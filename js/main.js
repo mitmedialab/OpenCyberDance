@@ -4,7 +4,7 @@ import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
 
-let scene, renderer, camera, stats
+let scene, renderer, camera, stats, gltf
 let model, skeleton, mixer, clock
 
 const crossFadeControls = []
@@ -35,22 +35,71 @@ const additiveActions = {
 }
 
 let panelSettings, numAnimations
+let baseAnimationTracks = []
 
 init()
+
+function setAnimationTrack(tracks) {
+  tracks
+    // .filter((t) => /Hand|Arm/.test(t.name))
+    .forEach((track, ti) => {
+      const valueSize = track.getValueSize()
+
+      track.times.forEach((time, i) => {
+        const valueOffset = i * valueSize
+
+        const quaternion = new THREE.Quaternion().fromArray(
+          track.values,
+          valueOffset
+        )
+
+        const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
+
+        const originalEuler = baseAnimationTracks[ti][i]
+
+        euler.x = originalEuler.x
+        euler.y = originalEuler.y
+        euler.z = originalEuler.z
+
+        // // Amplify Euler angles
+        euler.x *= rotationSettings.X
+        euler.y *= rotationSettings.Y
+        euler.z *= rotationSettings.Z
+
+        // Convert back to quaternion
+        quaternion.setFromEuler(euler)
+
+        // Update track values
+        quaternion.toArray(track.values, valueOffset)
+      })
+
+      // track.values = track.values.map((v, i) => {
+      //   // if (t.constructor.name.includes('Vector')) {
+      //   //   return v
+      //   // }
+      //   // if (i === 0) return v * 5
+      //   // if (i === t.values.length - 4) return v * 5
+
+      //   // debugger
+
+      //   return v
+      // })
+    })
+}
 
 function init() {
   const container = document.getElementById('container')
   clock = new THREE.Clock()
 
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0xa0a0a0)
-  scene.fog = new THREE.Fog(0xa0a0a0, 10, 50)
+  scene.background = new THREE.Color(0xdedede)
+  scene.fog = new THREE.Fog(0xdedede, 10, 50)
 
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3)
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xfefefe, 4)
   hemiLight.position.set(0, 20, 0)
   scene.add(hemiLight)
 
-  const dirLight = new THREE.DirectionalLight(0xffffff, 3)
+  const dirLight = new THREE.DirectionalLight(0xffffff, 4)
   dirLight.position.set(3, 10, 10)
   dirLight.castShadow = true
   dirLight.shadow.camera.top = 2
@@ -67,25 +116,14 @@ function init() {
     new THREE.PlaneGeometry(100, 100),
     new THREE.MeshPhongMaterial({color: 0xcbcbcb, depthWrite: false})
   )
+
   mesh.rotation.x = -Math.PI / 2
   mesh.receiveShadow = true
   scene.add(mesh)
 
   const loader = new GLTFLoader()
 
-  async function transformModel() {
-    const r = await fetch('pp.gltf')
-    const json = await r.json()
-    console.log('pp', json)
-
-    json.animations
-
-    return json
-  }
-
   loader.load('humanPPtesting.glb', (gltf) => {
-    console.log({gltf})
-
     model = gltf.scene
     scene.add(model)
 
@@ -95,6 +133,8 @@ function init() {
 
     const s = 0.008
     model.scale.set(s, s, s)
+    model.position.set(0, 0, -0.5)
+    // console.log(model)
 
     skeleton = new THREE.SkeletonHelper(model)
     skeleton.visible = false
@@ -102,31 +142,31 @@ function init() {
 
     const animations = gltf.animations
 
-    const animIdx = 0
-    // const animIdx = gltf.animations.findIndex((a) => a.name === 'hiphop_1')
-    // console.log('animations', animations)
-    console.log('name', animations[animIdx].name)
+    animations[0].tracks.forEach((track) => {
+      const eulers = []
 
-    console.log('skeleton:', {model})
-    console.log('kx', gltf.animations[0].tracks)
+      const valueSize = track.getValueSize()
 
-    // gltf.animations[animIdx].tracks
-    //   .filter(
-    //     (t) =>
-    //       /Leg|Foot|Toe/.test(t.name) &&
-    //       t.constructor.name.includes('Vector') &&
-    //       !t.name.includes('scale')
-    //   )
-    //   .forEach((t) => {
-    //     t.values = t.values.map((v, i) => {
-    //       if (i === 0) return v * 5
-    //       if (i === t.values.length - 3) return v * 5
+      track.times.forEach((time, i) => {
+        const valueOffset = i * valueSize
 
-    //       return v
-    //     })
+        const quaternion = new THREE.Quaternion().fromArray(
+          track.values,
+          valueOffset
+        )
 
-    //     console.log('t', t.name, t.values)
-    //   })
+        const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
+        eulers.push(euler)
+      })
+
+      baseAnimationTracks.push(eulers)
+    })
+
+    // const tracks = gltf.animations[0].tracks.filter(
+    //   // (t) => /Leg|Foot|Toe/.test(t.name) && !t.name.includes('scale')
+    //   // t.constructor.name.includes('Vector') &&
+    //   (t) => t
+    // )
 
     mixer = new THREE.AnimationMixer(model)
 
@@ -163,7 +203,7 @@ function init() {
     animate()
   })
 
-  renderer = new THREE.WebGLRenderer({antialias: true})
+  renderer = new THREE.WfebGLRenderer({antialias: true})
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.shadowMap.enabled = true
@@ -191,12 +231,24 @@ function init() {
   window.addEventListener('resize', onWindowResize)
 }
 
+const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
+
 function createPanel() {
   const panel = new GUI({width: 310})
 
   const folder1 = panel.addFolder('Base Actions')
   const folder2 = panel.addFolder('Additive Action Weights')
   const folder3 = panel.addFolder('General Speed')
+  const folder4 = panel.addFolder('All Rotations')
+
+  function alterRotation() {
+    // setAnimationTrack(baseActions['take60_..004'].action._clip.tracks)
+    setAnimationTrack(baseActions['take60_..004'].action._clip.tracks)
+  }
+
+  folder4.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
+  folder4.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
+  folder4.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
 
   panelSettings = {
     'modify time scale': 1.0,
@@ -243,6 +295,7 @@ function createPanel() {
   folder1.open()
   folder2.open()
   folder3.open()
+  folder4.open()
 
   crossFadeControls.forEach(function (control) {
     control.setInactive = function () {

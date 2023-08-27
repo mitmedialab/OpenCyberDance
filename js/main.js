@@ -4,49 +4,65 @@ import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
 
-let scene, renderer, camera, stats, gltf
-let model, skeleton, mixer, clock
+/** @type {THREE.Scene} */
+let scene
+
+/** @type {THREE.Renderer} */
+let renderer
+
+/** @type {THREE.Camera} */
+let camera
+
+let stats
+
+/** @type {THREE.Scene} */
+let model
+
+/** @type {THREE.Skeleton} */
+let skeleton
+
+/** @type {THREE.AnimationMixer} */
+let mixer
+
+/** @type {THREE.Clock} */
+let clock
 
 const crossFadeControls = []
 
-let currentBaseAction = 'idle'
-const allActions = []
-const baseActions = {
-  // idle: {weight: 1},
-  // dance_flair: {weight: 0},
-  // hiphop_1: {weight: 0},
-  // hiphop_2: {weight: 0},
-  // hiphop_3: {weight: 0},
-  // silly: {weight: 0},
-  // salsa: {weight: 0},
-  // roomba: {weight: 0},
-  // Maraschino: {weight: 0},
-  // situp: {weight: 0},
-  // cs_leftHand: {weight: 0},
-  'take60_..004': {weight: 0},
-}
-const additiveActions = {
-  // sitting: {weight: 0},
-  // laidback: {weight: 0},
-  // jumping_jack: {weight: 0},
-  // fallforward: {weight: 0},
-  // fallback: {weight: 0},
-  // falling: {weight: 0},
+const anims = {
+  a: 'no.33_.idel',
+  b: 'no.57_.',
 }
 
+let currentBaseAction = 'idle'
+
+const allActions = []
+
+const baseActions = {
+  [anims.a]: {weight: 0},
+  [anims.b]: {weight: 0},
+}
+
+const additiveActions = {}
+
 let panelSettings, numAnimations
-let baseAnimationTracks = []
+
+/** @type {Record<string, {eulers: THREE.Euler[], timings: number[]}[]>} */
+const originalAnimations = {}
 
 init()
 
+/**
+ * @param {THREE.KeyframeTrack[]} tracks
+ */
 function setAnimationTrack(tracks) {
   tracks
     // .filter((t) => /Hand|Arm/.test(t.name))
-    .forEach((track, ti) => {
+    .forEach((track, trackIdx) => {
       const valueSize = track.getValueSize()
 
-      track.times.forEach((time, i) => {
-        const valueOffset = i * valueSize
+      track.times.forEach((time, timeIdx) => {
+        const valueOffset = timeIdx * valueSize
 
         const quaternion = new THREE.Quaternion().fromArray(
           track.values,
@@ -55,7 +71,8 @@ function setAnimationTrack(tracks) {
 
         const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
 
-        const originalEuler = baseAnimationTracks[ti][i]
+        const originalEuler =
+          originalAnimations[currentBaseAction][trackIdx].eulers[timeIdx]
 
         euler.x = originalEuler.x
         euler.y = originalEuler.y
@@ -123,9 +140,11 @@ function init() {
 
   const loader = new GLTFLoader()
 
-  loader.load('humanPPtesting.glb', (gltf) => {
+  loader.load('model-v2.glb', (gltf) => {
     model = gltf.scene
     scene.add(model)
+
+    console.log(gltf.animations)
 
     model.traverse(function (object) {
       if (object.isMesh) object.castShadow = true
@@ -142,24 +161,48 @@ function init() {
 
     const animations = gltf.animations
 
-    animations[0].tracks.forEach((track) => {
-      const eulers = []
+    animations.forEach((animation) => {
+      /** @type {THREE.KeyframeTrack[]} */
+      const tracks = animation.tracks
 
-      const valueSize = track.getValueSize()
+      tracks.forEach((track) => {
+        const eulers = []
 
-      track.times.forEach((time, i) => {
-        const valueOffset = i * valueSize
+        // Original track timings before modification
+        const timings = track.times.slice(0)
+        const valueSize = track.getValueSize()
 
-        const quaternion = new THREE.Quaternion().fromArray(
-          track.values,
-          valueOffset
-        )
+        // Target only specific body parts
 
-        const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
-        eulers.push(euler)
+        if (/Hand|Arm/.test(track.name)) {
+          console.log(`[!] speeding up ${track.name}`)
+
+          track.times.forEach((time, i) => {
+            track.times[i] /= 1.05
+          })
+        }
+
+        track.times.forEach((time, i) => {
+          const valueOffset = i * valueSize
+
+          const quaternion = new THREE.Quaternion().fromArray(
+            track.values,
+            valueOffset
+          )
+
+          const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
+          eulers.push(euler)
+        })
+
+        track.validate()
+
+        if (!originalAnimations[animation.name])
+          originalAnimations[animation.name] = []
+
+        originalAnimations[animation.name].push({eulers, timings})
       })
 
-      baseAnimationTracks.push(eulers)
+      // debugger
     })
 
     // const tracks = gltf.animations[0].tracks.filter(
@@ -200,7 +243,7 @@ function init() {
 
     createPanel()
 
-    animate()
+    render()
   })
 
   renderer = new THREE.WebGLRenderer({antialias: true})
@@ -232,6 +275,73 @@ function init() {
 }
 
 const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
+const trackSpeed = {speed: 1.0}
+
+/**
+ * @param {THREE.KeyframeTrack} track
+ */
+const isTargetTrack = (track) => /Leg|Foot|Toe/.test(track.name)
+
+function alterRotation() {
+  if (currentBaseAction === 'idle') return
+
+  // console.log('--> altering rotation')
+
+  setAnimationTrack(baseActions[currentBaseAction].action._clip.tracks)
+}
+
+function alterSpeed() {
+  if (currentBaseAction === 'idle') return
+
+  // console.log('--> altering speed')
+
+  /** @type {THREE.KeyframeTrack[]} */
+  const tracks = baseActions[currentBaseAction].action._clip.tracks
+
+  window.trackNames = tracks.map((t) => t.name)
+
+  tracks.forEach((track, trackIdx) => {
+    // Target only specific body parts
+    if (!isTargetTrack(track)) return
+
+    // console.log(track.name)
+
+    track.times =
+      originalAnimations[currentBaseAction][trackIdx].timings.slice(0)
+
+    // track.scale(trackSpeed.speed)
+    // track.shift(trackSpeed.speed)
+    // track.optimize()
+
+    if (!track.validate()) console.warn('track invalid:', trackIdx)
+
+    // Translation and Scale
+    if (track instanceof THREE.VectorKeyframeTrack) {
+      // debugger
+    }
+
+    // Rotation
+    if (track instanceof THREE.QuaternionKeyframeTrack) {
+      // debugger
+    }
+
+    tracks[trackIdx] = track
+
+    track.times.forEach((time, i) => {
+      // track.times[i] = time * trackSpeed.speed
+      track.times[i] /= 1.05
+    })
+
+    // debugger
+  })
+
+  baseActions[currentBaseAction].action._clip.tracks = tracks
+
+  window.tracks = tracks
+  window.filteredTracks = tracks.filter(isTargetTrack)
+
+  // debugger
+}
 
 function createPanel() {
   const panel = new GUI({width: 310})
@@ -240,15 +350,13 @@ function createPanel() {
   const folder2 = panel.addFolder('Additive Action Weights')
   const folder3 = panel.addFolder('General Speed')
   const folder4 = panel.addFolder('All Rotations')
-
-  function alterRotation() {
-    // setAnimationTrack(baseActions['take60_..004'].action._clip.tracks)
-    setAnimationTrack(baseActions['take60_..004'].action._clip.tracks)
-  }
+  const folder5 = panel.addFolder('Track Speed')
 
   folder4.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
   folder4.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
   folder4.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
+
+  folder5.add(trackSpeed, 'speed', 1, 100, 0.01).listen().onChange(alterSpeed)
 
   panelSettings = {
     'modify time scale': 1.0,
@@ -267,7 +375,6 @@ function createPanel() {
       const action = settings ? settings.action : null
 
       if (currentAction !== action) {
-        console.log('pcf', {currentAction, action, settings, name})
         prepareCrossFade(currentAction, action, 0.35)
       }
     }
@@ -282,14 +389,14 @@ function createPanel() {
     folder2
       .add(panelSettings, name, 0.0, 1.0, 0.01)
       .listen()
-      .onChange(function (weight) {
+      .onChange((weight) => {
         setWeight(settings.action, weight)
         settings.weight = weight
       })
   }
 
   folder3
-    .add(panelSettings, 'modify time scale', 0.0, 1.5, 0.01)
+    .add(panelSettings, 'modify time scale', 0.0, 5, 0.01)
     .onChange(modifyTimeScale)
 
   folder1.open()
@@ -297,12 +404,12 @@ function createPanel() {
   folder3.open()
   folder4.open()
 
-  crossFadeControls.forEach(function (control) {
-    control.setInactive = function () {
+  crossFadeControls.forEach((control) => {
+    control.setInactive = () => {
       control.domElement.classList.add('control-inactive')
     }
 
-    control.setActive = function () {
+    control.setActive = () => {
       control.domElement.classList.remove('control-inactive')
     }
 
@@ -326,6 +433,8 @@ function modifyTimeScale(speed) {
 }
 
 function prepareCrossFade(startAction, endAction, duration) {
+  console.log('preparing cross-fade', {startAction, endAction, duration})
+
   try {
     // If the current action is 'idle', execute the crossfade immediately;
     // else wait until the current action has finished its current loop
@@ -345,7 +454,9 @@ function prepareCrossFade(startAction, endAction, duration) {
       currentBaseAction = 'None'
     }
 
-    crossFadeControls.forEach(function (control) {
+    console.log('current base action ->', currentBaseAction)
+
+    crossFadeControls.forEach((control) => {
       const name = control.property
 
       if (name === currentBaseAction) {
@@ -372,7 +483,7 @@ function synchronizeCrossFade(startAction, endAction, duration) {
 }
 
 function executeCrossFade(startAction, endAction, duration) {
-  console.log('cf/', {startAction, endAction})
+  console.log('crossfading:', {startAction, endAction})
 
   try {
     // Not only the start action, but also the end action must get a weight of 1 before fading
@@ -398,7 +509,7 @@ function executeCrossFade(startAction, endAction, duration) {
       startAction?.fadeOut(duration)
     }
   } catch (err) {
-    console.log('~---', err)
+    console.log('crossfade error:', err)
   }
 }
 
@@ -411,35 +522,6 @@ function setWeight(action, weight) {
   action.setEffectiveWeight(weight)
 }
 
-function rotateCamera() {
-  const controls = new OrbitControls(camera, renderer.domElement)
-  controls.autoRotate = true
-  controls.autoRotateSpeed = 2.0
-  controls.update()
-}
-
-function getLeftHandClip(model) {
-  const bone = model.getObjectByName('mixamorigLeftHand')
-
-  return new THREE.AnimationClip('cs_leftHand', -1, [
-    new THREE.QuaternionKeyframeTrack(
-      bone.name + '.quaternion',
-      // Keyframe time value
-      [0, 1, 2],
-      // Quarternion identity rotation
-      [0, 0, 0, 1, 0, 0, 0, 1]
-    ),
-
-    new THREE.QuaternionKeyframeTrack(
-      bone.name + '.quaternion',
-      // Keyframe time value
-      [2, 4, 5],
-      // Quarternion identity rotation
-      [0, 0, 0, 1, 0, 0, 0, 1]
-    ),
-  ])
-}
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
@@ -447,10 +529,8 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight)
 }
 
-function animate() {
-  // Render loop
-
-  requestAnimationFrame(animate)
+function render() {
+  requestAnimationFrame(render)
 
   for (let i = 0; i !== numAnimations; ++i) {
     const action = allActions[i]
@@ -459,15 +539,9 @@ function animate() {
     settings.weight = 0
   }
 
-  // Get the time elapsed since the last frame, used for mixer update
-
   const mixerUpdateDelta = clock.getDelta()
 
-  // Update the animation mixer, the stats panel, and render this frame
-
   mixer.update(mixerUpdateDelta)
-
   stats.update()
-
   renderer.render(scene, camera)
 }

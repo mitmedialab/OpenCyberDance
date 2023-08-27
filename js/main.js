@@ -27,6 +27,11 @@ let mixer
 /** @type {THREE.Clock} */
 let clock
 
+// Allows each animation track to loop.
+// Super memory and compute intensive, even though it's Float32Array.
+// Slows down significantly after 1.
+const EXTRA_TRACK_ITERATION = 0
+
 const crossFadeControls = []
 
 const anims = {
@@ -38,6 +43,7 @@ let currentBaseAction = 'idle'
 
 const allActions = []
 
+/** @type {Record<string, {weight: number, action: THREE.AnimationAction}>} */
 const baseActions = {
   [anims.a]: {weight: 0},
   [anims.b]: {weight: 0},
@@ -47,7 +53,7 @@ const additiveActions = {}
 
 let panelSettings, numAnimations
 
-/** @type {Record<string, {eulers: THREE.Euler[], timings: number[]}[]>} */
+/** @type {Record<string, {eulers: THREE.Euler[], timings: number[], duration: number}[]>} */
 const originalAnimations = {}
 
 init()
@@ -55,53 +61,76 @@ init()
 /**
  * @param {THREE.KeyframeTrack[]} tracks
  */
-function setAnimationTrack(tracks) {
-  tracks
-    // .filter((t) => /Hand|Arm/.test(t.name))
-    .forEach((track, trackIdx) => {
-      const valueSize = track.getValueSize()
+function updateRotation(tracks) {
+  tracks.forEach((track, trackIdx) => {
+    const valueSize = track.getValueSize()
 
-      track.times.forEach((time, timeIdx) => {
-        const valueOffset = timeIdx * valueSize
+    // Only compute rotation for quaternion tracks.
+    if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
-        const quaternion = new THREE.Quaternion().fromArray(
-          track.values,
-          valueOffset
-        )
+    track.times.forEach((time, timeIdx) => {
+      const valueOffset = timeIdx * valueSize
 
-        const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
+      const quaternion = new THREE.Quaternion().fromArray(
+        track.values,
+        valueOffset
+      )
 
-        const originalEuler =
-          originalAnimations[currentBaseAction][trackIdx].eulers[timeIdx]
+      const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
 
-        euler.x = originalEuler.x
-        euler.y = originalEuler.y
-        euler.z = originalEuler.z
+      const originalEuler =
+        originalAnimations[currentBaseAction][trackIdx].eulers[timeIdx]
 
-        // // Amplify Euler angles
-        euler.x *= rotationSettings.X
-        euler.y *= rotationSettings.Y
-        euler.z *= rotationSettings.Z
+      euler.x = originalEuler.x
+      euler.y = originalEuler.y
+      euler.z = originalEuler.z
 
-        // Convert back to quaternion
-        quaternion.setFromEuler(euler)
+      // Amplify Euler angles
+      euler.x *= rotationSettings.X
+      euler.y *= rotationSettings.Y
+      euler.z *= rotationSettings.Z
 
-        // Update track values
-        quaternion.toArray(track.values, valueOffset)
-      })
+      // Convert back to quaternion
+      quaternion.setFromEuler(euler)
 
-      // track.values = track.values.map((v, i) => {
-      //   // if (t.constructor.name.includes('Vector')) {
-      //   //   return v
-      //   // }
-      //   // if (i === 0) return v * 5
-      //   // if (i === t.values.length - 4) return v * 5
-
-      //   // debugger
-
-      //   return v
-      // })
+      // Update track values
+      quaternion.toArray(track.values, valueOffset)
     })
+  })
+}
+
+/**
+ * Lengthen the keyframe tracks, so that it loops properly.
+ * We are only using one animation clip, so we need to lengthen the tracks.
+ *
+ * @param {THREE.KeyframeTrack[]} tracks
+ */
+function lengthenKeyframeTracks(tracks) {
+  tracks.forEach((track) => {
+    const finalTime = track.times[track.times.length - 1]
+
+    track.times = f32Append(
+      track.times,
+      [...track.times].map((t) => t + finalTime)
+    )
+
+    track.values = f32Append(track.values, track.values)
+
+    track.validate()
+  })
+}
+
+/**
+ * @param {Float32Array} source
+ * @param {number[]} items
+ * @returns
+ */
+function f32Append(source, items) {
+  const dest = new Float32Array(source.length + items.length)
+  dest.set(source)
+  dest.set(items, source.length)
+
+  return dest
 }
 
 function init() {
@@ -126,8 +155,6 @@ function init() {
   dirLight.shadow.camera.near = 0.1
   dirLight.shadow.camera.far = 40
   scene.add(dirLight)
-
-  // ground
 
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(100, 100),
@@ -165,25 +192,19 @@ function init() {
       /** @type {THREE.KeyframeTrack[]} */
       const tracks = animation.tracks
 
+      console.log('lkt/before', tracks[0].times.length)
+
+      for (let i = 0; i < EXTRA_TRACK_ITERATION; i++) {
+        lengthenKeyframeTracks(tracks)
+      }
+      console.log('lkt/after', tracks[0].times.length)
+
       tracks.forEach((track) => {
         const eulers = []
 
         // Original track timings before modification
         const timings = track.times.slice(0)
         const valueSize = track.getValueSize()
-
-        // Target only specific body parts
-        // Initial.
-        if (/Hand|Arm/.test(track.name)) {
-          console.log(`[!] speeding up ${track.name}`)
-
-          track.times.forEach((time, i) => {
-            // track.times[i] /= 1.05
-            track.times[i] /= 1
-          })
-
-          // debugger
-        }
 
         track.times.forEach((time, i) => {
           const valueOffset = i * valueSize
@@ -202,11 +223,15 @@ function init() {
         if (!originalAnimations[animation.name])
           originalAnimations[animation.name] = []
 
-        originalAnimations[animation.name].push({eulers, timings})
+        const duration = track.times[track.times.length - 1] - track.times[0]
+
+        originalAnimations[animation.name].push({eulers, timings, duration})
       })
 
       // debugger
     })
+
+    window.originalAnimations = originalAnimations
 
     // const tracks = gltf.animations[0].tracks.filter(
     //   // (t) => /Leg|Foot|Toe/.test(t.name) && !t.name.includes('scale')
@@ -263,6 +288,7 @@ function init() {
     1,
     100
   )
+
   camera.position.set(-1, 2, 3)
 
   const controls = new OrbitControls(camera, renderer.domElement)
@@ -278,78 +304,122 @@ function init() {
 }
 
 const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
-const trackSpeed = {speed: 1.0}
 
 /**
  * @param {THREE.KeyframeTrack} track
  */
 const isTargetTrack = (track) => /Leg|Foot|Toe/.test(track.name)
 
+const parts = {
+  head: /Neck|Head/,
+  legs: /Hips|Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot/,
+  body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
+}
+
+/** @type {Record<keyof typeof parts, number>} */
+const energy = {
+  // หัว
+  head: 1,
+
+  // แขนถึงลำตัว
+  body: 1,
+
+  // เอวลงขา
+  legs: 1,
+}
+
+/**
+ * @param {keyof typeof parts} part
+ * @param {string} name
+ * @returns {boolean}
+ */
+const isPart = (part, name) => parts[part].test(name)
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function trackNameToPart(name) {
+  for (const part of Object.keys(parts)) {
+    if (isPart(part, name)) return part
+  }
+}
+
 function alterRotation() {
   if (currentBaseAction === 'idle') return
 
-  // console.log('--> altering rotation')
-
-  setAnimationTrack(baseActions[currentBaseAction].action._clip.tracks)
+  const clip = baseActions[currentBaseAction].action.getClip()
+  updateRotation(clip.tracks)
 }
 
-function alterSpeed() {
+function alterEnergy() {
   if (currentBaseAction === 'idle') return
 
-  // console.log('--> altering speed')
+  /** @type {THREE.AnimationAction} */
+  const action = baseActions[currentBaseAction].action
+  const clip = action.getClip()
 
   /** @type {THREE.KeyframeTrack[]} */
-  const tracks = baseActions[currentBaseAction].action._clip.tracks
+  const tracks = clip.tracks
 
   window.trackNames = tracks.map((t) => t.name)
 
   tracks.forEach((track, trackIdx) => {
-    // Target only specific body parts
-    if (!isTargetTrack(track)) return
+    try {
+      const part = trackNameToPart(track.name)
+      const factor = energy[part] ?? 1
 
-    // console.log(track.name)
+      // Revert timing to original.
+      track.times =
+        originalAnimations[currentBaseAction][trackIdx].timings.slice(0)
 
-    track.times =
-      originalAnimations[currentBaseAction][trackIdx].timings.slice(0)
+      // Scale up or down keyframe tracks.
+      track.times = track.times.map((t) => {
+        const value = t / factor
+        if (isNaN(value)) return t
 
-    // track.scale(trackSpeed.speed)
-    // track.shift(trackSpeed.speed)
-    // track.optimize()
+        return value
+      })
 
-    if (!track.validate()) console.warn('track invalid:', trackIdx)
+      tracks[trackIdx] = track
 
-    // Translation and Scale
-    if (track instanceof THREE.VectorKeyframeTrack) {
-      // debugger
+      if (!track.validate())
+        console.warn('post-validate error:', track.name, track)
+    } catch (err) {
+      console.log(`[!] track error:`, err)
     }
-
-    // Rotation
-    if (track instanceof THREE.QuaternionKeyframeTrack) {
-      // debugger
-    }
-
-    tracks[trackIdx] = track
-
-    track.times.forEach((time, i) => {
-      // track.times[i] /= trackSpeed.speed
-      // track.times[i] /= 1.5
-    })
-
-    // debugger
   })
 
-  baseActions[currentBaseAction].action._clip.tracks = tracks
+  /** @type {THREE.AnimationClip} */
+  clip.tracks = tracks
 
-  // HACK: ????
-  baseActions[currentBaseAction].action = mixer.clipAction({
-    ...baseActions[currentBaseAction].action._clip,
-    tracks,
-  })
+  // TODO: does it work better if we uncache? this breaks crossfade tho!
+  // mixer.uncacheClip(clip)
+
+  const nextAction = mixer.clipAction(clip.clone())
+
+  baseActions[currentBaseAction].action = nextAction
+
+  const actionIdx = allActions.find(
+    (a) => a.getClip().name === currentBaseAction
+  )
+
+  // TODO: cross-fade
+
+  // nextAction.syncWith(action)
+  nextAction.setEffectiveTimeScale(0)
+  nextAction.time = action.time
+  action.crossFadeTo(nextAction, 0.35, true)
+  nextAction.play()
+  nextAction.setEffectiveTimeScale(1)
+
+  mixer.addEventListener('loop', () => console.log('Loop!'))
+  mixer.addEventListener('finished', () => console.log('Finished!'))
+
+  allActions[actionIdx] = nextAction
 
   window.tracks = tracks
   window.filteredTracks = tracks.filter(isTargetTrack)
-
-  // debugger
 }
 
 function createPanel() {
@@ -359,13 +429,15 @@ function createPanel() {
   const folder2 = panel.addFolder('Additive Action Weights')
   const folder3 = panel.addFolder('General Speed')
   const folder4 = panel.addFolder('All Rotations')
-  const folder5 = panel.addFolder('Track Speed')
+  const folder5 = panel.addFolder('Energy')
 
   folder4.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
   folder4.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
   folder4.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
 
-  folder5.add(trackSpeed, 'speed', 1, 100, 0.01).listen().onChange(alterSpeed)
+  folder5.add(energy, 'head', 0, 10, 0.01).listen().onChange(alterEnergy)
+  folder5.add(energy, 'body', 0, 10, 0.01).listen().onChange(alterEnergy)
+  folder5.add(energy, 'legs', 0, 10, 0.01).listen().onChange(alterEnergy)
 
   panelSettings = {
     'modify time scale': 1.0,
@@ -483,6 +555,8 @@ function synchronizeCrossFade(startAction, endAction, duration) {
   mixer.addEventListener('loop', onLoopFinished)
 
   function onLoopFinished(event) {
+    console.log('>>>> loop finished triggered')
+
     if (event.action === startAction) {
       mixer.removeEventListener('loop', onLoopFinished)
 
@@ -541,16 +615,17 @@ function onWindowResize() {
 function render() {
   requestAnimationFrame(render)
 
-  for (let i = 0; i !== numAnimations; ++i) {
-    const action = allActions[i]
-    const clip = action.getClip()
-    const settings = baseActions[clip.name] || additiveActions[clip.name]
-    settings.weight = 0
-  }
+  // for (let i = 0; i !== numAnimations; ++i) {
+  //   const action = allActions[i]
+  //   const clip = action.getClip()
+  //   const settings = baseActions[clip.name] || additiveActions[clip.name]
+  //   settings.weight = 0
+  // }
 
   const mixerUpdateDelta = clock.getDelta()
 
   mixer.update(mixerUpdateDelta)
+
   stats.update()
   renderer.render(scene, camera)
 }

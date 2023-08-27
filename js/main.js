@@ -173,13 +173,16 @@ function init() {
         const valueSize = track.getValueSize()
 
         // Target only specific body parts
-
+        // Initial.
         if (/Hand|Arm/.test(track.name)) {
           console.log(`[!] speeding up ${track.name}`)
 
           track.times.forEach((time, i) => {
-            track.times[i] /= 1.05
+            // track.times[i] /= 1.05
+            track.times[i] /= 1
           })
+
+          // debugger
         }
 
         track.times.forEach((time, i) => {
@@ -328,14 +331,20 @@ function alterSpeed() {
     tracks[trackIdx] = track
 
     track.times.forEach((time, i) => {
-      // track.times[i] = time * trackSpeed.speed
-      track.times[i] /= 1.05
+      // track.times[i] /= trackSpeed.speed
+      // track.times[i] /= 1.5
     })
 
     // debugger
   })
 
   baseActions[currentBaseAction].action._clip.tracks = tracks
+
+  // HACK: ????
+  baseActions[currentBaseAction].action = mixer.clipAction({
+    ...baseActions[currentBaseAction].action._clip,
+    tracks,
+  })
 
   window.tracks = tracks
   window.filteredTracks = tracks.filter(isTargetTrack)

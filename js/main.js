@@ -352,7 +352,12 @@ function alterRotation() {
   updateRotation(clip.tracks)
 }
 
-function alterEnergy() {
+/**
+ *
+ * @param {({track: THREE.KeyframeTrack, index: number, part: keyof typeof parts}) => void} onTrack
+ * @returns
+ */
+function alterAnimationTrack(onTrack) {
   if (currentBaseAction === 'idle') return
 
   /** @type {THREE.AnimationAction} */
@@ -362,29 +367,18 @@ function alterEnergy() {
   /** @type {THREE.KeyframeTrack[]} */
   const tracks = clip.tracks
 
-  window.trackNames = tracks.map((t) => t.name)
+  // window.trackNames = tracks.map((t) => t.name)
 
   tracks.forEach((track, trackIdx) => {
     try {
       const part = trackNameToPart(track.name)
-      const factor = energy[part] ?? 1
+      const original = originalAnimations[currentBaseAction][trackIdx]
 
-      // Revert timing to original.
-      track.times =
-        originalAnimations[currentBaseAction][trackIdx].timings.slice(0)
-
-      // Scale up or down keyframe tracks.
-      track.times = track.times.map((t) => {
-        const value = t / factor
-        if (isNaN(value)) return t
-
-        return value
-      })
-
+      onTrack({track, part, original, index: trackIdx})
       tracks[trackIdx] = track
 
       if (!track.validate())
-        console.warn('post-validate error:', track.name, track)
+        console.warn('post-validation error:', track.name, track)
     } catch (err) {
       console.log(`[!] track error:`, err)
     }
@@ -413,13 +407,30 @@ function alterEnergy() {
   nextAction.play()
   nextAction.setEffectiveTimeScale(1)
 
-  mixer.addEventListener('loop', () => console.log('Loop!'))
-  mixer.addEventListener('finished', () => console.log('Finished!'))
+  // mixer.addEventListener('loop', () => console.log('Loop!'))
+  // mixer.addEventListener('finished', () => console.log('Finished!'))
 
   allActions[actionIdx] = nextAction
 
   window.tracks = tracks
   window.filteredTracks = tracks.filter(isTargetTrack)
+}
+
+function alterEnergy() {
+  alterAnimationTrack(({track, original, part}) => {
+    const factor = energy[part] ?? 1
+
+    // Revert timing to original.
+    track.times = original.timings.slice(0)
+
+    // Scale up or down keyframe tracks.
+    track.times = track.times.map((t) => {
+      const value = t / factor
+      if (isNaN(value)) return t
+
+      return value
+    })
+  })
 }
 
 function createPanel() {

@@ -310,13 +310,22 @@ const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
  */
 const isTargetTrack = (track) => /Leg|Foot|Toe/.test(track.name)
 
-const parts = {
+const coreParts = {
   head: /Neck|Head/,
-  legs: /Hips|Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot/,
+  legs: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot/,
   body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
 }
 
-/** @type {Record<keyof typeof parts, number>} */
+const delayParts = {
+  head: /Head|Neck/,
+  body: /Hips|Spine/,
+  leftArm: /LeftShoulder|LeftArm|LeftForeArm|LeftHand|LeftInHand/,
+  rightArm: /RightShoulder|RightArm|RightForeArm|RightHand|RightInHand/,
+  leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
+  rightLeg: /RightUpLeg|RightLeg|RightFoot/,
+}
+
+/** @type {Record<keyof typeof coreParts, number>} */
 const energy = {
   // หัว
   head: 1,
@@ -328,21 +337,47 @@ const energy = {
   legs: 1,
 }
 
+/** @type {Record<keyof typeof delayParts, number>} */
+const delays = {
+  // head: 0,
+  // body: 0,
+  // legs: 0,
+  leftArm: 0,
+  rightArm: 0,
+  leftLeg: 0,
+  rightLeg: 0,
+}
+
 /**
- * @param {keyof typeof parts} part
+ * @param {keyof typeof coreParts} part
  * @param {string} name
  * @returns {boolean}
  */
-const isPart = (part, name) => parts[part].test(name)
+const isCorePart = (part, name) => coreParts[part].test(name)
+
+/**
+ * @param {keyof typeof delayParts} part
+ * @param {string} name
+ * @returns {boolean}
+ */
+const isDelayPart = (part, name) => delayParts[part]?.test(name)
 
 /**
  * @param {string} name
- * @returns {string}
+ * @param {'core' | 'delay'} type
  */
-function trackNameToPart(name) {
-  for (const part of Object.keys(parts)) {
-    if (isPart(part, name)) return part
+function trackNameToPart(name, type) {
+  if (type === 'core') {
+    for (const part of Object.keys(coreParts)) {
+      if (isCorePart(part, name)) return part
+    }
+  } else if (type === 'delay') {
+    for (const part of Object.keys(delayParts)) {
+      if (isDelayPart(part, name)) return part
+    }
   }
+
+  console.warn(`Unmatched part:`, {name, type})
 }
 
 function alterRotation() {
@@ -354,7 +389,7 @@ function alterRotation() {
 
 /**
  *
- * @param {({track: THREE.KeyframeTrack, index: number, part: keyof typeof parts}) => void} onTrack
+ * @param {({track: THREE.KeyframeTrack, index: number, part: keyof typeof coreParts}) => void} onTrack
  * @returns
  */
 function alterAnimationTrack(onTrack) {
@@ -371,10 +406,9 @@ function alterAnimationTrack(onTrack) {
 
   tracks.forEach((track, trackIdx) => {
     try {
-      const part = trackNameToPart(track.name)
       const original = originalAnimations[currentBaseAction][trackIdx]
 
-      onTrack({track, part, original, index: trackIdx})
+      onTrack({track, original, index: trackIdx})
       tracks[trackIdx] = track
 
       if (!track.validate())
@@ -417,7 +451,8 @@ function alterAnimationTrack(onTrack) {
 }
 
 function alterEnergy() {
-  alterAnimationTrack(({track, original, part}) => {
+  alterAnimationTrack(({track, original}) => {
+    const part = trackNameToPart(track.name, 'core')
     const factor = energy[part] ?? 1
 
     // Revert timing to original.
@@ -425,6 +460,8 @@ function alterEnergy() {
 
     // Scale up or down keyframe tracks.
     track.times = track.times.map((t) => {
+      if (factor === 1) return t
+
       const value = t / factor
       if (isNaN(value)) return t
 
@@ -433,22 +470,59 @@ function alterEnergy() {
   })
 }
 
+function alterDelay() {
+  alterAnimationTrack(({track, original}) => {
+    const part = trackNameToPart(track.name, 'delay')
+    const offset = delays[part] ?? 0
+
+    track.times = original.timings.slice(0)
+    if (offset > 0) track.shift(offset)
+  })
+}
+
 function createPanel() {
   const panel = new GUI({width: 310})
 
-  const folder1 = panel.addFolder('Base Actions')
-  const folder2 = panel.addFolder('Additive Action Weights')
-  const folder3 = panel.addFolder('General Speed')
-  const folder4 = panel.addFolder('All Rotations')
-  const folder5 = panel.addFolder('Energy')
+  const baseFolder = panel.addFolder('Base Actions')
+  const additiveFolder = panel.addFolder('Additive Action Weights')
+  const speedFolder = panel.addFolder('General Speed')
+  const rotFolder = panel.addFolder('All Rotations')
+  const energyFolder = panel.addFolder('Energy')
+  const delayFolder = panel.addFolder('Delays')
 
-  folder4.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
-  folder4.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
-  folder4.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
+  rotFolder.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
+  rotFolder.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
+  rotFolder.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
 
-  folder5.add(energy, 'head', 0, 10, 0.01).listen().onChange(alterEnergy)
-  folder5.add(energy, 'body', 0, 10, 0.01).listen().onChange(alterEnergy)
-  folder5.add(energy, 'legs', 0, 10, 0.01).listen().onChange(alterEnergy)
+  /**
+   * @param {keyof typeof coreParts} parts
+   */
+  const addEnergy = (...parts) => {
+    parts.forEach((part) => {
+      energyFolder
+        .add(energy, part, -100, 100, 1)
+        .listen()
+        .onChange(alterEnergy)
+    })
+  }
+
+  /**
+   * @param {keyof typeof delayParts} parts
+   */
+  const addDelay = (...parts) => {
+    parts.forEach((part) => {
+      delayFolder
+        .add(delays, part, -100, 100, 0.5)
+        .listen()
+        .onChange(alterDelay)
+    })
+  }
+
+  addEnergy('head', 'body', 'legs')
+  addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
+
+  // delayFolder.add(delays, 'body', -100, 100, 1).listen().onChange(alterDelay)
+  // delayFolder.add(delays, 'legs', -100, 100, 1).listen().onChange(alterDelay)
 
   panelSettings = {
     'modify time scale': 1.0,
@@ -471,14 +545,14 @@ function createPanel() {
       }
     }
 
-    crossFadeControls.push(folder1.add(panelSettings, name))
+    crossFadeControls.push(baseFolder.add(panelSettings, name))
   }
 
   for (const name of Object.keys(additiveActions)) {
     const settings = additiveActions[name]
 
     panelSettings[name] = settings.weight
-    folder2
+    additiveFolder
       .add(panelSettings, name, 0.0, 1.0, 0.01)
       .listen()
       .onChange((weight) => {
@@ -487,14 +561,14 @@ function createPanel() {
       })
   }
 
-  folder3
+  speedFolder
     .add(panelSettings, 'modify time scale', 0.0, 5, 0.01)
     .onChange(modifyTimeScale)
 
-  folder1.open()
-  folder2.open()
-  folder3.open()
-  folder4.open()
+  baseFolder.open()
+  additiveFolder.open()
+  speedFolder.open()
+  rotFolder.open()
 
   crossFadeControls.forEach((control) => {
     control.setInactive = () => {

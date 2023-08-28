@@ -68,8 +68,6 @@ let baseActions = {}
 /** @type {Record<string, THREE.AnimationAction>} */
 let secondCharacterActions = {}
 
-let additiveActions = {}
-
 let panelSettings, numAnimations
 
 /** @type {Record<string, {eulers: THREE.Euler[], timings: number[], duration: number}[]>} */
@@ -352,8 +350,9 @@ function addPrimaryCharacter(file) {
 
         track.validate()
 
-        if (!originalAnimations[animation.name])
+        if (!originalAnimations[animation.name]) {
           originalAnimations[animation.name] = []
+        }
 
         const duration = track.times[track.times.length - 1] - track.times[0]
 
@@ -378,20 +377,6 @@ function addPrimaryCharacter(file) {
 
       activateAction(action)
       allActions.push(action)
-
-      // if (additiveActions[name]) {
-      //   // Make the clip additive and remove the reference frame
-      //   THREE.AnimationUtils.makeClipAdditive(clip)
-
-      //   if (clip.name.endsWith('_pose')) {
-      //     clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30)
-      //   }
-
-      //   const action = mixer.clipAction(clip)
-      //   activateAction(action)
-      //   additiveActions[name].action = action
-      //   allActions.push(action)
-      // }
     }
 
     createPanel()
@@ -622,7 +607,6 @@ function createPanel() {
   const panel = new GUI({width: 310})
 
   const baseFolder = panel.addFolder('Base Actions')
-  const additiveFolder = panel.addFolder('Additive Action Weights')
   const speedFolder = panel.addFolder('General Speed')
   const rotFolder = panel.addFolder('All Rotations')
   const energyFolder = panel.addFolder('Energy')
@@ -723,25 +707,11 @@ function createPanel() {
     crossFadeControls.push(baseFolder.add(panelSettings, name))
   }
 
-  for (const name of Object.keys(additiveActions)) {
-    const settings = additiveActions[name]
-
-    panelSettings[name] = settings.weight
-    additiveFolder
-      .add(panelSettings, name, 0.0, 1.0, 0.01)
-      .listen()
-      .onChange((weight) => {
-        setWeight(settings.action, weight)
-        settings.weight = weight
-      })
-  }
-
   speedFolder
     .add(panelSettings, 'modify time scale', 0.0, 5, 0.01)
     .onChange(modifyTimeScale)
 
   baseFolder.open()
-  additiveFolder.open()
   speedFolder.open()
   rotFolder.open()
 
@@ -768,9 +738,8 @@ function createPanel() {
 function activateAction(action) {
   const clip = action.getClip()
 
-  const settings = baseActions[clip.name] || additiveActions[clip.name]
+  const settings = baseActions[clip.name]
   setWeight(action, settings.weight)
-  // action.startAt(clip.duration / 2)
   action.play()
 }
 
@@ -886,7 +855,7 @@ function render() {
     if (!action) continue
 
     const clip = action.getClip()
-    const settings = baseActions[clip.name] || additiveActions[clip.name]
+    const settings = baseActions[clip.name]
     settings.weight = 0
   }
 

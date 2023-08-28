@@ -693,7 +693,7 @@ function createPanel() {
         mixer2.stopAllAction()
       } else {
         const a2 = originalActions[currentBaseAction]
-        a2.play()
+        if (a2) a2.play()
       }
 
       // if (ANALYZER_ENABLED) analyzer.analyze(tracks)

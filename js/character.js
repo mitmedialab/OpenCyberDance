@@ -7,6 +7,7 @@ import {trackToEuler} from './math.js'
 
 import {lengthenKeyframeTracks} from './keyframes.js'
 
+import {trackNameToPart} from './parts.js'
 import {dispose} from './dispose.js'
 
 import {
@@ -50,7 +51,7 @@ export class Character {
   actions = new Map()
 
   /** @type {Params} */
-  override = null
+  params = null
 
   options = {
     scale: 0.008,
@@ -58,11 +59,11 @@ export class Character {
     // Lengthen keyframe tracks.
     lengthen: 1,
 
-    // Use default parameters
-    forceDefaults: true,
+    // Freeze parameters.
+    freezeParams: false,
   }
 
-  /** Character map sources */
+  /** Character model source URLs */
   static sources = {
     none: '',
     robot: 'Robot3357test.glb',
@@ -102,23 +103,33 @@ export class Character {
   }
 
   act(name) {
-    this.actions.get(name)?.play()
+    this.play(this.actions.get(name))
   }
 
   actAt(i) {
-    this.actionList[i]?.play()
+    this.play(this.actionList[i])
   }
 
-  async setup(scene, override) {
-    this.scene = scene
-    this.override = override
+  /** @param {AnimationAction} action */
+  play(action) {
+    if (!action) return
 
+    action.play()
+    this.currentAction = action.getClip().name
+  }
+
+  async setup(scene, params) {
+    this.scene = scene
+    this.params = params
+
+    // Ensure that there is no stale data
     this.clear()
 
-    const file = Character.sources[this.type]
-    if (file === 'none' || !file) return
+    // Get the model url based on the character type
+    const url = Character.sources[this.type]
+    if (url === 'none' || !url) return
 
-    const gltf = await loadModel(file)
+    const gltf = await loadModel(url)
 
     // Add the character model
     this.model = gltf.scene
@@ -165,14 +176,17 @@ export class Character {
     }
 
     // Do not cache the original for default parameter characters.
-    if (this.options.forceDefaults) return
+    if (this.options.freezeParams) return
 
     // Cache original keyframe tracks for modification
     clip.tracks.forEach((track) => {
       const timings = track.times.slice(0)
       const duration = track.times[track.times.length - 1] - track.times[0]
       const size = track.getValueSize()
-      const eulers = track.times.map((_, i) => trackToEuler(track, i * size))
+
+      const eulers = [...Array(track.times.length)].map((_, i) => {
+        return trackToEuler(track, i * size)
+      })
 
       track.validate()
 
@@ -199,24 +213,28 @@ export class Character {
   /**
    * Update animation parameters.
    */
-  updateParams() {
-    if (this.options.forceDefaults) return
+  updateParams(flags = {core: true}) {
+    if (this.options.freezeParams) return
 
     this.currentClip?.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
       track.times = original.timings.slice(0)
 
-      // Override delays
-      overrideDelay(track, this.override.delays)
+      if (flags.core) {
+        // Override delays
+        overrideDelay(track, this.params.delays)
 
-      // Override energy
-      const part = trackNameToPart(track.name, 'core')
-      const energy = this.override.energy[part]
-      overrideEnergy(track, energy)
+        // Override energy
+        const part = trackNameToPart(track.name, 'core')
+        const energy = this.params.energy[part]
+        overrideEnergy(track, energy)
+      }
 
-      // Override rotation
-      overrideRotation(track, this.override.rotations, original.eulers)
+      // Override rotation only
+      if (flags.rotation) {
+        overrideRotation(track, this.params.rotations, original.eulers)
+      }
     })
   }
 }

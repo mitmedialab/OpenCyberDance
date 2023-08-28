@@ -1,3 +1,7 @@
+import * as THREE from 'three'
+
+import {trackNameToPart} from './parts.js'
+
 export class Params {
   timescale = 1
 
@@ -41,20 +45,20 @@ export function overrideEnergy(track, factor = 1) {
 
 /**
  * @param {KeyframeTrack} track
- * @param {{x: number, y: number, z: number}} settings
+ * @param {{x: number, y: number, z: number}} config
  * @param {THREE.Euler[]} base
  * @returns
  */
-export function overrideRotation(track, settings, base) {
+export function overrideRotation(track, config, base) {
   if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
   const size = track.getValueSize()
 
-  track.times.forEach((_, timeIndex) => {
-    const offset = timeIndex * size
+  track.times.forEach((_, i) => {
+    const offset = i * size
     const quaternion = new THREE.Quaternion().fromArray(track.values, offset)
     const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
-    const original = base[timeIndex]
+    const original = base[i]
 
     // Revert back to original from the model file.
     euler.x = original.x
@@ -62,9 +66,9 @@ export function overrideRotation(track, settings, base) {
     euler.z = original.z
 
     // Apply the new rotation to the target.
-    euler.x *= settings.x
-    euler.y *= settings.y
-    euler.z *= settings.z
+    euler.x *= config.x
+    euler.y *= config.y
+    euler.z *= config.z
 
     quaternion.setFromEuler(euler)
     quaternion.toArray(track.values, offset)
@@ -73,11 +77,11 @@ export function overrideRotation(track, settings, base) {
 
 /**
  * @param {THREE.KeyframeTrack} track
- * @param {Map<string, number>} settings
+ * @param {Map<string, number>} config
  */
-export function overrideDelay(track, settings) {
+export function overrideDelay(track, config) {
   const part = trackNameToPart(track.name, 'delay')
 
-  const offset = delays[part] ?? 0
+  const offset = config[part] ?? 0
   if (offset > 0) track.shift(offset)
 }

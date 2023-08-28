@@ -1,9 +1,8 @@
 import * as THREE from 'three'
-import {Euler} from 'three'
 
 /**
  *
- * @param {Euler} track
+ * @param {THREE.KeyframeTrack} track
  * @param {number} offset
  * @returns
  */

@@ -115,9 +115,9 @@ export class World {
   }
 
   setupPanel() {
-    this.panel.handlers.delay = this.updateParams.bind(this)
-    this.panel.handlers.energy = this.updateParams.bind(this)
-    this.panel.handlers.rotation = this.updateParams.bind(this)
+    this.panel.handlers.delay = () => this.updateParams({core: true})
+    this.panel.handlers.energy = () => this.updateParams({core: true})
+    this.panel.handlers.rotation = () => this.updateParams({rotation: true})
 
     this.panel.handlers.timescale = () => {
       for (const character of this.characters) {
@@ -128,20 +128,20 @@ export class World {
     this.panel.createPanel()
   }
 
-  updateParams() {
+  updateParams(flags) {
     for (const character of this.characters) {
-      character.updateParams()
+      character.updateParams(flags)
     }
   }
 
   async setupCharacters() {
     // Create characters
     const a = Character.of('robot')
-    const b = Character.of('abstract', {forceDefaults: true})
+    const b = Character.of('abstract')
     const chars = [a, b]
 
     // Initialize characters
-    await Promise.all(chars.map((c) => c.setup(this.scene, this.override)))
+    await Promise.all(chars.map((c) => c.setup(this.scene, this.params)))
 
     // Position characters
     a.model.position.set(-0.5, 0, 0)

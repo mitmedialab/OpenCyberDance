@@ -237,13 +237,13 @@ export class Character {
     })
 
     const prevAction = this.actions.get(clip.name)
+    this.mixer.uncacheAction(prevAction)
+
     const action = this.mixer.clipAction(clip.clone())
     this.actions.set(clip.name, action)
 
-    action.setEffectiveTimeScale(0)
     action.time = prevAction.time
     prevAction.crossFadeTo(action, 0.35, true)
     action.play()
-    action.setEffectiveTimeScale(1)
   }
 }

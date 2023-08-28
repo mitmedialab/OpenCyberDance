@@ -134,7 +134,9 @@ export class World {
 
   updateParams(flags) {
     for (const character of this.characters) {
-      character.updateParams(flags)
+      profile('p', () => {
+        character.updateParams(flags)
+      })
     }
   }
 

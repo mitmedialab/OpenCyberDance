@@ -38,7 +38,7 @@ let points
 // Allows each animation track to loop.
 // Super memory and compute intensive, even though it's Float32Array.
 // Slows down significantly after 1.
-const EXTRA_TRACK_ITERATION = 0
+const EXTRA_TRACK_ITERATION = 2
 
 const crossFadeControls = []
 

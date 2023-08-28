@@ -12,10 +12,18 @@ import {
  */
 
 /**
+ * @typedef {{track: string, value: MoveValue}} Keyframe
+ */
+
+/**
  * @param {THREE.Quarternion} q
  */
 export function toEuler(q) {
   return new THREE.Euler().setFromQuaternion(q, 'XYZ')
+}
+
+export function toBone(name) {
+  return name.replace(/\.(position|quaternion)/, '')
 }
 
 export class KeyframeAnalyzer {
@@ -28,8 +36,12 @@ export class KeyframeAnalyzer {
   /** @type {Map<string, {time: number, value: MoveValue}[]>} */
   movesByTrack = new Map()
 
-  /** @type {Map<number, {track: string, value: MoveValue}[]>} */
+  /** @type {Map<number, Keyframes>} */
   movesByTime = new Map()
+
+  get ready() {
+    return this.movesByTime.size > 0
+  }
 
   /**
    * Reset the analyzer's internal state.
@@ -45,7 +57,7 @@ export class KeyframeAnalyzer {
   /**
    * @param {number} time
    * @param {string} track
-   * @param {any} value
+   * @param {MoveValue} value
    */
   addMove(time, track, value) {
     if (!this.movesByTrack.has(track)) this.movesByTrack.set(track, [])
@@ -66,22 +78,61 @@ export class KeyframeAnalyzer {
   }
 
   /**
-   * @param {string|RegExp} matcher
-   * @param {*} time
+   * @param {number} time
+   * @param {string|RegExp|null} matcher
    * @returns
    */
-  getKeyframesAtTime(matcher, time) {
-    const parts = this.movesByTime.get(time)
-    if (!parts) return []
-    if (!matcher) return parts
+  getKeyframesAtTime(time, matcher) {
+    const keyframes = this.movesByTime.get(time)
+    if (!keyframes || keyframes.length === 0) return []
+
+    return this.filterKeyframes(keyframes, matcher) ?? []
+  }
+
+  /**
+   * @param {number} time
+   * @param {string|RegExp|null} matcher
+   * @param {number} range
+   * @returns {Keyframe[]}
+   */
+  searchKeyframesAroundTime(time, matcher, range = 0.1, limit = 1) {
+    // If there is an exact match, use that value.
+    const keyframes = this.getKeyframesAtTime(time, matcher) ?? []
+    if (keyframes.length > 0) return keyframes
+
+    // Search for keyframes within the range.
+    return this.nearbyTimes(time, range)
+      .slice(0, limit)
+      .map((t) => this.getKeyframesAtTime(t, matcher) ?? [])
+      .reduce((a, b) => [...a, ...b], [])
+  }
+
+  /**
+   * @param {number} time
+   * @param {number} range
+   */
+  nearbyTimes(time, range = 0.1) {
+    // t >= time - range &&
+    return this.times.filter((t) => t <= time + range)
+  }
+
+  /**
+   * @param {Keyframe[]} keyframes
+   * @param {string|RegExp|null} matcher
+   * @returns
+   */
+  filterKeyframes(keyframes, matcher) {
+    if (!matcher) return keyframes ?? []
 
     if (typeof matcher === 'string') {
-      return parts.filter((move) => move.track.includes(matcher)) ?? []
+      return keyframes.filter((move) => move.track.includes(matcher)) ?? []
     }
 
     if (matcher instanceof RegExp) {
-      return parts.filter((move) => matcher.test(move.track)) ?? []
+      return keyframes.filter((move) => matcher.test(move.track)) ?? []
     }
+
+    return []
   }
 
   /**
@@ -118,5 +169,7 @@ export class KeyframeAnalyzer {
     this.times = [...this.movesByTime.keys()]
 
     window.analyzer = this
+
+    console.log(`> analyzed ${this.tracks.length} tracks.`)
   }
 }

@@ -51,8 +51,9 @@ let points
 const EXTRA_TRACK_ITERATION = 2
 
 const characterMap = {
-  robot: '008test.glb',
+  robot: 'Robot00833test.glb',
   abstract: 'humanPPtesting.glb',
+  none: '',
 }
 
 const crossFadeControls = []
@@ -75,8 +76,8 @@ let panelSettings, numAnimations
 const originalAnimations = {}
 
 const characters = {
-  secondVisible: false,
   character: 'robot',
+  character2: 'none',
 }
 
 init()
@@ -218,14 +219,9 @@ function f32Append(source, items) {
 //   scene.add(points)
 // }
 
-/**
- * @param {keyof typeof characterMap} name
- */
-function swapCharacters(name) {
-  const file = characterMap[name]
-
-  addPrimaryCharacter(file)
-  addSecondCharacter(file)
+function swapCharacters() {
+  addPrimaryCharacter(characterMap[characters.character])
+  addSecondCharacter(characterMap[characters.character2])
 }
 
 function init() {
@@ -260,7 +256,7 @@ function init() {
   mesh.receiveShadow = true
   scene.add(mesh)
 
-  swapCharacters(characters.character)
+  swapCharacters()
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio(window.devicePixelRatio)
@@ -400,10 +396,12 @@ function addPrimaryCharacter(file) {
 }
 
 function addSecondCharacter(file) {
-  const loader = new GLTFLoader()
-
   dispose(model2)
   scene.remove(model2)
+
+  if (file === 'none' || !file) return
+
+  const loader = new GLTFLoader()
 
   loader.load(file, (gltf) => {
     model2 = gltf.scene
@@ -416,7 +414,7 @@ function addSecondCharacter(file) {
     const s = 0.008
     model2.scale.set(s, s, s)
     model2.position.set(-1.5, 0, -0.5)
-    model2.visible = characters.secondVisible
+    model2.visible = characters.character2 !== 'none'
 
     skeleton2 = new THREE.SkeletonHelper(model2)
     skeleton2.visible = false
@@ -632,14 +630,11 @@ function createPanel() {
 
   characterFolder
     .add(characters, 'character', Object.keys(characterMap))
-    .onChange(() => swapCharacters(characters.character))
+    .onChange(swapCharacters)
 
   characterFolder
-    .add(characters, 'secondVisible', false)
-    .listen()
-    .onChange(() => {
-      model2.visible = characters.secondVisible
-    })
+    .add(characters, 'character2', Object.keys(characterMap))
+    .onChange(swapCharacters)
 
   /**
    * @param {keyof typeof coreParts} parts

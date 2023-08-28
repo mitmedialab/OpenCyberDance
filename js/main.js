@@ -33,7 +33,7 @@ let clock
 /** @type {THREE.Points} */
 let points
 
-let analyzer = new KeyframeAnalyzer()
+// let analyzer = new KeyframeAnalyzer()
 
 // Allows each animation track to loop.
 // Super memory and compute intensive, even though it's Float32Array.
@@ -141,67 +141,67 @@ function f32Append(source, items) {
   return dest
 }
 
-function debugAddPointClouds(tracks) {
-  // Clear existing objects.
-  if (points) {
-    points.traverse((obj) => points.remove(obj))
-    scene.remove(points)
-  }
+// function debugAddPointClouds(tracks) {
+//   // Clear existing objects.
+//   if (points) {
+//     points.traverse((obj) => points.remove(obj))
+//     scene.remove(points)
+//   }
 
-  const times = analyzer.times
+//   const times = analyzer.times
 
-  if (times.length === 0) {
-    console.warn('analyzer cannot find any keyframes!')
-    return
-  }
+//   if (times.length === 0) {
+//     console.warn('analyzer cannot find any keyframes!')
+//     return
+//   }
 
-  const geometry = new THREE.BufferGeometry()
+//   const geometry = new THREE.BufferGeometry()
 
-  const V_SIZE = 3
-  const positions = new Float32Array(times.length * V_SIZE)
+//   const V_SIZE = 3
+//   const positions = new Float32Array(times.length * V_SIZE)
 
-  times.forEach((time) => {
-    const keyframes = analyzer.getKeyframesAtTime(time)
+//   times.forEach((time) => {
+//     const keyframes = analyzer.getKeyframesAtTime(time)
 
-    keyframes.forEach((part, i) => {
-      const v = part.value.v
-      // const bone = model.getObjectByName(toBone(part.track))
+//     keyframes.forEach((part, i) => {
+//       const v = part.value.v
+//       // const bone = model.getObjectByName(toBone(part.track))
 
-      if (v instanceof THREE.Vector3) {
-        positions[i] = v.x
-        positions[i + 1] = v.y
-        positions[i + 2] = v.z
-      }
+//       if (v instanceof THREE.Vector3) {
+//         positions[i] = v.x
+//         positions[i + 1] = v.y
+//         positions[i + 2] = v.z
+//       }
 
-      // TODO: we can't do this because rotations cannot be plotted as positions.
-      // if (v instanceof THREE.Quaternion) {
-      //   const r = bone.rotation.clone().setFromQuaternion(v)
-      //   positions[i] = r.x
-      //   positions[i + 1] = r.y
-      //   positions[i + 2] = r.z
-      // }
-    })
-  })
+//       // TODO: we can't do this because rotations cannot be plotted as positions.
+//       // if (v instanceof THREE.Quaternion) {
+//       //   const r = bone.rotation.clone().setFromQuaternion(v)
+//       //   positions[i] = r.x
+//       //   positions[i + 1] = r.y
+//       //   positions[i + 2] = r.z
+//       // }
+//     })
+//   })
 
-  console.log(`> adding ${times.length} point clouds`)
+//   console.log(`> adding ${times.length} point clouds`)
 
-  // const sprite = new THREE.TextureLoader().load('disc.png')
-  // sprite.colorSpace = THREE.SRGBColorSpace
+//   // const sprite = new THREE.TextureLoader().load('disc.png')
+//   // sprite.colorSpace = THREE.SRGBColorSpace
 
-  const attribute = new THREE.BufferAttribute(positions, V_SIZE)
-  geometry.setAttribute('position', attribute)
+//   const attribute = new THREE.BufferAttribute(positions, V_SIZE)
+//   geometry.setAttribute('position', attribute)
 
-  const material = new THREE.PointsMaterial({
-    size: 0.1,
-    alphaTest: 0.2,
-    transparent: true,
-  })
+//   const material = new THREE.PointsMaterial({
+//     size: 0.1,
+//     alphaTest: 0.2,
+//     transparent: true,
+//   })
 
-  material.color.setHSL(0.5, Math.random(), Math.random(), THREE.SRGBColorSpace)
+//   material.color.setHSL(0.5, Math.random(), Math.random(), THREE.SRGBColorSpace)
 
-  points = new THREE.Points(geometry, material)
-  scene.add(points)
-}
+//   points = new THREE.Points(geometry, material)
+//   scene.add(points)
+// }
 
 function init() {
   const container = document.getElementById('container')
@@ -564,7 +564,7 @@ function createPanel() {
    */
   const addEnergy = (...parts) => {
     parts.forEach((part) => {
-      energyFolder.add(energy, part, 1, 12, 0.01).listen().onChange(alterEnergy)
+      energyFolder.add(energy, part, 1, 8, 0.01).listen().onChange(alterEnergy)
     })
   }
 
@@ -603,7 +603,7 @@ function createPanel() {
         prepareCrossFade(currentAction, action, 0.35)
       }
 
-      if (ANALYZER_ENABLED) analyzer.analyze(tracks)
+      // if (ANALYZER_ENABLED) analyzer.analyze(tracks)
       // debugAddPointClouds(action.getClip().tracks)
     }
 

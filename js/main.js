@@ -21,11 +21,17 @@ let stats
 /** @type {THREE.Scene} */
 let model
 
+/** @type {THREE.Scene} */
+let model2
+
 /** @type {THREE.Skeleton} */
 let skeleton
 
 /** @type {THREE.AnimationMixer} */
 let mixer
+
+/** @type {THREE.AnimationMixer} */
+let mixer2
 
 /** @type {THREE.Clock} */
 let clock
@@ -55,6 +61,12 @@ const allActions = []
 const baseActions = {
   [anims.a]: {weight: 0},
   [anims.b]: {weight: 0},
+}
+
+/** @type {Record<string, THREE.AnimationAction>} */
+const originalActions = {
+  [anims.a]: null,
+  [anims.b]: null,
 }
 
 const additiveActions = {}
@@ -236,21 +248,52 @@ function init() {
   scene.add(mesh)
 
   const loader = new GLTFLoader()
+  addBaseCharacter(loader)
+  addSecondCharacter(loader)
 
+  renderer = new THREE.WebGLRenderer({antialias: true})
+  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.shadowMap.enabled = true
+  renderer.useLegacyLights = false
+  container.appendChild(renderer.domElement)
+
+  // camera
+  camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    1,
+    100
+  )
+
+  camera.position.set(-1, 2, 3)
+
+  const controls = new OrbitControls(camera, renderer.domElement)
+  controls.enablePan = true
+  controls.enableZoom = true
+  controls.target.set(0, 1, 0)
+  controls.update()
+
+  stats = new Stats()
+  container.appendChild(stats.dom)
+
+  window.addEventListener('resize', onWindowResize)
+}
+
+function addBaseCharacter(loader) {
   loader.load('model-v2.glb', (gltf) => {
     model = gltf.scene
     scene.add(model)
 
-    console.log(gltf.animations)
+    // console.log(gltf.animations)
 
-    model.traverse(function (object) {
+    model.traverse((object) => {
       if (object.isMesh) object.castShadow = true
     })
 
     const s = 0.008
     model.scale.set(s, s, s)
     model.position.set(0, 0, -0.5)
-    // console.log(model)
 
     skeleton = new THREE.SkeletonHelper(model)
     skeleton.visible = false
@@ -297,8 +340,6 @@ function init() {
 
         originalAnimations[animation.name].push({eulers, timings, duration})
       })
-
-      // debugger
     })
 
     window.originalAnimations = originalAnimations
@@ -338,34 +379,37 @@ function init() {
 
     render()
   })
+}
 
-  renderer = new THREE.WebGLRenderer({antialias: true})
-  renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.setSize(window.innerWidth, window.innerHeight)
-  renderer.shadowMap.enabled = true
-  renderer.useLegacyLights = false
-  container.appendChild(renderer.domElement)
+function addSecondCharacter(loader) {
+  loader.load('model-v2.glb', (gltf) => {
+    model2 = gltf.scene
+    scene.add(model2)
 
-  // camera
-  camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    1,
-    100
-  )
+    model2.traverse((object) => {
+      if (object.isMesh) object.castShadow = true
+    })
 
-  camera.position.set(-1, 2, 3)
+    const s = 0.008
+    model2.scale.set(s, s, s)
+    model2.position.set(-1.5, 0, -0.5)
+    model2.visible = false
 
-  const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enablePan = true
-  controls.enableZoom = true
-  controls.target.set(0, 1, 0)
-  controls.update()
+    const skeleton2 = new THREE.SkeletonHelper(model2)
+    skeleton2.visible = false
+    scene.add(skeleton2)
 
-  stats = new Stats()
-  container.appendChild(stats.dom)
+    mixer2 = new THREE.AnimationMixer(model2)
 
-  window.addEventListener('resize', onWindowResize)
+    gltf.animations.forEach((animation) => {
+      /** @type {THREE.KeyframeTrack[]} */
+      const tracks = animation.tracks
+      const clip = new THREE.AnimationClip(animation.name, -1, tracks)
+      const action = new THREE.AnimationAction(mixer2, clip)
+
+      originalActions[animation.name] = action
+    })
+  })
 }
 
 /**
@@ -551,6 +595,8 @@ function updateAnimationValues() {
   })
 }
 
+const secondCharacter = {visible: false}
+
 function createPanel() {
   const panel = new GUI({width: 310})
 
@@ -560,10 +606,18 @@ function createPanel() {
   const rotFolder = panel.addFolder('All Rotations')
   const energyFolder = panel.addFolder('Energy')
   const delayFolder = panel.addFolder('Delays')
+  const secondCharFolder = panel.addFolder('Second Character')
 
   rotFolder.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
   rotFolder.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
   rotFolder.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
+
+  secondCharFolder
+    .add(secondCharacter, 'visible', false)
+    .listen()
+    .onChange(() => {
+      model2.visible = secondCharacter.visible
+    })
 
   /**
    * @param {keyof typeof coreParts} parts
@@ -605,7 +659,9 @@ function createPanel() {
     const name = baseNames[i]
     const settings = baseActions[name]
 
-    // handler
+    /**
+     * This is activated when we switch!
+     */
     panelSettings[name] = function () {
       const currentSettings = baseActions[currentBaseAction]
       const currentAction = currentSettings ? currentSettings.action : null
@@ -613,6 +669,14 @@ function createPanel() {
 
       if (currentAction !== action) {
         prepareCrossFade(currentAction, action, 0.35)
+      }
+
+      // Secondary character
+      if (!currentBaseAction || currentBaseAction === 'None') {
+        mixer2.stopAllAction()
+      } else {
+        const a2 = originalActions[currentBaseAction]
+        a2.play()
       }
 
       // if (ANALYZER_ENABLED) analyzer.analyze(tracks)
@@ -675,6 +739,7 @@ function activateAction(action) {
 
 function modifyTimeScale(speed) {
   mixer.timeScale = speed
+  mixer2.timeScale = speed
 }
 
 function prepareCrossFade(startAction, endAction, duration) {
@@ -788,6 +853,7 @@ function render() {
 
   const mixerUpdateDelta = clock.getDelta()
   mixer.update(mixerUpdateDelta)
+  if (mixer2) mixer2.update(mixerUpdateDelta)
 
   // const baseActionTime = baseActions[currentBaseAction]?.action?.time
 

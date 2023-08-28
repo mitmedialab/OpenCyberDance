@@ -55,23 +55,16 @@ export function overrideRotation(track, config, base) {
   const size = track.getValueSize()
 
   track.times.forEach((_, i) => {
-    const offset = i * size
-    const quaternion = new THREE.Quaternion().fromArray(track.values, offset)
-    const euler = new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
-    const original = base[i]
-
-    // Revert back to original from the model file.
-    euler.x = original.x
-    euler.y = original.y
-    euler.z = original.z
+    const euler = base[i].clone()
 
     // Apply the new rotation to the target.
     euler.x *= config.x
     euler.y *= config.y
     euler.z *= config.z
 
-    quaternion.setFromEuler(euler)
-    quaternion.toArray(track.values, offset)
+    const q = new THREE.Quaternion()
+      .setFromEuler(euler)
+      .toArray(track.values, i * size)
   })
 }
 

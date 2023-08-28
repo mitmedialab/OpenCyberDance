@@ -6,6 +6,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {Panel} from './panel.js'
 import {Character} from './character.js'
 import {Params} from './overrides.js'
+import {profile} from './perf.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -129,9 +130,11 @@ export class World {
   }
 
   updateParams(flags) {
-    for (const character of this.characters) {
-      character.updateParams(flags)
-    }
+    profile('updateParams', () => {
+      for (const character of this.characters) {
+        character.updateParams(flags)
+      }
+    })
   }
 
   async setupCharacters() {

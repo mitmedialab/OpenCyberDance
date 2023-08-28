@@ -1,7 +1,14 @@
+import * as THREE from 'three'
+
 import {AnimationAction, AnimationClip} from 'three'
+import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'
+
 import {lengthenKeyframeTracks} from './keyframes.js'
+
+import {dispose} from './dispose.js'
+
 import {
   Params,
   overrideDelay,
@@ -12,7 +19,7 @@ import {
 /** @typedef {{eulers: THREE.Euler[], timings: number[], duration: number}} AnimationSource */
 
 export class Character {
-  _scale = 0.08
+  _scale = 0.008
 
   /** @type {keyof typeof Character.sources} */
   type = 'robot'
@@ -83,12 +90,10 @@ export class Character {
     this.scene.remove(this.model)
   }
 
-  /** @type {Params} state */
-  registerOverride(override) {
+  setup(scene, override) {
+    this.scene = scene
     this.override = override
-  }
 
-  setup() {
     this.clear()
 
     const file = Character.sources[this.type]
@@ -99,7 +104,7 @@ export class Character {
     loader.load(file, (gltf) => {
       // Add the character model
       this.model = gltf.scene
-      this.scene.add(model)
+      this.scene.add(this.model)
 
       // Cast shadows
       this.model.traverse((object) => {
@@ -110,7 +115,7 @@ export class Character {
       this.model.scale.set(this._scale, this._scale, this._scale)
 
       // Add model skeleton
-      this.skeleton = new THREE.SkeletonHelper(model)
+      this.skeleton = new THREE.SkeletonHelper(this.model)
       this.skeleton.visible = false
       this.scene.add(this.skeleton)
 

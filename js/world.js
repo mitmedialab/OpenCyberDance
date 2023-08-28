@@ -36,8 +36,9 @@ export class World {
     this.setupPanel()
 
     // Setup characters
-    this.characters.push(Character.of('robot'))
-    this.characters.push(Character.of('abstract'))
+    const characters = [Character.of('robot'), Character.of('abstract')]
+    characters.forEach((c) => c.setup(this.scene, this.override))
+    this.characters.push(...characters)
 
     // Setup elements
     this.container.appendChild(this.renderer.domElement)

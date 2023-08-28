@@ -58,7 +58,7 @@ export class Character {
     position: [0, 0, 0],
 
     // Lengthen keyframe tracks.
-    lengthen: 1,
+    lengthen: 0,
 
     // Freeze parameters.
     freezeParams: false,
@@ -143,15 +143,14 @@ export class Character {
     // Create individual animation mixer
     this.mixer = new THREE.AnimationMixer(this.model)
 
-    // Setup animations.
-    this.loadAnimations(gltf.animations)
-  }
+    /** @type {AnimationClip[]} */
+    const clips = gltf.animations
 
-  /** @param {AnimationClip[]} clips */
-  loadAnimations(clips) {
     for (const clip of clips) {
-      this.cacheClip(clip)
+      // Process the individual animation clips.
+      this.processClip(clip)
 
+      // Register the animation clip as character actions.
       const action = this.mixer.clipAction(clip)
       this.actions.set(clip.name, action)
     }
@@ -160,10 +159,12 @@ export class Character {
   /**
    * @param {THREE.AnimationClip} clip
    */
-  cacheClip(clip) {
-    // Lengthten keyframe tracks.
-    for (let i = 0; i < this.options.lengthen; i++) {
-      lengthenKeyframeTracks(clip.tracks)
+  processClip(clip) {
+    // Make keyframes track longer for track-level looping.
+    if (this.options.lengthen > 0) {
+      for (let i = 0; i < this.options.lengthen; i++) {
+        lengthenKeyframeTracks(clip.tracks)
+      }
     }
 
     // Do not cache the original for default parameter characters.
@@ -171,27 +172,29 @@ export class Character {
 
     // Cache original keyframe tracks for modification
     clip.tracks.forEach((track) => {
+      // Cache timing and durations.
       const timings = track.times.slice(0)
       const duration = track.times[track.times.length - 1] - track.times[0]
-      const size = track.getValueSize()
 
-      const eulers = [...Array(track.times.length)].map((_, i) => {
-        return trackToEuler(track, i * size)
-      })
+      /** @type {AnimationSource} */
+      const source = {timings, duration}
 
-      track.validate()
+      // Cache euler angles for rotation tracks.
+      if (track instanceof QuaternionKeyframeTrack) {
+        const size = track.getValueSize()
+
+        source.eulers = [...Array(track.times.length)].map((_, i) => {
+          return trackToEuler(track, i * size)
+        })
+      }
 
       if (!this.original.has(clip.name)) this.original.set(clip.name, [])
-
-      this.original.get(clip.name).push({
-        eulers,
-        timings,
-        duration,
-      })
+      this.original.get(clip.name).push(source)
     })
   }
 
   /**
+   * Get the original animation timings and values.
    * @param {number} index
    */
   originalOf(index) {

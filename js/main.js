@@ -3,6 +3,7 @@ import Stats from 'three/addons/libs/stats.module.js'
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
+import {KeyframeAnalyzer} from './analyze.js'
 
 /** @type {THREE.Scene} */
 let scene
@@ -133,6 +134,33 @@ function f32Append(source, items) {
   return dest
 }
 
+function debugAddPointCloud() {
+  /** @type {KeyframeAnalyzer} */
+  const analyzer = window.analyzer
+  if (!analyzer) return
+
+  const times = analyzer.getTimes()
+
+  const dotGeometry = new THREE.Geometry()
+
+  times.slice(0, 5).forEach((time) => {
+    const parts = analyzer.getPartsAtTime('Leg', time)
+    parts.forEach((part) => {
+      if (part.value instanceof THREE.Vector3) {
+        dotGeometry.vertices.push(part.value)
+      }
+    })
+  })
+
+  const dotMaterial = new THREE.PointsMaterial({
+    size: 1,
+    sizeAttenuation: false,
+  })
+
+  const dot = new THREE.Points(dotGeometry, dotMaterial)
+  scene.add(dot)
+}
+
 function init() {
   const container = document.getElementById('container')
   clock = new THREE.Clock()
@@ -233,12 +261,6 @@ function init() {
 
     window.originalAnimations = originalAnimations
 
-    // const tracks = gltf.animations[0].tracks.filter(
-    //   // (t) => /Leg|Foot|Toe/.test(t.name) && !t.name.includes('scale')
-    //   // t.constructor.name.includes('Vector') &&
-    //   (t) => t
-    // )
-
     mixer = new THREE.AnimationMixer(model)
 
     numAnimations = animations.length
@@ -301,9 +323,9 @@ function init() {
   container.appendChild(stats.dom)
 
   window.addEventListener('resize', onWindowResize)
-}
 
-const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
+  debugAddPointCloud()
+}
 
 /**
  * @param {THREE.KeyframeTrack} track
@@ -312,7 +334,7 @@ const isTargetTrack = (track) => /Leg|Foot|Toe/.test(track.name)
 
 const coreParts = {
   head: /Neck|Head/,
-  legs: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot/,
+  legs: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
   body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
 }
 
@@ -324,6 +346,8 @@ const delayParts = {
   leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
   rightLeg: /RightUpLeg|RightLeg|RightFoot/,
 }
+
+const rotationSettings = {X: 1.0, Y: 1.0, Z: 1.0}
 
 /** @type {Record<keyof typeof coreParts, number>} */
 const energy = {
@@ -499,10 +523,7 @@ function createPanel() {
    */
   const addEnergy = (...parts) => {
     parts.forEach((part) => {
-      energyFolder
-        .add(energy, part, -100, 100, 1)
-        .listen()
-        .onChange(alterEnergy)
+      energyFolder.add(energy, part, 1, 12, 0.01).listen().onChange(alterEnergy)
     })
   }
 
@@ -511,10 +532,7 @@ function createPanel() {
    */
   const addDelay = (...parts) => {
     parts.forEach((part) => {
-      delayFolder
-        .add(delays, part, -100, 100, 0.5)
-        .listen()
-        .onChange(alterDelay)
+      delayFolder.add(delays, part, -10, 10, 0.01).listen().onChange(alterDelay)
     })
   }
 
@@ -587,10 +605,14 @@ function createPanel() {
   })
 }
 
+/**
+ * @param {THREE.AnimationAction} action
+ */
 function activateAction(action) {
   const clip = action.getClip()
   const settings = baseActions[clip.name] || additiveActions[clip.name]
   setWeight(action, settings.weight)
+  // action.startAt(clip.duration / 2)
   action.play()
 }
 
@@ -700,12 +722,12 @@ function onWindowResize() {
 function render() {
   requestAnimationFrame(render)
 
-  // for (let i = 0; i !== numAnimations; ++i) {
-  //   const action = allActions[i]
-  //   const clip = action.getClip()
-  //   const settings = baseActions[clip.name] || additiveActions[clip.name]
-  //   settings.weight = 0
-  // }
+  for (let i = 0; i !== numAnimations; ++i) {
+    const action = allActions[i]
+    const clip = action.getClip()
+    const settings = baseActions[clip.name] || additiveActions[clip.name]
+    settings.weight = 0
+  }
 
   const mixerUpdateDelta = clock.getDelta()
 

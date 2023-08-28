@@ -50,6 +50,11 @@ let points
 // Slows down significantly after 1.
 const EXTRA_TRACK_ITERATION = 2
 
+const characterMap = {
+  robot: '008test.glb',
+  abstract: 'humanPPtesting.glb',
+}
+
 const crossFadeControls = []
 
 let currentBaseAction = 'idle'
@@ -68,6 +73,11 @@ let panelSettings, numAnimations
 
 /** @type {Record<string, {eulers: THREE.Euler[], timings: number[], duration: number}[]>} */
 const originalAnimations = {}
+
+const characters = {
+  secondVisible: false,
+  character: 'robot',
+}
 
 init()
 
@@ -208,6 +218,16 @@ function f32Append(source, items) {
 //   scene.add(points)
 // }
 
+/**
+ * @param {keyof typeof characterMap} name
+ */
+function swapCharacters(name) {
+  const file = characterMap[name]
+
+  addPrimaryCharacter(file)
+  addSecondCharacter(file)
+}
+
 function init() {
   const container = document.getElementById('container')
   clock = new THREE.Clock()
@@ -240,9 +260,7 @@ function init() {
   mesh.receiveShadow = true
   scene.add(mesh)
 
-  const modelFileName = '008test.glb'
-  addPrimaryCharacter(modelFileName)
-  addSecondCharacter(modelFileName)
+  swapCharacters(characters.character)
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio(window.devicePixelRatio)
@@ -277,6 +295,7 @@ function addPrimaryCharacter(file) {
   const loader = new GLTFLoader()
 
   dispose(model)
+  scene.remove(model)
 
   loader.load(file, (gltf) => {
     model = gltf.scene
@@ -384,6 +403,7 @@ function addSecondCharacter(file) {
   const loader = new GLTFLoader()
 
   dispose(model2)
+  scene.remove(model2)
 
   loader.load(file, (gltf) => {
     model2 = gltf.scene
@@ -396,7 +416,7 @@ function addSecondCharacter(file) {
     const s = 0.008
     model2.scale.set(s, s, s)
     model2.position.set(-1.5, 0, -0.5)
-    model2.visible = false
+    model2.visible = characters.secondVisible
 
     skeleton2 = new THREE.SkeletonHelper(model2)
     skeleton2.visible = false
@@ -595,8 +615,6 @@ function updateAnimationValues() {
   })
 }
 
-const secondCharacter = {visible: false}
-
 function createPanel() {
   const panel = new GUI({width: 310})
 
@@ -606,17 +624,21 @@ function createPanel() {
   const rotFolder = panel.addFolder('All Rotations')
   const energyFolder = panel.addFolder('Energy')
   const delayFolder = panel.addFolder('Delays')
-  const secondCharFolder = panel.addFolder('Second Character')
+  const characterFolder = panel.addFolder('Characters')
 
   rotFolder.add(rotationSettings, 'X', 1, 10).listen().onChange(alterRotation)
   rotFolder.add(rotationSettings, 'Y', 1, 10).listen().onChange(alterRotation)
   rotFolder.add(rotationSettings, 'Z', 1, 10).listen().onChange(alterRotation)
 
-  secondCharFolder
-    .add(secondCharacter, 'visible', false)
+  characterFolder
+    .add(characters, 'character', Object.keys(characterMap))
+    .onChange(() => swapCharacters(characters.character))
+
+  characterFolder
+    .add(characters, 'secondVisible', false)
     .listen()
     .onChange(() => {
-      model2.visible = secondCharacter.visible
+      model2.visible = characters.secondVisible
     })
 
   /**

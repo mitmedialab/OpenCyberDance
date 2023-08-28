@@ -370,8 +370,6 @@ function addPrimaryCharacter(file) {
       let clip = animations[i]
 
       const name = clip.name
-      console.log('clipName', name)
-
       const action = mixer.clipAction(clip)
 
       baseActions[name] = {}

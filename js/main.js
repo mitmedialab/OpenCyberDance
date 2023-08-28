@@ -453,8 +453,7 @@ function alterRotation() {
 }
 
 /**
- *
- * @param {({track: THREE.KeyframeTrack, index: number, part: keyof typeof coreParts}) => void} onTrack
+ * @param {({track: THREE.KeyframeTrack, index: number, original: any}) => void} onTrack
  * @returns
  */
 function alterAnimationTrack(onTrack) {
@@ -515,33 +514,40 @@ function alterAnimationTrack(onTrack) {
   window.filteredTracks = tracks.filter(isTargetTrack)
 }
 
-function alterEnergy() {
-  alterAnimationTrack(({track, original}) => {
-    const part = trackNameToPart(track.name, 'core')
-    const factor = energy[part] ?? 1
+/**
+ * @param {THREE.KeyframeTrack} track
+ */
+function alterDelay(track) {
+  const part = trackNameToPart(track.name, 'delay')
 
-    // Revert timing to original.
-    track.times = original.timings.slice(0)
+  const offset = delays[part] ?? 0
+  if (offset > 0) track.shift(offset)
+}
 
-    // Scale up or down keyframe tracks.
-    track.times = track.times.map((t) => {
-      if (factor === 1) return t
+/**
+ * @param {THREE.KeyframeTrack} track
+ */
+function alterEnergy(track) {
+  const part = trackNameToPart(track.name, 'core')
+  const factor = energy[part] ?? 1
 
-      const value = t / factor
-      if (isNaN(value)) return t
+  // Scale up or down keyframe tracks.
+  track.times = track.times.map((t) => {
+    if (factor === 1) return t
 
-      return value
-    })
+    const value = t / factor
+    if (isNaN(value)) return t
+
+    return value
   })
 }
 
-function alterDelay() {
+function updateAnimationValues() {
   alterAnimationTrack(({track, original}) => {
-    const part = trackNameToPart(track.name, 'delay')
-    const offset = delays[part] ?? 0
-
     track.times = original.timings.slice(0)
-    if (offset > 0) track.shift(offset)
+
+    alterDelay(track, original)
+    alterEnergy(track, original)
   })
 }
 
@@ -564,7 +570,10 @@ function createPanel() {
    */
   const addEnergy = (...parts) => {
     parts.forEach((part) => {
-      energyFolder.add(energy, part, 1, 8, 0.01).listen().onChange(alterEnergy)
+      energyFolder
+        .add(energy, part, 1, 8, 0.01)
+        .listen()
+        .onChange(updateAnimationValues)
     })
   }
 
@@ -573,7 +582,10 @@ function createPanel() {
    */
   const addDelay = (...parts) => {
     parts.forEach((part) => {
-      delayFolder.add(delays, part, -10, 10, 0.01).listen().onChange(alterDelay)
+      delayFolder
+        .add(delays, part, -10, 10, 0.01)
+        .listen()
+        .onChange(updateAnimationValues)
     })
   }
 

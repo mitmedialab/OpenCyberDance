@@ -66,7 +66,7 @@ const allActions = []
 const baseActions = {}
 
 /** @type {Record<string, THREE.AnimationAction>} */
-const originalActions = {}
+const secondCharacterActions = {}
 
 const additiveActions = {}
 
@@ -428,7 +428,7 @@ function addSecondCharacter(file) {
       const clip = new THREE.AnimationClip(animation.name, -1, tracks)
       const action = new THREE.AnimationAction(mixer2, clip)
 
-      originalActions[animation.name] = action
+      secondCharacterActions[animation.name] = action
     })
   })
 }
@@ -692,8 +692,14 @@ function createPanel() {
       if (!currentBaseAction || currentBaseAction === 'None') {
         mixer2.stopAllAction()
       } else {
-        const a2 = originalActions[currentBaseAction]
-        if (a2) a2.play()
+        const a2 = secondCharacterActions[currentBaseAction]
+
+        if (a2) {
+          a2.play()
+        } else {
+          const b = Object.values(secondCharacterActions)[0]
+          if (b) b.play()
+        }
       }
 
       // if (ANALYZER_ENABLED) analyzer.analyze(tracks)

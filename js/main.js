@@ -777,8 +777,8 @@ function activateAction(action) {
 }
 
 function modifyTimeScale(speed) {
-  mixer.timeScale = speed
-  mixer2.timeScale = speed
+  if (mixer) mixer.timeScale = speed
+  if (mixer2) mixer2.timeScale = speed
 }
 
 function prepareCrossFade(startAction, endAction, duration) {

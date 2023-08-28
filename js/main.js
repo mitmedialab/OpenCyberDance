@@ -51,7 +51,7 @@ let points
 const EXTRA_TRACK_ITERATION = 2
 
 const characterMap = {
-  robot: 'Robot00833test.glb',
+  robot: 'Robot3357test.glb',
   abstract: 'humanPPtesting.glb',
   none: '',
 }
@@ -60,15 +60,15 @@ const crossFadeControls = []
 
 let currentBaseAction = 'idle'
 
-const allActions = []
+let allActions = []
 
 /** @type {Record<string, {weight: number, action: THREE.AnimationAction}>} */
-const baseActions = {}
+let baseActions = {}
 
 /** @type {Record<string, THREE.AnimationAction>} */
-const secondCharacterActions = {}
+let secondCharacterActions = {}
 
-const additiveActions = {}
+let additiveActions = {}
 
 let panelSettings, numAnimations
 
@@ -78,6 +78,7 @@ const originalAnimations = {}
 const characters = {
   character: 'robot',
   character2: 'none',
+  character2Action: 'none',
 }
 
 init()
@@ -220,6 +221,10 @@ function f32Append(source, items) {
 // }
 
 function swapCharacters() {
+  allActions = []
+  baseActions = {}
+  secondCharacterActions = {}
+
   addPrimaryCharacter(characterMap[characters.character])
   addSecondCharacter(characterMap[characters.character2])
 }
@@ -288,10 +293,12 @@ function init() {
 }
 
 function addPrimaryCharacter(file) {
-  const loader = new GLTFLoader()
-
   dispose(model)
   scene.remove(model)
+
+  if (file === 'none' || !file) return
+
+  const loader = new GLTFLoader()
 
   loader.load(file, (gltf) => {
     model = gltf.scene
@@ -630,10 +637,12 @@ function createPanel() {
 
   characterFolder
     .add(characters, 'character', Object.keys(characterMap))
+    .name('Primary character')
     .onChange(swapCharacters)
 
   characterFolder
     .add(characters, 'character2', Object.keys(characterMap))
+    .name('Secondary character')
     .onChange(swapCharacters)
 
   /**
@@ -689,16 +698,23 @@ function createPanel() {
       }
 
       // Secondary character
-      if (!currentBaseAction || currentBaseAction === 'None') {
-        mixer2.stopAllAction()
-      } else {
-        const a2 = secondCharacterActions[currentBaseAction]
-
-        if (a2) {
-          a2.play()
+      if (characters.character2 !== 'none') {
+        if (!currentBaseAction || currentBaseAction === 'None') {
+          mixer2.stopAllAction()
         } else {
-          const b = Object.values(secondCharacterActions)[0]
-          if (b) b.play()
+          const secondAction = secondCharacterActions[currentBaseAction]
+
+          if (secondAction) {
+            secondAction.play()
+            characters.character2Action = currentBaseAction
+          } else {
+            const first = Object.values(secondCharacterActions)[0]
+
+            if (first) {
+              characters.character2Action = first.getClip().name
+              first.play()
+            }
+          }
         }
       }
 

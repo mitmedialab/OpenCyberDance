@@ -27,18 +27,14 @@ export class World {
     this.scene.background = new THREE.Color(0xdedede)
     this.scene.fog = new THREE.Fog(0xdedede, 10, 50)
 
-    // Setup environments
+    // Setup the scenes
     this.setupLights()
     this.setupPlane()
     this.setupRenderer()
     this.setupCamera()
     this.setupControls()
     this.setupPanel()
-
-    // Setup characters
-    const characters = [Character.of('robot'), Character.of('abstract')]
-    characters.forEach((c) => c.setup(this.scene, this.override))
-    this.characters.push(...characters)
+    this.setupCharacters()
 
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
@@ -119,8 +115,6 @@ export class World {
   }
 
   setupPanel() {
-    this.panel.createPanel()
-
     this.panel.handlers.delay = this.updateParams.bind(this)
     this.panel.handlers.energy = this.updateParams.bind(this)
     this.panel.handlers.rotation = this.updateParams.bind(this)
@@ -130,11 +124,33 @@ export class World {
         character.mixer.timeScale = this.params.timescale
       }
     }
+
+    this.panel.createPanel()
   }
 
   updateParams() {
     for (const character of this.characters) {
       character.updateParams()
     }
+  }
+
+  async setupCharacters() {
+    // Create characters
+    const a = Character.of('robot')
+    const b = Character.of('abstract', {forceDefaults: true})
+    const chars = [a, b]
+
+    // Initialize characters
+    await Promise.all(chars.map((c) => c.setup(this.scene, this.override)))
+
+    // Position characters
+    a.model.position.set(-0.5, 0, 0)
+    b.model.position.set(0.5, 0, 0)
+
+    // Start animations
+    a.actAt(0)
+    b.actAt(0)
+
+    this.characters.push(...chars)
   }
 }

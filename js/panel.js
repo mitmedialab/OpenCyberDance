@@ -66,8 +66,9 @@ export class Panel {
     this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
 
     this.globalFolder
-      .add(this.params, 'timescale', 0.0, 5, 0.01)
+      .add(this.params, 'timescale', 0, 5, 0.01)
       .name('Animation Speed')
+      .listen()
       .onChange(this.handlers.timescale)
 
     this.globalFolder.open()

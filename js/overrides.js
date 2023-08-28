@@ -1,5 +1,5 @@
 export class Params {
-  timescale = 0
+  timescale = 1
 
   rotations = {
     x: 1,

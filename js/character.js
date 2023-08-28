@@ -18,9 +18,10 @@ import {
 
 /** @typedef {{eulers: THREE.Euler[], timings: number[], duration: number}} AnimationSource */
 
-export class Character {
-  _scale = 0.008
+const loader = new GLTFLoader()
+const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
 
+export class Character {
   /** @type {keyof typeof Character.sources} */
   type = 'robot'
 
@@ -52,8 +53,13 @@ export class Character {
   override = null
 
   options = {
+    scale: 0.008,
+
     // Lengthen keyframe tracks.
     lengthen: 1,
+
+    // Use default parameters
+    forceDefaults: true,
   }
 
   /** Character map sources */
@@ -66,15 +72,16 @@ export class Character {
   /**
    * @param {keyof typeof Character.sources} name
    **/
-  constructor(name) {
+  constructor(name, options) {
     this.type = name
+    if (options) this.options = {...this.options, ...options}
   }
 
   /**
    * @param {keyof typeof Character.sources} type
    **/
-  static of(type) {
-    return new Character(type)
+  static of(type, options) {
+    return new Character(type, options)
   }
 
   get currentClip() {
@@ -90,7 +97,19 @@ export class Character {
     this.scene.remove(this.model)
   }
 
-  setup(scene, override) {
+  get actionList() {
+    return [...this.actions.values()]
+  }
+
+  act(name) {
+    this.actions.get(name)?.play()
+  }
+
+  actAt(i) {
+    this.actionList[i]?.play()
+  }
+
+  async setup(scene, override) {
     this.scene = scene
     this.override = override
 
@@ -99,32 +118,31 @@ export class Character {
     const file = Character.sources[this.type]
     if (file === 'none' || !file) return
 
-    const loader = new GLTFLoader()
+    const gltf = await loadModel(file)
 
-    loader.load(file, (gltf) => {
-      // Add the character model
-      this.model = gltf.scene
-      this.scene.add(this.model)
+    // Add the character model
+    this.model = gltf.scene
+    this.scene.add(this.model)
 
-      // Cast shadows
-      this.model.traverse((object) => {
-        if (object.isMesh) object.castShadow = true
-      })
-
-      // Adjust character scale
-      this.model.scale.set(this._scale, this._scale, this._scale)
-
-      // Add model skeleton
-      this.skeleton = new THREE.SkeletonHelper(this.model)
-      this.skeleton.visible = false
-      this.scene.add(this.skeleton)
-
-      // Create individual animation mixer
-      this.mixer = new THREE.AnimationMixer(this.model)
-
-      // Setup animations.
-      this.loadAnimations(gltf.animations)
+    // Cast shadows
+    this.model.traverse((object) => {
+      if (object.isMesh) object.castShadow = true
     })
+
+    // Adjust character scale
+    const scale = this.options.scale
+    this.model.scale.set(scale, scale, scale)
+
+    // Add model skeleton
+    this.skeleton = new THREE.SkeletonHelper(this.model)
+    this.skeleton.visible = false
+    this.scene.add(this.skeleton)
+
+    // Create individual animation mixer
+    this.mixer = new THREE.AnimationMixer(this.model)
+
+    // Setup animations.
+    this.loadAnimations(gltf.animations)
   }
 
   /** @param {AnimationClip[]} clips */
@@ -146,15 +164,19 @@ export class Character {
       lengthenKeyframeTracks(clip.tracks)
     }
 
+    // Do not cache the original for default parameter characters.
+    if (this.options.forceDefaults) return
+
+    // Cache original keyframe tracks for modification
     clip.tracks.forEach((track) => {
       const timings = track.times.slice(0)
       const duration = track.times[track.times.length - 1] - track.times[0]
       const size = track.getValueSize()
       const eulers = track.times.map((_, i) => trackToEuler(track, i * size))
 
-      if (!this.original.has(clip.name)) this.original.set(clip.name, [])
-
       track.validate()
+
+      if (!this.original.has(clip.name)) this.original.set(clip.name, [])
 
       this.original.get(clip.name).push({
         eulers,
@@ -178,6 +200,8 @@ export class Character {
    * Update animation parameters.
    */
   updateParams() {
+    if (this.options.forceDefaults) return
+
     this.currentClip?.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)

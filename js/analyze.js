@@ -8,7 +8,7 @@ import {
 
 /**
  * Value of movement for analysis.
- * @typedef {THREE.Vector3|THREE.Quaternion} MoveValue
+ * @typedef {{v: THREE.Vector3|THREE.Quaternion}} MoveValue
  */
 
 /**
@@ -22,11 +22,25 @@ export class KeyframeAnalyzer {
   /** @type {KeyframeTrack[]} */
   tracks = []
 
+  /** @type {number[]} */
+  times = []
+
   /** @type {Map<string, {time: number, value: MoveValue}[]>} */
   movesByTrack = new Map()
 
   /** @type {Map<number, {track: string, value: MoveValue}[]>} */
   movesByTime = new Map()
+
+  /**
+   * Reset the analyzer's internal state.
+   * @param {KeyframeTrack[]} tracks
+   */
+  reset(tracks) {
+    if (tracks) this.tracks = tracks
+
+    this.movesByTrack.clear()
+    this.movesByTime.clear()
+  }
 
   /**
    * @param {number} time
@@ -41,18 +55,33 @@ export class KeyframeAnalyzer {
     this.movesByTrack.get(track).push({time, ...value})
   }
 
-  getTimes() {
-    return [...this.movesByTime.keys()]
+  /**
+   * @param {number} index
+   * @param {string|RegExp} matcher
+   */
+  getKeyframes(index, matcher) {
+    const time = this.times[index]
+
+    return {time, keyframes: this.getKeyframesAtTime(matcher, time)}
   }
 
-  getPartsAtTime(matcher, time) {
+  /**
+   * @param {string|RegExp} matcher
+   * @param {*} time
+   * @returns
+   */
+  getKeyframesAtTime(matcher, time) {
     const parts = this.movesByTime.get(time)
-    if (!parts) return null
+    if (!parts) return []
+    if (!matcher) return parts
 
-    const keyframes = parts.filter((move) => move.track.includes(matcher))
-    if (!keyframes) return null
+    if (typeof matcher === 'string') {
+      return parts.filter((move) => move.track.includes(matcher)) ?? []
+    }
 
-    return keyframes
+    if (matcher instanceof RegExp) {
+      return parts.filter((move) => matcher.test(move.track)) ?? []
+    }
   }
 
   /**
@@ -60,7 +89,7 @@ export class KeyframeAnalyzer {
    * @param {KeyframeTrack[]} tracks
    */
   analyze(tracks) {
-    if (tracks) this.tracks = tracks
+    this.reset(tracks)
 
     this.tracks.forEach((track, trackIdx) => {
       const valueSize = track.getValueSize()
@@ -71,7 +100,7 @@ export class KeyframeAnalyzer {
           const offset = timeIdx * valueSize
           const vector = new THREE.Vector3().fromArray(track.values, offset)
 
-          this.addMove(time, track.name, vector)
+          this.addMove(time, track.name, {v: vector})
         })
       }
 
@@ -81,10 +110,12 @@ export class KeyframeAnalyzer {
           const offset = timeIdx * valueSize
           const q = new THREE.Quaternion().fromArray(track.values, offset)
 
-          this.addMove(time, track.name, q)
+          this.addMove(time, track.name, {v: q})
         })
       }
     })
+
+    this.times = [...this.movesByTime.keys()]
 
     window.analyzer = this
   }

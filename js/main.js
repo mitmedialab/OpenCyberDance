@@ -3,7 +3,7 @@ import Stats from 'three/addons/libs/stats.module.js'
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
-import {KeyframeAnalyzer} from './analyze.js'
+import {KeyframeAnalyzer, toEuler} from './analyze.js'
 
 /** @type {THREE.Scene} */
 let scene
@@ -27,6 +27,8 @@ let mixer
 
 /** @type {THREE.Clock} */
 let clock
+
+let analyzer = new KeyframeAnalyzer()
 
 // Allows each animation track to loop.
 // Super memory and compute intensive, even though it's Float32Array.
@@ -134,31 +136,57 @@ function f32Append(source, items) {
   return dest
 }
 
-function debugAddPointCloud() {
-  /** @type {KeyframeAnalyzer} */
-  const analyzer = window.analyzer
-  if (!analyzer) return
+function debugAddPointClouds(tracks) {
+  analyzer.analyze(tracks)
 
-  const times = analyzer.getTimes()
+  const times = analyzer.times
 
-  const dotGeometry = new THREE.Geometry()
+  if (times.length === 0) {
+    console.warn('analyzer cannot find any keyframes!')
+    return
+  }
 
-  times.slice(0, 5).forEach((time) => {
-    const parts = analyzer.getPartsAtTime('Leg', time)
-    parts.forEach((part) => {
-      if (part.value instanceof THREE.Vector3) {
-        dotGeometry.vertices.push(part.value)
+  const geometry = new THREE.BufferGeometry()
+
+  const keyframes = times
+
+  const V_SIZE = 3
+  const positions = new Float32Array(keyframes.length * V_SIZE)
+
+  keyframes.forEach((time) => {
+    const parts = analyzer.getKeyframesAtTime('Leg', time)
+
+    parts.forEach((part, i) => {
+      const v = part.value.v
+
+      if (v instanceof THREE.Vector3) {
+        positions[i] = v.x
+        positions[i + 1] = v.y
+        positions[i + 2] = v.z
+      }
+
+      if (v instanceof THREE.Quaternion) {
+        const euler = toEuler(v)
+        positions[i] = euler.x
+        positions[i + 1] = euler.y
+        positions[i + 2] = euler.z
       }
     })
   })
 
-  const dotMaterial = new THREE.PointsMaterial({
+  console.log(`> adding ${keyframes.length} point clouds`)
+
+  const attribute = new THREE.BufferAttribute(positions, V_SIZE)
+  geometry.setAttribute('position', attribute)
+
+  const material = new THREE.PointsMaterial({
     size: 1,
-    sizeAttenuation: false,
+    color: 0x00ff00,
+    sizeAttenuation: true,
   })
 
-  const dot = new THREE.Points(dotGeometry, dotMaterial)
-  scene.add(dot)
+  const points = new THREE.Points(geometry, material)
+  scene.add(points)
 }
 
 function init() {
@@ -266,6 +294,7 @@ function init() {
     numAnimations = animations.length
 
     for (let i = 0; i !== numAnimations; ++i) {
+      /** @type {THREE.AnimationClip} */
       let clip = animations[i]
 
       const name = clip.name
@@ -323,8 +352,6 @@ function init() {
   container.appendChild(stats.dom)
 
   window.addEventListener('resize', onWindowResize)
-
-  debugAddPointCloud()
 }
 
 /**
@@ -610,6 +637,8 @@ function createPanel() {
  */
 function activateAction(action) {
   const clip = action.getClip()
+  debugAddPointClouds(clip.tracks)
+
   const settings = baseActions[clip.name] || additiveActions[clip.name]
   setWeight(action, settings.weight)
   // action.startAt(clip.duration / 2)

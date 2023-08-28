@@ -4,6 +4,7 @@ import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
 import {KeyframeAnalyzer, toBone, toEuler} from './analyze.js'
+import {dispose} from './dispose.js'
 
 const ANALYZER_ENABLED = false
 
@@ -27,6 +28,9 @@ let model2
 /** @type {THREE.Skeleton} */
 let skeleton
 
+/** @type {THREE.Skeleton2} */
+let skeleton2
+
 /** @type {THREE.AnimationMixer} */
 let mixer
 
@@ -48,26 +52,15 @@ const EXTRA_TRACK_ITERATION = 2
 
 const crossFadeControls = []
 
-const anims = {
-  a: 'no.33_.idel',
-  b: 'no.57_.',
-}
-
 let currentBaseAction = 'idle'
 
 const allActions = []
 
 /** @type {Record<string, {weight: number, action: THREE.AnimationAction}>} */
-const baseActions = {
-  [anims.a]: {weight: 0},
-  [anims.b]: {weight: 0},
-}
+const baseActions = {}
 
 /** @type {Record<string, THREE.AnimationAction>} */
-const originalActions = {
-  [anims.a]: null,
-  [anims.b]: null,
-}
+const originalActions = {}
 
 const additiveActions = {}
 
@@ -247,9 +240,9 @@ function init() {
   mesh.receiveShadow = true
   scene.add(mesh)
 
-  const loader = new GLTFLoader()
-  addBaseCharacter(loader)
-  addSecondCharacter(loader)
+  const modelFileName = '008test.glb'
+  addPrimaryCharacter(modelFileName)
+  addSecondCharacter(modelFileName)
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio(window.devicePixelRatio)
@@ -280,12 +273,14 @@ function init() {
   window.addEventListener('resize', onWindowResize)
 }
 
-function addBaseCharacter(loader) {
-  loader.load('model-v2.glb', (gltf) => {
+function addPrimaryCharacter(file) {
+  const loader = new GLTFLoader()
+
+  dispose(model)
+
+  loader.load(file, (gltf) => {
     model = gltf.scene
     scene.add(model)
-
-    // console.log(gltf.animations)
 
     model.traverse((object) => {
       if (object.isMesh) object.castShadow = true
@@ -299,7 +294,9 @@ function addBaseCharacter(loader) {
     skeleton.visible = false
     scene.add(skeleton)
 
+    /** @type {THREE.AnimationClip[]} */
     const animations = gltf.animations
+    numAnimations = animations.length
 
     animations.forEach((animation) => {
       /** @type {THREE.KeyframeTrack[]} */
@@ -346,8 +343,6 @@ function addBaseCharacter(loader) {
 
     mixer = new THREE.AnimationMixer(model)
 
-    numAnimations = animations.length
-
     for (let i = 0; i !== numAnimations; ++i) {
       /** @type {THREE.AnimationClip} */
       let clip = animations[i]
@@ -355,24 +350,28 @@ function addBaseCharacter(loader) {
       const name = clip.name
       console.log('clipName', name)
 
-      if (baseActions[name]) {
-        const action = mixer.clipAction(clip)
-        activateAction(action)
-        baseActions[name].action = action
-        allActions.push(action)
-      } else if (additiveActions[name]) {
-        // Make the clip additive and remove the reference frame
-        THREE.AnimationUtils.makeClipAdditive(clip)
+      const action = mixer.clipAction(clip)
 
-        if (clip.name.endsWith('_pose')) {
-          clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30)
-        }
+      baseActions[name] = {}
+      baseActions[name].weight = 0.0
+      baseActions[name].action = action
 
-        const action = mixer.clipAction(clip)
-        activateAction(action)
-        additiveActions[name].action = action
-        allActions.push(action)
-      }
+      activateAction(action)
+      allActions.push(action)
+
+      // if (additiveActions[name]) {
+      //   // Make the clip additive and remove the reference frame
+      //   THREE.AnimationUtils.makeClipAdditive(clip)
+
+      //   if (clip.name.endsWith('_pose')) {
+      //     clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30)
+      //   }
+
+      //   const action = mixer.clipAction(clip)
+      //   activateAction(action)
+      //   additiveActions[name].action = action
+      //   allActions.push(action)
+      // }
     }
 
     createPanel()
@@ -381,8 +380,12 @@ function addBaseCharacter(loader) {
   })
 }
 
-function addSecondCharacter(loader) {
-  loader.load('model-v2.glb', (gltf) => {
+function addSecondCharacter(file) {
+  const loader = new GLTFLoader()
+
+  dispose(model2)
+
+  loader.load(file, (gltf) => {
     model2 = gltf.scene
     scene.add(model2)
 
@@ -395,7 +398,7 @@ function addSecondCharacter(loader) {
     model2.position.set(-1.5, 0, -0.5)
     model2.visible = false
 
-    const skeleton2 = new THREE.SkeletonHelper(model2)
+    skeleton2 = new THREE.SkeletonHelper(model2)
     skeleton2.visible = false
     scene.add(skeleton2)
 
@@ -548,9 +551,6 @@ function alterAnimationTrack(onTrack) {
   action.crossFadeTo(nextAction, 0.35, true)
   nextAction.play()
   nextAction.setEffectiveTimeScale(1)
-
-  // mixer.addEventListener('loop', () => console.log('Loop!'))
-  // mixer.addEventListener('finished', () => console.log('Finished!'))
 
   allActions[actionIdx] = nextAction
 
@@ -846,6 +846,8 @@ function render() {
 
   for (let i = 0; i !== numAnimations; ++i) {
     const action = allActions[i]
+    if (!action) continue
+
     const clip = action.getClip()
     const settings = baseActions[clip.name] || additiveActions[clip.name]
     settings.weight = 0

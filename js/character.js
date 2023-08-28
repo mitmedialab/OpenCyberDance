@@ -1,6 +1,6 @@
 import * as THREE from 'three'
+import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 
-import {AnimationAction, AnimationClip} from 'three'
 import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'

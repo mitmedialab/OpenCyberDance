@@ -357,8 +357,8 @@ function init() {
   camera.position.set(-1, 2, 3)
 
   const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enablePan = false
-  controls.enableZoom = false
+  controls.enablePan = true
+  controls.enableZoom = true
   controls.target.set(0, 1, 0)
   controls.update()
 

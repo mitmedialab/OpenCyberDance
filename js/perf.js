@@ -1,6 +1,6 @@
 export async function profile(label, callback) {
   const start = performance.now()
-  await callback()
+  callback()
 
-  console.log(`> ${label} took ${performance.now() - start}ms`)
+  // console.log(`> ${label} took ${performance.now() - start}ms`)
 }

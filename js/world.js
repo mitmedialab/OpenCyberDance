@@ -40,6 +40,9 @@ export class World {
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
     this.container.appendChild(this.stats.domElement)
+
+    // Expose the world instance
+    window.world = this
   }
 
   render() {
@@ -116,8 +119,8 @@ export class World {
   }
 
   setupPanel() {
-    this.panel.handlers.delay = () => this.updateParams({core: true})
-    this.panel.handlers.energy = () => this.updateParams({core: true})
+    this.panel.handlers.delay = () => this.updateParams()
+    this.panel.handlers.energy = () => this.updateParams()
     this.panel.handlers.rotation = () => this.updateParams({rotation: true})
 
     this.panel.handlers.timescale = () => {
@@ -130,30 +133,23 @@ export class World {
   }
 
   updateParams(flags) {
-    profile('updateParams', () => {
-      for (const character of this.characters) {
-        character.updateParams(flags)
-      }
-    })
+    for (const character of this.characters) {
+      character.updateParams(flags)
+    }
+  }
+
+  /**
+   * @param {keyof typeof Character.sources} type
+   **/
+  async addCharacter(type, config) {
+    const character = new Character(type, config)
+    await character.setup(this.scene, this.params)
+    character.play(character.actionList[0])
+    this.characters.push(character)
   }
 
   async setupCharacters() {
-    // Create characters
-    const a = Character.of('robot')
-    const b = Character.of('abstract')
-    const chars = [a, b]
-
-    // Initialize characters
-    await Promise.all(chars.map((c) => c.setup(this.scene, this.params)))
-
-    // Position characters
-    a.model.position.set(-0.5, 0, 0)
-    b.model.position.set(0.5, 0, 0)
-
-    // Start animations
-    a.actAt(0)
-    b.actAt(0)
-
-    this.characters.push(...chars)
+    this.addCharacter('robot', {position: [-0.5, 0, 0], freezeParams: true})
+    this.addCharacter('abstract', {position: [0.5, 0, 0.5]})
   }
 }

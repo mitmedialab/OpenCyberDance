@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import {trackNameToPart} from './parts.js'
+import {profile} from './perf.js'
 
 export class Params {
   timescale = 1

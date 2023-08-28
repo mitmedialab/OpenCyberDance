@@ -55,6 +55,7 @@ export class Character {
 
   options = {
     scale: 0.008,
+    position: [0, 0, 0],
 
     // Lengthen keyframe tracks.
     lengthen: 1,
@@ -78,13 +79,6 @@ export class Character {
     if (options) this.options = {...this.options, ...options}
   }
 
-  /**
-   * @param {keyof typeof Character.sources} type
-   **/
-  static of(type, options) {
-    return new Character(type, options)
-  }
-
   get currentClip() {
     return this.actions.get(this.currentAction)?.getClip()
   }
@@ -104,10 +98,6 @@ export class Character {
 
   act(name) {
     this.play(this.actions.get(name))
-  }
-
-  actAt(i) {
-    this.play(this.actionList[i])
   }
 
   /** @param {AnimationAction} action */
@@ -143,6 +133,7 @@ export class Character {
     // Adjust character scale
     const scale = this.options.scale
     this.model.scale.set(scale, scale, scale)
+    this.model.position.set(...this.options.position)
 
     // Add model skeleton
     this.skeleton = new THREE.SkeletonHelper(this.model)
@@ -216,7 +207,10 @@ export class Character {
   updateParams(flags = {core: true}) {
     if (this.options.freezeParams) return
 
-    this.currentClip?.tracks.forEach((track, index) => {
+    const clip = this.currentClip
+    if (!clip) return
+
+    clip.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
       track.times = original.timings.slice(0)
@@ -235,6 +229,18 @@ export class Character {
       if (flags.rotation) {
         overrideRotation(track, this.params.rotations, original.eulers)
       }
+
+      clip[index] = track
     })
+
+    const prevAction = this.actions.get(clip.name)
+    const action = this.mixer.clipAction(clip.clone())
+    this.actions.set(clip.name, action)
+
+    action.setEffectiveTimeScale(0)
+    action.time = prevAction.time
+    prevAction.crossFadeTo(action, 0.35, true)
+    action.play()
+    action.setEffectiveTimeScale(1)
   }
 }

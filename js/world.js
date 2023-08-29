@@ -37,6 +37,7 @@ export class World {
     this.setupControls()
     this.setupPanel()
     this.setupCharacters()
+    this.addResizeHandler()
 
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
@@ -112,10 +113,10 @@ export class World {
 
   addResizeHandler() {
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
+      this.camera.aspect = window.innerWidth / window.innerHeight
+      this.camera.updateProjectionMatrix()
 
-      renderer.setSize(window.innerWidth, window.innerHeight)
+      this.renderer.setSize(window.innerWidth, window.innerHeight)
     })
   }
 
@@ -125,49 +126,6 @@ export class World {
    */
   characterByName(name) {
     return this.characters.find((c) => c.options.name === name)
-  }
-
-  setupPanel() {
-    this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
-    this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
-
-    this.panel.handlers.rotation = debounce(() => {
-      return this.updateParams({rotation: true})
-    }, 100)
-
-    this.panel.handlers.timescale = () => {
-      for (const character of this.characters) {
-        character.mixer.timeScale = this.params.timescale
-      }
-    }
-
-    /** @param {keyof typeof Params.prototype.characters} name */
-    this.panel.handlers.character = async (name) => {
-      const character = this.characterByName(name)
-      if (!character) return
-
-      const config = this.params.characters[name]
-
-      character.options.model = config.model
-      character.options.action = ''
-      await character.setup()
-
-      // Sync animation timing with a peer.
-      const peer = this.characters.find((c) => c.name !== name)
-      if (peer) {
-        character.mixer.setTime(peer.mixer.time)
-        character.mixer.update(this.clock.getDelta())
-      }
-    }
-
-    /** @param {keyof typeof Params.prototype.characters} name */
-    this.panel.handlers.action = (name) => {
-      const action = this.params.characters[name].action
-
-      this.characterByName(name).playByName(action)
-    }
-
-    this.panel.createPanel()
   }
 
   updateParams(flags) {
@@ -200,5 +158,61 @@ export class World {
       position: [-0.5, 0, 0],
       freezeParams: true,
     })
+  }
+
+  setupPanel() {
+    this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
+    this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
+
+    this.panel.handlers.rotation = debounce(() => {
+      return this.updateParams({rotation: true})
+    }, 100)
+
+    this.panel.handlers.timescale = () => {
+      for (const character of this.characters) {
+        character.mixer.timeScale = this.params.timescale
+      }
+    }
+
+    /** @param {keyof typeof Params.prototype.characters} name */
+    this.panel.handlers.character = async (name) => {
+      const character = this.characterByName(name)
+      if (!character) return
+
+      await this.resetCharacter(character)
+    }
+
+    /** @param {keyof typeof Params.prototype.characters} name */
+    this.panel.handlers.action = (name) => {
+      const action = this.params.characters[name].action
+
+      this.characterByName(name).playByName(action)
+    }
+
+    this.panel.handlers.reset = async () => {
+      this.params = new Params()
+
+      // Reset characters.
+      for (const character of this.characters) {
+        await this.resetCharacter(character)
+      }
+    }
+
+    this.panel.createPanel()
+  }
+
+  /** @param {Character} character */
+  async resetCharacter(character) {
+    if (!character) return
+
+    character.reset()
+
+    // Sync animation timing with a peer.
+    const peer = this.characters.find((c) => c.name !== name)
+
+    if (peer) {
+      character.mixer.setTime(peer.mixer.time)
+      character.mixer.update(this.clock.getDelta())
+    }
   }
 }

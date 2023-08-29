@@ -17,6 +17,7 @@ export class Panel {
     timescale: () => {},
     action: () => {},
     character: () => {},
+    reset: () => {},
   }
 
   constructor(params) {
@@ -90,6 +91,11 @@ export class Panel {
       .listen()
       .onChange(this.handlers.timescale)
 
+    this.globalFolder
+      .add({reset: this.reset.bind(this)}, 'reset')
+      .name('Reset')
+      .listen()
+
     const primary = this.characterFolder.addFolder('Primary')
     this.addCharacterControl(primary, 'second')
 
@@ -101,5 +107,10 @@ export class Panel {
     this.energyFolder.open()
     this.delayFolder.open()
     this.characterFolder.open()
+  }
+
+  reset() {
+    this.panel.reset()
+    this.handlers.reset()
   }
 }

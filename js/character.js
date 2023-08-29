@@ -289,4 +289,13 @@ export class Character {
     prevAction.crossFadeTo(action, 0.35, true)
     action.play()
   }
+
+  async reset() {
+    const config = this.params.characters[this.options.name]
+
+    this.options.model = config.model
+    this.options.action = null
+
+    await this.setup()
+  }
 }

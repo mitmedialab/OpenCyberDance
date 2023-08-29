@@ -91,6 +91,11 @@ export class Character {
     return this.actions.get(this.options.action)?.getClip()
   }
 
+  handlers = {
+    /** @param {Character} character */
+    animationLoaded: (character) => {},
+  }
+
   setPosition(x = 0, y = 0, z = 0) {
     this.model.position.set(x, y, z)
   }
@@ -99,6 +104,13 @@ export class Character {
     dispose(this.mixer)
     dispose(this.model)
     this.scene.remove(this.model)
+
+    this.mixer = null
+    this.skeleton = null
+    this.model = null
+
+    this.original.clear()
+    this.actions.clear()
   }
 
   get actionList() {
@@ -109,15 +121,16 @@ export class Character {
   play(action) {
     if (!action) return
 
+    const name = action.getClip().name
+    console.log('Playing:', name)
+
     action.play()
-    this.options.action = action.getClip().name
+    this.options.action = name
   }
 
   /** @param {string} action */
   playByName(action) {
     if (!this.actions.has(action)) return
-
-    console.log('Playing:', action)
 
     this.options.action = action
     this.updateAction()
@@ -183,6 +196,9 @@ export class Character {
       const action = this.mixer.clipAction(clip)
       this.actions.set(clip.name, action)
     }
+
+    // Signal that the animation has been loaded.
+    this.handlers.animationLoaded?.(this)
 
     // Play the first animation
     this.updateAction()
@@ -297,6 +313,7 @@ export class Character {
   }
 
   async reset() {
+    console.log('>>> Resetting character!')
     const config = this.params.characters[this.options.name]
 
     this.options.model = config.model

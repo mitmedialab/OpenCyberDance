@@ -61,6 +61,8 @@ export class Panel {
   addCharacterControl(folder, char) {
     const field = this.params.characters[char]
 
+    folder.character = char
+
     folder
       .add(field, 'model', Object.keys(Character.sources))
       .listen()

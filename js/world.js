@@ -141,8 +141,28 @@ export class World {
    **/
   async addCharacter(config) {
     const character = new Character(config)
+
+    character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
+
     await character.setup(this.scene, this.params)
     this.characters.push(character)
+  }
+
+  /**
+   * @param {Character} char
+   */
+  handleAnimationChange(char) {
+    const {name, action} = char.options
+
+    let controller = world.panel.characterFolder.children
+      .find((k) => k.character === name)
+      .controllers.find((c) => c.property === 'action')
+      .options([...char.actions.keys()])
+      .listen()
+      .onChange(() => this.panel.handlers.action(name))
+
+    this.params.characters[name].action = action
+    controller.updateDisplay()
   }
 
   async setupCharacters() {
@@ -193,8 +213,10 @@ export class World {
     /** @param {keyof typeof Params.prototype.characters} name */
     this.panel.handlers.action = (name) => {
       const action = this.params.characters[name].action
+      const character = this.characterByName(name)
+      if (!character || !action) return
 
-      this.characterByName(name).playByName(action)
+      character.playByName(action)
     }
 
     this.panel.createPanel()

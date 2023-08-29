@@ -1,5 +1,6 @@
 import {World} from './world.js'
 import {gpt} from './gpt.js'
+import {randVariance} from './math.js'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
@@ -77,7 +78,9 @@ export class VoiceController {
     responsiveVoice.speak(text, 'US English Male', {
       pitch: 0.2,
       rate: 1,
-      onend: () => {},
+      onend: () => {
+        if (this.recognition) this.recognition.start()
+      },
     })
   }
 
@@ -134,6 +137,10 @@ export class VoiceController {
       energyLegs: (v) => {
         p.energy.legs = v
       },
+
+      synchronicLimbs: (v) => {
+        this.setSynchronic(v)
+      },
     }
 
     const out = Object.entries(output).find(([k, v]) => v !== null)
@@ -148,11 +155,16 @@ export class VoiceController {
     this.sync()
   }
 
-  sync(key) {
-    console.log('syncing...')
+  sync() {
+    this.world.updateParams({core: true})
+  }
 
-    if (!key) {
-      this.world.updateParams({core: true})
+  setSynchronic(v) {
+    const p = this.world.params
+    console.log('synchronic:', v)
+
+    for (const key in p.delays) {
+      p.delays[key] = randVariance(v)
     }
   }
 }

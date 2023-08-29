@@ -155,10 +155,8 @@ export class Character {
   }
 
   updateAction() {
-    console.log([...this.actions.keys()])
-
     if (!this.options.action) {
-      console.warn('Please specify an action!')
+      this.play(this.actionList[0])
       return
     }
 

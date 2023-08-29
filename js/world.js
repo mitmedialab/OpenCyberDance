@@ -154,7 +154,6 @@ export class World {
   async addCharacter(config) {
     const character = new Character(config)
     await character.setup(this.scene, this.params)
-    character.play(character.actionList[0])
     this.characters.push(character)
   }
 
@@ -162,6 +161,7 @@ export class World {
     this.addCharacter({
       name: 'first',
       model: 'robot',
+      action: 'no.33_..001',
       position: [-0.5, 0, 0],
       freezeParams: true,
     })
@@ -169,6 +169,7 @@ export class World {
     this.addCharacter({
       name: 'second',
       model: 'abstract',
+      action: 'no.33_.',
       position: [0.5, 0, 0.5],
     })
   }

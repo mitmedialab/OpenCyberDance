@@ -196,18 +196,14 @@ export class World {
 
     /** @param {keyof typeof Params.prototype.characters} name */
     this.panel.handlers.character = async (name) => {
-      const character = this.characterByName(name)
-      if (!character) return
+      const char = this.characterByName(name)
+      if (!char) return
 
-      await character.reset()
+      await char.reset()
 
       // Sync animation timing with a peer.
-      const peer = this.characters.find((c) => c.name !== character.name)
-
-      if (peer) {
-        character.mixer.setTime(peer.mixer.time)
-        character.mixer.update(this.clock.getDelta())
-      }
+      const peer = this.characters.find((c) => c.name !== name)
+      if (peer) char.mixer.setTime(peer.mixer.time)
     }
 
     /** @param {keyof typeof Params.prototype.characters} name */

@@ -15,7 +15,7 @@ export class Params {
   energy = {
     head: 1,
     body: 1,
-    legs: 1,
+    foot: 1,
   }
 
   /** @type {Record<keyof typeof delayParts, number>} */
@@ -28,7 +28,7 @@ export class Params {
 
   characters = {
     first: {
-      model: 'robot',
+      model: 'abstract',
       action: '',
     },
     second: {

@@ -1,6 +1,6 @@
 export const coreParts = {
   head: /Neck|Head/,
-  legs: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
+  foot: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
   body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
 }
 

@@ -92,7 +92,7 @@ export class VoiceController {
 
     const prompt = `
       This is the system that evaluate the input, and generate a JSON code with these variables:
-      - energy, energyHead, energyBody, energyLegs, reset
+      - energyHead, energyBody, energyFoot, reset
       - synchronicLimbs, axisPoint, externalBodySpace, circleAndCurve.
 
       All value should be an integer.
@@ -120,11 +120,11 @@ export class VoiceController {
     const p = this.world.params
 
     const handlers = {
-      energy: (v) => {
-        p.energy.body = v
-        p.energy.head = v
-        p.energy.legs = v
-      },
+      // energy: (v) => {
+      //   p.energy.body = v
+      //   p.energy.head = v
+      //   p.energy.legs = v
+      // },
 
       energyHead: (v) => {
         p.energy.head = v
@@ -134,8 +134,8 @@ export class VoiceController {
         p.energy.body = v
       },
 
-      energyLegs: (v) => {
-        p.energy.legs = v
+      energyFoot: (v) => {
+        p.energy.foot = v
       },
 
       synchronicLimbs: (v) => {
@@ -171,4 +171,6 @@ export class VoiceController {
       p.delays[key] = randVariance(v)
     }
   }
+
+  
 }

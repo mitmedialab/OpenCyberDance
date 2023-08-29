@@ -170,7 +170,7 @@ export class World {
   async setupCharacters() {
     this.addCharacter({
       name: 'first',
-      model: 'robot',
+      model: 'abstract',
       position: [-0.5, 0, 0],
     })
 

@@ -85,7 +85,7 @@ export class Panel {
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
-    this.addEnergy('head', 'body', 'legs')
+    this.addEnergy('head', 'body', 'foot')
     this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
 
     this.globalFolder

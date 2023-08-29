@@ -1,6 +1,7 @@
-export async function profile(label, callback) {
+export async function profile(label, callback, threshold = 10) {
   const start = performance.now()
   callback()
 
-  console.log(`> ${label} took ${performance.now() - start}ms`)
+  const time = performance.now() - start
+  if (time > threshold) console.log(`> ${label} took ${time}ms`)
 }

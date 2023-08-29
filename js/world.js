@@ -7,6 +7,7 @@ import {Panel} from './panel.js'
 import {Character} from './character.js'
 import {Params} from './overrides.js'
 import {profile} from './perf.js'
+import {debounce} from './utils.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -119,9 +120,12 @@ export class World {
   }
 
   setupPanel() {
-    this.panel.handlers.delay = () => this.updateParams()
-    this.panel.handlers.energy = () => this.updateParams()
-    this.panel.handlers.rotation = () => this.updateParams({rotation: true})
+    this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
+    this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
+
+    this.panel.handlers.rotation = debounce(() => {
+      return this.updateParams({rotation: true})
+    }, 100)
 
     this.panel.handlers.timescale = () => {
       for (const character of this.characters) {
@@ -133,11 +137,11 @@ export class World {
   }
 
   updateParams(flags) {
-    for (const character of this.characters) {
-      profile('p', () => {
+    profile('update', () => {
+      for (const character of this.characters) {
         character.updateParams(flags)
-      })
-    }
+      }
+    })
   }
 
   /**

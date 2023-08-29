@@ -124,7 +124,7 @@ export class World {
    * @returns {Character}
    */
   characterByName(name) {
-    return this.characters.find((c) => c.name === name)
+    return this.characters.find((c) => c.options.name === name)
   }
 
   setupPanel() {
@@ -144,9 +144,13 @@ export class World {
     /** @param {keyof typeof Params.prototype.characters} name */
     this.panel.handlers.character = (name) => {
       const character = this.characterByName(name)
+      console.log('Swapping:', character)
+      if (!character) return
+
       const config = this.params.characters[name]
 
       character.options.model = config.model
+      character.options.action = ''
       character.setup()
     }
 
@@ -181,16 +185,14 @@ export class World {
     this.addCharacter({
       name: 'first',
       model: 'robot',
-      action: 'no.33_..001',
-      position: [-0.5, 0, 0],
+      position: [0.5, 0, 0.5],
       freezeParams: true,
     })
 
     this.addCharacter({
       name: 'second',
       model: 'abstract',
-      action: 'no.33_.',
-      position: [0.5, 0, 0.5],
+      position: [-0.5, 0, 0],
     })
   }
 }

@@ -71,6 +71,12 @@ export class Character {
     abstract: '3357modelidel.glb',
   }
 
+  /** @type {Record<keyof typeof Character.sources, string>} */
+  static defaultActions = {
+    none: 'no.33_.',
+    robot: 'no.33_..001',
+  }
+
   /**
    * @param {keyof typeof Character.sources} name
    **/
@@ -87,6 +93,7 @@ export class Character {
   }
 
   clear() {
+    dispose(this.mixer)
     dispose(this.model)
     this.scene.remove(this.model)
   }
@@ -121,6 +128,11 @@ export class Character {
     if (url === 'none' || !url) return
 
     const gltf = await loadModel(url)
+
+    // Set the default actions.
+    if (!this.options.action) {
+      this.options.action = Character.defaultActions[this.options.model]
+    }
 
     // Add the character model
     this.model = gltf.scene
@@ -161,18 +173,20 @@ export class Character {
   }
 
   updateAction() {
+    // If we did not define the proper default action, fallback to the first action.
     if (!this.options.action) {
       this.play(this.actionList[0])
       return
     }
 
-    const defaultAction = this.actions.get(this.options.action)
-
-    if (!defaultAction) {
-      console.warn(`Action ${this.options.action} does not exist!`)
+    if (!this.actions.has(this.options.action)) {
+      console.error(`Action ${this.options.action} does not exist!`)
+      return
     }
 
-    this.play(defaultAction)
+    console.log(`> playing ${this.options.action}`)
+
+    this.play(this.actions.get(this.options.action))
   }
 
   /**

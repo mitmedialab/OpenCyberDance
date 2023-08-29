@@ -103,9 +103,15 @@ export class Character {
     this.options.action = action.getClip().name
   }
 
+  /** @param {string} action */
+  playByName(action) {
+    this.options.action = action
+    this.updateAction()
+  }
+
   async setup(scene, params) {
-    this.scene = scene
-    this.params = params
+    if (scene) this.scene = scene
+    if (params) this.params = params
 
     // Ensure that there is no stale data
     this.clear()

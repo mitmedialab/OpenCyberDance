@@ -15,7 +15,7 @@ export class Panel {
     delay: () => {},
     rotation: () => {},
     timescale: () => {},
-    animation: () => {},
+    action: () => {},
     character: () => {},
   }
 
@@ -66,9 +66,9 @@ export class Panel {
       .onChange(() => this.handlers.character(char))
 
     folder
-      .add(field, 'animation')
+      .add(field, 'action')
       .listen()
-      .onChange(() => this.handlers.animation(char))
+      .onChange(() => this.handlers.action(char))
   }
 
   createPanel() {

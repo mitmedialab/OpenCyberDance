@@ -29,11 +29,11 @@ export class Params {
   characters = {
     first: {
       model: 'robot',
-      animation: 'none',
+      action: 'none',
     },
     second: {
       model: 'abstract',
-      animation: 'none',
+      action: 'none',
     },
   }
 }

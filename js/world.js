@@ -119,6 +119,14 @@ export class World {
     })
   }
 
+  /**
+   * @param {string} name
+   * @returns {Character}
+   */
+  characterByName(name) {
+    return this.characters.find((c) => c.name === name)
+  }
+
   setupPanel() {
     this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
     this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
@@ -133,9 +141,21 @@ export class World {
       }
     }
 
-    this.panel.handlers.animation = (key) => {}
+    /** @param {keyof typeof Params.prototype.characters} name */
+    this.panel.handlers.character = (name) => {
+      const character = this.characterByName(name)
+      const config = this.params.characters[name]
 
-    this.panel.handlers.animation = (key) => {}
+      character.options.model = config.model
+      character.setup()
+    }
+
+    /** @param {keyof typeof Params.prototype.characters} name */
+    this.panel.handlers.action = (name) => {
+      const action = this.params.characters[name].action
+
+      this.characterByName(name).playByName(action)
+    }
 
     this.panel.createPanel()
   }

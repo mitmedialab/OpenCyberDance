@@ -160,11 +160,16 @@ export class World {
 
   async setupCharacters() {
     this.addCharacter({
+      name: 'first',
       model: 'robot',
       position: [-0.5, 0, 0],
       freezeParams: true,
     })
 
-    this.addCharacter({model: 'abstract', position: [0.5, 0, 0.5]})
+    this.addCharacter({
+      name: 'second',
+      model: 'abstract',
+      position: [0.5, 0, 0.5],
+    })
   }
 }

@@ -23,9 +23,6 @@ const loader = new GLTFLoader()
 const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
 
 export class Character {
-  /// Current action.
-  currentAction = 'none'
-
   /**
    * Reference to scene.
    * @type {THREE.Scene}
@@ -52,6 +49,7 @@ export class Character {
 
   options = {
     name: '',
+    action: '',
 
     /** @type {keyof typeof Character.sources} */
     model: 'robot',
@@ -70,7 +68,7 @@ export class Character {
   static sources = {
     none: '',
     robot: 'Robot3357test.glb',
-    abstract: 'humanPPtesting.glb',
+    abstract: '3357modelidel.glb',
   }
 
   /**
@@ -81,7 +79,7 @@ export class Character {
   }
 
   get currentClip() {
-    return this.actions.get(this.currentAction)?.getClip()
+    return this.actions.get(this.options.action)?.getClip()
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -97,16 +95,12 @@ export class Character {
     return [...this.actions.values()]
   }
 
-  act(name) {
-    this.play(this.actions.get(name))
-  }
-
   /** @param {AnimationAction} action */
   play(action) {
     if (!action) return
 
     action.play()
-    this.currentAction = action.getClip().name
+    this.options.action = action.getClip().name
   }
 
   async setup(scene, params) {
@@ -155,6 +149,26 @@ export class Character {
       const action = this.mixer.clipAction(clip)
       this.actions.set(clip.name, action)
     }
+
+    // Play the first animation
+    this.updateAction()
+  }
+
+  updateAction() {
+    console.log([...this.actions.keys()])
+
+    if (!this.options.action) {
+      console.warn('Please specify an action!')
+      return
+    }
+
+    const defaultAction = this.actions.get(this.options.action)
+
+    if (!defaultAction) {
+      console.warn(`Action ${this.options.action} does not exist!`)
+    }
+
+    this.play(defaultAction)
   }
 
   /**
@@ -199,7 +213,7 @@ export class Character {
    * @param {number} index
    */
   originalOf(index) {
-    const sources = this.original.get(this.currentAction)
+    const sources = this.original.get(this.options.action)
     if (!sources) return
 
     return sources[index]

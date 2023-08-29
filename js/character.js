@@ -48,7 +48,9 @@ export class Character {
   params = null
 
   options = {
+    /** @type {keyof typeof Params.prototype.characters} */
     name: '',
+
     action: '',
 
     /** @type {keyof typeof Character.sources} */
@@ -73,7 +75,8 @@ export class Character {
 
   /** @type {Record<keyof typeof Character.sources, string>} */
   static defaultActions = {
-    none: 'no.33_.',
+    none: '',
+    abstract: 'no.33_.',
     robot: 'no.33_..001',
   }
 
@@ -117,6 +120,8 @@ export class Character {
   }
 
   async setup(scene, params) {
+    const config = this.options
+
     if (scene) this.scene = scene
     if (params) this.params = params
 
@@ -124,14 +129,18 @@ export class Character {
     this.clear()
 
     // Get the model url based on the character model
-    const url = Character.sources[this.options.model]
+    const url = Character.sources[config.model]
     if (url === 'none' || !url) return
 
     const gltf = await loadModel(url)
 
     // Set the default actions.
-    if (!this.options.action) {
-      this.options.action = Character.defaultActions[this.options.model]
+    if (!config.action) {
+      config.action = Character.defaultActions[config.model]
+
+      if (!config.action) {
+        console.error(`invalid default action for ${config.model}`)
+      }
     }
 
     // Add the character model
@@ -144,9 +153,9 @@ export class Character {
     })
 
     // Adjust character scale
-    const scale = this.options.scale
+    const scale = config.scale
     this.model.scale.set(scale, scale, scale)
-    this.model.position.set(...this.options.position)
+    this.model.position.set(...config.position)
 
     // Add model skeleton
     this.skeleton = new THREE.SkeletonHelper(this.model)
@@ -174,20 +183,20 @@ export class Character {
   }
 
   updateAction() {
+    const config = this.options
+
     // If we did not define the proper default action, fallback to the first action.
-    if (!this.options.action) {
+    if (!config.action) {
       this.play(this.actionList[0])
       return
     }
 
-    if (!this.actions.has(this.options.action)) {
-      console.error(`Action ${this.options.action} does not exist!`)
+    if (!this.actions.has(config.action)) {
+      console.error(`${config.model}: ${config.action} missing!`)
       return
     }
 
-    console.log(`> playing ${this.options.action}`)
-
-    this.play(this.actions.get(this.options.action))
+    this.play(this.actions.get(config.action))
   }
 
   /**

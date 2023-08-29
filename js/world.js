@@ -152,10 +152,12 @@ export class World {
       character.options.action = ''
       await character.setup()
 
-      // Sync animation timing
-      const char = this.characters.find((c) => c.name !== name)
-      character.mixer.time = char.mixer.time
-      character.mixer.update(this.clock.getDelta())
+      // Sync animation timing with a peer.
+      const peer = this.characters.find((c) => c.name !== name)
+      if (peer) {
+        character.mixer.setTime(peer.mixer.time)
+        character.mixer.update(this.clock.getDelta())
+      }
     }
 
     /** @param {keyof typeof Params.prototype.characters} name */

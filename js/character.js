@@ -115,6 +115,10 @@ export class Character {
 
   /** @param {string} action */
   playByName(action) {
+    if (!this.actions.has(action)) return
+
+    console.log('Playing:', action)
+
     this.options.action = action
     this.updateAction()
   }

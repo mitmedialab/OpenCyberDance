@@ -1,4 +1,4 @@
-import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
 
 import {Params} from './overrides.js'
 

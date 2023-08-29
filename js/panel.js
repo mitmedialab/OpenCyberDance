@@ -18,6 +18,7 @@ export class Panel {
     action: () => {},
     character: () => {},
     reset: () => {},
+    voice: () => {},
   }
 
   constructor(params) {
@@ -80,7 +81,7 @@ export class Panel {
     this.globalFolder = panel.addFolder('General Settings')
     this.rotationFolder = panel.addFolder('All Rotations')
     this.energyFolder = panel.addFolder('Energy')
-    this.delayFolder = panel.addFolder('Delays')
+    this.delayFolder = panel.addFolder('Shifting / Synchronic')
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
@@ -96,6 +97,11 @@ export class Panel {
     this.globalFolder
       .add({reset: this.reset.bind(this)}, 'reset')
       .name('Reset')
+      .listen()
+
+    this.globalFolder
+      .add({voice: this.handlers.voice.bind(this)}, 'voice')
+      .name('Voice')
       .listen()
 
     for (const key in this.params.characters) {

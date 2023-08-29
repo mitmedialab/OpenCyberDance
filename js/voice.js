@@ -1,0 +1,158 @@
+import {World} from './world.js'
+import {gpt} from './gpt.js'
+
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition
+
+export class VoiceController {
+  recognition = null
+  active = false
+
+  /** @type {World} */
+  world
+
+  transcript = ''
+
+  /**
+   * @param {World} world
+   */
+  constructor(world) {
+    this.world = world
+  }
+
+  start() {
+    if (this.active) return
+    console.log('> starting recognition')
+
+    if (this.recognition) this.recognition.abort()
+
+    this.active = true
+
+    this.createRecognition()
+    this.recognition.start()
+  }
+
+  stop() {
+    console.log('> stopped recognition')
+
+    if (this.recognition) this.recognition.abort()
+
+    this.active = false
+    this.recognition = null
+  }
+
+  toggle() {
+    if (!this.active) {
+      this.start()
+      return
+    }
+
+    this.stop()
+  }
+
+  createRecognition() {
+    this.recognition = new SpeechRecognition()
+    this.recognition.lang = 'en-US'
+    this.recognition.interimResults = true
+
+    this.recognition.addEventListener('result', (e) => {
+      this.transcript = [...e.results].map((r) => r?.[0]?.transcript).join('')
+      console.log('$', this.transcript)
+    })
+
+    this.recognition.addEventListener('end', () => {
+      this.handleVoice().then()
+    })
+  }
+
+  /**
+   * @param {string} text
+   */
+  speak(text) {
+    if (!responsiveVoice) {
+      console.error('ResponsiveVoice not loaded!')
+      return
+    }
+
+    responsiveVoice.speak(text, 'US English Male', {
+      pitch: 0.2,
+      rate: 1,
+      onend: () => {},
+    })
+  }
+
+  async handleVoice() {
+    const text = this.transcript
+    this.transcript = ''
+
+    if (!this.active) return
+
+    const prompt = `
+      This is the system that evaluate the input, and generate a JSON code with these variables:
+      - energy, energyHead, energyBody, energyLegs
+      - synchronicLimbs, axisPoint, externalBodySpace, circleAndCurve.
+
+      All value should be an integer.
+      If the variable is not mentioned, give null as default.
+    `.trim()
+
+    console.log('human:', text)
+    this.speak(text)
+
+    const cmd = await gpt(prompt, text)
+    console.log('ai:', cmd)
+
+    let output = null
+
+    try {
+      output = JSON.parse(cmd)
+    } catch (err) {}
+
+    if (!output) {
+      console.warn('> invalid command:', cmd)
+      return
+    }
+
+    const p = this.world.params
+
+    const handlers = {
+      energy: (v) => {
+        p.energy.body = v
+        p.energy.head = v
+        p.energy.legs = v
+      },
+
+      energyHead: (v) => {
+        p.energy.head = v
+      },
+
+      energyBody: (v) => {
+        p.energy.body = v
+      },
+
+      energyLegs: (v) => {
+        p.energy.legs = v
+      },
+    }
+
+    const out = Object.entries(output).find(([k, v]) => v !== null)
+    console.log('ext>', out)
+
+    if (!out) return
+
+    const [key, value] = out
+    const handler = handlers[key]?.bind(this)
+
+    handler?.(value)
+
+    this.sync()
+  }
+
+  sync(key) {
+    console.log('syncing...')
+
+    if (!key) {
+      this.world.updateParams({core: true})
+    }
+  }
+}

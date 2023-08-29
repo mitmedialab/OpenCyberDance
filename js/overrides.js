@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import {trackNameToPart} from './parts.js'
+import {trackNameToPart, coreParts, delayParts} from './parts.js'
 
 export class Params {
   timescale = 1

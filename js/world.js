@@ -8,6 +8,7 @@ import {Character} from './character.js'
 import {Params} from './overrides.js'
 import {profile} from './perf.js'
 import {debounce} from './utils.js'
+import {VoiceController} from './voice.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -17,6 +18,7 @@ export class World {
   container = document.getElementById('container')
   params = new Params()
   panel = new Panel(this.params)
+  voice = new VoiceController(this)
 
   /** @type {Character[]} */
   characters = []
@@ -213,6 +215,11 @@ export class World {
       if (!character || !action) return
 
       character.playByName(action)
+    }
+
+    this.panel.handlers.voice = () => {
+      console.log('Voice')
+      this.voice.toggle()
     }
 
     this.panel.createPanel()

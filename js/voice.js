@@ -110,6 +110,7 @@ export class VoiceController {
 
     if (!output) {
       console.warn('> invalid command:', cmd)
+      this.speak(`I don't understand.`)
       return
     }
 
@@ -136,13 +137,12 @@ export class VoiceController {
     }
 
     const out = Object.entries(output).find(([k, v]) => v !== null)
-    console.log('ext>', out)
-
     if (!out) return
 
     const [key, value] = out
-    const handler = handlers[key]?.bind(this)
+    console.log(`set> ${key} = ${value}`)
 
+    const handler = handlers[key]?.bind(this)
     handler?.(value)
 
     this.sync()

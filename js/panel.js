@@ -98,11 +98,10 @@ export class Panel {
       .name('Reset')
       .listen()
 
-    const primary = this.characterFolder.addFolder('Primary')
-    this.addCharacterControl(primary, 'second')
-
-    const secondary = this.characterFolder.addFolder('Secondary')
-    this.addCharacterControl(secondary, 'first')
+    for (const key in this.params.characters) {
+      const folder = this.characterFolder.addFolder(`Character: ${key}`)
+      this.addCharacterControl(folder, key)
+    }
 
     this.globalFolder.open()
     this.rotationFolder.open()

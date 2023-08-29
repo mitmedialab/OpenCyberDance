@@ -142,16 +142,20 @@ export class World {
     }
 
     /** @param {keyof typeof Params.prototype.characters} name */
-    this.panel.handlers.character = (name) => {
+    this.panel.handlers.character = async (name) => {
       const character = this.characterByName(name)
-      console.log('Swapping:', character)
       if (!character) return
 
       const config = this.params.characters[name]
 
       character.options.model = config.model
       character.options.action = ''
-      character.setup()
+      await character.setup()
+
+      // Sync animation timing
+      const char = this.characters.find((c) => c.name !== name)
+      character.mixer.time = char.mixer.time
+      character.mixer.update(this.clock.getDelta())
     }
 
     /** @param {keyof typeof Params.prototype.characters} name */

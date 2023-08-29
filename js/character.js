@@ -155,6 +155,7 @@ export class Character {
 
     // Create individual animation mixer
     this.mixer = new THREE.AnimationMixer(this.model)
+    this.mixer.timeScale = this.params.timescale
 
     /** @type {AnimationClip[]} */
     const clips = gltf.animations

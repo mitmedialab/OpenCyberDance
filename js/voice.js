@@ -1,5 +1,5 @@
 import {World} from './world.js'
-import {gpt} from './gpt.js'
+import {gpt} from './prompt.js'
 import {randVariance} from './math.js'
 
 const SpeechRecognition =

@@ -133,6 +133,10 @@ export class World {
       }
     }
 
+    this.panel.handlers.animation = (key) => {}
+
+    this.panel.handlers.animation = (key) => {}
+
     this.panel.createPanel()
   }
 
@@ -145,17 +149,22 @@ export class World {
   }
 
   /**
-   * @param {keyof typeof Character.sources} type
+   * @param {typeof Character.prototype.options} config
    **/
-  async addCharacter(type, config) {
-    const character = new Character(type, config)
+  async addCharacter(config) {
+    const character = new Character(config)
     await character.setup(this.scene, this.params)
     character.play(character.actionList[0])
     this.characters.push(character)
   }
 
   async setupCharacters() {
-    this.addCharacter('robot', {position: [-0.5, 0, 0], freezeParams: true})
-    this.addCharacter('abstract', {position: [0.5, 0, 0.5]})
+    this.addCharacter({
+      model: 'robot',
+      position: [-0.5, 0, 0],
+      freezeParams: true,
+    })
+
+    this.addCharacter({model: 'abstract', position: [0.5, 0, 0.5]})
   }
 }

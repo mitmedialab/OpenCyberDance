@@ -2,6 +2,8 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
 
 import {Params} from './overrides.js'
 
+import {Character} from './character.js'
+
 export class Panel {
   panel = new GUI({width: 310})
 
@@ -13,6 +15,8 @@ export class Panel {
     delay: () => {},
     rotation: () => {},
     timescale: () => {},
+    animation: () => {},
+    character: () => {},
   }
 
   constructor(params) {
@@ -52,6 +56,21 @@ export class Panel {
     }
   }
 
+  /** @param {keyof typeof Params.prototype.characters} char */
+  addCharacterControl(folder, char) {
+    const field = this.params.characters[char]
+
+    folder
+      .add(field, 'model', Object.keys(Character.sources))
+      .listen()
+      .onChange(() => this.handlers.character(char))
+
+    folder
+      .add(field, 'animation')
+      .listen()
+      .onChange(() => this.handlers.animation(char))
+  }
+
   createPanel() {
     const panel = this.panel
 
@@ -70,6 +89,12 @@ export class Panel {
       .name('Animation Speed')
       .listen()
       .onChange(this.handlers.timescale)
+
+    const primary = this.characterFolder.addFolder('Primary')
+    this.addCharacterControl(primary, 'second')
+
+    const secondary = this.characterFolder.addFolder('Secondary')
+    this.addCharacterControl(secondary, 'first')
 
     this.globalFolder.open()
     this.rotationFolder.open()

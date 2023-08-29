@@ -23,9 +23,6 @@ const loader = new GLTFLoader()
 const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
 
 export class Character {
-  /** @type {keyof typeof Character.sources} */
-  type = 'robot'
-
   /// Current action.
   currentAction = 'none'
 
@@ -54,6 +51,11 @@ export class Character {
   params = null
 
   options = {
+    name: '',
+
+    /** @type {keyof typeof Character.sources} */
+    model: 'robot',
+
     scale: 0.008,
     position: [0, 0, 0],
 
@@ -74,8 +76,7 @@ export class Character {
   /**
    * @param {keyof typeof Character.sources} name
    **/
-  constructor(name, options) {
-    this.type = name
+  constructor(options) {
     if (options) this.options = {...this.options, ...options}
   }
 
@@ -115,8 +116,8 @@ export class Character {
     // Ensure that there is no stale data
     this.clear()
 
-    // Get the model url based on the character type
-    const url = Character.sources[this.type]
+    // Get the model url based on the character model
+    const url = Character.sources[this.options.model]
     if (url === 'none' || !url) return
 
     const gltf = await loadModel(url)

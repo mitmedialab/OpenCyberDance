@@ -26,6 +26,17 @@ export class Params {
     leftLeg: 0,
     rightLeg: 0,
   }
+
+  characters = {
+    first: {
+      model: 'robot',
+      animation: 'none',
+    },
+    second: {
+      model: 'abstract',
+      animation: 'none',
+    },
+  }
 }
 
 /**

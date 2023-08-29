@@ -192,13 +192,13 @@ export class World {
       name: 'first',
       model: 'robot',
       position: [0.5, 0, 0.5],
-      freezeParams: true,
     })
 
     this.addCharacter({
       name: 'second',
       model: 'abstract',
       position: [-0.5, 0, 0],
+      freezeParams: true,
     })
   }
 }

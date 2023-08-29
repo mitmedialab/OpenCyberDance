@@ -16,6 +16,7 @@ import {
   overrideEnergy,
   overrideRotation,
 } from './overrides.js'
+import {KeyframeAnalyzer} from './analyze.js'
 
 /** @typedef {{eulers: THREE.Euler[], timings: number[], duration: number}} AnimationSource */
 
@@ -47,6 +48,9 @@ export class Character {
   /** @type {Params} */
   params = null
 
+  /** @type {KeyframeAnalyzer} */
+  analyzer = null
+
   options = {
     /** @type {keyof typeof Params.prototype.characters} */
     name: '',
@@ -64,6 +68,8 @@ export class Character {
 
     // Freeze parameters.
     freezeParams: false,
+
+    analyze: false,
   }
 
   /** Character model source URLs */
@@ -134,6 +140,12 @@ export class Character {
     action.play()
 
     this.options.action = name
+
+    // Analyze the keyframe
+    if (this.options.analyze) {
+      this.analyzer = new KeyframeAnalyzer()
+      this.analyzer.analyze(prev.getClip().tracks)
+    }
   }
 
   /** @param {string} action */

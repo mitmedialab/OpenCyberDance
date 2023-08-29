@@ -172,6 +172,7 @@ export class World {
       name: 'first',
       model: 'abstract',
       position: [-0.8, 0, 0],
+      analyze: true,
     })
 
     this.addCharacter({

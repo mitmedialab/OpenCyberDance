@@ -168,8 +168,6 @@ export class KeyframeAnalyzer {
 
     this.times = [...this.movesByTime.keys()]
 
-    window.analyzer = this
-
     console.log(`> analyzed ${this.tracks.length} tracks.`)
   }
 }

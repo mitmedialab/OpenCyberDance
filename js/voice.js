@@ -92,7 +92,7 @@ export class VoiceController {
 
     const prompt = `
       This is the system that evaluate the input, and generate a JSON code with these variables:
-      - energy, energyHead, energyBody, energyLegs
+      - energy, energyHead, energyBody, energyLegs, reset
       - synchronicLimbs, axisPoint, externalBodySpace, circleAndCurve.
 
       All value should be an integer.
@@ -140,6 +140,10 @@ export class VoiceController {
 
       synchronicLimbs: (v) => {
         this.setSynchronic(v)
+      },
+
+      reset: (v) => {
+        this.world.panel.reset()
       },
     }
 

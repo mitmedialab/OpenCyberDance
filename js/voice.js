@@ -93,6 +93,7 @@ export class VoiceController {
     const prompt = `
       This is the system that evaluate the input, and generate a JSON code with these variables:
       - energyHead, energyBody, energyFoot, reset
+      - rotationX, rotationY, rotationZ
       - synchronicLimbs, axisPoint, externalBodySpace, circleAndCurve.
 
       All value should be an integer.
@@ -138,6 +139,18 @@ export class VoiceController {
         p.energy.foot = v
       },
 
+      rotationX: (v) => {
+        p.rotations.x = v
+      },
+
+      rotationY: (v) => {
+        p.rotations.y = v
+      },
+
+      rotationZ: (v) => {
+        p.rotations.z = v
+      },
+
       synchronicLimbs: (v) => {
         this.setSynchronic(v)
       },
@@ -156,10 +169,16 @@ export class VoiceController {
     const handler = handlers[key]?.bind(this)
     handler?.(value)
 
-    this.sync()
+    this.sync(key)
   }
 
-  sync() {
+  sync(key) {
+    // Sync rotation fields
+    if (key.includes('rotation')) {
+      this.world.updateParams({rotation: true})
+      return
+    }
+
     this.world.updateParams({core: true})
   }
 
@@ -171,6 +190,4 @@ export class VoiceController {
       p.delays[key] = randVariance(v)
     }
   }
-
-  
 }

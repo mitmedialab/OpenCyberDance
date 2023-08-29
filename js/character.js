@@ -124,7 +124,15 @@ export class Character {
     const name = action.getClip().name
     console.log('Playing:', name)
 
+    // Cross-fade previously running actions
+    const prev = this.actions.get(this.options.action)
+    if (prev?.isRunning && prev.getClip().name !== name) {
+      action.time = prev.time
+      prev.crossFadeTo(action, 0.35, true)
+    }
+
     action.play()
+
     this.options.action = name
   }
 

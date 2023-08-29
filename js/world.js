@@ -179,7 +179,15 @@ export class World {
       const character = this.characterByName(name)
       if (!character) return
 
-      await this.resetCharacter(character)
+      await character.reset()
+
+      // Sync animation timing with a peer.
+      const peer = this.characters.find((c) => c.name !== character.name)
+
+      if (peer) {
+        character.mixer.setTime(peer.mixer.time)
+        character.mixer.update(this.clock.getDelta())
+      }
     }
 
     /** @param {keyof typeof Params.prototype.characters} name */
@@ -189,30 +197,6 @@ export class World {
       this.characterByName(name).playByName(action)
     }
 
-    this.panel.handlers.reset = async () => {
-      this.params = new Params()
-
-      // Reset characters.
-      for (const character of this.characters) {
-        await this.resetCharacter(character)
-      }
-    }
-
     this.panel.createPanel()
-  }
-
-  /** @param {Character} character */
-  async resetCharacter(character) {
-    if (!character) return
-
-    character.reset()
-
-    // Sync animation timing with a peer.
-    const peer = this.characters.find((c) => c.name !== name)
-
-    if (peer) {
-      character.mixer.setTime(peer.mixer.time)
-      character.mixer.update(this.clock.getDelta())
-    }
   }
 }

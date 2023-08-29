@@ -128,6 +128,8 @@ export class Character {
     // Ensure that there is no stale data
     this.clear()
 
+    if (config.model === 'none') return
+
     // Get the model url based on the character model
     const url = Character.sources[config.model]
     if (url === 'none' || !url) return

@@ -78,6 +78,7 @@ export class Character {
     robot: 'Robot3357test.glb',
     abstract: '3357modelidel.glb',
     abstract57: '575859_tas.glb',
+    kukpat: 'Kukpat.glb',
   }
 
   /** @type {Record<keyof typeof Character.sources, string>} */
@@ -86,6 +87,7 @@ export class Character {
     abstract: 'no.33_.',
     robot: 'no.33_..001',
     abstract57: 'no57_Tas',
+    kukpat: 'kukpat_Tas',
   }
 
   /**

@@ -79,6 +79,7 @@ export class Character {
     abstract: '3357modelidel.glb',
     abstract57: '575859_tas.glb',
     kukpat: 'Kukpat.glb',
+    tranimid: 'tranimid.glb',
   }
 
   /** @type {Record<keyof typeof Character.sources, string>} */
@@ -88,6 +89,7 @@ export class Character {
     robot: 'no.33_..001',
     abstract57: 'no57_Tas',
     kukpat: 'kukpat_Tas',
+    tranimid: 'tranimid_Tas',
   }
 
   /**
@@ -325,6 +327,13 @@ export class Character {
       clip[index] = track
     })
 
+    this.fadeIntoModifiedAction(clip)
+  }
+
+  /**
+   * @param {AnimationClip} clip
+   */
+  fadeIntoModifiedAction(clip) {
     const prevAction = this.actions.get(clip.name)
     this.mixer.uncacheAction(prevAction)
 
@@ -344,5 +353,30 @@ export class Character {
     this.options.action = null
 
     await this.setup()
+  }
+
+  /**
+   * @param {string|number} id
+   * @param {number[]} values
+   */
+  overrideTrack(id, values) {
+    id = typeof id === 'string' ? this.trackIdByName(id) : id
+
+    const clip = this.currentClip
+    const track = clip.tracks[id]
+    console.log(`>> altering ${track.name} (id: ${id})`)
+    console.log(`>> length before: ${track.values.length}`)
+
+    clip.tracks[id].values = new Float32Array(values)
+    clip.tracks[id].validate()
+    console.log(`>> length after: ${clip.tracks[id].values.length}`)
+
+    this.fadeIntoModifiedAction(clip)
+  }
+
+  trackIdByName(name) {
+    return this.currentClip.tracks.findIndex((track) =>
+      track.name.includes(name)
+    )
   }
 }

@@ -28,7 +28,7 @@ export function applyTrackTransform(track, transform) {
   if (isVector) return track.values
 
   // Add w axis if it's a quaternion
-  if (isRotation) axes.push('w')
+  // if (isRotation) axes.push('w')
 
   /** @type {Record<string, number[]>} */
   const series = {}
@@ -41,11 +41,11 @@ export function applyTrackTransform(track, transform) {
   track.times.forEach((time, timeIdx) => {
     const offset = timeIdx * size
 
-    let v = isRotation ? new Quaternion() : new Vector3()
-    v = v.fromArray(track.values, offset)
+    const q = new Quaternion().fromArray(track.values, offset)
+    const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
 
     // Append each axis' value to their series
-    for (const a of axes) series[a].push(v[a])
+    for (const a of axes) series[a].push(e[a])
   })
 
   // Process each axis' data
@@ -55,7 +55,10 @@ export function applyTrackTransform(track, transform) {
   const values = []
 
   for (let i = 0; i < series.x.length; i++) {
-    for (const a of axes) values.push(series[a][i])
+    // Convert euler back to quaternion
+    let e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
+    let q = new Quaternion().setFromEuler(e)
+    values.push(q.x, q.y, q.z, q.w)
   }
 
   // debugger

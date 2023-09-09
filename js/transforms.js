@@ -22,7 +22,6 @@ export function applyTrackTransform(track, transform) {
   const axes = ['x', 'y', 'z']
 
   const isRotation = track instanceof QuaternionKeyframeTrack
-  const isVector = track instanceof VectorKeyframeTrack
 
   // Add w axis if it's a quaternion
   if (isRotation) axes.push('w')
@@ -57,7 +56,7 @@ export function applyTrackTransform(track, transform) {
 
   // debugger
 
-  return new Float32Array(series)
+  return new Float32Array(values)
 }
 
 export function lowpass(source, windowSize) {

@@ -406,6 +406,8 @@ export class Character {
       const values = applyTrackTransform(track, transformer)
       track.values = values
 
+      // debugger
+
       track.validate()
     }
 

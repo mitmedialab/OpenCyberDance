@@ -14,7 +14,10 @@ const colors = {
 
 export class Plotter {
   /// Number of keyframes to show; indicates how wide the time window is.
-  windowSize = 100
+  windowSize = 500
+
+  /// Number of keyframes to skip; indicates how far back in time to start.
+  offset = -100
 
   /** @type {HTMLDivElement} */
   domElement = null
@@ -94,7 +97,9 @@ export class Plotter {
     const canvas = this.canvases[name]
     const chart = Chart.getChart(canvas)
 
-    const frame = char.getCurrentKeyframes(/foot/i, this.windowSize)
+    const {windowSize, offset} = this
+
+    const frame = char.getCurrentKeyframes(/LeftLeg/, windowSize, offset)
     if (!frame) return
 
     const splits = Plotter.split(frame.values)

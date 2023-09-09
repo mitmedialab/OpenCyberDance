@@ -426,8 +426,9 @@ export class Character {
   /**
    * @param {string | number | RegExp} key
    * @param {number} limit
+   * @param {number} offset
    */
-  getCurrentKeyframes(key, limit = 10) {
+  getCurrentKeyframes(key, limit = 10, offset = 0) {
     key = this.trackIdByKey(key)
 
     const clip = this.currentClip
@@ -437,7 +438,10 @@ export class Character {
     const now = this.mixer.time
 
     const vs = track.getValueSize()
-    const start = track.times.findIndex((t) => t >= now)
+
+    let start = track.times.findIndex((t) => t >= now)
+    start = start + offset < 0 ? start : start + offset
+
     const end = start + limit
 
     const values = track.values.slice(start * vs, end * vs)

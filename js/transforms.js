@@ -72,8 +72,6 @@ export function applyTrackTransform(track, transform) {
     values.push(q.x, q.y, q.z, q.w)
   }
 
-  // debugger
-
   return new Float32Array(values)
 }
 

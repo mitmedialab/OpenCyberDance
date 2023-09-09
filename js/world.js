@@ -9,12 +9,14 @@ import {Params} from './overrides.js'
 import {profile} from './perf.js'
 import {debounce} from './utils.js'
 import {VoiceController} from './voice.js'
+import {Plotter} from './plotter.js'
 
 export class World {
   clock = new THREE.Clock()
   scene = new THREE.Scene()
   renderer = new THREE.WebGLRenderer({antialias: true})
   stats = new Stats()
+  plotter = new Plotter(this)
   container = document.getElementById('container')
   params = new Params()
   panel = new Panel(this.params)
@@ -44,6 +46,7 @@ export class World {
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
     this.container.appendChild(this.stats.domElement)
+    this.container.appendChild(this.plotter.domElement)
 
     // Expose the world instance
     window.world = this
@@ -143,7 +146,6 @@ export class World {
    **/
   async addCharacter(config) {
     const character = new Character(config)
-
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
 
     await character.setup(this.scene, this.params)

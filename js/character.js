@@ -435,7 +435,6 @@ export class Character {
     if (!track) return
 
     const now = this.mixer.time
-    console.log(`> key: ${key}, now: ${now}`)
 
     const vs = track.getValueSize()
     const start = track.times.findIndex((t) => t >= now)

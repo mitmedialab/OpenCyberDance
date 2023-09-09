@@ -62,7 +62,12 @@ export class Plotter {
         labels: [],
         datasets: AXES.map((a) => ({...ds, label: a})),
       },
-      options: {},
+      options: {
+        scales: {
+          x: {display: false},
+          y: {display: false},
+        },
+      },
     })
 
     this.canvases[key] = canvas

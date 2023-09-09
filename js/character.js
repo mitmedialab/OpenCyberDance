@@ -363,15 +363,34 @@ export class Character {
     id = typeof id === 'string' ? this.trackIdByName(id) : id
 
     const clip = this.currentClip
+
     const track = clip.tracks[id]
+    if (!track) return
+
     console.log(`>> altering ${track.name} (id: ${id})`)
-    console.log(`>> length before: ${track.values.length}`)
+
+    const size = track.values.length
+    console.log(`>> length before: ${size}`)
+
+    if (values.length !== size) {
+      console.warn(`track length mismatch. ${size} != ${values.length}`)
+      // return
+    }
 
     clip.tracks[id].values = new Float32Array(values)
     clip.tracks[id].validate()
     console.log(`>> length after: ${clip.tracks[id].values.length}`)
 
     this.fadeIntoModifiedAction(clip)
+  }
+
+  async loadTrackOverride(url) {
+    const f = await fetch(url)
+    const v = await f.json()
+
+    for (const [id, values] of Object.entries(v)) {
+      this.overrideTrack(id, values)
+    }
   }
 
   trackIdByName(name) {

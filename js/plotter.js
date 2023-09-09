@@ -21,6 +21,12 @@ export class Plotter {
   constructor(world) {
     this.world = world
     this.domElement = document.createElement('div')
+
+    const s = this.domElement.style
+    s.position = 'fixed'
+    s.left = 0
+    s.top = '40px'
+
     this.render()
   }
 
@@ -28,6 +34,9 @@ export class Plotter {
     console.log(`> plotter#add ${key}`)
 
     const canvas = document.createElement('canvas')
+    canvas.style.width = '400px'
+    canvas.style.height = '200px'
+
     this.domElement.appendChild(canvas)
 
     const ctx = canvas.getContext('2d')
@@ -47,8 +56,8 @@ export class Plotter {
     this.charts[key] = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: Array.from(Array(values.length).keys()),
-        datasets: ['x', 'y', 'z', 'w'].map((a) => ({...ds, label: a})),
+        labels: [],
+        datasets: AXES.map((a) => ({...ds, label: a})),
       },
       options: {},
     })
@@ -69,13 +78,11 @@ export class Plotter {
     const frame = char.getCurrentKeyframes(/foot/i, 40)
     if (!frame) return
 
-    chart.data.labels = AXES
-
     const splits = Plotter.split(frame.values)
-    const ds = chart.data.datasets
+    chart.data.labels = frame.times
 
     AXES.forEach((axis, i) => {
-      ds[i].data = splits[axis]
+      chart.data.datasets[i].data = splits[axis]
     })
 
     chart.update()

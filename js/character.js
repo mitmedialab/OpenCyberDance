@@ -438,8 +438,11 @@ export class Character {
 
     const vs = track.getValueSize()
     const start = track.times.findIndex((t) => t >= now)
-    const values = track.values.slice(start * vs, (start + limit) * vs)
+    const end = start + limit
 
-    return {start, values, now}
+    const values = track.values.slice(start * vs, end * vs)
+    const times = track.times.slice(start, end)
+
+    return {start, values, times, now}
   }
 }

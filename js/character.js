@@ -17,6 +17,7 @@ import {
   overrideRotation,
 } from './overrides.js'
 import {KeyframeAnalyzer} from './analyze.js'
+import {applyTrackTransform, transformers} from './transforms.js'
 
 /** @typedef {{eulers: THREE.Euler[], timings: number[], duration: number}} AnimationSource */
 
@@ -391,6 +392,24 @@ export class Character {
     for (const [id, values] of Object.entries(v)) {
       this.overrideTrack(id, values)
     }
+  }
+
+  applyTransform(transform) {
+    const transformer = transformers[transform]
+    if (!transformer) return
+
+    console.log(`> applying ${transform} transform`)
+
+    const clip = this.currentClip
+
+    for (const track of clip.tracks) {
+      const values = applyTrackTransform(track, transformer)
+      track.values = values
+
+      track.validate()
+    }
+
+    this.fadeIntoModifiedAction(clip)
   }
 
   trackIdByName(name) {

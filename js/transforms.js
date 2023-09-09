@@ -36,12 +36,20 @@ export function applyTrackTransform(track, transform) {
   // Setup each axis' series
   for (const a of axes) series[a] = []
 
+  /** @type {Quaternion[]} */
+  const original = []
+
   const size = track.getValueSize()
 
   track.times.forEach((time, timeIdx) => {
     const offset = timeIdx * size
 
     const q = new Quaternion().fromArray(track.values, offset)
+    q.normalize()
+
+    // Save original quaternion
+    original.push(q.clone())
+
     const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
 
     // Append each axis' value to their series
@@ -55,10 +63,19 @@ export function applyTrackTransform(track, transform) {
   const values = []
 
   for (let i = 0; i < series.x.length; i++) {
+    const o = original[i]
+
     // Convert euler back to quaternion
-    let e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
-    let q = new Quaternion().setFromEuler(e)
-    values.push(q.x, q.y, q.z, q.w)
+    const e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
+    const q = new Quaternion().setFromEuler(e)
+
+    // Smooth linear interpolate between original and transformed quaternion
+    const qs = o.slerp(q, 0.1)
+    qs.normalize()
+
+    // debugger
+
+    values.push(qs.x, qs.y, qs.z, qs.w)
   }
 
   // debugger
@@ -102,7 +119,7 @@ export function highpass(source, windowSize) {
   return out
 }
 
-export function gaussianSmoothing(source, windowSize) {
+export function gaussian(source, windowSize) {
   const sigma = windowSize / 2.0
   let sum = 0
 
@@ -198,6 +215,6 @@ const W_SIZE = 2
 export const transformers = {
   lowpass: (v) => lowpass(v, W_SIZE),
   highpass: (v) => highpass(v, W_SIZE),
-  gaussianSmooth: (v) => gaussianSmoothing(v, W_SIZE),
+  gaussian: (v) => gaussian(v, W_SIZE),
   derivative: (v) => derivative(v, W_SIZE),
 }

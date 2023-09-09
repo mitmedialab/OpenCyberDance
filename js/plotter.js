@@ -1,8 +1,6 @@
 import {Character} from './character.js'
 import {World} from './world.js'
 
-const PLOTTER_FPS = 2
-
 const AXES = ['x', 'y', 'z', 'w']
 
 const colors = {
@@ -13,6 +11,9 @@ const colors = {
 }
 
 export class Plotter {
+  /// How many frames per second to plot?
+  fps = 1
+
   /// Number of keyframes to show; indicates how wide the time window is.
   windowSize = 500
 
@@ -34,6 +35,9 @@ export class Plotter {
   /** @type {World} */
   world = null
 
+  /// Internal timer
+  timer = 0
+
   constructor(world) {
     this.world = world
     this.domElement = document.createElement('div')
@@ -43,7 +47,7 @@ export class Plotter {
     s.left = 0
     s.top = '40px'
 
-    this.render()
+    this.run()
   }
 
   add(key) {
@@ -131,9 +135,11 @@ export class Plotter {
     return s
   }
 
-  render() {
-    setInterval(() => {
+  run() {
+    clearInterval(this.timer)
+
+    this.timer = setInterval(() => {
       this.world.characters?.forEach(this.update.bind(this))
-    }, 1000 / PLOTTER_FPS)
+    }, 1000 / this.fps)
   }
 }

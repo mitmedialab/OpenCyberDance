@@ -5,6 +5,13 @@ const PLOTTER_FPS = 1
 
 const AXES = ['x', 'y', 'z', 'w']
 
+const colors = {
+  x: 'rgb(255, 99, 132)',
+  y: 'rgb(54, 162, 235)',
+  z: 'rgb(255, 205, 86)',
+  w: 'rgb(75, 192, 192)',
+}
+
 export class Plotter {
   /// Number of keyframes to show; indicates how wide the time window is.
   windowSize = 100
@@ -49,7 +56,6 @@ export class Plotter {
       label: key,
       data: values,
       fill: false,
-      borderColor: 'rgb(75, 192, 192)',
       borderWidth: 2,
       lineTension: 0.1,
       pointRadius: 0,
@@ -60,7 +66,7 @@ export class Plotter {
       type: 'line',
       data: {
         labels: [],
-        datasets: AXES.map((a) => ({...ds, label: a})),
+        datasets: AXES.map((a) => ({...ds, label: a, borderColor: colors[a]})),
       },
       options: {
         scales: {

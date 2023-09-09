@@ -19,6 +19,9 @@ export class Plotter {
   /// Number of keyframes to skip; indicates how far back in time to start.
   offset = -100
 
+  /// Track index of the animation to plot.
+  tid = 6
+
   /** @type {HTMLDivElement} */
   domElement = null
 
@@ -94,15 +97,11 @@ export class Plotter {
     const name = char.options.name
     if (!this.charts[name]) this.add(name)
 
-    const canvas = this.canvases[name]
-    const chart = Chart.getChart(canvas)
+    const chart = this.charts[name]
 
-    const {windowSize, offset} = this
+    const {tid, windowSize, offset} = this
 
-    // TODO: change this.
-    const pid = 6
-
-    const frame = char.getCurrentKeyframes(pid, windowSize, offset)
+    const frame = char.getCurrentKeyframes(tid, windowSize, offset)
     if (!frame) return
 
     const splits = Plotter.split(frame.values)

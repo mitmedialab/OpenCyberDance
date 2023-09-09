@@ -1,7 +1,7 @@
 import {Character} from './character.js'
 import {World} from './world.js'
 
-const PLOTTER_FPS = 1
+const PLOTTER_FPS = 2
 
 const AXES = ['x', 'y', 'z', 'w']
 
@@ -99,7 +99,10 @@ export class Plotter {
 
     const {windowSize, offset} = this
 
-    const frame = char.getCurrentKeyframes(/LeftLeg/, windowSize, offset)
+    // TODO: change this.
+    const pid = 6
+
+    const frame = char.getCurrentKeyframes(pid, windowSize, offset)
     if (!frame) return
 
     const splits = Plotter.split(frame.values)

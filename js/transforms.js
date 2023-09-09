@@ -1,8 +1,14 @@
 import * as THREE from 'three'
-import {KeyframeTrack, QuaternionKeyframeTrack} from 'three'
+
+import {
+  Vector3,
+  Quaternion,
+  KeyframeTrack,
+  QuaternionKeyframeTrack,
+  VectorKeyframeTrack,
+} from 'three'
 
 /** @type {Axis[]} */
-const axes = ['x', 'y', 'z', 'w']
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
 /** @typedef {(v: number[], axis: Axis) => void} Transform */
@@ -13,6 +19,14 @@ const axes = ['x', 'y', 'z', 'w']
  * @returns {Float32Array}
  **/
 export function applyTrackTransform(track, transform) {
+  const axes = ['x', 'y', 'z']
+
+  const isRotation = track instanceof QuaternionKeyframeTrack
+  const isVector = track instanceof VectorKeyframeTrack
+
+  // Add w axis if it's a quaternion
+  if (isRotation) axes.push('w')
+
   /** @type {Record<string, number[]>} */
   const series = {}
 
@@ -21,16 +35,15 @@ export function applyTrackTransform(track, transform) {
 
   const size = track.getValueSize()
 
-  // Rotational movement
-  if (track instanceof QuaternionKeyframeTrack) {
-    track.times.forEach((time, timeIdx) => {
-      const offset = timeIdx * size
-      const q = new THREE.Quaternion().fromArray(track.values, offset)
+  track.times.forEach((time, timeIdx) => {
+    const offset = timeIdx * size
 
-      // Append each axis' value to their series
-      for (const a of axes) series[a].push(q[a])
-    })
-  }
+    let v = isRotation ? new Quaternion() : new Vector3()
+    v = v.fromArray(track.values, offset)
+
+    // Append each axis' value to their series
+    for (const a of axes) series[a].push(v[a])
+  })
 
   // Process each axis' data
   for (const a of axes) series[a] = transform(series[a], a)
@@ -41,6 +54,8 @@ export function applyTrackTransform(track, transform) {
   for (let i = 0; i < series.x.length; i++) {
     for (const a of axes) values.push(series[a][i])
   }
+
+  // debugger
 
   return new Float32Array(series)
 }

@@ -22,6 +22,10 @@ export function applyTrackTransform(track, transform) {
   const axes = ['x', 'y', 'z']
 
   const isRotation = track instanceof QuaternionKeyframeTrack
+  const isVector = track instanceof VectorKeyframeTrack
+
+  // Temporarily disable transform for vector tracks
+  if (isVector) return track.values
 
   // Add w axis if it's a quaternion
   if (isRotation) axes.push('w')
@@ -186,9 +190,11 @@ function factorial(n) {
   return result
 }
 
+const W_SIZE = 2
+
 export const transformers = {
-  lowpass: (v) => lowpass(v, 5),
-  highpass: (v) => highpass(v, 5),
-  gaussianSmooth: (v) => gaussianSmoothing(v, 5),
-  derivative: (v) => derivative(v, 5),
+  lowpass: (v) => lowpass(v, W_SIZE),
+  highpass: (v) => highpass(v, W_SIZE),
+  gaussianSmooth: (v) => gaussianSmoothing(v, W_SIZE),
+  derivative: (v) => derivative(v, W_SIZE),
 }

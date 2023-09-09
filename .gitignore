@@ -1,2 +1,4 @@
 # Local Netlify folder
 .netlify
+
+new-rotations*.json

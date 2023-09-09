@@ -357,18 +357,18 @@ export class Character {
   }
 
   /**
-   * @param {string|number} id
+   * @param {string|number} key
    * @param {number[]} values
    */
-  overrideTrack(id, values) {
-    id = typeof id === 'string' ? this.trackIdByName(id) : id
+  overrideTrack(key, values) {
+    key = this.trackIdByKey(key)
 
     const clip = this.currentClip
 
-    const track = clip.tracks[id]
+    const track = clip.tracks[key]
     if (!track) return
 
-    console.log(`>> altering ${track.name} (id: ${id})`)
+    console.log(`>> altering ${track.name} (id: ${key})`)
 
     const size = track.values.length
     console.log(`>> length before: ${size}`)
@@ -378,9 +378,9 @@ export class Character {
       // return
     }
 
-    clip.tracks[id].values = new Float32Array(values)
-    clip.tracks[id].validate()
-    console.log(`>> length after: ${clip.tracks[id].values.length}`)
+    clip.tracks[key].values = new Float32Array(values)
+    clip.tracks[key].validate()
+    console.log(`>> length after: ${clip.tracks[key].values.length}`)
 
     this.fadeIntoModifiedAction(clip)
   }
@@ -414,9 +414,33 @@ export class Character {
     this.fadeIntoModifiedAction(clip)
   }
 
-  trackIdByName(name) {
-    return this.currentClip.tracks.findIndex((track) =>
-      track.name.includes(name)
-    )
+  /** @param {number | string | RegExp} key */
+  trackIdByKey(key) {
+    if (typeof key === 'number') return key
+
+    return this.currentClip.tracks.findIndex(({name}) => {
+      return key instanceof RegExp ? key.test(name) : name.includes(key)
+    })
+  }
+
+  /**
+   * @param {string | number | RegExp} key
+   * @param {number} limit
+   */
+  getCurrentKeyframes(key, limit = 10) {
+    key = this.trackIdByKey(key)
+
+    const clip = this.currentClip
+    const track = clip.tracks[key]
+    if (!track) return
+
+    const now = this.mixer.time
+    console.log(`> key: ${key}, now: ${now}`)
+
+    const vs = track.getValueSize()
+    const start = track.times.findIndex((t) => t >= now)
+    const values = track.values.slice(start * vs, (start + limit) * vs)
+
+    return {start, values, now}
   }
 }

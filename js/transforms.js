@@ -69,13 +69,7 @@ export function applyTrackTransform(track, transform) {
     const e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
     const q = new Quaternion().setFromEuler(e)
 
-    // Smooth linear interpolate between original and transformed quaternion
-    const qs = o.slerp(q, 0.1)
-    qs.normalize()
-
-    // debugger
-
-    values.push(qs.x, qs.y, qs.z, qs.w)
+    values.push(q.x, q.y, q.z, q.w)
   }
 
   // debugger

@@ -6,6 +6,9 @@ const PLOTTER_FPS = 1
 const AXES = ['x', 'y', 'z', 'w']
 
 export class Plotter {
+  /// Number of keyframes to show; indicates how wide the time window is.
+  windowSize = 100
+
   /** @type {HTMLDivElement} */
   domElement = null
 
@@ -75,7 +78,7 @@ export class Plotter {
     const canvas = this.canvases[name]
     const chart = Chart.getChart(canvas)
 
-    const frame = char.getCurrentKeyframes(/foot/i, 40)
+    const frame = char.getCurrentKeyframes(/foot/i, this.windowSize)
     if (!frame) return
 
     const splits = Plotter.split(frame.values)

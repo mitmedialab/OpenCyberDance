@@ -67,6 +67,11 @@ export class Plotter {
           x: {display: false},
           y: {display: false},
         },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
       },
     })
 

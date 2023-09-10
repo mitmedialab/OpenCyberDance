@@ -1,3 +1,5 @@
+// @ts-check
+
 import {Character} from './character.js'
 import {World} from './world.js'
 
@@ -23,16 +25,16 @@ export class Plotter {
   /// Track index of the animation to plot.
   tid = 6
 
-  /** @type {HTMLDivElement} */
+  /** @type {HTMLDivElement | null} */
   domElement = null
 
-  /** @type {Record<string, Chart>} */
-  charts = {}
+  /** @type {Map<string, Chart>} */
+  charts = new Map()
 
-  /** @type {Record<string, HTMLCanvasElement>} */
-  canvases = {}
+  /** @type {Map<string, HTMLCanvasElement>} */
+  canvases = new Map()
 
-  /** @type {World} */
+  /** @type {World | null} */
   world = null
 
   /// Internal timer
@@ -44,7 +46,7 @@ export class Plotter {
 
     const s = this.domElement.style
     s.position = 'fixed'
-    s.left = 0
+    s.left = '0px'
     s.top = '40px'
 
     this.run()
@@ -57,7 +59,7 @@ export class Plotter {
     canvas.style.width = '400px'
     canvas.style.height = '200px'
 
-    this.domElement.appendChild(canvas)
+    this.domElement?.appendChild(canvas)
 
     const ctx = canvas.getContext('2d')
     const values = []
@@ -118,7 +120,7 @@ export class Plotter {
     chart.update()
   }
 
-  /** @param {number[]} v */
+  /** @param {Float32Array} v */
   static split(v) {
     const s = {}
 
@@ -139,7 +141,7 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      this.world.characters?.forEach(this.update.bind(this))
+      this.world?.characters?.forEach(this.update.bind(this))
     }, 1000 / this.fps)
   }
 }

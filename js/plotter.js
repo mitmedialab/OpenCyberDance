@@ -67,7 +67,7 @@ export class Plotter {
     s.position = 'fixed'
     s.left = '0px'
     s.top = `${layout.top}px`
-    s.pointerEvents = 'none'
+    // s.pointerEvents = 'none'
 
     s.display = 'grid'
     s.gridTemplateColumns = `repeat(${layout.cols}, ${layout.w}px)`
@@ -103,6 +103,46 @@ export class Plotter {
       pointRadius: 0,
     }
 
+    const totalDuration = 10000
+    const delayBetweenPoints = totalDuration / values.length
+
+    const previousY = (ctx) =>
+      ctx.index === 0
+        ? ctx.chart.scales.y.getPixelForValue(100)
+        : ctx.chart
+            .getDatasetMeta(ctx.datasetIndex)
+            .data[ctx.index - 1].getProps(['y'], true).y
+
+    const animation = {
+      x: {
+        type: 'number',
+        easing: 'linear',
+        duration: delayBetweenPoints,
+
+        // the point is initially skipped
+        from: NaN,
+
+        delay(ctx) {
+          if (ctx.type !== 'data' || ctx.xStarted) return 0
+          ctx.xStarted = true
+
+          return ctx.index * delayBetweenPoints
+        },
+      },
+      y: {
+        type: 'number',
+        easing: 'linear',
+        duration: delayBetweenPoints,
+        from: previousY,
+        delay(ctx) {
+          if (ctx.type !== 'data' || ctx.yStarted) return 0
+          ctx.yStarted = true
+
+          return ctx.index * delayBetweenPoints
+        },
+      },
+    }
+
     // Create chart
     const chart = new Chart(ctx, {
       type: 'line',
@@ -111,6 +151,13 @@ export class Plotter {
         datasets: AXES.map((a) => ({...ds, label: a, borderColor: colors[a]})),
       },
       options: {
+        font: {
+          size: 2,
+        },
+        // animation,
+        interaction: {
+          intersect: false,
+        },
         responsive: false,
         scales: {
           x: {display: false},
@@ -119,6 +166,10 @@ export class Plotter {
         plugins: {
           legend: {
             display: false,
+          },
+          decimation: {
+            enabled: true,
+            algorithm: 'lttb',
           },
         },
       },

@@ -13,26 +13,35 @@ const colors = {
 }
 
 export class Plotter {
-  /// How many frames per second to plot?
+  /**
+   * How many frames per second to plot?
+   */
   fps = 1
 
-  /// Number of keyframes to show; indicates how wide the time window is.
+  /**
+   * Number of keyframes to show; indicates how wide the time window is.
+   */
   windowSize = 500
 
-  /// Number of keyframes to skip; indicates how far back in time to start.
+  /**
+   * Number of keyframes to skip; indicates how far back in time to start.
+   */
   offset = -100
 
-  /// Track index of the animation to plot.
-  tid = 6
+  /**
+   * Track index of the animation to plot.
+   * @type {number[]}
+   */
+  tracks = [6, 7]
 
   /** @type {HTMLDivElement | null} */
   domElement = null
 
-  /** @type {Map<string, Chart>} */
+  /**
+   * Map<CharacterName, Map<TrackId, {Chart, Canvas}>>
+   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement}>>}
+   **/
   charts = new Map()
-
-  /** @type {Map<string, HTMLCanvasElement>} */
-  canvases = new Map()
 
   /** @type {World | null} */
   world = null
@@ -48,12 +57,19 @@ export class Plotter {
     s.position = 'fixed'
     s.left = '0px'
     s.top = '40px'
+    s.pointerEvents = 'none'
 
     this.run()
   }
 
-  add(key) {
-    console.log(`> plotter#add ${key}`)
+  add(chrId) {
+    if (this.charts.has(chrId)) return
+
+    this.tracks.forEach((id) => this.createChart(chrId, id))
+  }
+
+  createChart(chrId, trackId) {
+    console.log(`> plt_add ${chrId}#${trackId}`)
 
     const canvas = document.createElement('canvas')
     canvas.style.width = '400px'
@@ -65,7 +81,7 @@ export class Plotter {
     const values = []
 
     const ds = {
-      label: key,
+      label: `${chrId}#${trackId}`,
       data: values,
       fill: false,
       borderWidth: 2,
@@ -74,7 +90,7 @@ export class Plotter {
     }
 
     // Create chart
-    this.charts[key] = new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
@@ -93,7 +109,10 @@ export class Plotter {
       },
     })
 
-    this.canvases[key] = canvas
+    // Initialize the charts mapping
+    if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
+
+    this.charts.get(chrId)?.set(trackId, {chart, canvas})
   }
 
   /**
@@ -101,23 +120,29 @@ export class Plotter {
    */
   update(char) {
     const name = char.options.name
-    if (!this.charts[name]) this.add(name)
+    if (!this.charts.has(name)) this.add(name)
 
-    const chart = this.charts[name]
+    const {windowSize, offset} = this
 
-    const {tid, windowSize, offset} = this
+    this.tracks.forEach((id) => {
+      const state = this.charts.get(name)?.get(id)
+      if (!state) return
 
-    const frame = char.getCurrentKeyframes(tid, windowSize, offset)
-    if (!frame) return
+      const {chart} = state
+      if (!chart) return
 
-    const splits = Plotter.split(frame.values)
-    chart.data.labels = frame.times
+      const frame = char.getCurrentKeyframes(id, windowSize, offset)
+      if (!frame) return
 
-    AXES.forEach((axis, i) => {
-      chart.data.datasets[i].data = splits[axis]
+      const splits = Plotter.split(frame.values)
+      chart.data.labels = frame.times
+
+      AXES.forEach((axis, i) => {
+        chart.data.datasets[i].data = splits[axis]
+      })
+
+      chart.update()
     })
-
-    chart.update()
   }
 
   /** @param {Float32Array} v */

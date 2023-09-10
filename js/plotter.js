@@ -55,7 +55,7 @@ export class Plotter {
 
   /**
    * Map<CharacterName, Map<TrackId, *>>
-   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement, box: HTMLDivElement}>>}
+   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement}>>}
    **/
   charts = new Map()
 
@@ -133,8 +133,6 @@ export class Plotter {
   }
 
   createChart(chrId, trackId) {
-    const box = document.createElement('div')
-
     const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
 
     // Log the track name for debugging.
@@ -184,12 +182,11 @@ export class Plotter {
     })
 
     // Append canvas to DOM
-    box.appendChild(canvas)
-    this.domElement?.appendChild(box)
+    this.domElement?.appendChild(canvas)
 
     // Initialize the charts mapping
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
-    this.charts.get(chrId)?.set(trackId, {chart, canvas, box})
+    this.charts.get(chrId)?.set(trackId, {chart, canvas})
   }
 
   /**
@@ -217,7 +214,7 @@ export class Plotter {
           const item = map?.get(id)
           item?.chart.destroy()
           item?.canvas?.remove()
-          if (item?.box) this.domElement?.removeChild(item.box)
+          if (item?.canvas) this.domElement?.removeChild(item.canvas)
           map?.delete(id)
         })
       }

@@ -32,6 +32,10 @@ export class World {
     return this.characterByName('first')
   }
 
+  get trackNames() {
+    return this.first.currentClip.tracks.map((t) => t.name)
+  }
+
   transform(t, o) {
     this.first.applyTransform(t, o)
   }

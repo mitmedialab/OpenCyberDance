@@ -12,6 +12,15 @@ const colors = {
   w: 'rgb(75, 192, 192)',
 }
 
+const layout = {
+  w: 100,
+  h: 50,
+  cols: 2,
+  top: 50,
+  px: 5,
+  py: 5,
+}
+
 export class Plotter {
   /**
    * How many frames per second to plot?
@@ -32,7 +41,7 @@ export class Plotter {
    * Track index of the animation to plot.
    * @type {Set<number>}
    */
-  tracks = new Set([6, 7])
+  tracks = new Set([6, 9])
 
   /** @type {HTMLDivElement | null} */
   domElement = null
@@ -56,8 +65,12 @@ export class Plotter {
     const s = this.domElement.style
     s.position = 'fixed'
     s.left = '0px'
-    s.top = '40px'
+    s.top = `${layout.top}px`
     s.pointerEvents = 'none'
+
+    s.display = 'grid'
+    s.gridTemplateColumns = `repeat(${layout.cols}, ${layout.w}px)`
+    s.gap = `${layout.py}px ${layout.px}px`
 
     this.run()
   }
@@ -70,8 +83,8 @@ export class Plotter {
 
   createChart(chrId, trackId) {
     const canvas = document.createElement('canvas')
-    canvas.style.width = '400px'
-    canvas.style.height = '200px'
+    canvas.style.width = `${layout.w}px`
+    canvas.style.height = `${layout.h}px`
 
     this.domElement?.appendChild(canvas)
 
@@ -95,6 +108,7 @@ export class Plotter {
         datasets: AXES.map((a) => ({...ds, label: a, borderColor: colors[a]})),
       },
       options: {
+        responsive: false,
         scales: {
           x: {display: false},
           y: {display: false},
@@ -191,11 +205,15 @@ export class Plotter {
     return s
   }
 
+  get interval() {
+    return 1000 / this.fps
+  }
+
   run() {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
       this.world?.characters?.forEach(this.update.bind(this))
-    }, 1000 / this.fps)
+    }, this.interval)
   }
 }

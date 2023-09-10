@@ -19,6 +19,7 @@ export class Panel {
     character: () => {},
     reset: () => {},
     voice: () => {},
+    freezePosition: () => {},
   }
 
   constructor(params) {
@@ -97,6 +98,11 @@ export class Panel {
     this.globalFolder
       .add({reset: this.reset.bind(this)}, 'reset')
       .name('Reset')
+      .listen()
+
+    this.globalFolder
+      .add({freezePosition: this.handlers.freezePosition}, 'freezePosition')
+      .name('Freeze Position')
       .listen()
 
     this.globalFolder

@@ -296,6 +296,10 @@ export class Character {
     return sources[index]
   }
 
+  freezePosition() {
+    this.overrideTrack('Hips.position', new Float32Array(7365).fill(0))
+  }
+
   /**
    * Update animation parameters.
    */
@@ -394,7 +398,7 @@ export class Character {
     }
   }
 
-  applyTransform(transform) {
+  applyTransform(transform, options) {
     const transformer = transformers[transform]
     if (!transformer) return
 
@@ -403,7 +407,7 @@ export class Character {
     const clip = this.currentClip
 
     for (const track of clip.tracks) {
-      const values = applyTrackTransform(track, transformer)
+      const values = applyTrackTransform(track, transformer, options)
       track.values = values
 
       // debugger

@@ -16,9 +16,10 @@ import {
 /**
  * @param {KeyframeTrack} track
  * @param {Transform} transform
+ * @param {*} options
  * @returns {Float32Array}
  **/
-export function applyTrackTransform(track, transform) {
+export function applyTrackTransform(track, transform, options) {
   const axes = ['x', 'y', 'z']
 
   const isRotation = track instanceof QuaternionKeyframeTrack
@@ -57,7 +58,12 @@ export function applyTrackTransform(track, transform) {
   })
 
   // Process each axis' data
-  for (const a of axes) series[a] = transform(series[a], a)
+  for (const a of axes) {
+    // Exclude the axis that are not filtered
+    if (options.axis && !options.axis.includes(a)) continue
+
+    series[a] = transform(series[a], a)
+  }
 
   // Zip back the transformed value in each axis.
   const values = []
@@ -202,11 +208,29 @@ function factorial(n) {
   return result
 }
 
-const W_SIZE = 2
+function belowZero(source, threshold) {
+  let out = []
+
+  let previous = source[0]
+
+  for (let i = 0; i < source.length; i++) {
+    if (source[i] >= threshold) {
+      out.push(source[i])
+      previous = source[i]
+    } else {
+      out.push(previous)
+    }
+  }
+
+  return out
+}
+
+const W_SIZE = 1
 
 export const transformers = {
   lowpass: (v) => lowpass(v, W_SIZE),
   highpass: (v) => highpass(v, W_SIZE),
   gaussian: (v) => gaussian(v, W_SIZE),
   derivative: (v) => derivative(v, W_SIZE),
+  belowZero: (v) => belowZero(v, 0.5),
 }

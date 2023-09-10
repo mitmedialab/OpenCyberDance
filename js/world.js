@@ -152,6 +152,10 @@ export class World {
     this.characters.push(character)
   }
 
+  freezeCharacters() {
+    this.characters.forEach((c) => c.freezePosition())
+  }
+
   /**
    * @param {Character} char
    */
@@ -223,6 +227,10 @@ export class World {
     this.panel.handlers.voice = () => {
       console.log('Voice')
       this.voice.toggle()
+    }
+
+    this.panel.handlers.freezePosition = () => {
+      this.freezeCharacters()
     }
 
     this.panel.createPanel()

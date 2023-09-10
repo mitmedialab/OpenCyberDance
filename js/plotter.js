@@ -1,5 +1,6 @@
 // @ts-check
 
+import {Chart} from 'chart.js'
 import {Character} from './character.js'
 import {World} from './world.js'
 
@@ -89,6 +90,8 @@ export class Plotter {
     this.domElement?.appendChild(canvas)
 
     const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
     const values = []
 
     const ds = {
@@ -110,6 +113,7 @@ export class Plotter {
       options: {
         responsive: false,
         scales: {
+          // @ts-ignore
           x: {display: false},
           y: {display: false},
         },
@@ -178,9 +182,11 @@ export class Plotter {
       if (!frame) return
 
       const splits = Plotter.split(frame.values)
-      chart.data.labels = frame.times
+      chart.data.labels = Array.from(frame.times)
 
       AXES.forEach((axis, i) => {
+        if (!chart.data.datasets) return
+
         chart.data.datasets[i].data = splits[axis]
       })
 

@@ -94,8 +94,10 @@ export class Plotter {
 
     const values = []
 
+    let label = `${trackId}`
+
     const ds = {
-      label: `${chrId}#${trackId}`,
+      label,
       data: values,
       fill: false,
       borderWidth: 2,
@@ -171,6 +173,13 @@ export class Plotter {
             enabled: true,
             algorithm: 'lttb',
           },
+          // subtitle: {
+          //   display: true,
+          //   text: ds.label,
+          //   font: {size: 1, weight: 'light'},
+          //   fullSize: false,
+          //   padding: {top: 2},
+          // },
         },
       },
     })
@@ -268,8 +277,22 @@ export class Plotter {
   run() {
     clearInterval(this.timer)
 
+    const b = profile('plot')
+
     this.timer = setInterval(() => {
-      this.world?.characters?.forEach(this.update.bind(this))
+      b(() => {
+        this.world?.characters?.forEach(this.update.bind(this))
+      })
     }, this.interval)
   }
+}
+
+const profile = (k, t) => (cb) => {
+  performance.mark(`${k}-s`)
+  cb()
+
+  performance.mark(`${k}-e`)
+
+  const m = performance.measure(k, `${k}-s`, `${k}-e`)
+  if (t && m.duration > t) console.log(`perf: ${k} took ${m.duration}ms`)
 }

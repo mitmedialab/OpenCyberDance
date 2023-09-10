@@ -8,8 +8,8 @@ import * as THREE from 'three'
 import {Chart} from 'chart.js'
 
 const p = {
-  p: profile('plot', 30),
-  cu: profile('chart:update', 1),
+  p: profile('plot', 33.33),
+  up: profile('chart', 16.67),
 }
 
 const colors = {
@@ -37,7 +37,7 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 300
+  windowSize = 400
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
@@ -92,8 +92,53 @@ export class Plotter {
     this.tracks.forEach((id) => this.createChart(chrId, id))
   }
 
+  createAnimation() {
+    const totalDuration = 10000
+    const delayBetweenPoints = totalDuration / this.windowSize
+
+    const previousY = (ctx) => {
+      return ctx.index === 0
+        ? ctx.chart.scales.y.getPixelForValue(100)
+        : ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1]?.y
+    }
+
+    return {
+      x: {
+        type: 'number',
+        easing: 'linear',
+        duration: delayBetweenPoints,
+        from: NaN, // the point is initially skipped
+        delay(ctx) {
+          if (ctx.type !== 'data' || ctx.xStarted) {
+            return 0
+          }
+          ctx.xStarted = true
+          return ctx.index * delayBetweenPoints
+        },
+      },
+      y: {
+        type: 'number',
+        easing: 'linear',
+        duration: delayBetweenPoints,
+        from: previousY,
+        delay(ctx) {
+          if (ctx.type !== 'data' || ctx.yStarted) {
+            return 0
+          }
+          ctx.yStarted = true
+          return ctx.index * delayBetweenPoints
+        },
+      },
+    }
+  }
+
   createChart(chrId, trackId) {
     const box = document.createElement('div')
+
+    const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
+
+    // Log the track name for debugging.
+    if (chrId === 'first') console.log(`+ ${track?.name}`)
 
     const canvas = document.createElement('canvas')
     canvas.style.width = `${layout.w}px`
@@ -104,25 +149,23 @@ export class Plotter {
 
     const axes = ['x', 'y', 'z', 'w']
 
+    const times = Array.from(track?.times ?? [])
+
     // Create chart
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: [],
-        datasets: axes.map((a) => ({
-          data: [],
-          label: `${trackId}#${a}`,
-          fill: false,
-          borderWidth: 6,
-          lineTension: 0.5,
-          pointRadius: 0,
+        datasets: axes.map((a, i) => ({
+          data: times.map((t) => ({x: t, y: 0})),
+          parsing: false,
+          borderWidth: 2,
           borderColor: colors[a],
         })),
       },
       options: {
         parsing: false,
         normalized: true,
-        // animation,
+        spanGaps: true,
         interaction: {
           intersect: false,
         },
@@ -136,27 +179,27 @@ export class Plotter {
           legend: {
             display: false,
           },
-          // decimation: {
-          //   enabled: true,
-          //   algorithm: 'lttb',
-          // },
+          decimation: {
+            enabled: true,
+            algorithm: 'lttb',
+          },
         },
       },
     })
 
-    // Initialize the charts mapping
-    if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
-    this.charts.get(chrId)?.set(trackId, {chart, canvas, box})
-
     // Append canvas to DOM
     box.appendChild(canvas)
     this.domElement?.appendChild(box)
+
+    // Initialize the charts mapping
+    if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
+    this.charts.get(chrId)?.set(trackId, {chart, canvas, box})
   }
 
   /**
    * @param {number[]} next
    */
-  updateTracks(next) {
+  select(next) {
     next.forEach((id) => {
       if (!this.tracks.has(id)) {
         console.log(`+ ${id}`)
@@ -202,11 +245,12 @@ export class Plotter {
       const track = char.currentClip?.tracks[id]
       if (!track) return
 
-      this.view(track, char.mixer.time).forEach((df, i) => {
-        chart.data.datasets[i].data = df
+      // Apply the dataset.
+      this.view(track, char.mixer.time).forEach((points, axis) => {
+        chart.data.datasets[axis].data = points
       })
 
-      p.cu(() => chart.update())
+      p.up(() => chart.update())
     })
   }
 
@@ -225,6 +269,8 @@ export class Plotter {
     /** @type {{x: number, y: number}[][]} */
     const s = []
 
+    const startOffset = start * valueSize
+
     track.times.slice(start, end).forEach((time, timeIdx) => {
       const offset = timeIdx * valueSize
 
@@ -232,11 +278,9 @@ export class Plotter {
         if (!s[ai]) s[ai] = []
 
         // Append data point
-        s[ai].push({x: time, y: track.values[offset + ai]})
+        s[ai].push({x: time, y: track.values[startOffset + offset + ai]})
       }
     })
-
-    debugger
 
     return s
   }
@@ -249,7 +293,7 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      p.p(() => this.world?.characters?.forEach(this.update.bind(this)))
+      this.world?.characters?.forEach(this.update.bind(this))
     }, this.interval)
   }
 }

@@ -28,6 +28,14 @@ export class World {
   /** @type {THREE.PerspectiveCamera} */
   camera = null
 
+  get first() {
+    return this.characterByName('first')
+  }
+
+  transform(t, o) {
+    this.first.applyTransform(t, o)
+  }
+
   setup() {
     // Setup background
     this.scene.background = new THREE.Color(0xdedede)

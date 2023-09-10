@@ -19,7 +19,7 @@ import {
  * @param {*} options
  * @returns {Float32Array}
  **/
-export function applyTrackTransform(track, transform, options) {
+export function applyTrackTransform(track, transform, options = {}) {
   const axes = ['x', 'y', 'z']
 
   const isRotation = track instanceof QuaternionKeyframeTrack
@@ -60,7 +60,7 @@ export function applyTrackTransform(track, transform, options) {
   // Process each axis' data
   for (const a of axes) {
     // Exclude the axis that are not filtered
-    if (options.axis && !options.axis.includes(a)) continue
+    if (options?.axis && !options?.axis?.includes(a)) continue
 
     series[a] = transform(series[a], a)
   }

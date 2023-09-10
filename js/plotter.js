@@ -113,7 +113,6 @@ export class Plotter {
       options: {
         responsive: false,
         scales: {
-          // @ts-ignore
           x: {display: false},
           y: {display: false},
         },

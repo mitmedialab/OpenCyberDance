@@ -9,7 +9,7 @@ import {Chart} from 'chart.js'
 
 const p = {
   p: profile('plot', 33.33),
-  up: profile('chart', 16.67),
+  up: profile('chart', 20),
 }
 
 const colors = {
@@ -155,9 +155,9 @@ export class Plotter {
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
-        datasets: axes.map((a, i) => ({
-          data: times.map((t) => ({x: t, y: 0})),
+        datasets: axes.map((a) => ({
           parsing: false,
+          data: [],
           borderWidth: 2,
           borderColor: colors[a],
         })),
@@ -165,7 +165,6 @@ export class Plotter {
       options: {
         parsing: false,
         normalized: true,
-        spanGaps: true,
         interaction: {
           intersect: false,
         },

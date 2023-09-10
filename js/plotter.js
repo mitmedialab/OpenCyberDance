@@ -1,10 +1,20 @@
 // @ts-check
 
-import {Chart} from 'chart.js'
 import {Character} from './character.js'
 import {World} from './world.js'
+import {profile} from './perf.js'
+import * as THREE from 'three'
 
-const AXES = ['x', 'y', 'z', 'w']
+import {Chart, TimeScale, TimeSeriesScale} from 'chart.js'
+
+import 'date-fns'
+import 'chartjs-adapter-date-fns'
+
+const p = {
+  p: profile('plot', 30),
+  df: profile('chart:dataframe', 1),
+  cu: profile('chart:update', 10),
+}
 
 const colors = {
   x: 'rgb(255, 99, 132)',
@@ -31,7 +41,7 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 500
+  windowSize = 300
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
@@ -60,6 +70,8 @@ export class Plotter {
   timer = 0
 
   constructor(world) {
+    Chart.register(TimeScale, TimeSeriesScale)
+
     this.world = world
     this.domElement = document.createElement('div')
 
@@ -145,14 +157,21 @@ export class Plotter {
       },
     }
 
+    const axes = ['x', 'y', 'z', 'w']
+
     // Create chart
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
-        datasets: AXES.map((a) => ({...ds, label: a, borderColor: colors[a]})),
+        datasets: axes.map((a) => ({
+          ...ds,
+          label: a,
+          borderColor: colors[a],
+        })),
       },
       options: {
+        parsing: false,
         font: {
           size: 2,
         },
@@ -162,8 +181,8 @@ export class Plotter {
         },
         responsive: false,
         scales: {
-          x: {display: false},
-          y: {display: false},
+          x: {display: false, type: 'timeseries'},
+          y: {display: false, type: 'timeseries'},
         },
         plugins: {
           legend: {
@@ -173,13 +192,6 @@ export class Plotter {
             enabled: true,
             algorithm: 'lttb',
           },
-          // subtitle: {
-          //   display: true,
-          //   text: ds.label,
-          //   font: {size: 1, weight: 'light'},
-          //   fullSize: false,
-          //   padding: {top: 2},
-          // },
         },
       },
     })
@@ -228,8 +240,6 @@ export class Plotter {
     const name = char.options.name
     if (!this.charts.has(name)) this.add(name)
 
-    const {windowSize, offset} = this
-
     this.tracks.forEach((id) => {
       const state = this.charts.get(name)?.get(id)
       if (!state) return
@@ -237,35 +247,47 @@ export class Plotter {
       const {chart} = state
       if (!chart) return
 
-      const frame = char.getCurrentKeyframes(id, windowSize, offset)
-      if (!frame) return
+      const track = char.currentClip?.tracks[id]
+      if (!track) return
 
-      const splits = Plotter.split(frame.values)
-      chart.data.labels = Array.from(frame.times)
+      p.df(() => {
+        this.points(track, char.mixer.time).forEach((df, i) => {
+          chart.data.datasets[i].data = df
+        })
 
-      AXES.forEach((axis, i) => {
-        if (!chart.data.datasets) return
-
-        chart.data.datasets[i].data = splits[axis]
+        debugger
       })
 
-      chart.update()
+      p.cu(() => chart.update())
     })
   }
 
-  /** @param {Float32Array} v */
-  static split(v) {
-    const s = {}
+  /**
+   * @param {THREE.KeyframeTrack} track
+   * @param {number} now
+   * @returns {{x: number, y: number}[][]}
+   */
+  points(track, now) {
+    const {windowSize, offset} = this
 
-    AXES.forEach((axis) => {
-      s[axis] = []
+    const valueSize = track.getValueSize()
+    const axes = track instanceof THREE.QuaternionKeyframeTrack ? 4 : 3
+
+    let start = track.times.findIndex((t) => t >= now)
+    start = start + offset < 0 ? start : start + offset
+
+    const end = start + windowSize
+
+    /** @type {{x: number, y: number}[][]} */
+    const s = [...Array(axes)].map(() => [])
+
+    track.times.slice(start, end).forEach((time, timeIdx) => {
+      const offset = timeIdx * valueSize
+
+      for (let ai = 0; ai < axes; ai++) {
+        s[ai].push({x: time, y: track.values[offset + ai]})
+      }
     })
-
-    for (let i = 0; i < v.length; i += 4) {
-      AXES.forEach((axis, j) => {
-        s[axis].push(v[i + j])
-      })
-    }
 
     return s
   }
@@ -277,22 +299,8 @@ export class Plotter {
   run() {
     clearInterval(this.timer)
 
-    const b = profile('plot')
-
     this.timer = setInterval(() => {
-      b(() => {
-        this.world?.characters?.forEach(this.update.bind(this))
-      })
+      p.p(() => this.world?.characters?.forEach(this.update.bind(this)))
     }, this.interval)
   }
-}
-
-const profile = (k, t) => (cb) => {
-  performance.mark(`${k}-s`)
-  cb()
-
-  performance.mark(`${k}-e`)
-
-  const m = performance.measure(k, `${k}-s`, `${k}-e`)
-  if (t && m.duration > t) console.log(`perf: ${k} took ${m.duration}ms`)
 }

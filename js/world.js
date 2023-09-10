@@ -146,7 +146,9 @@ export class World {
   }
 
   updateParams(flags) {
-    profile('update', () => {
+    const b = profile('updateParams', 100)
+
+    b(() => {
       for (const character of this.characters) {
         character.updateParams(flags)
       }

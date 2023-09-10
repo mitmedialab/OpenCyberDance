@@ -425,30 +425,8 @@ export class Character {
     })
   }
 
-  /**
-   * @param {string | number | RegExp} key
-   * @param {number} limit
-   * @param {number} offset
-   */
-  getCurrentKeyframes(key, limit = 10, offset = 0) {
-    key = this.trackIdByKey(key)
-
-    const clip = this.currentClip
-    const track = clip.tracks[key]
-    if (!track) return
-
-    const now = this.mixer.time
-
-    const vs = track.getValueSize()
-
-    let start = track.times.findIndex((t) => t >= now)
-    start = start + offset < 0 ? start : start + offset
-
-    const end = start + limit
-
-    const values = track.values.slice(start * vs, end * vs)
-    const times = track.times.slice(start, end)
-
-    return {start, values, times, now}
+  /** @param {number | string | RegExp} key */
+  trackByKey(key) {
+    return this.currentClip.tracks[this.trackIdByKey(key)]
   }
 }

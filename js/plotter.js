@@ -216,26 +216,27 @@ export class Plotter {
    * @returns {{x: number, y: number}[][]}
    */
   view(track, now) {
-    const {windowSize, offset} = this
-
-    const valueSize = track.getValueSize()
-    const axes = track instanceof THREE.QuaternionKeyframeTrack ? 4 : 3
-
     let start = track.times.findIndex((t) => t >= now)
-    start = start + offset < 0 ? start : start + offset
+    start = start + this.offset < 0 ? start : start + this.offset
 
-    const end = start + windowSize
+    const end = start + this.windowSize
+    const valueSize = track.getValueSize()
 
     /** @type {{x: number, y: number}[][]} */
-    const s = [...Array(axes)].map(() => [])
+    const s = []
 
     track.times.slice(start, end).forEach((time, timeIdx) => {
       const offset = timeIdx * valueSize
 
-      for (let ai = 0; ai < axes; ai++) {
+      for (let ai = 0; ai < valueSize; ai++) {
+        if (!s[ai]) s[ai] = []
+
+        // Append data point
         s[ai].push({x: time, y: track.values[offset + ai]})
       }
     })
+
+    debugger
 
     return s
   }

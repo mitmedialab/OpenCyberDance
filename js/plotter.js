@@ -8,7 +8,7 @@ import * as THREE from 'three'
 import {Chart} from 'chart.js'
 
 const p = {
-  p: profile('plot', 33.33),
+  pl: profile('plot', 33.33),
   up: profile('chart', 20),
 }
 
@@ -37,12 +37,12 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 400
+  windowSize = 200
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
    */
-  offset = -100
+  offset = -20
 
   /**
    * Track index of the animation to plot.
@@ -74,7 +74,6 @@ export class Plotter {
 
   prepare() {
     this.domElement = document.createElement('div')
-    this.world?.container?.appendChild(this.domElement)
 
     const s = this.domElement.style
     s.position = 'fixed'
@@ -150,25 +149,22 @@ export class Plotter {
 
     const axes = ['x', 'y', 'z', 'w']
 
-    const times = Array.from(track?.times ?? [])
-
     // Create chart
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
         datasets: axes.map((a) => ({
           parsing: false,
+          normalized: true,
           data: [],
           borderWidth: 2,
           borderColor: colors[a],
         })),
       },
       options: {
+        // animation: this.createAnimation(),
         parsing: false,
         normalized: true,
-        interaction: {
-          intersect: false,
-        },
         responsive: false,
         maintainAspectRatio: false,
         scales: {
@@ -221,7 +217,7 @@ export class Plotter {
           const item = map?.get(id)
           item?.chart.destroy()
           item?.canvas?.remove()
-          item?.box?.remove()
+          if (item?.box) this.domElement?.removeChild(item.box)
           map?.delete(id)
         })
       }
@@ -268,19 +264,16 @@ export class Plotter {
 
     /** @type {{x: number, y: number}[][]} */
     const s = []
+    for (let i = 0; i < valueSize; i++) s.push([])
 
-    const startOffset = start * valueSize
-
-    track.times.slice(start, end).forEach((time, timeIdx) => {
-      const offset = timeIdx * valueSize
+    for (let ti = start; ti < end; ti++) {
+      const time = track.times[ti]
+      const offset = (start + ti) * valueSize
 
       for (let ai = 0; ai < valueSize; ai++) {
-        if (!s[ai]) s[ai] = []
-
-        // Append data point
-        s[ai].push({x: time, y: track.values[startOffset + offset + ai]})
+        s[ai].push({x: time, y: track.values[offset + ai]})
       }
-    })
+    }
 
     return s
   }
@@ -293,7 +286,12 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      this.world?.characters?.forEach(this.update.bind(this))
-    }, this.interval)
+      console.log('tik')
+      if (this.world) this.update(this.world.first)
+
+      // p.pl(() => {
+      //   this.world?.characters?.forEach(this.update.bind(this))
+      // })
+    }, 1000)
   }
 }

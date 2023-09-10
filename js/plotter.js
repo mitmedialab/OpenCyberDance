@@ -74,6 +74,7 @@ export class Plotter {
 
   prepare() {
     this.domElement = document.createElement('div')
+    this.world?.container?.appendChild(this.domElement)
 
     const s = this.domElement.style
     s.position = 'fixed'

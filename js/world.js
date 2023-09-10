@@ -58,7 +58,6 @@ export class World {
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
     this.container.appendChild(this.stats.domElement)
-    this.container.appendChild(this.plotter.domElement)
 
     // Expose the world instance
     window.world = this

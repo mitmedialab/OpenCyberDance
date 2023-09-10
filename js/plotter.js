@@ -178,6 +178,7 @@ export class Plotter {
           const item = map?.get(id)
           item?.chart.destroy()
           item?.canvas?.remove()
+          item?.box?.remove()
           map?.delete(id)
         })
       }

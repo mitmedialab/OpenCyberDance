@@ -5,7 +5,7 @@ import {World} from './world.js'
 import {profile} from './perf.js'
 import * as THREE from 'three'
 
-import {Chart, registerables} from 'chart.js'
+import {Chart} from 'chart.js'
 
 const p = {
   p: profile('plot', 30),
@@ -54,8 +54,8 @@ export class Plotter {
   domElement = null
 
   /**
-   * Map<CharacterName, Map<TrackId, {Chart, Canvas}>>
-   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement}>>}
+   * Map<CharacterName, Map<TrackId, *>>
+   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement, box: HTMLDivElement}>>}
    **/
   charts = new Map()
 
@@ -67,15 +67,13 @@ export class Plotter {
 
   constructor(world) {
     this.world = world
-    this.domElement = document.createElement('div')
 
-    this.mount().then()
+    this.prepare()
+    this.run()
   }
 
-  async mount() {
-    if (!this.domElement) return
-
-    Chart.register(...registerables)
+  prepare() {
+    this.domElement = document.createElement('div')
 
     const s = this.domElement.style
     s.position = 'fixed'
@@ -86,8 +84,6 @@ export class Plotter {
     s.display = 'grid'
     s.gridTemplateColumns = `repeat(${layout.cols}, ${layout.w}px)`
     s.gap = `${layout.py}px ${layout.px}px`
-
-    this.run()
   }
 
   add(chrId) {
@@ -97,21 +93,14 @@ export class Plotter {
   }
 
   createChart(chrId, trackId) {
+    const box = document.createElement('div')
+
     const canvas = document.createElement('canvas')
     canvas.style.width = `${layout.w}px`
     canvas.style.height = `${layout.h}px`
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
-    const ds = {
-      label: trackId,
-      data: [],
-      fill: false,
-      borderWidth: 2,
-      lineTension: 0.1,
-      pointRadius: 0,
-    }
 
     const axes = ['x', 'y', 'z', 'w']
 
@@ -121,20 +110,24 @@ export class Plotter {
       data: {
         labels: [],
         datasets: axes.map((a) => ({
-          ...ds,
-          label: a,
+          data: [],
+          label: `${trackId}#${a}`,
+          fill: false,
+          borderWidth: 6,
+          lineTension: 0.5,
+          pointRadius: 0,
           borderColor: colors[a],
         })),
       },
       options: {
         parsing: false,
         normalized: true,
-        font: {size: 2},
         // animation,
         interaction: {
           intersect: false,
         },
         responsive: false,
+        maintainAspectRatio: false,
         scales: {
           x: {display: false, type: 'linear'},
           y: {display: false, type: 'linear'},
@@ -143,20 +136,21 @@ export class Plotter {
           legend: {
             display: false,
           },
-          decimation: {
-            enabled: true,
-            algorithm: 'lttb',
-          },
+          // decimation: {
+          //   enabled: true,
+          //   algorithm: 'lttb',
+          // },
         },
       },
     })
 
     // Initialize the charts mapping
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
-    this.charts.get(chrId)?.set(trackId, {chart, canvas})
+    this.charts.get(chrId)?.set(trackId, {chart, canvas, box})
 
     // Append canvas to DOM
-    this.domElement?.appendChild(canvas)
+    box.appendChild(canvas)
+    this.domElement?.appendChild(box)
   }
 
   /**

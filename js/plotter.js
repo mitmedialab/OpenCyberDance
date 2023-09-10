@@ -128,6 +128,7 @@ export class Plotter {
       },
       options: {
         parsing: false,
+        normalized: true,
         font: {size: 2},
         // animation,
         interaction: {

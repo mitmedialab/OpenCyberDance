@@ -5,15 +5,11 @@ import {World} from './world.js'
 import {profile} from './perf.js'
 import * as THREE from 'three'
 
-import {Chart, TimeScale, TimeSeriesScale} from 'chart.js'
-
-import 'date-fns'
-import 'chartjs-adapter-date-fns'
+import {Chart, registerables} from 'chart.js'
 
 const p = {
   p: profile('plot', 30),
-  df: profile('chart:dataframe', 1),
-  cu: profile('chart:update', 10),
+  cu: profile('chart:update', 1),
 }
 
 const colors = {
@@ -70,10 +66,16 @@ export class Plotter {
   timer = 0
 
   constructor(world) {
-    Chart.register(TimeScale, TimeSeriesScale)
-
     this.world = world
     this.domElement = document.createElement('div')
+
+    this.mount().then()
+  }
+
+  async mount() {
+    if (!this.domElement) return
+
+    Chart.register(...registerables)
 
     const s = this.domElement.style
     s.position = 'fixed'
@@ -99,62 +101,16 @@ export class Plotter {
     canvas.style.width = `${layout.w}px`
     canvas.style.height = `${layout.h}px`
 
-    this.domElement?.appendChild(canvas)
-
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const values = []
-
-    let label = `${trackId}`
-
     const ds = {
-      label,
-      data: values,
+      label: trackId,
+      data: [],
       fill: false,
       borderWidth: 2,
       lineTension: 0.1,
       pointRadius: 0,
-    }
-
-    const totalDuration = 10000
-    const delayBetweenPoints = totalDuration / values.length
-
-    const previousY = (ctx) =>
-      ctx.index === 0
-        ? ctx.chart.scales.y.getPixelForValue(100)
-        : ctx.chart
-            .getDatasetMeta(ctx.datasetIndex)
-            .data[ctx.index - 1].getProps(['y'], true).y
-
-    const animation = {
-      x: {
-        type: 'number',
-        easing: 'linear',
-        duration: delayBetweenPoints,
-
-        // the point is initially skipped
-        from: NaN,
-
-        delay(ctx) {
-          if (ctx.type !== 'data' || ctx.xStarted) return 0
-          ctx.xStarted = true
-
-          return ctx.index * delayBetweenPoints
-        },
-      },
-      y: {
-        type: 'number',
-        easing: 'linear',
-        duration: delayBetweenPoints,
-        from: previousY,
-        delay(ctx) {
-          if (ctx.type !== 'data' || ctx.yStarted) return 0
-          ctx.yStarted = true
-
-          return ctx.index * delayBetweenPoints
-        },
-      },
     }
 
     const axes = ['x', 'y', 'z', 'w']
@@ -172,17 +128,15 @@ export class Plotter {
       },
       options: {
         parsing: false,
-        font: {
-          size: 2,
-        },
+        font: {size: 2},
         // animation,
         interaction: {
           intersect: false,
         },
         responsive: false,
         scales: {
-          x: {display: false, type: 'timeseries'},
-          y: {display: false, type: 'timeseries'},
+          x: {display: false, type: 'linear'},
+          y: {display: false, type: 'linear'},
         },
         plugins: {
           legend: {
@@ -198,8 +152,10 @@ export class Plotter {
 
     // Initialize the charts mapping
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
-
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
+
+    // Append canvas to DOM
+    this.domElement?.appendChild(canvas)
   }
 
   /**
@@ -250,12 +206,8 @@ export class Plotter {
       const track = char.currentClip?.tracks[id]
       if (!track) return
 
-      p.df(() => {
-        this.points(track, char.mixer.time).forEach((df, i) => {
-          chart.data.datasets[i].data = df
-        })
-
-        debugger
+      this.view(track, char.mixer.time).forEach((df, i) => {
+        chart.data.datasets[i].data = df
       })
 
       p.cu(() => chart.update())
@@ -267,7 +219,7 @@ export class Plotter {
    * @param {number} now
    * @returns {{x: number, y: number}[][]}
    */
-  points(track, now) {
+  view(track, now) {
     const {windowSize, offset} = this
 
     const valueSize = track.getValueSize()

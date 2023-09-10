@@ -29,20 +29,22 @@
       async
     ></script>
 
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=auvTMQpf"></script>
+    <script
+      src="https://code.responsivevoice.org/responsivevoice.js?key=auvTMQpf"
+      async
+      defer
+    ></script>
 
     <script type="importmap">
       {
         "imports": {
           "three": "https://cdn.jsdelivr.net/npm/three@0.156.1/+esm",
           "three/addons/": "./jsm/",
-          "date-fns": "https://cdn.jsdelivr.net/npm/date-fns/+esm",
-          "chartjs-adapter-date-fns": "https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/+esm",
-          "chart.js": "https://cdn.jsdelivr.net/npm/chart.js/auto/+esm"
+          "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/+esm"
         }
       }
     </script>
 
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js" defer></script>
   </body>
 </html>

@@ -161,6 +161,10 @@ export class Plotter {
       },
       options: {
         // animation: this.createAnimation(),
+        animation: {
+          easing: 'easeOutCubic',
+          duration: 2000,
+        },
         parsing: false,
         normalized: true,
         responsive: false,
@@ -241,6 +245,7 @@ export class Plotter {
       // Apply the dataset.
       this.view(track, char.mixer.time).forEach((points, axis) => {
         chart.data.datasets[axis].data = points
+        chart.data.datasets[axis].clip = false
       })
 
       p.up(() => chart.update())
@@ -254,25 +259,23 @@ export class Plotter {
    */
   view(track, now) {
     let start = track.times.findIndex((t) => t >= now)
-    start = start + this.offset < 0 ? start : start + this.offset
+    start = Math.max(0, start + this.offset)
 
-    const end = start + this.windowSize
+    const end = Math.min(start + this.windowSize, track.times.length)
     const valueSize = track.getValueSize()
 
     /** @type {{x: number, y: number}[][]} */
-    const s = []
-    for (let i = 0; i < valueSize; i++) s.push([])
+    const series = Array.from({length: valueSize}).map(() => [])
 
-    for (let ti = start; ti < end; ti++) {
-      const time = track.times[ti]
-      const offset = (start + ti) * valueSize
+    for (let frame = start; frame < end; frame++) {
+      const time = track.times[frame]
 
-      for (let ai = 0; ai < valueSize; ai++) {
-        s[ai].push({x: time, y: track.values[offset + ai]})
+      for (let axis = 0; axis < valueSize; axis++) {
+        series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
       }
     }
 
-    return s
+    return series
   }
 
   get interval() {
@@ -283,7 +286,6 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      console.log('tik')
       if (this.world) this.update(this.world.first)
 
       // p.pl(() => {

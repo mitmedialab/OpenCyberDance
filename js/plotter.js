@@ -30,9 +30,9 @@ export class Plotter {
 
   /**
    * Track index of the animation to plot.
-   * @type {number[]}
+   * @type {Set<number>}
    */
-  tracks = [6, 7]
+  tracks = new Set([6, 7])
 
   /** @type {HTMLDivElement | null} */
   domElement = null
@@ -69,8 +69,6 @@ export class Plotter {
   }
 
   createChart(chrId, trackId) {
-    console.log(`> plt_add ${chrId}#${trackId}`)
-
     const canvas = document.createElement('canvas')
     canvas.style.width = '400px'
     canvas.style.height = '200px'
@@ -113,6 +111,37 @@ export class Plotter {
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
 
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
+  }
+
+  /**
+   * @param {number[]} next
+   */
+  updateTracks(next) {
+    next.forEach((id) => {
+      if (!this.tracks.has(id)) {
+        console.log(`+ ${id}`)
+
+        this.tracks.add(id)
+        this.charts.forEach((_, chrId) => {
+          this.createChart(chrId, id)
+        })
+      }
+    })
+
+    this.tracks.forEach((id) => {
+      if (!next.includes(id)) {
+        console.log(`- ${id}`)
+        this.tracks.delete(id)
+
+        this.charts.forEach((_, chrId) => {
+          const map = this.charts.get(chrId)
+          const item = map?.get(id)
+          item?.chart.destroy()
+          item?.canvas?.remove()
+          map?.delete(id)
+        })
+      }
+    })
   }
 
   /**

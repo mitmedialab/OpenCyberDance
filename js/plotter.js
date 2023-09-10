@@ -37,12 +37,12 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 200
+  windowSize = 300
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
    */
-  offset = -20
+  offset = -100
 
   /**
    * Track index of the animation to plot.
@@ -286,11 +286,9 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      if (this.world) this.update(this.world.first)
-
-      // p.pl(() => {
-      //   this.world?.characters?.forEach(this.update.bind(this))
-      // })
+      p.pl(() => {
+        this.world?.characters?.forEach(this.update.bind(this))
+      })
     }, 1000)
   }
 }

@@ -163,7 +163,7 @@ export class Plotter {
   /**
    * @param {number[]} next
    */
-  select(next) {
+  select(...next) {
     next.forEach((id) => {
       if (!this.tracks.has(id)) {
         console.log(`+ ${id}`)

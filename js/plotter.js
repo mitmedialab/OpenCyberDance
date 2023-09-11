@@ -99,6 +99,7 @@ export class Plotter {
     canvas.style.width = `${layout.w}px`
     canvas.style.height = `${layout.h}px`
     canvas.setAttribute('data-plotter-id', `${chrId}:${trackId}`)
+    canvas.setAttribute('data-plotter-track-name', track.name)
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return

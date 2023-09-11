@@ -188,7 +188,8 @@ export class World {
   handleAnimationChange(char) {
     const {name, action} = char.options
 
-    let controller = world.panel.characterFolder.children
+    // Update the dropdown animation's active state
+    let dropdown = world.panel.characterFolder.children
       .find((k) => k.character === name)
       .controllers.find((c) => c.property === 'action')
       .options([...char.actions.keys()])
@@ -196,7 +197,16 @@ export class World {
       .onChange(() => this.panel.handlers.action(name))
 
     this.params.characters[name].action = action
-    controller.updateDisplay()
+    dropdown.updateDisplay()
+
+    if (name === 'first') {
+      const seek = world.panel.playbackFolder.children.find(
+        (c) => c.property === 'time'
+      )
+
+      const {duration} = char.actions.get(action).getClip()
+      if (duration) seek.max(Math.round(duration * 100) / 100)
+    }
   }
 
   async setupCharacters() {

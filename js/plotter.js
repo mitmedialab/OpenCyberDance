@@ -157,9 +157,7 @@ export class Plotter {
   }
 
   containerOf(id) {
-    if (!this.domElement) return null
-
-    return this.domElement.querySelector(`[data-plotter-character="${id}"]`)
+    return this.domElement?.querySelector(`[data-plotter-character="${id}"]`)
   }
 
   /**
@@ -186,19 +184,8 @@ export class Plotter {
           const map = this.charts.get(chrId)
           const item = map?.get(id)
 
-          // Destroy the chart.
           item?.chart.destroy()
-
-          // Remove the canvas from the DOM.
-          if (item?.canvas) {
-            item.canvas.remove()
-
-            const container = this.containerOf(chrId)
-            if (!container) return
-
-            container?.removeChild(item.canvas)
-          }
-
+          item?.canvas?.remove()
           map?.delete(id)
         })
       }

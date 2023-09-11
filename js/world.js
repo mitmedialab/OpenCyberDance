@@ -268,7 +268,7 @@ export class World {
 
     const updatePlotterOnSeek = debounce((c) => {
       this.characters.forEach((c) => this.plotter?.update(c, {seeking: true}))
-    }, 500)
+    }, 200)
 
     this.panel.handlers.seek = () => {
       this.characters.forEach((c) => c.mixer.setTime(this.params.time))

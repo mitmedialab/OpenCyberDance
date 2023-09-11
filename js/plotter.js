@@ -233,7 +233,17 @@ export class Plotter {
       if (!chart) return
 
       // Apply the dataset.
-      this.view(track, char.mixer.time).forEach((points, axis) => {
+      const view = this.view(track, char.mixer.time)
+
+      // Adjust the chart scaling.
+      const scale = chart.config.options?.scales?.x
+
+      if (scale) {
+        scale.min = view.min
+        scale.max = view.max
+      }
+
+      view.series.forEach((points, axis) => {
         chart.data.datasets[axis].data = points
         chart.data.datasets[axis].clip = false
       })
@@ -249,7 +259,6 @@ export class Plotter {
   /**
    * @param {THREE.KeyframeTrack} track
    * @param {number} now
-   * @returns {{x: number, y: number}[][]}
    */
   view(track, now) {
     let start = track.times.findIndex((t) => t >= now)
@@ -269,7 +278,7 @@ export class Plotter {
       }
     }
 
-    return series
+    return {series, min: track.times[start], max: track.times[end]}
   }
 
   get interval() {

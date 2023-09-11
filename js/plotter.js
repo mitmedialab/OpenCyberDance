@@ -8,8 +8,7 @@ import * as THREE from 'three'
 import {Chart} from 'chart.js'
 
 const p = {
-  pl: profile('plot', 33.33),
-  up: profile('chart', 20),
+  up: profile('chart', 10),
 }
 
 const colors = {
@@ -86,12 +85,6 @@ export class Plotter {
     s.gap = `${layout.py}px ${layout.px}px`
   }
 
-  add(charId) {
-    if (this.charts.has(charId)) return
-
-    this.tracks.forEach((id) => this.createChart(charId, id))
-  }
-
   createAnimation() {
     const totalDuration = 10000
     const delayBetweenPoints = totalDuration / this.windowSize
@@ -134,7 +127,6 @@ export class Plotter {
 
   createChart(chrId, trackId) {
     const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
-    console.log(`create: ${chrId}:${trackId}`)
 
     // Log the track name for debugging.
     if (chrId === 'first') console.log(`+ ${track?.name}`)
@@ -192,8 +184,6 @@ export class Plotter {
     // Initialize the charts mapping
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
-
-    console.log(`> created: ${chrId}#${trackId}`)
   }
 
   /**
@@ -237,7 +227,7 @@ export class Plotter {
 
     // Initialize the chart if it doesn't exist.
     if (!this.charts.has(name)) {
-      this.add(name)
+      this.tracks.forEach((id) => this.createChart(name, id))
     }
 
     this.tracks.forEach((id) => {
@@ -291,9 +281,7 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      p.pl(() => {
-        this.world?.characters?.forEach(this.update.bind(this))
-      })
+      this.world?.characters?.forEach(this.update.bind(this))
     }, 1000)
   }
 }

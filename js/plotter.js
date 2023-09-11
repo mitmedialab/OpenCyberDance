@@ -86,6 +86,7 @@ export class Plotter {
 
   createChart(chrId, trackId) {
     const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
+    if (!track?.name) return
 
     // Log the track name for debugging.
     if (chrId === 'first') console.log(`+ ${track?.name}`)

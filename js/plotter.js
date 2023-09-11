@@ -8,7 +8,7 @@ import * as THREE from 'three'
 import {Chart} from 'chart.js'
 
 const p = {
-  up: profile('chart', 10),
+  u: profile('chart', 10),
 }
 
 const colors = {
@@ -36,7 +36,7 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 300
+  windowSize = 200
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
@@ -153,11 +153,7 @@ export class Plotter {
         })),
       },
       options: {
-        // animation: this.createAnimation(),
-        animation: {
-          easing: 'easeOutCubic',
-          duration: 2000,
-        },
+        animation: false,
         parsing: false,
         normalized: true,
         responsive: false,
@@ -219,7 +215,7 @@ export class Plotter {
   /**
    * @param {Character} char
    */
-  update(char) {
+  async update(char) {
     const {name} = char.options
     const charts = this.charts.get(name)
 
@@ -241,8 +237,12 @@ export class Plotter {
         chart.data.datasets[axis].data = points
         chart.data.datasets[axis].clip = false
       })
+    })
 
-      p.up(() => chart.update())
+    p.u(() => {
+      this.tracks.forEach((t) => {
+        charts?.get(t)?.chart?.update()
+      })
     })
   }
 
@@ -281,6 +281,6 @@ export class Plotter {
 
     this.timer = setInterval(() => {
       this.world?.characters?.forEach(this.update.bind(this))
-    }, 1000)
+    }, this.interval)
   }
 }

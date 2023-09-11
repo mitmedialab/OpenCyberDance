@@ -230,7 +230,8 @@ export class Plotter {
     this.tracks.forEach((id) => this.createChart(name, id))
   }
 
-  current(id = this.tracks[0]) {
+  /** @param {number} id */
+  current(id = [...this.tracks][0]) {
     if (!this.world) return []
 
     const c = this.world.first

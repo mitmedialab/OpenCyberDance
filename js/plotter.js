@@ -72,6 +72,10 @@ export class Plotter {
     this.run()
   }
 
+  get trackNames() {
+    return [...this.tracks].map((i) => this.world?.trackNames[i])
+  }
+
   prepare() {
     this.domElement = document.createElement('div')
 

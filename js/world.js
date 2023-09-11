@@ -38,6 +38,7 @@ export class World {
 
   transform(t, o) {
     this.first.applyTransform(t, o)
+    this.updatePlotterOnPause()
   }
 
   async setup() {
@@ -266,15 +267,9 @@ export class World {
 
     this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
 
-    const updatePlotterOnSeek = debounce((c) => {
-      this.characters.forEach((c) => this.plotter?.update(c, {seeking: true}))
-    }, 200)
-
     this.panel.handlers.seek = () => {
       this.characters.forEach((c) => c.mixer.setTime(this.params.time))
-
-      // If we are paused, update the plotter.
-      if (this.params.paused) updatePlotterOnSeek()
+      this.updatePlotterOnPause()
     }
 
     this.panel.handlers.pause = () => {
@@ -287,6 +282,13 @@ export class World {
 
     this.panel.createPanel()
   }
+
+  // If we are paused and seeking, update the plotter.
+  updatePlotterOnPause = debounce(() => {
+    if (!this.params.paused) return
+
+    this.characters.forEach((c) => this.plotter?.update(c, {seeking: true}))
+  }, 200)
 
   /**
    * Queries the track id by name of regex.

@@ -287,4 +287,30 @@ export class World {
 
     this.panel.createPanel()
   }
+
+  /**
+   * Queries the track id by name of regex.
+   *
+   * @param {(number|string|RegExp)[]} query
+   * @returns {number[]}
+   */
+  queryTrackIds(query) {
+    /** @type {Set<number>} */
+    const ids = new Set()
+    query.filter((q) => typeof q === 'number').forEach((q) => ids.add(q))
+
+    const tracks = this.first.currentClip?.tracks
+    if (!tracks) return [...ids]
+
+    for (const q of query) {
+      tracks
+        .filter((t) => {
+          if (typeof q === 'string') return t.name.includes(q)
+          if (q instanceof RegExp) return q.test(t.name)
+        })
+        .forEach((t) => ids.add(tracks.indexOf(t)))
+    }
+
+    return [...ids]
+  }
 }

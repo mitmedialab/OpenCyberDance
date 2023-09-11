@@ -166,9 +166,13 @@ export class Plotter {
   }
 
   /**
-   * @param {number[]} next
+   * @param {(number|string|RegExp)[]} query
    */
-  select(...next) {
+  select(...query) {
+    if (!this.world) return
+
+    const next = this.world.queryTrackIds(query)
+
     next.forEach((id) => {
       if (!this.tracks.has(id)) {
         console.log(`+ ${id}`)

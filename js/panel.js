@@ -20,6 +20,8 @@ export class Panel {
     reset: () => {},
     voice: () => {},
     freezePosition: () => {},
+    seek: () => {},
+    pause: () => {},
   }
 
   constructor(params) {
@@ -79,7 +81,8 @@ export class Panel {
   createPanel() {
     const panel = this.panel
 
-    this.globalFolder = panel.addFolder('General Settings')
+    this.playbackFolder = panel.addFolder('Playback Settings')
+    this.commandFolder = panel.addFolder('Commands')
     this.rotationFolder = panel.addFolder('All Rotations')
     this.energyFolder = panel.addFolder('Energy')
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
@@ -89,25 +92,36 @@ export class Panel {
     this.addEnergy('head', 'body', 'foot')
     this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
 
-    this.globalFolder
+    this.commandFolder
+      .add({reset: this.reset.bind(this)}, 'reset')
+      .name('Reset')
+      .listen()
+
+    this.commandFolder
+      .add({voice: this.handlers.voice.bind(this)}, 'voice')
+      .name('Voice')
+      .listen()
+
+    this.commandFolder
+      .add({freezePosition: this.handlers.freezePosition}, 'freezePosition')
+      .name('Lock Position')
+      .listen()
+
+    this.playbackFolder
       .add(this.params, 'timescale', 0, 5, 0.01)
       .name('Animation Speed')
       .listen()
       .onChange(this.handlers.timescale)
 
-    this.globalFolder
-      .add({reset: this.reset.bind(this)}, 'reset')
-      .name('Reset')
+    this.playbackFolder
+      .add(this.params, 'time', 0, 100, 0.01)
+      .name('Seek')
       .listen()
+      .onChange(this.handlers.seek)
 
-    this.globalFolder
-      .add({freezePosition: this.handlers.freezePosition}, 'freezePosition')
-      .name('Freeze Position')
-      .listen()
-
-    this.globalFolder
-      .add({voice: this.handlers.voice.bind(this)}, 'voice')
-      .name('Voice')
+    this.playbackFolder
+      .add({pause: this.handlers.pause}, 'pause')
+      .name('Pause')
       .listen()
 
     for (const key in this.params.characters) {
@@ -115,7 +129,7 @@ export class Panel {
       this.addCharacterControl(folder, key)
     }
 
-    this.globalFolder.open()
+    this.commandFolder.open()
     this.rotationFolder.open()
     this.energyFolder.open()
     this.delayFolder.open()

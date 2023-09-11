@@ -217,7 +217,7 @@ function belowZero(source, threshold) {
   return out
 }
 
-const W_SIZE = 1
+const W_SIZE = 4
 
 export const transformers = {
   lowpass: (v) => lowpass(v, W_SIZE),

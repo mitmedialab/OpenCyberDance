@@ -54,6 +54,7 @@ export class World {
     this.setupPanel()
     this.setupCharacters()
     this.addResizeHandler()
+    this.addSeekBarUpdater()
 
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
@@ -64,14 +65,23 @@ export class World {
     window.world = this
   }
 
+  // Update the time in the seek bar
+  addSeekBarUpdater() {
+    setInterval(() => {
+      this.params.time = Math.round(this.first.mixer.time * 100) / 100
+    }, 1000)
+  }
+
   render() {
     requestAnimationFrame(this.render.bind(this))
 
-    // Update mixers for each character
     const delta = this.clock.getDelta()
 
     for (const character of this.characters) {
-      if (character.mixer) character.mixer.update(delta)
+      if (character.mixer) {
+        // Update mixers for each character
+        character.mixer.update(delta)
+      }
     }
 
     // Render the scene
@@ -242,8 +252,19 @@ export class World {
       this.voice.toggle()
     }
 
-    this.panel.handlers.freezePosition = () => {
-      this.freezeCharacters()
+    this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
+
+    this.panel.handlers.seek = () => {
+      for (const c of this.characters) {
+        c.mixer.setTime(this.params.time)
+      }
+    }
+
+    this.panel.handlers.pause = () => {
+      for (const c of this.characters) {
+        const action = c.actions.get(c.options.action)
+        action.paused = !action.paused
+      }
     }
 
     this.panel.createPanel()

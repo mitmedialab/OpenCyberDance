@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import {trackNameToPart, coreParts, delayParts} from './parts.js'
 
 export class Params {
+  time = 0
   timescale = 1
 
   rotations = {

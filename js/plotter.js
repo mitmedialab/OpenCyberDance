@@ -47,7 +47,7 @@ export class Plotter {
    * Track index of the animation to plot.
    * @type {Set<number>}
    */
-  tracks = new Set([6, 9])
+  tracks = new Set([6, 9, 12, 14, 16, 18])
 
   /** @type {HTMLDivElement | null} */
   domElement = null
@@ -253,7 +253,7 @@ export class Plotter {
    */
   view(track, now) {
     let start = track.times.findIndex((t) => t >= now)
-    start = Math.max(0, start + this.offset)
+    start = Math.max(0, start, start + this.offset)
 
     const end = Math.min(start + this.windowSize, track.times.length)
     const valueSize = track.getValueSize()

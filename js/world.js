@@ -267,16 +267,14 @@ export class World {
     this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
 
     const updatePlotterOnSeek = debounce((c) => {
-      this.plotter?.update(c, {seeking: true})
+      this.characters.forEach((c) => this.plotter?.update(c, {seeking: true}))
     }, 500)
 
     this.panel.handlers.seek = () => {
-      this.characters.forEach((c) => {
-        c.mixer.setTime(this.params.time)
+      this.characters.forEach((c) => c.mixer.setTime(this.params.time))
 
-        // If we are paused, update the plotter.
-        if (this.params.paused) updatePlotterOnSeek(c)
-      })
+      // If we are paused, update the plotter.
+      if (this.params.paused) updatePlotterOnSeek()
     }
 
     this.panel.handlers.pause = () => {

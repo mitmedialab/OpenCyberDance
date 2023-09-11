@@ -6,6 +6,7 @@ import {profile} from './perf.js'
 import * as THREE from 'three'
 
 import {Chart} from 'chart.js'
+import AnnotationPlugin from 'chartjs-plugin-annotation'
 
 const p = {
   u: profile('chart', 15),
@@ -67,6 +68,8 @@ export class Plotter {
 
   constructor(world) {
     this.world = world
+
+    Chart.register(AnnotationPlugin)
 
     this.prepare()
     this.run()
@@ -130,7 +133,7 @@ export class Plotter {
         maintainAspectRatio: false,
         scales: {
           x: {display: false, type: 'linear'},
-          y: {display: false, type: 'linear'},
+          y: {display: false, type: 'linear', stacked: true},
         },
         plugins: {
           legend: {
@@ -146,6 +149,15 @@ export class Plotter {
           decimation: {
             enabled: true,
             algorithm: 'min-max',
+          },
+          annotation: {
+            annotations: [
+              // {
+              //   type: 'line',
+              //   scaleID: 'x',
+              //   value: Math.abs(this.offset),
+              // },
+            ],
           },
         },
       },

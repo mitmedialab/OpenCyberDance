@@ -147,16 +147,19 @@ export class Plotter {
 
     // Appending canvas to the DOM
     if (this.domElement) {
-      const container = this.domElement.querySelector(
-        `[data-plotter-character="${chrId}"]`
-      )
-
-      if (!container) debugger
+      const container = this.containerOf(chrId)
+      if (!container) return
 
       container?.appendChild(canvas)
     }
 
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
+  }
+
+  containerOf(id) {
+    if (!this.domElement) return null
+
+    return this.domElement.querySelector(`[data-plotter-character="${id}"]`)
   }
 
   /**
@@ -182,9 +185,20 @@ export class Plotter {
         this.charts.forEach((_, chrId) => {
           const map = this.charts.get(chrId)
           const item = map?.get(id)
+
+          // Destroy the chart.
           item?.chart.destroy()
-          item?.canvas?.remove()
-          if (item?.canvas) this.domElement?.removeChild(item.canvas)
+
+          // Remove the canvas from the DOM.
+          if (item?.canvas) {
+            item.canvas.remove()
+
+            const container = this.containerOf(chrId)
+            if (!container) return
+
+            container?.removeChild(item.canvas)
+          }
+
           map?.delete(id)
         })
       }

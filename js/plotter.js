@@ -43,7 +43,7 @@ export class Plotter {
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
    */
-  offset = -50
+  offset = -10
 
   /**
    * Track index of the animation to plot.

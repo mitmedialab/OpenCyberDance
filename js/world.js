@@ -75,12 +75,12 @@ export class World {
   render() {
     requestAnimationFrame(this.render.bind(this))
 
-    const delta = this.clock.getDelta()
+    // Update animation mixers for each character
+    if (!this.params.paused) {
+      const delta = this.clock.getDelta()
 
-    for (const character of this.characters) {
-      if (character.mixer) {
-        // Update mixers for each character
-        character.mixer.update(delta)
+      for (const c of this.characters) {
+        c.mixer?.update(delta)
       }
     }
 
@@ -261,9 +261,10 @@ export class World {
     }
 
     this.panel.handlers.pause = () => {
-      for (const c of this.characters) {
-        const action = c.actions.get(c.options.action)
-        action.paused = !action.paused
+      if (this.params.paused) {
+        this.clock.stop()
+      } else {
+        this.clock.start()
       }
     }
 

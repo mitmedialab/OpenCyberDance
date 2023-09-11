@@ -120,9 +120,10 @@ export class Panel {
       .onChange(this.handlers.seek)
 
     this.playbackFolder
-      .add({pause: this.handlers.pause}, 'pause')
-      .name('Pause')
+      .add(this.params, 'paused')
+      .name('Paused')
       .listen()
+      .onChange(this.handlers.pause)
 
     for (const key in this.params.characters) {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)

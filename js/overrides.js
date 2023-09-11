@@ -5,6 +5,7 @@ import {trackNameToPart, coreParts, delayParts} from './parts.js'
 export class Params {
   time = 0
   timescale = 1
+  paused = false
 
   rotations = {
     x: 1,

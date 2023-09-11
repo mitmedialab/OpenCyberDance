@@ -1,7 +1,7 @@
 import {World} from './world.js'
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const world = new World()
-  world.setup()
+  await world.setup()
   world.render()
 })

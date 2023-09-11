@@ -40,7 +40,7 @@ export class World {
     this.first.applyTransform(t, o)
   }
 
-  setup() {
+  async setup() {
     // Setup background
     this.scene.background = new THREE.Color(0xdedede)
     this.scene.fog = new THREE.Fog(0xdedede, 10, 50)

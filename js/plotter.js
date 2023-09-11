@@ -86,10 +86,10 @@ export class Plotter {
     s.gap = `${layout.py}px ${layout.px}px`
   }
 
-  add(chrId) {
-    if (this.charts.has(chrId)) return
+  add(charId) {
+    if (this.charts.has(charId)) return
 
-    this.tracks.forEach((id) => this.createChart(chrId, id))
+    this.tracks.forEach((id) => this.createChart(charId, id))
   }
 
   createAnimation() {
@@ -134,6 +134,7 @@ export class Plotter {
 
   createChart(chrId, trackId) {
     const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
+    console.log(`create: ${chrId}:${trackId}`)
 
     // Log the track name for debugging.
     if (chrId === 'first') console.log(`+ ${track?.name}`)
@@ -185,12 +186,14 @@ export class Plotter {
       },
     })
 
-    // Append canvas to DOM
-    this.domElement?.appendChild(canvas)
+    // Appending canvas to the DOM
+    if (this.domElement) this.domElement.appendChild(canvas)
 
     // Initialize the charts mapping
     if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
+
+    console.log(`> created: ${chrId}#${trackId}`)
   }
 
   /**
@@ -229,18 +232,20 @@ export class Plotter {
    * @param {Character} char
    */
   update(char) {
-    const name = char.options.name
-    if (!this.charts.has(name)) this.add(name)
+    const {name} = char.options
+    const charts = this.charts.get(name)
+
+    // Initialize the chart if it doesn't exist.
+    if (!this.charts.has(name)) {
+      this.add(name)
+    }
 
     this.tracks.forEach((id) => {
-      const state = this.charts.get(name)?.get(id)
-      if (!state) return
-
-      const {chart} = state
-      if (!chart) return
-
       const track = char.currentClip?.tracks[id]
       if (!track) return
+
+      const {chart} = charts?.get(id) ?? {}
+      if (!chart) return
 
       // Apply the dataset.
       this.view(track, char.mixer.time).forEach((points, axis) => {

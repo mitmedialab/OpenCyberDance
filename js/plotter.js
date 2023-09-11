@@ -37,12 +37,12 @@ export class Plotter {
   /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
-  windowSize = 200
+  windowSize = 250
 
   /**
    * Number of keyframes to skip; indicates how far back in time to start.
    */
-  offset = -100
+  offset = -50
 
   /**
    * Track index of the animation to plot.

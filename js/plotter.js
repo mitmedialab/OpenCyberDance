@@ -48,7 +48,7 @@ export class Plotter {
    * Track index of the animation to plot.
    * @type {Set<number>}
    */
-  tracks = new Set([6, 9, 12, 14, 16, 18])
+  tracks = new Set([1, 2, 3, 4, 7])
 
   /** @type {HTMLDivElement | null} */
   domElement = null
@@ -95,6 +95,7 @@ export class Plotter {
     const canvas = document.createElement('canvas')
     canvas.style.width = `${layout.w}px`
     canvas.style.height = `${layout.h}px`
+    canvas.setAttribute('chart-id', `${chrId}:${trackId}`)
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return

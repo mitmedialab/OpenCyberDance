@@ -68,6 +68,8 @@ export class World {
   // Update the time in the seek bar
   addSeekBarUpdater() {
     setInterval(() => {
+      if (this.params.paused) return
+
       this.params.time = Math.round(this.first.mixer.time * 100) / 100
     }, 1000)
   }

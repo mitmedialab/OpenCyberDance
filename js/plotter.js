@@ -8,7 +8,8 @@ import * as THREE from 'three'
 import {Chart} from 'chart.js'
 
 const p = {
-  u: profile('chart', 10),
+  u: profile('chart', 15),
+  o: profile('plotter', 30),
 }
 
 const colors = {
@@ -259,7 +260,9 @@ export class Plotter {
     clearInterval(this.timer)
 
     this.timer = setInterval(() => {
-      this.world?.characters?.forEach(this.update.bind(this))
+      p.o(() => {
+        this.world?.characters?.forEach(this.update.bind(this))
+      })
     }, this.interval)
   }
 }

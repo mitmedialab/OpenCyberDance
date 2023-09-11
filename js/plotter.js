@@ -134,7 +134,7 @@ export class Plotter {
             enabled: false,
             external(t) {
               // @ts-ignore
-              window.t = t
+              // window.t = t
             },
           },
           decimation: {

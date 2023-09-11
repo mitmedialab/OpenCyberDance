@@ -181,8 +181,6 @@ export class Plotter {
     // Appending canvas to the DOM
     if (this.domElement) this.domElement.appendChild(canvas)
 
-    // Initialize the charts mapping
-    if (!this.charts.has(chrId)) this.charts.set(chrId, new Map())
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
   }
 
@@ -227,6 +225,7 @@ export class Plotter {
 
     // Initialize the chart if it doesn't exist.
     if (!this.charts.has(name)) {
+      this.charts.set(name, new Map())
       this.tracks.forEach((id) => this.createChart(name, id))
     }
 

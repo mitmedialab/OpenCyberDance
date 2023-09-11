@@ -75,7 +75,7 @@ export class Plotter {
     this.run()
 
     // @ts-ignore
-    world.p = this
+    window.p = this
   }
 
   get trackNames() {
@@ -228,6 +228,16 @@ export class Plotter {
     // Setup the charts.
     this.charts.set(name, new Map())
     this.tracks.forEach((id) => this.createChart(name, id))
+  }
+
+  current(id = this.tracks[0]) {
+    if (!this.world) return []
+
+    const c = this.world.first
+    const track = c.currentClip?.tracks[id]
+    if (!track) return []
+
+    return this.view(track, c.mixer.time)
   }
 
   /**

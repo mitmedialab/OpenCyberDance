@@ -213,11 +213,12 @@ export class Plotter {
   /**
    * @param {Character} char
    */
-  update(char) {
+  update(char, options = {seeking: false}) {
     if (!this.domElement) return
-    if (this.world?.params.paused) return
+    if (this.world?.params.paused && !options.seeking) return
 
     const {name} = char.options
+
     const charts = this.charts.get(name)
 
     // Setup the charts if it hasn't been done yet.

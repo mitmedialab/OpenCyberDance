@@ -233,9 +233,9 @@ export class World {
       return this.updateParams({rotation: true})
     }, 100)
 
-    this.panel.handlers.timescale = () => {
+    this.panel.handlers.timescale = (timescale) => {
       for (const character of this.characters) {
-        character.mixer.timeScale = this.params.timescale
+        character.mixer.timeScale = timescale
       }
     }
 
@@ -267,17 +267,13 @@ export class World {
 
     this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
 
-    this.panel.handlers.seek = () => {
-      this.characters.forEach((c) => c.mixer.setTime(this.params.time))
+    this.panel.handlers.seek = (time) => {
+      this.characters.forEach((c) => c.mixer.setTime(time))
       this.updatePlotterOnPause()
     }
 
-    this.panel.handlers.pause = () => {
-      if (this.params.paused) {
-        this.clock.stop()
-      } else {
-        this.clock.start()
-      }
+    this.panel.handlers.pause = (paused) => {
+      paused ? this.clock.stop() : this.clock.start()
     }
 
     this.panel.createPanel()

@@ -37,9 +37,6 @@ export function applyTrackTransform(track, transform, options = {}) {
   // Setup each axis' series
   for (const a of axes) series[a] = []
 
-  /** @type {Quaternion[]} */
-  const original = []
-
   const size = track.getValueSize()
 
   track.times.forEach((time, timeIdx) => {
@@ -47,9 +44,6 @@ export function applyTrackTransform(track, transform, options = {}) {
 
     const q = new Quaternion().fromArray(track.values, offset)
     q.normalize()
-
-    // Save original quaternion
-    original.push(q.clone())
 
     const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
 
@@ -69,8 +63,6 @@ export function applyTrackTransform(track, transform, options = {}) {
   const values = []
 
   for (let i = 0; i < series.x.length; i++) {
-    const o = original[i]
-
     // Convert euler back to quaternion
     const e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
     const q = new Quaternion().setFromEuler(e)

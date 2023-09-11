@@ -114,7 +114,7 @@ export class Panel {
       .onChange(this.handlers.timescale)
 
     this.playbackFolder
-      .add(this.params, 'time', 0, 100, 0.01)
+      .add(this.params, 'time', 0, 100, 0.001)
       .name('Seek')
       .listen()
       .onChange(this.handlers.seek)

@@ -209,6 +209,7 @@ export class Plotter {
    */
   update(char) {
     if (!this.domElement) return
+    if (this.world?.params.paused) return
 
     const {name} = char.options
     const charts = this.charts.get(name)

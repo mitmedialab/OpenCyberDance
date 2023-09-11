@@ -147,6 +147,11 @@ export function gaussian(source, windowSize) {
       kernelIndex++
     }
 
+    // ? Poom: avoid zero!
+    if (newValue === 0) {
+      newValue = source[j]
+    }
+
     out.push(newValue)
   }
 

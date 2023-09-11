@@ -269,8 +269,8 @@ export class Plotter {
       const scale = chart.config.options?.scales?.x
 
       if (scale) {
-        scale.min = view.min
-        scale.max = view.max
+        scale.min = view.start
+        scale.max = view.end
       }
 
       view.series.forEach((points, axis) => {
@@ -308,7 +308,7 @@ export class Plotter {
       }
     }
 
-    return {series, min: track.times[start], max: track.times[end]}
+    return {series, start: track.times[start], end: track.times[end]}
   }
 
   get interval() {

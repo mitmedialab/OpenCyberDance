@@ -81,9 +81,7 @@ export class Plotter {
     s.top = `${layout.top}px`
     // s.pointerEvents = 'none'
 
-    s.display = 'grid'
-    s.gridTemplateColumns = `repeat(${layout.cols}, ${layout.w}px)`
-    s.gap = `${layout.py}px ${layout.px}px`
+    s.display = 'flex'
   }
 
   createChart(chrId, trackId) {
@@ -95,7 +93,7 @@ export class Plotter {
     const canvas = document.createElement('canvas')
     canvas.style.width = `${layout.w}px`
     canvas.style.height = `${layout.h}px`
-    canvas.setAttribute('chart-id', `${chrId}:${trackId}`)
+    canvas.setAttribute('data-plotter-id', `${chrId}:${trackId}`)
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -147,7 +145,15 @@ export class Plotter {
     })
 
     // Appending canvas to the DOM
-    if (this.domElement) this.domElement.appendChild(canvas)
+    if (this.domElement) {
+      const container = this.domElement.querySelector(
+        `[data-plotter-character="${chrId}"]`
+      )
+
+      if (!container) debugger
+
+      container?.appendChild(canvas)
+    }
 
     this.charts.get(chrId)?.set(trackId, {chart, canvas})
   }
@@ -184,18 +190,30 @@ export class Plotter {
     })
   }
 
+  setupCharts(name) {
+    if (this.charts.has(name)) return
+
+    // Initialize the plotter container.
+    const container = document.createElement('div')
+    container.setAttribute('data-plotter-character', name)
+    this.domElement?.appendChild(container)
+
+    // Setup the charts.
+    this.charts.set(name, new Map())
+    this.tracks.forEach((id) => this.createChart(name, id))
+  }
+
   /**
    * @param {Character} char
    */
   async update(char) {
+    if (!this.domElement) return
+
     const {name} = char.options
     const charts = this.charts.get(name)
 
-    // Initialize the chart if it doesn't exist.
-    if (!this.charts.has(name)) {
-      this.charts.set(name, new Map())
-      this.tracks.forEach((id) => this.createChart(name, id))
-    }
+    // Setup the charts if it hasn't been done yet.
+    this.setupCharts(name)
 
     this.tracks.forEach((id) => {
       const track = char.currentClip?.tracks[id]

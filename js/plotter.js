@@ -73,6 +73,9 @@ export class Plotter {
 
     this.prepare()
     this.run()
+
+    // @ts-ignore
+    world.p = plotter
   }
 
   get trackNames() {

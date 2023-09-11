@@ -62,8 +62,8 @@ export class World {
     this.container.appendChild(this.stats.domElement)
     this.container.appendChild(this.plotter.domElement)
 
-    // Expose the world instance
-    window.world = this
+    // Expose the world instance as `w`
+    window.w = this
   }
 
   // Update the time in the seek bar

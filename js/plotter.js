@@ -133,6 +133,7 @@ export class Plotter {
           tooltip: {
             enabled: false,
             external(t) {
+              // @ts-ignore
               window.t = t
             },
           },
@@ -206,7 +207,7 @@ export class Plotter {
   /**
    * @param {Character} char
    */
-  async update(char) {
+  update(char) {
     if (!this.domElement) return
 
     const {name} = char.options

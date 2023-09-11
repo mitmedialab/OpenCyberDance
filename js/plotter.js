@@ -116,6 +116,10 @@ export class Plotter {
         animation: false,
         parsing: false,
         normalized: true,
+        interaction: {
+          intersect: false,
+          mode: 'x',
+        },
         responsive: false,
         maintainAspectRatio: false,
         scales: {
@@ -126,9 +130,15 @@ export class Plotter {
           legend: {
             display: false,
           },
+          tooltip: {
+            enabled: false,
+            external(t) {
+              window.t = t
+            },
+          },
           decimation: {
             enabled: true,
-            algorithm: 'lttb',
+            algorithm: 'min-max',
           },
         },
       },

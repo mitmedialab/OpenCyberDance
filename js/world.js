@@ -190,7 +190,7 @@ export class World {
     const {name, action} = char.options
 
     // Update the dropdown animation's active state
-    let dropdown = world.panel.characterFolder.children
+    let dropdown = this.panel.characterFolder.children
       .find((k) => k.character === name)
       .controllers.find((c) => c.property === 'action')
       .options([...char.actions.keys()])
@@ -201,7 +201,7 @@ export class World {
     dropdown.updateDisplay()
 
     if (name === 'first') {
-      const seek = world.panel.playbackFolder.children.find(
+      const seek = this.panel.playbackFolder.children.find(
         (c) => c.property === 'time'
       )
 

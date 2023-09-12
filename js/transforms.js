@@ -1,7 +1,8 @@
+// @ts-check
+
 import * as THREE from 'three'
 
 import {
-  Vector3,
   Quaternion,
   KeyframeTrack,
   QuaternionKeyframeTrack,
@@ -11,12 +12,24 @@ import {
 /** @type {Axis[]} */
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {(v: number[], axis: Axis) => void} Transform */
+/** @typedef {{threshold?: number, axis?: Axis}} Options */
+/** @typedef {(v: number[], o: Options) => number[]} Transform */
+
+/** @param {number} n */
+function factorial(n) {
+  let result = 1
+
+  for (let i = 2; i <= n; i++) {
+    result *= i
+  }
+
+  return result
+}
 
 /**
  * @param {KeyframeTrack} track
  * @param {Transform} transform
- * @param {*} options
+ * @param {Options} options
  * @returns {Float32Array}
  **/
 export function applyTrackTransform(track, transform, options = {}) {
@@ -51,12 +64,14 @@ export function applyTrackTransform(track, transform, options = {}) {
     for (const a of axes) series[a].push(e[a])
   })
 
+  const {axis} = options ?? {}
+
   // Process each axis' data
   for (const a of axes) {
     // Exclude the axis that are not filtered
-    if (options?.axis && !options?.axis?.includes(a)) continue
+    if (axis && !axis?.includes(a)) continue
 
-    series[a] = transform(series[a], a)
+    series[a] = transform(series[a], options)
   }
 
   // Zip back the transformed value in each axis.
@@ -73,8 +88,11 @@ export function applyTrackTransform(track, transform, options = {}) {
   return new Float32Array(values)
 }
 
-export function lowpass(source, windowSize) {
+/** @type {Transform} */
+export function lowpass(source, options) {
   const out = []
+
+  const {threshold: windowSize = 2} = options ?? {}
 
   for (let i = 0; i < source.length; i++) {
     let sum = 0
@@ -91,8 +109,11 @@ export function lowpass(source, windowSize) {
   return out
 }
 
-export function highpass(source, windowSize) {
+/** @type {Transform} */
+export function highpass(source, options) {
   const out = []
+
+  const {threshold: windowSize = 2} = options ?? {}
 
   for (let i = 0; i < source.length; i++) {
     let sum = 0
@@ -109,7 +130,10 @@ export function highpass(source, windowSize) {
   return out
 }
 
-export function gaussian(source, windowSize) {
+/** @type {Transform} */
+export function gaussian(source, options) {
+  const {threshold: windowSize = 2} = options ?? {}
+
   const sigma = windowSize / 2.0
   let sum = 0
 
@@ -167,12 +191,10 @@ export function gaussian(source, windowSize) {
   return out
 }
 
-/**
- * @param {number[]} source
- * @param {number} order
- * @returns {number[]}
- */
-function derivative(source, order) {
+/** @type {Transform} */
+function derivative(source, options) {
+  const {threshold: order = 2} = options ?? {}
+
   const out = []
 
   // this represents the difference in points which is assumed to be 1
@@ -204,17 +226,10 @@ function derivative(source, order) {
   return out
 }
 
-function factorial(n) {
-  let result = 1
+/** @type {Transform} */
+function capMin(source, options) {
+  const {threshold = 0.1} = options ?? {}
 
-  for (let i = 2; i <= n; i++) {
-    result *= i
-  }
-
-  return result
-}
-
-function capMin(source, threshold) {
   let out = []
 
   let previous = source[0]
@@ -231,12 +246,10 @@ function capMin(source, threshold) {
   return out
 }
 
-const W_SIZE = 4
-
 export const transformers = {
-  lowpass: (v) => lowpass(v, W_SIZE),
-  highpass: (v) => highpass(v, W_SIZE),
-  gaussian: (v) => gaussian(v, W_SIZE),
-  derivative: (v) => derivative(v, W_SIZE),
-  capMin: (v) => capMin(v, 0.5),
+  lowpass,
+  highpass,
+  gaussian,
+  derivative,
+  capMin,
 }

@@ -297,7 +297,12 @@ export class Character {
   }
 
   freezePosition() {
-    this.overrideTrack('Hips.position', new Float32Array(7365).fill(0))
+    const id = 'Hips.position'
+
+    const size = this.currentClip.tracks.find((t) => t.name === id).values
+      .length
+
+    this.overrideTrack(id, new Float32Array(size).fill(0))
   }
 
   /**

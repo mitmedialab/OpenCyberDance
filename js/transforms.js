@@ -242,10 +242,31 @@ function capMin(source, options) {
   return out
 }
 
+/** @type {Transform} */
+function capMax(source, options) {
+  const {threshold = 0.1} = options ?? {}
+
+  let out = []
+
+  let previous = source[0]
+
+  for (let i = 0; i < source.length; i++) {
+    if (source[i] <= threshold) {
+      out.push(source[i])
+      previous = source[i]
+    } else {
+      out.push(previous)
+    }
+  }
+
+  return out
+}
+
 export const transformers = {
   lowpass,
   highpass,
   gaussian,
   derivative,
   capMin,
+  capMax,
 }

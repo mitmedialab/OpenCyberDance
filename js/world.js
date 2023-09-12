@@ -39,10 +39,15 @@ export class World {
   /**
    *
    * @param {keyof typeof import('./transforms.js').transformers} t
-   * @param {import('./transforms.js').Options} o
+   * @param {import('./transforms.js').Options & {tracks: (number|string|RegExp)[]}} o
    */
   transform(t, o) {
-    this.first.applyTransform(t, o)
+    const options = {
+      ...o,
+      ...(o.tracks && {tracks: this.query(...o.tracks)}),
+    }
+
+    this.first.applyTransform(t, options)
     this.updatePlotterOnPause()
   }
 

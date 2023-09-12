@@ -29,6 +29,8 @@ const layout = {
   py: 5,
 }
 
+const AXES = ['x', 'y', 'z', 'w']
+
 export class Plotter {
   /**
    * How many frames per second to plot?
@@ -65,6 +67,9 @@ export class Plotter {
 
   /// Internal timer
   timer = 0
+
+  /// Visible axis
+  axes = [...AXES]
 
   constructor(world) {
     this.world = world
@@ -110,13 +115,11 @@ export class Plotter {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const axes = ['x', 'y', 'z', 'w']
-
     // Create chart
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
-        datasets: axes.map((a) => ({
+        datasets: AXES.map((a) => ({
           parsing: false,
           normalized: true,
           data: [],
@@ -300,10 +303,15 @@ export class Plotter {
     /** @type {{x: number, y: number}[][]} */
     const series = Array.from({length: valueSize}).map(() => [])
 
+    const visibility = AXES.map((a) => this.axes.includes(a))
+
     for (let frame = start; frame < end; frame++) {
       const time = track.times[frame]
 
       for (let axis = 0; axis < valueSize; axis++) {
+        // Do not render the axis that are not visible.
+        if (!visibility[axis]) continue
+
         series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
       }
     }

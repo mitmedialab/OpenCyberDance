@@ -147,10 +147,19 @@ export function gaussian(source, windowSize) {
       kernelIndex++
     }
 
-    // ? Poom: avoid zero!
-    if (newValue === 0) {
-      newValue = source[j]
-    }
+    const deviation = source[i] - newValue
+
+    // // ? Poom: avoid sudden change!
+    // if (Math.abs(deviation) > 0.2) {
+    //   newValue = source[i]
+    // }
+
+    // // ? Poom: avoid zero!
+    // if (newValue < 0.1 || newValue > 0.9) {
+    //   newValue = source[i]
+    // }
+
+    newValue = source[i]
 
     out.push(newValue)
   }
@@ -205,7 +214,7 @@ function factorial(n) {
   return result
 }
 
-function belowZero(source, threshold) {
+function capMin(source, threshold) {
   let out = []
 
   let previous = source[0]
@@ -229,5 +238,5 @@ export const transformers = {
   highpass: (v) => highpass(v, W_SIZE),
   gaussian: (v) => gaussian(v, W_SIZE),
   derivative: (v) => derivative(v, W_SIZE),
-  belowZero: (v) => belowZero(v, 0.5),
+  capMin: (v) => capMin(v, 0.5),
 }

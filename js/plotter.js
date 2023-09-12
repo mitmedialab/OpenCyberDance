@@ -99,12 +99,16 @@ export class Plotter {
     s.display = 'flex'
   }
 
+  trackById(id, chr = 'first') {
+    return this.world?.characterByName(chr)?.trackByKey(id)
+  }
+
   createChart(chrId, trackId) {
-    const track = this.world?.characterByName(chrId)?.trackByKey(trackId)
-    if (!track?.name) return
+    const track = this.trackById(trackId, chrId)
+    if (!track) return
 
     // Log the track name for debugging.
-    if (chrId === 'first') console.log(`+ ${track?.name}`)
+    if (chrId === 'first') console.log(`+ ${track.name}`)
 
     const canvas = document.createElement('canvas')
     canvas.style.width = `${layout.w}px`
@@ -194,9 +198,8 @@ export class Plotter {
 
     next.forEach((id) => {
       if (!this.tracks.has(id)) {
-        console.log(`+ ${id}`)
-
         this.tracks.add(id)
+
         this.charts.forEach((_, chrId) => {
           this.createChart(chrId, id)
         })
@@ -205,9 +208,9 @@ export class Plotter {
 
     this.tracks.forEach((id) => {
       if (!next.includes(id)) {
-        console.log(`- ${id}`)
         this.tracks.delete(id)
 
+        // Remove each charts
         this.charts.forEach((_, chrId) => {
           const map = this.charts.get(chrId)
           const item = map?.get(id)
@@ -216,6 +219,10 @@ export class Plotter {
           item?.canvas?.remove()
           map?.delete(id)
         })
+
+        // Log deletion
+        const name = this.trackById(id)?.name
+        console.log(`- ${name}`)
       }
     })
   }

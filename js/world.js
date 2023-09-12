@@ -42,6 +42,9 @@ export class World {
    * @param {import('./transforms.js').Options & {tracks: (number|string|RegExp)[]}} o
    */
   transform(t, o) {
+    // Convert a single track query to an array.
+    if (o.tracks && !Array.isArray(o.tracks)) o.tracks = [o.tracks]
+
     const options = {
       ...o,
       ...(o.tracks && {tracks: this.query(...o.tracks)}),

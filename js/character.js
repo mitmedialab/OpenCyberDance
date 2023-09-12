@@ -486,7 +486,7 @@ export class Character {
    * @param {(number|string|RegExp)[]} query
    * @returns {number[]}
    */
-  query(query) {
+  query(...query) {
     /** @type {Set<number>} */
     const ids = new Set()
     query.forEach((q) => typeof q === 'number' && ids.add(q))

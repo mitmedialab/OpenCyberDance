@@ -297,7 +297,7 @@ export class World {
    * @param {(number|string|RegExp)[]} query
    * @returns {number[]}
    */
-  query(query) {
-    return this.first.query(query)
+  query(...query) {
+    return this.first.query(...query)
   }
 }

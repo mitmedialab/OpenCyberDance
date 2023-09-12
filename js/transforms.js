@@ -225,9 +225,7 @@ function derivative(source, options) {
 /** @type {Transform} */
 function capMin(source, options) {
   const {threshold = 0.1} = options ?? {}
-
   let out = []
-
   let previous = source[0]
 
   for (let i = 0; i < source.length; i++) {

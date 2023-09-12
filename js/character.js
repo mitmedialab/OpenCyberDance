@@ -1,3 +1,5 @@
+// @ts-check
+
 import * as THREE from 'three'
 import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 
@@ -19,7 +21,7 @@ import {
 import {KeyframeAnalyzer} from './analyze.js'
 import {applyTrackTransform, transformers} from './transforms.js'
 
-/** @typedef {{eulers: THREE.Euler[], timings: number[], duration: number}} AnimationSource */
+/** @typedef {{eulers: THREE.Euler[], timings: Float32Array, duration: number}} AnimationSource */
 
 const loader = new GLTFLoader()
 const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
@@ -27,17 +29,17 @@ const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
 export class Character {
   /**
    * Reference to scene.
-   * @type {THREE.Scene}
+   * @type {THREE.Scene | null}
    **/
   scene = null
 
-  /** @type {THREE.AnimationMixer} */
+  /** @type {THREE.AnimationMixer | null} */
   mixer = null
 
-  /** @type {THREE.SkeletonHelper} */
+  /** @type {THREE.SkeletonHelper | null} */
   skeleton = null
 
-  /** @type {THREE.Scene} */
+  /** @type {THREE.Scene | null} */
   model = null
 
   /** @type {Map<string, AnimationSource[]>} */
@@ -46,15 +48,15 @@ export class Character {
   /** @type {Map<string, AnimationAction>} */
   actions = new Map()
 
-  /** @type {Params} */
+  /** @type {Params | null} */
   params = null
 
-  /** @type {KeyframeAnalyzer} */
+  /** @type {KeyframeAnalyzer | null} */
   analyzer = null
 
   options = {
     /** @type {keyof typeof Params.prototype.characters} */
-    name: '',
+    name: 'first',
 
     action: '',
 
@@ -94,7 +96,7 @@ export class Character {
   }
 
   /**
-   * @param {keyof typeof Character.sources} name
+   * @param {typeof Character.prototype.options} options
    **/
   constructor(options) {
     if (options) this.options = {...this.options, ...options}
@@ -110,11 +112,16 @@ export class Character {
   }
 
   setPosition(x = 0, y = 0, z = 0) {
-    this.model.position.set(x, y, z)
+    this.model?.position.set(x, y, z)
   }
 
   clear() {
+    if (!this.scene || !this.model) return
+
+    // @ts-ignore
     dispose(this.mixer)
+
+    // Remove the character model
     dispose(this.model)
     this.scene.remove(this.model)
 
@@ -149,7 +156,7 @@ export class Character {
     this.options.action = name
 
     // Analyze the keyframe
-    if (this.options.analyze) {
+    if (this.options.analyze && prev) {
       this.analyzer = new KeyframeAnalyzer()
       this.analyzer.analyze(prev.getClip().tracks)
     }
@@ -191,17 +198,23 @@ export class Character {
 
     // Add the character model
     this.model = gltf.scene
+
+    if (!this.scene || !this.model || !this.params) return
+
     this.scene.add(this.model)
 
     // Cast shadows
     this.model.traverse((object) => {
+      // @ts-ignore
       if (object.isMesh) object.castShadow = true
     })
 
     // Adjust character scale
     const scale = config.scale
     this.model.scale.set(scale, scale, scale)
-    this.model.position.set(...config.position)
+
+    const [x, y, z] = config.position
+    this.model.position.set(x, y, z)
 
     // Add model skeleton
     this.skeleton = new THREE.SkeletonHelper(this.model)
@@ -245,7 +258,10 @@ export class Character {
       return
     }
 
-    this.play(this.actions.get(config.action))
+    const action = this.actions.get(config.action)
+    if (!action) return
+
+    this.play(action)
   }
 
   /**
@@ -269,7 +285,7 @@ export class Character {
       const duration = track.times[track.times.length - 1] - track.times[0]
 
       /** @type {AnimationSource} */
-      const source = {timings, duration}
+      const source = {timings, duration, eulers: []}
 
       // Cache euler angles for rotation tracks.
       if (track instanceof QuaternionKeyframeTrack) {
@@ -281,7 +297,7 @@ export class Character {
       }
 
       if (!this.original.has(clip.name)) this.original.set(clip.name, [])
-      this.original.get(clip.name).push(source)
+      this.original.get(clip.name)?.push(source)
     })
   }
 
@@ -299,9 +315,10 @@ export class Character {
   freezePosition() {
     const id = 'Hips.position'
 
-    const size = this.currentClip.tracks.find((t) => t.name === id).values
+    const size = this.currentClip?.tracks.find((t) => t.name === id)?.values
       .length
 
+    if (!size) return
     this.overrideTrack(id, new Float32Array(size).fill(0))
   }
 
@@ -317,14 +334,19 @@ export class Character {
     clip.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
+      if (!original || !this.params) return
+
       track.times = original.timings.slice(0)
 
       if (flags.core) {
         // Override delays
+        // @ts-ignore
         overrideDelay(track, this.params.delays)
 
         // Override energy
         const part = trackNameToPart(track.name, 'core')
+        if (!part) return
+
         const energy = this.params.energy[part]
         overrideEnergy(track, energy)
       }
@@ -344,8 +366,12 @@ export class Character {
    * @param {AnimationClip} clip
    */
   fadeIntoModifiedAction(clip) {
+    if (!this.mixer) return
+
     const prevAction = this.actions.get(clip.name)
-    this.mixer.uncacheAction(prevAction)
+    if (!prevAction) return
+
+    this.mixer.uncacheAction(prevAction.getClip())
 
     const action = this.mixer.clipAction(clip.clone())
     this.actions.set(clip.name, action)
@@ -356,10 +382,15 @@ export class Character {
   }
 
   async reset() {
+    if (!this.params) return
+
     console.log('>>> Resetting character!')
     const config = this.params.characters[this.options.name]
 
+    // @ts-ignore
     this.options.model = config.model
+
+    // @ts-ignore
     this.options.action = null
 
     await this.setup()
@@ -367,12 +398,13 @@ export class Character {
 
   /**
    * @param {string|number} key
-   * @param {number[]} values
+   * @param {Float32Array | number[]} values
    */
   overrideTrack(key, values) {
-    key = this.trackIdByKey(key)
+    key = this.trackIdByKey(key) ?? 0
 
     const clip = this.currentClip
+    if (!clip) return
 
     const track = clip.tracks[key]
     if (!track) return
@@ -403,6 +435,11 @@ export class Character {
     }
   }
 
+  /**
+   * @param {import('./transforms.js').Transform} transform
+   * @param {import('./transforms.js').Options} options
+   * @returns
+   */
   applyTransform(transform, options) {
     const transformer = transformers[transform]
     if (!transformer) return
@@ -410,13 +447,18 @@ export class Character {
     console.log(`> applying ${transform} transform`)
 
     const clip = this.currentClip
+    if (!clip) return
 
-    for (const track of clip.tracks) {
+    clip.tracks.forEach((track, id) => {
+      // Exclude the tracks that does not match.
+      if (options.tracks && !options.tracks?.includes(id)) return
+
+      // Apply the transform to each track.
       const values = applyTrackTransform(track, transformer, options)
       track.values = values
 
       track.validate()
-    }
+    })
 
     this.fadeIntoModifiedAction(clip)
   }
@@ -425,13 +467,42 @@ export class Character {
   trackIdByKey(key) {
     if (typeof key === 'number') return key
 
-    return this.currentClip.tracks.findIndex(({name}) => {
+    return this.currentClip?.tracks.findIndex(({name}) => {
       return key instanceof RegExp ? key.test(name) : name.includes(key)
     })
   }
 
   /** @param {number | string | RegExp} key */
   trackByKey(key) {
-    return this.currentClip.tracks[this.trackIdByKey(key)]
+    const id = this.trackIdByKey(key)
+    if (!id) return
+
+    return this.currentClip?.tracks[id]
+  }
+
+  /**
+   * Queries the track id by name of regex.
+   *
+   * @param {(number|string|RegExp)[]} query
+   * @returns {number[]}
+   */
+  queryTrackIds(query) {
+    /** @type {Set<number>} */
+    const ids = new Set()
+    query.forEach((q) => typeof q === 'number' && ids.add(q))
+
+    const tracks = this.currentClip?.tracks
+    if (!tracks) return [...ids]
+
+    for (const q of query) {
+      tracks
+        .filter((t) => {
+          if (typeof q === 'string') return t.name.includes(q)
+          if (q instanceof RegExp) return q.test(t.name)
+        })
+        .forEach((t) => ids.add(tracks.indexOf(t)))
+    }
+
+    return [...ids]
   }
 }

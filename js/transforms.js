@@ -12,8 +12,11 @@ import {
 /** @type {Axis[]} */
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {{threshold?: number, axis?: Axis}} Options */
+/** @typedef {{threshold?: number, axis?: Axis, tracks?: number[]}} Options */
 /** @typedef {(v: number[], o: Options) => number[]} Transform */
+
+/// We are transforming in Euler space, so we don't need `w`
+const AXES = ['x', 'y', 'z']
 
 /** @param {number} n */
 function factorial(n) {
@@ -33,22 +36,17 @@ function factorial(n) {
  * @returns {Float32Array}
  **/
 export function applyTrackTransform(track, transform, options = {}) {
-  const axes = ['x', 'y', 'z']
+  const {axis} = options ?? {}
 
-  const isRotation = track instanceof QuaternionKeyframeTrack
+  // Temporarily disable transform for vector tracks.
   const isVector = track instanceof VectorKeyframeTrack
-
-  // Temporarily disable transform for vector tracks
   if (isVector) return track.values
-
-  // Add w axis if it's a quaternion
-  // if (isRotation) axes.push('w')
 
   /** @type {Record<string, number[]>} */
   const series = {}
 
   // Setup each axis' series
-  for (const a of axes) series[a] = []
+  for (const a of AXES) series[a] = []
 
   const size = track.getValueSize()
 
@@ -61,13 +59,11 @@ export function applyTrackTransform(track, transform, options = {}) {
     const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
 
     // Append each axis' value to their series
-    for (const a of axes) series[a].push(e[a])
+    for (const a of AXES) series[a].push(e[a])
   })
 
-  const {axis} = options ?? {}
-
   // Process each axis' data
-  for (const a of axes) {
+  for (const a of AXES) {
     // Exclude the axis that are not filtered
     if (axis && !axis?.includes(a)) continue
 

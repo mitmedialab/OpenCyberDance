@@ -1,4 +1,4 @@
-/** @param {THREE.Scene[]} scenes */
+/** @param {(THREE.Scene | null)[]} scenes */
 export const dispose = (...scenes) => {
   scenes.forEach((scene) => {
     if (!scene) return

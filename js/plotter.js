@@ -246,7 +246,7 @@ export class Plotter {
 
     const c = this.world.first
     const track = c.currentClip?.tracks[id]
-    if (!track) return []
+    if (!track || !c.mixer) return []
 
     return this.view(track, c.mixer.time)
   }
@@ -270,7 +270,7 @@ export class Plotter {
       if (!track) return
 
       const {chart} = charts?.get(id) ?? {}
-      if (!chart) return
+      if (!chart || !char.mixer) return
 
       // Apply the dataset.
       const view = this.view(track, char.mixer.time)

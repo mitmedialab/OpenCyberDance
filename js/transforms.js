@@ -167,7 +167,7 @@ export function gaussian(source, options) {
       kernelIndex++
     }
 
-    const deviation = source[i] - newValue
+    // const deviation = source[i] - newValue
 
     // // ? Poom: avoid sudden change!
     // if (Math.abs(deviation) > 0.2) {
@@ -179,7 +179,7 @@ export function gaussian(source, options) {
     //   newValue = source[i]
     // }
 
-    newValue = source[i]
+    // newValue = source[i]
 
     out.push(newValue)
   }

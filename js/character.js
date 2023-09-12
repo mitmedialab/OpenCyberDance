@@ -437,7 +437,7 @@ export class Character {
 
   /**
    *
-   * @param {keyof typeof import('./transforms.js').transformers} transform
+   * @param {keyof typeof import('./transforms.js').transformers | import('./transforms.js').Transform} transform
    * @param {import('./transforms.js').Options & {tracks: Q | Q[]}} options
    */
   transform(transform, options) {
@@ -451,15 +451,20 @@ export class Character {
       options.tracks = this.query(...options.tracks)
     }
 
-    const transformer = transformers[transform]
+    const isKey = typeof transform === 'string'
+    const name = isKey ? transform : transform.name
+
+    const transformer = isKey ? transformers[transform] : transform
     if (!transformer) return
 
-    console.log(`> applying ${transform} transform`)
+    console.log(`> applying ${name} transform`)
 
     const clip = this.currentClip
     if (!clip) return
 
     clip.tracks.forEach((track, id) => {
+      if (!transformer) return
+
       // Exclude the tracks that does not match.
       if (options.tracks && !options.tracks?.includes(id)) return
 

@@ -87,3 +87,8 @@ w.transform('capMin', {
   - pause แค่บางส่วน (ค่อยทำ)
 - หยุดนานแค่ไหน? กำหนดเองได้
   - Parameters
+
+## Graph Visualizer for Delays/Energy/Shifting Relations
+
+- Currently not applying to the sidebar graph
+- Keep as-is (no animation from ChartJS)

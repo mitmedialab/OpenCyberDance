@@ -436,7 +436,7 @@ export class Character {
   }
 
   /**
-   * @param {import('./transforms.js').Transform} transform
+   * @param {keyof typeof import('./transforms.js').transformers} transform
    * @param {import('./transforms.js').Options} options
    * @returns
    */
@@ -486,7 +486,7 @@ export class Character {
    * @param {(number|string|RegExp)[]} query
    * @returns {number[]}
    */
-  queryTrackIds(query) {
+  query(query) {
     /** @type {Set<number>} */
     const ids = new Set()
     query.forEach((q) => typeof q === 'number' && ids.add(q))

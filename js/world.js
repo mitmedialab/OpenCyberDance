@@ -36,6 +36,11 @@ export class World {
     return this.first.currentClip.tracks.map((t) => t.name)
   }
 
+  /**
+   *
+   * @param {keyof typeof import('./transforms.js').transformers} t
+   * @param {import('./transforms.js').Options} o
+   */
   transform(t, o) {
     this.first.applyTransform(t, o)
     this.updatePlotterOnPause()
@@ -292,7 +297,7 @@ export class World {
    * @param {(number|string|RegExp)[]} query
    * @returns {number[]}
    */
-  queryTrackIds(query) {
-    return this.first.queryTrackIds(query)
+  query(query) {
+    return this.first.query(query)
   }
 }

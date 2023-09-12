@@ -194,7 +194,7 @@ export class Plotter {
   select(...query) {
     if (!this.world) return
 
-    const next = this.world.queryTrackIds(query)
+    const next = this.world.query(query)
 
     next.forEach((id) => {
       if (!this.tracks.has(id)) {

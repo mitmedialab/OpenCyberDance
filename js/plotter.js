@@ -189,7 +189,7 @@ export class Plotter {
   }
 
   /**
-   * @param {(number|string|RegExp)[]} query
+   * @param {import('./character.js').Q[]} query
    */
   select(...query) {
     if (!this.world) return

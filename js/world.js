@@ -36,21 +36,9 @@ export class World {
     return this.first.currentClip.tracks.map((t) => t.name)
   }
 
-  /**
-   *
-   * @param {keyof typeof import('./transforms.js').transformers} t
-   * @param {import('./transforms.js').Options & {tracks: (number|string|RegExp)[]}} o
-   */
+  /** @type {typeof Character.prototype.transform} */
   transform(t, o) {
-    // Convert a single track query to an array.
-    if (o.tracks && !Array.isArray(o.tracks)) o.tracks = [o.tracks]
-
-    const options = {
-      ...o,
-      ...(o.tracks && {tracks: this.query(...o.tracks)}),
-    }
-
-    this.first.applyTransform(t, options)
+    this.first.transform(t, o)
     this.updatePlotterOnPause()
   }
 
@@ -302,7 +290,7 @@ export class World {
   /**
    * Queries the track id by name of regex.
    *
-   * @param {(number|string|RegExp)[]} query
+   * @param {(import('./character.js').Q)[]} query
    * @returns {number[]}
    */
   query(...query) {

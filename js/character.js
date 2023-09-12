@@ -22,6 +22,7 @@ import {KeyframeAnalyzer} from './analyze.js'
 import {applyTrackTransform, transformers} from './transforms.js'
 
 /** @typedef {{eulers: THREE.Euler[], timings: Float32Array, duration: number}} AnimationSource */
+/** @typedef {number|string|RegExp} Q */
 
 const loader = new GLTFLoader()
 const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
@@ -416,7 +417,6 @@ export class Character {
 
     if (values.length !== size) {
       console.warn(`track length mismatch. ${size} != ${values.length}`)
-      // return
     }
 
     clip.tracks[key].values = new Float32Array(values)
@@ -436,11 +436,21 @@ export class Character {
   }
 
   /**
+   *
    * @param {keyof typeof import('./transforms.js').transformers} transform
-   * @param {import('./transforms.js').Options} options
-   * @returns
+   * @param {import('./transforms.js').Options & {tracks: Q | Q[]}} options
    */
-  applyTransform(transform, options) {
+  transform(transform, options) {
+    if (options.tracks) {
+      // Convert a single track query to an array.
+      if (!Array.isArray(options.tracks)) {
+        options.tracks = [options.tracks]
+      }
+
+      // Query the track ids.
+      options.tracks = this.query(...options.tracks)
+    }
+
     const transformer = transformers[transform]
     if (!transformer) return
 
@@ -483,7 +493,7 @@ export class Character {
   /**
    * Queries the track id by name of regex.
    *
-   * @param {(number|string|RegExp)[]} query
+   * @param {Q[]} query
    * @returns {number[]}
    */
   query(...query) {

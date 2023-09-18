@@ -21,7 +21,7 @@ import {
 import {KeyframeAnalyzer} from './analyze.js'
 import {applyTrackTransform, transformers} from './transforms.js'
 
-/** @typedef {{eulers: THREE.Euler[], timings: Float32Array, duration: number}} AnimationSource */
+/** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
 /** @typedef {number|string|RegExp} Q */
 
 const loader = new GLTFLoader()
@@ -283,10 +283,11 @@ export class Character {
     clip.tracks.forEach((track) => {
       // Cache timing and durations.
       const timings = track.times.slice(0)
+      const values = track.values.slice(0)
       const duration = track.times[track.times.length - 1] - track.times[0]
 
       /** @type {AnimationSource} */
-      const source = {timings, duration, eulers: []}
+      const source = {timings, values, duration, eulers: []}
 
       // Cache euler angles for rotation tracks.
       if (track instanceof QuaternionKeyframeTrack) {
@@ -400,8 +401,9 @@ export class Character {
   /**
    * @param {string|number} key
    * @param {Float32Array | number[]} values
+   * @param {(Float32Array | number[])?} times
    */
-  overrideTrack(key, values) {
+  overrideTrack(key, values, times = null) {
     key = this.trackIdByKey(key) ?? 0
 
     const clip = this.currentClip
@@ -417,6 +419,10 @@ export class Character {
 
     if (values.length !== size) {
       console.warn(`track length mismatch. ${size} != ${values.length}`)
+    }
+
+    if (times) {
+      clip.tracks[key].times = new Float32Array(times)
     }
 
     clip.tracks[key].values = new Float32Array(values)
@@ -436,11 +442,33 @@ export class Character {
   }
 
   /**
+   * Get the original keyframe track.
+   * @param {number[]?} ids track ids
+   */
+  originalClip(ids) {
+    const clip = this.currentClip
+    if (!clip) return
+
+    clip.tracks.forEach((track, id) => {
+      if (ids && !ids.includes(id)) return
+
+      const s = this.originalOf(id)
+      if (!s) return
+
+      track.values = s.values.slice(0)
+    })
+
+    return clip
+  }
+
+  /**
    *
    * @param {keyof typeof import('./transforms.js').transformers | import('./transforms.js').Transform} transform
    * @param {import('./transforms.js').Options & {tracks: Q | Q[]}} options
    */
   transform(transform, options) {
+    if (this.options.freezeParams) return
+
     if (options.tracks) {
       // Convert a single track query to an array.
       if (!Array.isArray(options.tracks)) {
@@ -457,9 +485,12 @@ export class Character {
     const transformer = isKey ? transformers[transform] : transform
     if (!transformer) return
 
-    console.log(`> applying ${name} transform`)
+    console.log(`> applying ${name} transform`, options)
 
-    const clip = this.currentClip
+    const clip = options.reset
+      ? this.originalClip(options.tracks)
+      : this.currentClip
+
     if (!clip) return
 
     clip.tracks.forEach((track, id) => {
@@ -468,10 +499,13 @@ export class Character {
       // Exclude the tracks that does not match.
       if (options.tracks && !options.tracks?.includes(id)) return
 
+      track.validate()
+
       // Apply the transform to each track.
       const values = applyTrackTransform(track, transformer, options)
       track.values = values
 
+      // DEBUG: validate
       track.validate()
     })
 
@@ -519,5 +553,14 @@ export class Character {
     }
 
     return [...ids]
+  }
+
+  /** @param {number[]} ids */
+  getTrackNames(ids) {
+    return (
+      this.currentClip?.tracks
+        .filter((t, i) => ids.includes(i))
+        .map((t) => t.name) ?? []
+    )
   }
 }

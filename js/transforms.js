@@ -12,7 +12,7 @@ import {
 /** @type {Axis[]} */
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {{threshold?: number, axis?: Axis, tracks?: number[]}} Options */
+/** @typedef {{threshold?: number, axis?: Axis, tracks?: number[], reset?: boolean}} Options */
 /** @typedef {(v: number[], o: Options) => number[]} Transform */
 
 /// We are transforming in Euler space, so we don't need `w`
@@ -74,11 +74,13 @@ export function applyTrackTransform(track, transform, options = {}) {
   const values = []
 
   for (let i = 0; i < series.x.length; i++) {
+    // if (isNaN(series.x[i])) console.warn(`NaN detected.`)
+
     // Convert euler back to quaternion
     const e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
     const q = new Quaternion().setFromEuler(e)
 
-    values.push(q.x, q.y, q.z, q.w)
+    values.push(q.x || 0, q.y || 0, q.z || 0, q.w || 0)
   }
 
   return new Float32Array(values)
@@ -267,4 +269,22 @@ export const transformers = {
   derivative,
   capMin,
   capMax,
+}
+
+/** @typedef {[min: number, max: number, step: number, initial: number]} FormulaRange */
+
+/** @type {FormulaRange} */
+const rFloat = [0, 1, 0.01, 0.1]
+
+/** @type {FormulaRange} */
+const rWindow = [0, 800, 1, 1]
+
+/** @type {Record<keyof typeof transformers, FormulaRange>} */
+export const formulaRanges = {
+  capMin: rFloat,
+  capMax: rFloat,
+  lowpass: rWindow,
+  highpass: rWindow,
+  gaussian: rWindow,
+  derivative: [0, 3, 1, 0],
 }

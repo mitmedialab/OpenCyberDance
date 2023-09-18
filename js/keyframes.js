@@ -14,6 +14,6 @@ export function lengthenKeyframeTracks(tracks) {
     track.times = f32Append(track.times, next)
     track.values = f32Append(track.values, track.values)
 
-    track.validate()
+    // track.validate()
   })
 }

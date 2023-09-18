@@ -13,6 +13,15 @@ export const delayParts = {
   rightLeg: /RightUpLeg|RightLeg|RightFoot/,
 }
 
+export const curveParts = {
+  head: /Head|Neck/,
+  body: /Hips|Spine/,
+  leftArm: /LeftShoulder|LeftArm|LeftForeArm/,
+  rightArm: /RightShoulder|RightArm|RightForeArm/,
+  leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
+  rightLeg: /RightUpLeg|RightLeg|RightFoot/,
+}
+
 /**
  * @param {keyof typeof coreParts} part
  * @param {string} name

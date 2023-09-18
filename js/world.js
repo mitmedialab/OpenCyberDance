@@ -10,6 +10,8 @@ import {profile} from './perf.js'
 import {debounce} from './utils.js'
 import {VoiceController} from './voice.js'
 import {Plotter} from './plotter.js'
+import {curveParts, delayParts} from './parts.js'
+import {formulaRanges} from './transforms.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -267,6 +269,74 @@ export class World {
     }
 
     this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
+
+    this.panel.handlers.curve = debounce(() => {
+      const p = this.params
+
+      const tracks = Object.entries(p.curve.parts)
+        .filter(([_, v]) => v === true)
+        .map(([p]) => curveParts[p])
+
+      const axis = Object.entries(p.curve.axes)
+        .filter(([_, v]) => v === true)
+        .map(([k]) => k)
+
+      const isDisabled =
+        p.curve.equation === 'none' || tracks.length === 0 || axis.length === 0
+
+      // Revert all tracks.
+      if (isDisabled && p.curve.dirty) {
+        const ch = this.first
+
+        const clip = ch.originalClip()
+        ch.fadeIntoModifiedAction(clip)
+        p.curve.dirty = false
+      }
+
+      if (isDisabled) return
+
+      const ids = this.query(...tracks)
+      console.log('Match:', this.first.getTrackNames(ids))
+
+      this.plotter.axes = axis
+      this.plotter.select(...ids)
+
+      this.transform(p.curve.equation, {
+        axis,
+        tracks: ids,
+        reset: true,
+        threshold: p.curve.threshold,
+      })
+
+      p.curve.dirty = true
+
+      console.log('Transform:', p.curve)
+
+      const dropdown = this.panel.curveFolder.children.find(
+        (c) => c.property === 'threshold'
+      )
+
+      if (dropdown) {
+        const range = formulaRanges[p.curve.equation]
+        if (!range) return
+
+        const [fMin, fMax, fStep, fInitial] = range
+        dropdown._min = fMin
+        dropdown._max = fMax
+        dropdown._step = fStep
+        dropdown.initialValue = fInitial
+
+        const current = dropdown.getValue()
+
+        if (current < fMin || current > fMax) {
+          dropdown.setValue(fInitial)
+        }
+
+        dropdown.updateDisplay()
+      }
+
+      // debugger
+    }, 500)
 
     this.panel.handlers.seek = (time) => {
       this.characters.forEach((c) => c.mixer.setTime(time))

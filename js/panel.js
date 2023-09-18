@@ -3,6 +3,7 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
 import {Params} from './overrides.js'
 
 import {Character} from './character.js'
+import {transformers} from './transforms.js'
 
 export class Panel {
   panel = new GUI({width: 310})
@@ -22,6 +23,7 @@ export class Panel {
     freezePosition: () => {},
     seek: () => {},
     pause: () => {},
+    curve: () => {},
   }
 
   constructor(params) {
@@ -78,6 +80,38 @@ export class Panel {
       .onChange(() => this.handlers.action(char))
   }
 
+  addCurveControl() {
+    const eqs = ['none', ...Object.keys(transformers)]
+
+    this.curveFolder
+      .add(this.params.curve, 'equation', eqs)
+      .listen()
+      .onChange(this.handlers.curve)
+
+    this.curveFolder
+      .add(this.params.curve, 'threshold', 0, 1, 0.01)
+      .listen()
+      .onChange(this.handlers.curve)
+
+    this.curvePartsFolder = this.curveFolder.addFolder('Select Parts')
+
+    for (const part in this.params.curve.parts) {
+      this.curvePartsFolder
+        .add(this.params.curve.parts, part)
+        .listen()
+        .onChange(this.handlers.curve)
+    }
+
+    this.curveAxisFolder = this.curveFolder.addFolder('Select Axis')
+
+    for (const axis of ['x', 'y', 'z']) {
+      this.curveAxisFolder
+        .add(this.params.curve.axes, axis)
+        .listen()
+        .onChange(this.handlers.curve)
+    }
+  }
+
   createPanel() {
     const panel = this.panel
 
@@ -86,6 +120,7 @@ export class Panel {
     this.rotationFolder = panel.addFolder('All Rotations')
     this.energyFolder = panel.addFolder('Energy')
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
+    this.curveFolder = panel.addFolder('Circle and Curve')
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
@@ -129,6 +164,8 @@ export class Panel {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)
       this.addCharacterControl(folder, key)
     }
+
+    this.addCurveControl()
 
     this.commandFolder.open()
     this.rotationFolder.open()

@@ -6,7 +6,7 @@ import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'
-import {lengthenKeyframeTracks} from './keyframes.js'
+import {keyframesAt, lengthenKeyframeTracks} from './keyframes.js'
 import {trackNameToPart} from './parts.js'
 import {dispose} from './dispose.js'
 import {curveParts} from './parts.js'
@@ -601,33 +601,22 @@ export class Character {
     )
   }
 
-  getAcceleration(key) {
+  getAcceleration(key, windowSize = 200) {
     const track = this.trackByKey(key)
     if (!track) return
 
-    const windowSize = 200
-    const offset = this.mixer?.time
-    if (!offset) return
+    const {series} = keyframesAt(track, {
+      from: this.mixer?.time ?? 0,
+      windowSize,
+      offset: 0,
+      axes: ['x', 'y', 'z', 'w'],
+    })
 
-    let start = track.times.findIndex((t) => t >= offset)
-    start = Math.max(0, start, start + offset)
+    return series.map((s) => {
+      const start = s[0]
+      const end = s[s.length - 1]
 
-    const end = Math.min(start + windowSize, track.times.length)
-    const valueSize = track.getValueSize()
-
-    /** @type {{x: number, y: number}[][]} */
-    const series = Array.from({length: valueSize}).map(() => [])
-
-    for (let frame = start; frame < end; frame++) {
-      const time = track.times[frame]
-
-      for (let axis = 0; axis < valueSize; axis++) {
-        if (axis !== 0) continue
-
-        series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
-      }
-    }
-
-    return {series, start: track.times[start], end: track.times[end]}
+      return (end.y - start.y) / (end.x - start.x)
+    })
   }
 }

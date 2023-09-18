@@ -7,6 +7,7 @@ import * as THREE from 'three'
 
 import {Chart} from 'chart.js'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
+import {AXES, keyframesAt} from './keyframes.js'
 
 const p = {
   u: profile('chart', 15),
@@ -29,8 +30,6 @@ const layout = {
   py: 5,
 }
 
-const AXES = ['x', 'y', 'z', 'w']
-
 export class Plotter {
   /**
    * How many frames per second to plot?
@@ -51,7 +50,7 @@ export class Plotter {
    * Track index of the animation to plot.
    * @type {Set<number>}
    */
-  tracks = new Set([])
+  tracks = new Set()
 
   /** @type {HTMLDivElement | null} */
   domElement = null
@@ -69,6 +68,7 @@ export class Plotter {
   timer = 0
 
   /// Visible axis
+  /** @type {import('./transforms.js').Axis[]} */
   axes = [...AXES]
 
   constructor(world) {
@@ -301,29 +301,12 @@ export class Plotter {
    * @param {number} now
    */
   view(track, now) {
-    let start = track.times.findIndex((t) => t >= now)
-    start = Math.max(0, start, start + this.offset)
-
-    const end = Math.min(start + this.windowSize, track.times.length)
-    const valueSize = track.getValueSize()
-
-    /** @type {{x: number, y: number}[][]} */
-    const series = Array.from({length: valueSize}).map(() => [])
-
-    const visibility = AXES.map((a) => this.axes.includes(a))
-
-    for (let frame = start; frame < end; frame++) {
-      const time = track.times[frame]
-
-      for (let axis = 0; axis < valueSize; axis++) {
-        // Do not render the axis that are not visible.
-        if (!visibility[axis]) continue
-
-        series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
-      }
-    }
-
-    return {series, start: track.times[start], end: track.times[end]}
+    return keyframesAt(track, {
+      from: now,
+      axes: this.axes,
+      offset: this.offset,
+      windowSize: this.windowSize,
+    })
   }
 
   get interval() {

@@ -333,6 +333,8 @@ export class Character {
       _curve.tracks = this.query(...this.curveConfig.tracks)
     }
 
+    console.log('updateParams:', this.options.name)
+
     clip.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
@@ -417,14 +419,17 @@ export class Character {
     const prevAction = this.actions.get(clip.name)
     if (!prevAction) return
 
-    // this.mixer.uncacheAction(prevAction.getClip())
-
     const action = this.mixer.clipAction(clip.clone())
     this.actions.set(clip.name, action)
 
     action.time = prevAction.time
     prevAction.crossFadeTo(action, 0.35, true)
     action.play()
+
+    // Uncache the action after the cross-fade is complete.
+    setTimeout(() => {
+      this.mixer?.uncacheAction(prevAction.getClip())
+    }, 4000)
   }
 
   async reset() {

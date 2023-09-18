@@ -6,7 +6,12 @@ import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'
-import {keyframesAt, lengthenKeyframeTracks} from './keyframes.js'
+import {
+  getAcceleration,
+  getRateOfChange,
+  keyframesAt,
+  lengthenKeyframeTracks,
+} from './keyframes.js'
 import {trackNameToPart} from './parts.js'
 import {dispose} from './dispose.js'
 import {curveParts} from './parts.js'
@@ -601,7 +606,9 @@ export class Character {
     )
   }
 
-  getAcceleration(key, windowSize = 200) {
+  getMovementStats(key, options) {
+    const {windowSize = 200, threshold = 0.01, skip = 1} = options ?? {}
+
     const track = this.trackByKey(key)
     if (!track) return
 
@@ -612,11 +619,9 @@ export class Character {
       axes: ['x', 'y', 'z', 'w'],
     })
 
-    return series.map((s) => {
-      const start = s[0]
-      const end = s[s.length - 1]
-
-      return (end.y - start.y) / (end.x - start.x)
-    })
+    return {
+      acceleration: series.map(getAcceleration),
+      rateOfChange: getRateOfChange(series, {threshold, skip}),
+    }
   }
 }

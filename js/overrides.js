@@ -127,18 +127,12 @@ export function overrideDelay(track, config) {
   if (offset > 0) track.shift(offset)
 }
 
-export function applyExternalBodySpace(track) {
-  // Only apply external body space for rotations
-  if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
-
-  // TODO: apply in chunks?
-  const {series} = keyframesAt(track, {
-    from: 0,
-    offset: 0,
-    windowSize: track.times.length,
-    axes: ['x', 'y'],
-  })
-
+/**
+ *
+ * @param {THREE.KeyframeTrack[]} tracks
+ * @returns {THREE.KeyframeTrack[]}
+ */
+export function applyExternalBodySpace(tracks) {
   // Stall the movement by X seconds.
   const DELAY = 0.05
 
@@ -146,60 +140,75 @@ export function applyExternalBodySpace(track) {
   // the area is considered as no change.
   const THRESH = 0.1
 
-  // TODO: wider window to consider rate of change, e.g. 4 at a time?
-  const rates = getRateOfChange(series, {threshold: THRESH, skip: 1})
+  tracks.forEach((track, ti) => {
+    // Only apply external body space for rotations
+    if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
-  // Offset the time by this amount.
-  // Time has to accumulate as the track is shifted to the right.
-  let offset = 0
+    // TODO: apply in chunks?
+    const {series} = keyframesAt(track, {
+      from: 0,
+      offset: 0,
+      windowSize: track.times.length,
+      axes: ['x', 'y'],
+    })
 
-  // Which frame are we processing right now?
-  let frame = 0
+    // TODO: wider window to consider rate of change, e.g. 4 at a time?
+    const rates = getRateOfChange(series, {threshold: THRESH, skip: 1})
 
-  const times = [...track.times]
-  const values = [...track.values]
+    // Offset the time by this amount.
+    // Time has to accumulate as the track is shifted to the right.
+    let offset = 0
 
-  const size = track.getValueSize()
+    // Which frame are we processing right now?
+    let frame = 0
 
-  let isNoChange = false
-  let noChangeStart = 0
-  let noChangeValue = new Float32Array()
+    const times = [...track.times]
+    const values = [...track.values]
 
-  while (frame < track.times.length) {
-    const rate = rates[frame]
+    const size = track.getValueSize()
 
-    if (rate > 0 && isNoChange) {
-      isNoChange = false
+    let isNoChange = false
+    let noChangeStart = 0
+    let noChangeValue = new Float32Array()
 
-      console.log(`freezing ${noChangeStart} to ${frame}. offset = ${offset}`)
+    while (frame < track.times.length) {
+      const rate = rates[frame]
 
-      // 1 - Freezing movement values in time.
-      for (let f = noChangeStart; f < frame; f++) {
-        for (let i = 0; i < size; i++) {
-          values[f * size + i] = noChangeValue[i]
+      if (rate > 0 && isNoChange) {
+        isNoChange = false
+
+        console.log(`freezing ${noChangeStart} to ${frame}. offset = ${offset}`)
+
+        // 1 - Freezing movement values in time.
+        for (let f = noChangeStart; f < frame; f++) {
+          for (let i = 0; i < size; i++) {
+            values[f * size + i] = noChangeValue[i]
+          }
         }
       }
+
+      if (rate > 0 || isNoChange) {
+        times[frame] += offset
+        frame++
+
+        continue
+      }
+
+      isNoChange = true
+      noChangeStart = frame
+      noChangeValue = track.values.slice(frame, frame + size)
+
+      // Extend the keyframes when there is no change.
+      offset += DELAY
+
+      frame += 1
     }
 
-    if (rate > 0 || isNoChange) {
-      times[frame] += offset
-      frame++
+    track.times = new Float32Array(times)
+    track.values = new Float32Array(values)
 
-      continue
-    }
+    tracks[ti] = track
+  })
 
-    isNoChange = true
-    noChangeStart = frame
-    noChangeValue = track.values.slice(frame, frame + size)
-
-    // Extend the keyframes when there is no change.
-    offset += DELAY
-
-    frame += 1
-  }
-
-  track.times = new Float32Array(times)
-  track.values = new Float32Array(values)
-
-  return track
+  return tracks
 }

@@ -371,10 +371,6 @@ export class Character {
         overrideEnergy(track, energy)
       }
 
-      if (flags.space) {
-        applyExternalBodySpace(track, this.params.space)
-      }
-
       // Override rotation only
       // TODO: support individual body parts' rotation!
       if (flags.rotation) {
@@ -392,6 +388,8 @@ export class Character {
 
       clip[index] = track
     })
+
+    clip.tracks = applyExternalBodySpace(clip.tracks)
 
     this.fadeIntoModifiedAction(clip)
   }

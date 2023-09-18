@@ -317,8 +317,10 @@ export class Character {
    * Update animation parameters.
    */
   updateParams(flags = {core: true}) {
+    const {lockPosition: lock} = flags
+
     const {freezeParams} = this.options
-    if (freezeParams && flags.lockPosition === undefined) return
+    if (freezeParams && lock === undefined) return
 
     const clip = this.currentClip
     if (!clip || !this.params) return
@@ -338,14 +340,13 @@ export class Character {
 
       // Lock and unlock hips position hips position.
       if (track.name === 'Hips.position') {
-        if (flags.lockPosition) {
-          track.values = track.values.fill(0)
-        } else if (flags.lockPosition === false) {
-          track.values = original.values.slice(0)
-        }
+        track.values = lock ? track.values.fill(0) : original.values.slice(0)
       }
 
-      if (freezeParams) return
+      if (freezeParams) {
+        clip[index] = track
+        return
+      }
 
       // Reset the keyframe times.
       track.times = original.timings.slice(0)

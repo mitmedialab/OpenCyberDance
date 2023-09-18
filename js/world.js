@@ -11,6 +11,7 @@ import {debounce} from './utils.js'
 import {VoiceController} from './voice.js'
 import {Plotter} from './plotter.js'
 import {formulaRanges} from './transforms.js'
+import {curveParts} from './parts.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -55,9 +56,11 @@ export class World {
     this.setupCamera()
     this.setupControls()
     this.setupPanel()
-    this.setupCharacters()
+    await this.setupCharacters()
+
     this.addResizeHandler()
     this.addSeekBarUpdater()
+    this.handleCurveFormulaChange()
 
     // Setup elements
     this.container.appendChild(this.renderer.domElement)
@@ -241,13 +244,13 @@ export class World {
   }
 
   async setupCharacters() {
-    this.addCharacter({
+    await this.addCharacter({
       name: 'first',
       model: 'abstract',
       position: [-0.8, 0, 0],
     })
 
-    this.addCharacter({
+    await this.addCharacter({
       name: 'second',
       model: 'abstract',
       position: [0.8, 0, 0],

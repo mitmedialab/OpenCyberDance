@@ -600,4 +600,34 @@ export class Character {
         .map((t) => t.name) ?? []
     )
   }
+
+  getAcceleration(key) {
+    const track = this.trackByKey(key)
+    if (!track) return
+
+    const windowSize = 200
+    const offset = this.mixer?.time
+    if (!offset) return
+
+    let start = track.times.findIndex((t) => t >= offset)
+    start = Math.max(0, start, start + offset)
+
+    const end = Math.min(start + windowSize, track.times.length)
+    const valueSize = track.getValueSize()
+
+    /** @type {{x: number, y: number}[][]} */
+    const series = Array.from({length: valueSize}).map(() => [])
+
+    for (let frame = start; frame < end; frame++) {
+      const time = track.times[frame]
+
+      for (let axis = 0; axis < valueSize; axis++) {
+        if (axis !== 0) continue
+
+        series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
+      }
+    }
+
+    return {series, start: track.times[start], end: track.times[end]}
+  }
 }

@@ -51,7 +51,7 @@ export class Plotter {
    * Track index of the animation to plot.
    * @type {Set<number>}
    */
-  tracks = new Set([1, 2, 3, 4, 7])
+  tracks = new Set([])
 
   /** @type {HTMLDivElement | null} */
   domElement = null

@@ -4,8 +4,7 @@
 - When graph is below certain threshold, pause it
   - pause หมดเลย​ (ไปก่อน)
   - pause แค่บางส่วน (ค่อยทำ)
-- หยุดนานแค่ไหน? กำหนดเองได้
-  - Parameters
+- Parameter: หยุดนานแค่ไหน
 
 ## Feature: Graph
 

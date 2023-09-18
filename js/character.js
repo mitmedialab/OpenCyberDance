@@ -18,6 +18,7 @@ import {curveParts} from './parts.js'
 
 import {
   Params,
+  applyExternalBodySpace,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
@@ -368,6 +369,10 @@ export class Character {
 
         const energy = this.params.energy[part]
         overrideEnergy(track, energy)
+      }
+
+      if (flags.space) {
+        applyExternalBodySpace(track, this.params.space)
       }
 
       // Override rotation only

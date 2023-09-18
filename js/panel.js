@@ -24,6 +24,7 @@ export class Panel {
     seek: () => {},
     pause: () => {},
     curve: () => {},
+    space: () => {},
   }
 
   constructor(params) {
@@ -121,6 +122,7 @@ export class Panel {
     this.energyFolder = panel.addFolder('Energy')
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
     this.curveFolder = panel.addFolder('Circle and Curve')
+    this.spaceFolder = panel.addFolder('External Body Space')
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
@@ -167,6 +169,11 @@ export class Panel {
     }
 
     this.addCurveControl()
+
+    this.spaceFolder
+      .add(this.params, 'space', 0, 4, 0.001)
+      .listen()
+      .onChange(this.handlers.space)
 
     this.commandFolder.open()
     this.rotationFolder.open()

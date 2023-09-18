@@ -274,6 +274,10 @@ export class World {
       this.updateParams({rotation: true})
     }, 100)
 
+    this.panel.handlers.space = debounce(() => {
+      this.updateParams({space: true})
+    }, 500)
+
     this.panel.handlers.timescale = (timescale) => {
       for (const character of this.characters) {
         character.mixer.timeScale = timescale

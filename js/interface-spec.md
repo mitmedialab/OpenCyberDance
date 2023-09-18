@@ -14,8 +14,9 @@
   - Legend: parts, e.g. "Hand", etc.
 - Graph: scrollable views
 
-- Graph Visualizer for Delays/Energy/Shifting Relations
-  - Currently not applying to the sidebar graph
+- Graph Visualizer for Energy and Delays
+  - Energy and delays applies to timing, so they affect the x (time) scale, unlike others which affect the y scale.
+  
 
 ## Visualization
 

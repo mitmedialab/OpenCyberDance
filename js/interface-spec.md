@@ -77,7 +77,7 @@ w.transform('capMin', {
   threshold: 0.2,
   tracks: /hand/i
 })
-````
+```
 
 ## External Body Space
 

@@ -273,7 +273,7 @@ export const transformers = {
 /** @typedef {[min: number, max: number, step: number, initial: number]} FormulaRange */
 
 /** @type {FormulaRange} */
-const rFloat = [0, 1, 0.01, 0.1]
+const rFloat = [-1, 1, 0.01, 0.1]
 
 /** @type {FormulaRange} */
 const rWindow = [1, 2000, 1, 1]

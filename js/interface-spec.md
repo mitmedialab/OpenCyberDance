@@ -18,6 +18,8 @@
 - Graphing energy and delays
   - Energy and delays applies to timing, so they affect the x (time) scale, unlike others which affect the y scale.
 
+- Detect loop, fix timing
+
 ## Visualization
 
 - axes -> according to selected

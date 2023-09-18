@@ -152,9 +152,6 @@ export function applyExternalBodySpace(tracks) {
       axes: ['x', 'y'],
     })
 
-    // TODO: wider window to consider rate of change, e.g. 4 at a time?
-    const rates = getRateOfChange(series, {threshold: THRESH, skip: 1})
-
     // Offset the time by this amount.
     // Time has to accumulate as the track is shifted to the right.
     let offset = 0

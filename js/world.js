@@ -235,7 +235,7 @@ export class World {
 
       const current = dropdown.getValue()
 
-      if (current < fInitial || current < fMin || current > fMax) {
+      if (current < fMin || current > fMax) {
         dropdown.setValue(fInitial)
       }
 

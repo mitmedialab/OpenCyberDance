@@ -268,15 +268,14 @@ export class Character {
    * @param {THREE.AnimationClip} clip
    */
   processClip(clip) {
+    const {lengthen, freezeParams} = this.options
+
     // Make keyframes track longer for track-level looping.
-    if (this.options.lengthen > 0) {
-      for (let i = 0; i < this.options.lengthen; i++) {
+    if (lengthen > 0) {
+      for (let i = 0; i < lengthen; i++) {
         lengthenKeyframeTracks(clip.tracks)
       }
     }
-
-    // Do not cache the original for default parameter characters.
-    if (this.options.freezeParams) return
 
     // Cache original keyframe tracks for modification
     clip.tracks.forEach((track) => {
@@ -289,7 +288,7 @@ export class Character {
       const source = {timings, values, duration, eulers: []}
 
       // Cache euler angles for rotation tracks.
-      if (track instanceof QuaternionKeyframeTrack) {
+      if (!freezeParams && track instanceof QuaternionKeyframeTrack) {
         const size = track.getValueSize()
 
         source.eulers = [...Array(track.times.length)].map((_, i) => {
@@ -333,8 +332,6 @@ export class Character {
       _curve.tracks = this.query(...this.curveConfig.tracks)
     }
 
-    console.log('updateParams:', this.options.name)
-
     clip.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
@@ -345,10 +342,7 @@ export class Character {
         track.values = lock ? track.values.fill(0) : original.values.slice(0)
       }
 
-      if (freezeParams) {
-        clip[index] = track
-        return
-      }
+      if (freezeParams) return
 
       // Reset the keyframe times.
       track.times = original.timings.slice(0)

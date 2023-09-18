@@ -8,7 +8,6 @@ import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 import {trackToEuler} from './math.js'
 import {
   getAcceleration,
-  getRateOfChange,
   keyframesAt,
   lengthenKeyframeTracks,
 } from './keyframes.js'
@@ -626,7 +625,6 @@ export class Character {
 
     return {
       acceleration: series.map(getAcceleration),
-      rateOfChange: getRateOfChange(series, {threshold, skip}),
     }
   }
 }

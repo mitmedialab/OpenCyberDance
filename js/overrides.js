@@ -140,68 +140,71 @@ export function applyExternalBodySpace(tracks) {
   // the area is considered as no change.
   const THRESH = 0.1
 
+  const timing = tracks[0].times
+
+  const averages = [...timing].map((_, frame) => {
+    const sums = tracks.map((track) => {
+      const size = track.getValueSize()
+
+      let sum = 0
+      for (let axis = 0; axis < size; axis++) {
+        sum += Math.abs(track.values[frame * size + axis])
+      }
+
+      return sum
+    })
+
+    return sums.reduce((a, b) => a + b, 0) / sums.length
+  })
+
+  // Find rate of change across frames
+  const rates = averages.map((_, frame) => {
+    const value = Math.abs(averages[frame] - averages[frame - 1] ?? 0)
+
+    // When the rate of change dips below the threshold,
+    // we consider this as zero change.
+    return value < THRESH ? 0 : value
+  })
+
+  // Find the areas where there is no change.
+  const noChangeRegions = []
+  let hasNoChange = false
+  let noChangeStart = 0
+
+  rates.forEach((rate, frame) => {
+    if (rate === 0) {
+      hasNoChange = true
+      noChangeStart = frame
+    } else if (rate > 0 && hasNoChange) {
+      noChangeRegions.push([noChangeStart, frame])
+      hasNoChange = false
+      noChangeStart = -1
+    }
+  })
+
+  // Every track must apply the same rotation freeze.
   tracks.forEach((track, ti) => {
     // Only apply external body space for rotations
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
-    // TODO: apply in chunks?
-    const {series} = keyframesAt(track, {
-      from: 0,
-      offset: 0,
-      windowSize: track.times.length,
-      axes: ['x', 'y'],
-    })
-
-    // TODO: wider window to consider rate of change, e.g. 4 at a time?
-    const rates = getRateOfChange(series, {threshold: THRESH, skip: 1})
-
-    // Offset the time by this amount.
-    // Time has to accumulate as the track is shifted to the right.
-    let offset = 0
-
-    // Which frame are we processing right now?
-    let frame = 0
+    const size = track.getValueSize()
 
     const times = [...track.times]
     const values = [...track.values]
 
-    const size = track.getValueSize()
+    // Apply external body space to the track.
+    for (const [start, end] of noChangeRegions) {
+      // Skip the region if it's too small.
+      if (end - start < 5) continue
 
-    let isNoChange = false
-    let noChangeStart = 0
-    let noChangeValue = new Float32Array()
+      const first = values.slice(start, start * size)
 
-    while (frame < track.times.length) {
-      const rate = rates[frame]
-
-      if (rate > 0 && isNoChange) {
-        isNoChange = false
-
-        console.log(`freezing ${noChangeStart} to ${frame}. offset = ${offset}`)
-
-        // 1 - Freezing movement values in time.
-        for (let f = noChangeStart; f < frame; f++) {
-          for (let i = 0; i < size; i++) {
-            values[f * size + i] = noChangeValue[i]
-          }
-        }
+      // Freeze the aniimation track using the first value.
+      for (let frame = start; frame < end; frame++) {
+        first.forEach((value, axis) => {
+          values[frame * size + axis] = value
+        })
       }
-
-      if (rate > 0 || isNoChange) {
-        times[frame] += offset
-        frame++
-
-        continue
-      }
-
-      isNoChange = true
-      noChangeStart = frame
-      noChangeValue = track.values.slice(frame, frame + size)
-
-      // Extend the keyframes when there is no change.
-      offset += DELAY
-
-      frame += 1
     }
 
     track.times = new Float32Array(times)

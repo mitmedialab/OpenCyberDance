@@ -63,25 +63,3 @@ export function getAcceleration(data) {
 
   return (end.y - start.y) / (end.x - start.x)
 }
-
-/** @param {{x: number, y: number}[][]} series */
-export function getRateOfChange(series, {threshold = 0.01, skip = 1}) {
-  const rates = [0]
-
-  for (let axis = 0; axis < series.length; axis++) {
-    const data = series[axis]
-
-    let idx = 0
-
-    for (let i = 1; i < data.length; i += skip) {
-      if (!rates[idx]) rates[idx] = 0
-
-      const delta = Math.abs(data[i]?.y - data[i - skip]?.y ?? 0)
-      rates[idx] += delta < threshold ? 0 : Math.max(delta || 0, 0)
-
-      idx++
-    }
-  }
-
-  return rates
-}

@@ -6,11 +6,10 @@ import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'
-
 import {lengthenKeyframeTracks} from './keyframes.js'
-
 import {trackNameToPart} from './parts.js'
 import {dispose} from './dispose.js'
+import {curveParts} from './parts.js'
 
 import {
   Params,
@@ -358,10 +357,41 @@ export class Character {
         overrideRotation(track, this.params.rotations, original.eulers)
       }
 
+      // Override curve only
+      if (flags.curve) {
+        const p = this.params
+        const {tracks, axis} = this.curveConfig
+
+        this.transform(p.curve.equation, {
+          axis,
+          tracks: this.query(...tracks),
+          threshold: p.curve.threshold,
+        })
+      }
+
       clip[index] = track
     })
 
     this.fadeIntoModifiedAction(clip)
+  }
+
+  /**
+   * @returns {{tracks: Q[], axis: import('./transforms.js').Axis[]}}
+   */
+  get curveConfig() {
+    const c = this.params?.curve
+    if (!c) return {tracks: [], axis: []}
+
+    const tracks = Object.entries(c.parts)
+      .filter(([_, v]) => v === true)
+      .map(([p]) => curveParts[p])
+
+    const axis = Object.entries(c.axes)
+      .filter(([_, v]) => v === true)
+      .map(([k]) => k)
+
+    // @ts-ignore
+    return {tracks, axis}
   }
 
   /**
@@ -463,7 +493,7 @@ export class Character {
 
   /**
    *
-   * @param {keyof typeof import('./transforms.js').transformers | import('./transforms.js').Transform} transform
+   * @param {keyof typeof import('./transforms.js').transformers | 'none' | import('./transforms.js').Transform} transform
    * @param {import('./transforms.js').Options & {tracks: Q | Q[]}} options
    */
   transform(transform, options) {
@@ -487,10 +517,7 @@ export class Character {
 
     console.log(`> applying ${name} transform`, options)
 
-    const clip = options.reset
-      ? this.originalClip(options.tracks)
-      : this.currentClip
-
+    const clip = this.currentClip
     if (!clip) return
 
     clip.tracks.forEach((track, id) => {
@@ -499,13 +526,9 @@ export class Character {
       // Exclude the tracks that does not match.
       if (options.tracks && !options.tracks?.includes(id)) return
 
-      track.validate()
-
       // Apply the transform to each track.
       const values = applyTrackTransform(track, transformer, options)
       track.values = values
-
-      // DEBUG: validate
       track.validate()
     })
 

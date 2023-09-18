@@ -12,10 +12,11 @@ import {
 /** @type {Axis[]} */
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {{threshold?: number, axis?: Axis, tracks?: number[], reset?: boolean}} Options */
+/** @typedef {{threshold?: number, axis?: Axis[], tracks?: number[], reset?: boolean}} Options */
 /** @typedef {(v: number[], o: Options) => number[]} Transform */
 
 /// We are transforming in Euler space, so we don't need `w`
+/** @type {Axis[]} */
 const AXES = ['x', 'y', 'z']
 
 /** @param {number} n */
@@ -74,8 +75,6 @@ export function applyTrackTransform(track, transform, options = {}) {
   const values = []
 
   for (let i = 0; i < series.x.length; i++) {
-    // if (isNaN(series.x[i])) console.warn(`NaN detected.`)
-
     // Convert euler back to quaternion
     const e = new THREE.Euler(series.x[i], series.y[i], series.z[i])
     const q = new Quaternion().setFromEuler(e)

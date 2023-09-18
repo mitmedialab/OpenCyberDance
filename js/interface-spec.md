@@ -1,22 +1,23 @@
-# Next Tasks
+## External Body Space
 
-- External Body Space
-  - Slider for the % possibility of freeze when the acceleration decrease (to show the external body space)
-  - When graph is below certain threshold, pause it
-    - pause หมดเลย​ (ไปก่อน)
-    - pause แค่บางส่วน (ค่อยทำ)
-  - หยุดนานแค่ไหน? กำหนดเองได้
-    - Parameters
+- Slider for the % possibility of freeze when the acceleration decrease (to show the external body space)
+- When graph is below certain threshold, pause it
+  - pause หมดเลย​ (ไปก่อน)
+  - pause แค่บางส่วน (ค่อยทำ)
+- หยุดนานแค่ไหน? กำหนดเองได้
+  - Parameters
+
+## Feature: Graph
 
 - Graph Legends
   - Legend: character left/right
   - Legend: color legend (แดง x, เขียว y)
   - Legend: parts, e.g. "Hand", etc.
-- Graph: scrollable views
 
-- Graph Visualizer for Energy and Delays
+- Scrollable views in graph
+
+- Graphing energy and delays
   - Energy and delays applies to timing, so they affect the x (time) scale, unlike others which affect the y scale.
-  
 
 ## Visualization
 

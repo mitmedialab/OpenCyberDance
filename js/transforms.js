@@ -276,7 +276,7 @@ export const transformers = {
 const rFloat = [0, 1, 0.01, 0.1]
 
 /** @type {FormulaRange} */
-const rWindow = [1, 800, 1, 1]
+const rWindow = [1, 2000, 1, 1]
 
 /** @type {Record<keyof typeof transformers, FormulaRange>} */
 export const formulaRanges = {

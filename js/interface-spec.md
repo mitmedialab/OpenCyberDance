@@ -1,55 +1,37 @@
-# Interface
+# Next Tasks
 
-- Apply to all
-  - ทุกๆ body parts ที่เราสนใจ
-- Apply to each individually
+- External Body Space
+  - Slider for the % possibility of freeze when the acceleration decrease (to show the external body space)
+  - When graph is below certain threshold, pause it
+    - pause หมดเลย​ (ไปก่อน)
+    - pause แค่บางส่วน (ค่อยทำ)
+  - หยุดนานแค่ไหน? กำหนดเองได้
+    - Parameters
+
+- Graph Legends
+  - Legend: character left/right
+  - Legend: color legend (แดง x, เขียว y)
+  - Legend: parts, e.g. "Hand", etc.
+- Graph: scrollable views
+
+- Graph Visualizer for Delays/Energy/Shifting Relations
+  - Currently not applying to the sidebar graph
 
 ## Visualization
 
 - axes -> according to selected
 - body parts -> according to selected
   - blacklist อันที่ไม่ค่อยเปลี่ยน ไม่ต้องแสดง
-- graph legend/label
-  - character left/right
-  - scrollable to find each one
-  - "Hand", etc.
-  - color legend (แดง x, เขียว y)
 
-## Body Parts Checklist
+--- Completed ---
 
-- [ ] Head
-- [ ] Body
-- [ ] Left Arm
-- [Select All]
-
-## Equation
-
-- Equation Type
-- Threshold
+- Body Parts Checklist
+- Equation
+  - Threshold
   - min, max -> differently for each equation
-    - 0.1 - 0.9
-    - 100 - 1000 (track timing len)
-    - differential order
+- Axes: X, Y, Z
 
-## Axes
-
-- [ ] X
-- [ ] Y
-- [ ] Z
-- [Select All]
-
-```ts
-head: /Head|Neck/
-body: /Hips|Spine/
-leftArm: /LeftShoulder|LeftArm|LeftForeArm|LeftHand|LeftInHand/
-rightArm: /RightShoulder|RightArm|RightForeArm|RightHand|RightInHand/
-leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/
-rightLeg: /RightUpLeg|RightLeg|RightFoot/
-```
-
-Interface
-- Dropdown
-  - Filters
+--- Console Notes ---
 
 ## Plotter Parameters
 
@@ -78,17 +60,3 @@ w.transform('capMin', {
   tracks: /hand/i
 })
 ```
-
-## External Body Space
-
-- Slider for the % possibility of freeze when the acceleration decrease (to show the external body space)
-- When graph is below certain threshold, pause it
-  - pause หมดเลย​ (ไปก่อน)
-  - pause แค่บางส่วน (ค่อยทำ)
-- หยุดนานแค่ไหน? กำหนดเองได้
-  - Parameters
-
-## Graph Visualizer for Delays/Energy/Shifting Relations
-
-- Currently not applying to the sidebar graph
-- Keep as-is (no animation from ChartJS)

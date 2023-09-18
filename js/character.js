@@ -332,32 +332,37 @@ export class Character {
     }
 
     clip.tracks.forEach((track, index) => {
-      // Lock hips position.
-      if (flags.lockPosition && track.name === 'Hips.position') {
-        track.values = track.values.fill(0)
-      }
-
       // Reset the keyframe times.
       const original = this.originalOf(index)
       if (!original || !this.params) return
 
-      // Unlock hips position.
-      if (flags.lockPosition === false && original.values) {
-        track.values = original.values.slice(0)
+      // Lock and unlock hips position hips position.
+      if (track.name === 'Hips.position') {
+        if (flags.lockPosition) {
+          track.values = track.values.fill(0)
+        } else if (flags.lockPosition === false) {
+          track.values = original.values.slice(0)
+        }
       }
 
       if (freezeParams) return
 
+      // Reset the keyframe times.
       track.times = original.timings.slice(0)
 
-      if (flags.core) {
-        // Override delays
-        // @ts-ignore
-        overrideDelay(track, this.params.delays)
+      // Reset the keyframe values when circle and curve formula changes.
+      if (flags.curve) {
+        track.values = original.values.slice(0)
+      }
 
+      if (flags.core) {
         // Override energy
         const part = trackNameToPart(track.name, 'core')
         if (!part) return
+
+        // Override delays
+        // @ts-ignore
+        overrideDelay(track, this.params.delays)
 
         const energy = this.params.energy[part]
         overrideEnergy(track, energy)

@@ -4,7 +4,6 @@ import * as THREE from 'three'
 
 import {trackNameToPart, coreParts, delayParts, curveParts} from './parts.js'
 import {transformers} from './transforms.js'
-import {getRateOfChange, keyframesAt} from './keyframes.js'
 
 export class Params {
   time = 0

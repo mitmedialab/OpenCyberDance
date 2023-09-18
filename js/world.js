@@ -183,10 +183,6 @@ export class World {
     this.characters.push(character)
   }
 
-  freezeCharacters() {
-    this.characters.forEach((c) => c.freezePosition())
-  }
-
   /**
    * @param {Character} char
    */
@@ -263,6 +259,10 @@ export class World {
     this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
     this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
 
+    this.panel.handlers.lockPosition = (lock) => {
+      this.updateParams({lockPosition: lock})
+    }
+
     this.panel.handlers.curve = debounce(() => {
       this.updateParams({curve: true})
     }, 500)
@@ -302,8 +302,6 @@ export class World {
       console.log('Voice')
       this.voice.toggle()
     }
-
-    this.panel.handlers.freezePosition = this.freezeCharacters.bind(this)
 
     this.panel.handlers.seek = (time) => {
       this.characters.forEach((c) => c.mixer.setTime(time))

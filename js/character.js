@@ -313,16 +313,6 @@ export class Character {
     return sources[index]
   }
 
-  freezePosition() {
-    const id = 'Hips.position'
-
-    const size = this.currentClip?.tracks.find((t) => t.name === id)?.values
-      .length
-
-    if (!size) return
-    this.overrideTrack(id, new Float32Array(size).fill(0))
-  }
-
   /**
    * Update animation parameters.
    */
@@ -338,6 +328,11 @@ export class Character {
       if (!original || !this.params) return
 
       track.times = original.timings.slice(0)
+
+      // Lock hips position.
+      if (flags.lockPosition && track.name === 'Hips.position') {
+        track.values = track.values.fill(0)
+      }
 
       if (flags.core) {
         // Override delays

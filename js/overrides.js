@@ -9,6 +9,7 @@ export class Params {
   time = 0
   timescale = 1
   paused = false
+  lockPosition = false
 
   curve = {
     /** @type {Record<keyof typeof curveParts, boolean>} */

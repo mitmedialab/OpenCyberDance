@@ -20,7 +20,7 @@ export class Panel {
     character: () => {},
     reset: () => {},
     voice: () => {},
-    freezePosition: () => {},
+    lockPosition: () => {},
     seek: () => {},
     pause: () => {},
     curve: () => {},
@@ -137,11 +137,6 @@ export class Panel {
       .name('Voice')
       .listen()
 
-    this.commandFolder
-      .add({freezePosition: this.handlers.freezePosition}, 'freezePosition')
-      .name('Lock Position')
-      .listen()
-
     this.playbackFolder
       .add(this.params, 'timescale', 0, 5, 0.01)
       .name('Animation Speed')
@@ -159,6 +154,12 @@ export class Panel {
       .name('Paused')
       .listen()
       .onChange(this.handlers.pause)
+
+    this.playbackFolder
+      .add(this.params, 'lockPosition')
+      .name('Lock Position')
+      .listen()
+      .onChange(this.handlers.lockPosition)
 
     for (const key in this.params.characters) {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)

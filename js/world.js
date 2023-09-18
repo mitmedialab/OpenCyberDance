@@ -164,7 +164,7 @@ export class World {
     const b = profile('updateParams', 100)
 
     b(() => {
-      if (flags.curve) this.handleCurveFormulaChange()
+      if (flags?.curve) this.handleCurveFormulaChange()
 
       for (const character of this.characters) {
         character.updateParams(flags)

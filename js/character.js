@@ -418,7 +418,7 @@ export class Character {
     const prevAction = this.actions.get(clip.name)
     if (!prevAction) return
 
-    this.mixer.uncacheAction(prevAction.getClip())
+    // this.mixer.uncacheAction(prevAction.getClip())
 
     const action = this.mixer.clipAction(clip.clone())
     this.actions.set(clip.name, action)

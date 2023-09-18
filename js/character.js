@@ -366,6 +366,7 @@ export class Character {
       }
 
       // Override rotation only
+      // TODO: support individual body parts' rotation!
       if (flags.rotation) {
         overrideRotation(track, this.params.rotations, original.eulers)
       }

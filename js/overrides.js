@@ -128,7 +128,6 @@ export function overrideDelay(track, config) {
 }
 
 /**
- *
  * @param {THREE.KeyframeTrack[]} tracks
  * @returns {THREE.KeyframeTrack[]}
  */
@@ -199,13 +198,24 @@ export function applyExternalBodySpace(tracks) {
 
       const first = values.slice(start, start * size)
 
-      // Freeze the aniimation track using the first value.
+      // Freeze the animation track using the first value.
       for (let frame = start; frame < end; frame++) {
         first.forEach((value, axis) => {
           values[frame * size + axis] = value
         })
       }
     }
+
+    const startFrames = noChangeRegions.map(([start]) => start)
+    let offset = 0
+
+    times.forEach((time, frame) => {
+      // Increase the offset if the frame is a start frame.
+      if (startFrames.includes(frame)) offset += DELAY
+
+      // Delay the animation by X seconds.
+      times[frame] = time + offset
+    })
 
     track.times = new Float32Array(times)
     track.values = new Float32Array(values)

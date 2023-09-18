@@ -12,7 +12,7 @@ import {
 /** @type {Axis[]} */
 
 /** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {{threshold?: number, axis?: Axis[], tracks?: number[], reset?: boolean}} Options */
+/** @typedef {{threshold?: number, axis?: Axis[], tracks?: number[]}} Options */
 /** @typedef {(v: number[], o: Options) => number[]} Transform */
 
 /// We are transforming in Euler space, so we don't need `w`

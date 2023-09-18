@@ -317,22 +317,38 @@ export class Character {
    * Update animation parameters.
    */
   updateParams(flags = {core: true}) {
-    if (this.options.freezeParams) return
+    const {freezeParams} = this.options
+    if (freezeParams && flags.lockPosition === undefined) return
 
     const clip = this.currentClip
-    if (!clip) return
+    if (!clip || !this.params) return
+
+    let _curve = {}
+
+    if (flags.curve) {
+      _curve.equation = transformers[this.params.curve.equation]
+      _curve.axis = this.curveConfig.axis
+      _curve.tracks = this.query(...this.curveConfig.tracks)
+    }
 
     clip.tracks.forEach((track, index) => {
-      // Reset the keyframe times.
-      const original = this.originalOf(index)
-      if (!original || !this.params) return
-
-      track.times = original.timings.slice(0)
-
       // Lock hips position.
       if (flags.lockPosition && track.name === 'Hips.position') {
         track.values = track.values.fill(0)
       }
+
+      // Reset the keyframe times.
+      const original = this.originalOf(index)
+      if (!original || !this.params) return
+
+      // Unlock hips position.
+      if (flags.lockPosition === false && original.values) {
+        track.values = original.values.slice(0)
+      }
+
+      if (freezeParams) return
+
+      track.times = original.timings.slice(0)
 
       if (flags.core) {
         // Override delays
@@ -353,14 +369,13 @@ export class Character {
       }
 
       // Override curve only
-      if (flags.curve) {
-        const p = this.params
-        const {tracks, axis} = this.curveConfig
+      if (flags.curve && _curve.tracks.includes(index)) {
+        const {axis, tracks, equation} = _curve
 
-        this.transform(p.curve.equation, {
+        track.values = applyTrackTransform(track, equation, {
           axis,
-          tracks: this.query(...tracks),
-          threshold: p.curve.threshold,
+          tracks,
+          threshold: this.params.curve.threshold,
         })
       }
 

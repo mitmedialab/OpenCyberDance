@@ -374,12 +374,10 @@ export class Character {
       }
 
       // Override curve only
-      if (flags.curve && _curve.tracks.includes(index)) {
-        const {axis, tracks, equation} = _curve
-
-        track.values = applyTrackTransform(track, equation, {
-          axis,
-          tracks,
+      if (flags.curve && _curve.tracks.includes(index) && _curve.equation) {
+        track.values = applyTrackTransform(track, _curve.equation, {
+          axis: _curve.axis,
+          tracks: _curve.tracks,
           threshold: this.params.curve.threshold,
         })
       }

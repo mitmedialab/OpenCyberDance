@@ -146,6 +146,9 @@ export function overrideDelay(track, config) {
 export function applyExternalBodySpace(tracks, options) {
   const {delay, threshold, minWindow, windowSize} = options ?? {}
 
+  // Do not compute anything if the delay is zero.
+  if (delay === 0) return tracks
+
   const timing = tracks[0].times
 
   // TODO: cache the average value for a HUGE speedup!

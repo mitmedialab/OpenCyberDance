@@ -134,9 +134,14 @@ export function applyExternalBodySpace(tracks) {
   // Stall the movement by X seconds.
   const DELAY = 0.05
 
-  // If the rate of change dips below this threshold,
-  // the area is considered as no change.
-  const THRESH = 0.1
+  // Ignore changes below this threshold.
+  const THRESHOLD = 0.0005
+
+  // Ignore areas smaller than this.
+  const MIN_CHANGE_SIZE = 3
+
+  // The moving window size to calculate the moving averages.
+  const WINDOW_SIZE = 5
 
   const timing = tracks[0].times
 
@@ -156,32 +161,31 @@ export function applyExternalBodySpace(tracks) {
   })
 
   // Find rate of change across frames
-  const rates = averages.map((_, frame) => {
-    const value = Math.abs(averages[frame] - averages[frame - 1] ?? 0)
-
-    // When the rate of change dips below the threshold,
-    // we consider this as zero change.
-    return value < THRESH ? 0 : value
-  })
-
-  // Find the areas where there is no change.
   const noChangeRegions = []
-  let hasNoChange = false
-  let noChangeStart = 0
+  let windowStart = 0
+  let windowEnd = WINDOW_SIZE - 1
 
-  rates.forEach((rate, frame) => {
-    if (rate === 0) {
-      hasNoChange = true
-      noChangeStart = frame
-    } else if (rate > 0 && hasNoChange) {
-      noChangeRegions.push([noChangeStart, frame])
-      hasNoChange = false
-      noChangeStart = -1
-    }
-  })
+  while (windowEnd < averages.length) {
+    const w = averages.slice(windowStart, windowEnd + 1)
+
+    const diffs = w.map((v, i) => {
+      return i < WINDOW_SIZE - 1 ? w[i + 1] - v : 0
+    })
+
+    // Check if all differences in the window are below the threshold
+    const isStalled =
+      diffs.every((diff) => Math.abs(diff) <= THRESHOLD) &&
+      windowEnd - windowStart >= MIN_CHANGE_SIZE
+
+    if (isStalled) noChangeRegions.push([windowStart, windowEnd])
+
+    // Move the window to the next non-overlapping position
+    windowStart += WINDOW_SIZE
+    windowEnd += WINDOW_SIZE
+  }
 
   // Every track must apply the same rotation freeze.
-  tracks.forEach((track, ti) => {
+  const out = tracks.map((track, ti) => {
     // Only apply external body space for rotations
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
@@ -192,9 +196,6 @@ export function applyExternalBodySpace(tracks) {
 
     // Apply external body space to the track.
     for (const [start, end] of noChangeRegions) {
-      // Skip the region if it's too small.
-      if (end - start < 5) continue
-
       const first = values.slice(start, start * size)
 
       // Freeze the animation track using the first value.
@@ -206,21 +207,27 @@ export function applyExternalBodySpace(tracks) {
     }
 
     const startFrames = noChangeRegions.map(([start]) => start)
-    let offset = 0
+    let delayOffset = 0
 
     times.forEach((time, frame) => {
-      // Increase the offset if the frame is a start frame.
-      if (startFrames.includes(frame)) offset += DELAY
-
       // Delay the animation by X seconds.
-      times[frame] = time + offset
+      times[frame] = time + delayOffset
+
+      // Increase the offset if the frame is a start frame.
+      if (startFrames.includes(frame)) {
+        delayOffset += DELAY
+      }
     })
 
-    track.times = new Float32Array(times)
-    track.values = new Float32Array(values)
+    return {times, values}
 
-    tracks[ti] = track
+    // track.times = new Float32Array(times)
+    // track.values = new Float32Array(values)
+
+    // tracks[ti] = track
   })
+
+  console.log({averages, noChangeRegions, out})
 
   return tracks
 }

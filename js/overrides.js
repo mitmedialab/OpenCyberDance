@@ -130,18 +130,20 @@ export function overrideDelay(track, config) {
  * @param {THREE.KeyframeTrack[]} tracks
  * @returns {THREE.KeyframeTrack[]}
  */
-export function applyExternalBodySpace(tracks) {
-  // Stall the movement by X seconds.
-  const DELAY = 0.05
+export function applyExternalBodySpace(tracks, options) {
+  const {
+    // Stall the movement by X seconds.
+    delay = 0.05,
 
-  // Ignore changes below this threshold.
-  const THRESHOLD = 0.0005
+    // Ignore changes below this threshold.
+    threshold = 0.005,
 
-  // Ignore areas smaller than this.
-  const MIN_CHANGE_SIZE = 3
+    // Ignore region of change smaller than this window.
+    minWindow = 3,
 
-  // The moving window size to calculate the moving averages.
-  const WINDOW_SIZE = 5
+    // The window size to calculate the averages.
+    windowSize = 5,
+  } = options ?? {}
 
   const timing = tracks[0].times
 
@@ -164,26 +166,26 @@ export function applyExternalBodySpace(tracks) {
   // Find rate of change across frames
   const noChangeRegions = []
   let windowStart = 0
-  let windowEnd = WINDOW_SIZE - 1
+  let windowEnd = windowSize - 1
 
   while (windowEnd < averages.length) {
     const w = averages.slice(windowStart, windowEnd + 1)
 
     const diffs = w.map((v, i) => {
-      return i < WINDOW_SIZE - 1 ? w[i + 1] - v : 0
+      return i < windowSize - 1 ? w[i + 1] - v : 0
     })
 
     // Check if all differences in the window are below the threshold
     const isStalled =
-      diffs.every((diff) => Math.abs(diff) <= THRESHOLD) &&
-      windowEnd - windowStart >= MIN_CHANGE_SIZE
+      diffs.every((diff) => Math.abs(diff) <= threshold) &&
+      windowEnd - windowStart >= minWindow
 
     // Consider these regions as no-change regions
     if (isStalled) noChangeRegions.push([windowStart, windowEnd])
 
     // Move the window to the next non-overlapping position
-    windowStart += WINDOW_SIZE
-    windowEnd += WINDOW_SIZE
+    windowStart += windowSize
+    windowEnd += windowSize
   }
 
   // Every track must apply the same rotation freeze.
@@ -195,7 +197,7 @@ export function applyExternalBodySpace(tracks) {
     const endFrames = noChangeRegions.map(([start]) => start)
 
     // Current region's delay offset.
-    let delayBy = 0
+    let localDelay = 0
 
     // Accumulated delay from previous delay regions.
     let totalDelay = 0
@@ -206,21 +208,21 @@ export function applyExternalBodySpace(tracks) {
     track.times.forEach((time, frame) => {
       if (endFrames.includes(frame)) {
         isAdjusting = false
-        totalDelay += delayBy
+        totalDelay += localDelay
       }
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
-        delayBy += DELAY
+        localDelay += delay
         isAdjusting = true
       }
 
       // Apply the accumulated delay.
       track.times[frame] += totalDelay
 
-      // Apply the delay for each frame.
+      // Apply the local delay for each frame.
       if (isAdjusting) {
-        track.times[frame] += delayBy
+        track.times[frame] += localDelay
       }
     })
 

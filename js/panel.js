@@ -135,7 +135,7 @@ export class Panel {
       .onChange(this.handlers.space)
 
     this.spaceFolder
-      .add(this.params.space, 'windowSize', 1, 10, 1)
+      .add(this.params.space, 'windowSize', 1, 120, 1)
       .name('Window Size')
       .listen()
       .onChange(this.handlers.space)

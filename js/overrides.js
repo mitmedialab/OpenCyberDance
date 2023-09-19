@@ -153,6 +153,7 @@ export function applyExternalBodySpace(tracks, options) {
 
   const timing = tracks[0].times
 
+  // TODO: cache the average value for a HUGE speedup!
   const averages = [...timing].map((_, frame) => {
     const sums = tracks.map((track) => {
       const size = track.getValueSize()
@@ -169,8 +170,9 @@ export function applyExternalBodySpace(tracks, options) {
     return sums.reduce((a, b) => a + b, 0) / sums.length
   })
 
-  // Find rate of change across frames
-  const noChangeRegions = []
+  // Valleys in a graph with low change.
+  const valleys = []
+
   let windowStart = 0
   let windowEnd = windowSize - 1
 
@@ -182,12 +184,12 @@ export function applyExternalBodySpace(tracks, options) {
     })
 
     // Check if all differences in the window are below the threshold
-    const isStalled =
+    const isValley =
       diffs.every((diff) => Math.abs(diff) <= threshold) &&
       windowEnd - windowStart >= minWindow
 
     // Consider these regions as no-change regions
-    if (isStalled) noChangeRegions.push([windowStart, windowEnd])
+    if (isValley) valleys.push([windowStart, windowEnd])
 
     // Move the window to the next non-overlapping position
     windowStart += windowSize
@@ -199,8 +201,8 @@ export function applyExternalBodySpace(tracks, options) {
     // Only apply external body space for rotations
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
-    const startFrames = noChangeRegions.map(([start]) => start)
-    const endFrames = noChangeRegions.map(([start]) => start)
+    const startFrames = valleys.map(([start]) => start)
+    const endFrames = valleys.map(([start]) => start)
 
     // Current region's delay offset.
     let delayPerFrame = 0
@@ -220,8 +222,7 @@ export function applyExternalBodySpace(tracks, options) {
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
-        const [_, end] =
-          noChangeRegions[startFrames.findIndex((s) => s === frame)]
+        const [_, end] = valleys[startFrames.findIndex((s) => s === frame)]
         const numFrames = Math.abs(end - frame)
 
         delayPerFrame = delay / numFrames
@@ -240,7 +241,7 @@ export function applyExternalBodySpace(tracks, options) {
     tracks[ti] = track
   })
 
-  console.log({averages, noChangeRegions})
+  console.log(`Found ${valleys.length} valleys with low change:`, valleys)
 
   return tracks
 }

@@ -277,8 +277,8 @@ const rWindow = [1, 2000, 1, 1]
 
 /** @type {Record<keyof typeof transformers, FormulaRange>} */
 export const formulaRanges = {
-  capMin: [-2, 1, 0.01, 0.1],
-  capMax: [0, 3, 0.01, 0.1],
+  capMin: [-2, 3, 0.01, 0.1],
+  capMax: [-2, 3, 0.01, 0.1],
   lowpass: rWindow,
   highpass: rWindow,
   gaussian: rWindow,

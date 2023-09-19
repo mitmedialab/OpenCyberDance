@@ -193,7 +193,7 @@ export function applyExternalBodySpace(tracks) {
 
     // Apply external body space to the track.
     for (const [start, end] of noChangeRegions) {
-      const first = track.values.slice(start, start * size)
+      const first = track.values.slice(start, start + size)
 
       // Freeze the animation track using the first value.
       for (let frame = start; frame < end; frame++) {

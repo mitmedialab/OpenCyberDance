@@ -129,7 +129,7 @@ export class Panel {
       .onChange(this.handlers.space)
 
     this.spaceFolder
-      .add(this.params.space, 'minWindow', 1, 10, 1)
+      .add(this.params.space, 'minWindow', 1, 4, 1)
       .listen()
       .name('Minimum Window')
       .onChange(this.handlers.space)

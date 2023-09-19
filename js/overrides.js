@@ -241,7 +241,10 @@ export function applyExternalBodySpace(tracks, options) {
     tracks[ti] = track
   })
 
-  console.log(`Found ${valleys.length} valleys with low change:`, valleys)
+  console.log(`Found ${valleys.length} valleys with low change.`)
+
+  // @ts-ignore
+  window.valleys = valleys
 
   return tracks
 }

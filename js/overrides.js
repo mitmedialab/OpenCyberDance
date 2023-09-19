@@ -14,7 +14,7 @@ export class Params {
   /** External body space */
   space = {
     /** Stall the movement by X seconds. */
-    delay: 0.05,
+    delay: 0.4,
 
     /** Ignore changes below this threshold. */
     threshold: 0.005,
@@ -23,7 +23,7 @@ export class Params {
     minWindow: 3,
 
     /** The window size to calculate the averages. */
-    windowSize: 5,
+    windowSize: 30,
   }
 
   curve = {
@@ -144,12 +144,7 @@ export function overrideDelay(track, config) {
  * @returns {THREE.KeyframeTrack[]}
  */
 export function applyExternalBodySpace(tracks, options) {
-  const {
-    delay = 0.05,
-    threshold = 0.005,
-    minWindow = 3,
-    windowSize = 5,
-  } = options ?? {}
+  const {delay, threshold, minWindow, windowSize} = options ?? {}
 
   const timing = tracks[0].times
 

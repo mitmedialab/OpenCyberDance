@@ -13,8 +13,8 @@ export class Params {
 
   /** External body space */
   space = {
-    /** Stall the movement by X seconds. */
-    delay: 0.4,
+    /** Slow down the movement for the entire valley for X seconds. */
+    delay: 0,
 
     /** Ignore changes below this threshold. */
     threshold: 0.005,

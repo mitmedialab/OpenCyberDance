@@ -191,17 +191,14 @@ export function applyExternalBodySpace(tracks) {
 
     const size = track.getValueSize()
 
-    const times = [...track.times]
-    const values = [...track.values]
-
     // Apply external body space to the track.
     for (const [start, end] of noChangeRegions) {
-      const first = values.slice(start, start * size)
+      const first = track.values.slice(start, start * size)
 
       // Freeze the animation track using the first value.
       for (let frame = start; frame < end; frame++) {
         first.forEach((value, axis) => {
-          values[frame * size + axis] = value
+          track.values[frame * size + axis] = value
         })
       }
     }
@@ -209,9 +206,9 @@ export function applyExternalBodySpace(tracks) {
     const startFrames = noChangeRegions.map(([start]) => start)
     let delayOffset = 0
 
-    times.forEach((time, frame) => {
+    track.times.forEach((time, frame) => {
       // Delay the animation by X seconds.
-      times[frame] = time + delayOffset
+      track.times[frame] = time + delayOffset
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
@@ -219,12 +216,7 @@ export function applyExternalBodySpace(tracks) {
       }
     })
 
-    return {times, values}
-
-    // track.times = new Float32Array(times)
-    // track.values = new Float32Array(values)
-
-    // tracks[ti] = track
+    tracks[ti] = track
   })
 
   console.log({averages, noChangeRegions, out})

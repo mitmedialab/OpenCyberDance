@@ -123,7 +123,7 @@ export class Panel {
       .onChange(this.handlers.space)
 
     this.spaceFolder
-      .add(this.params.space, 'threshold', -1, 1, 0.001)
+      .add(this.params.space, 'threshold', 0, 1, 0.001)
       .name('Threshold')
       .listen()
       .onChange(this.handlers.space)

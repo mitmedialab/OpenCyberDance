@@ -154,7 +154,8 @@ export function applyExternalBodySpace(tracks) {
         sum += Math.abs(track.values[frame * size + axis])
       }
 
-      return sum
+      // Average of quaternion x/y/z/w values
+      return sum / size
     })
 
     return sums.reduce((a, b) => a + b, 0) / sums.length
@@ -177,6 +178,7 @@ export function applyExternalBodySpace(tracks) {
       diffs.every((diff) => Math.abs(diff) <= THRESHOLD) &&
       windowEnd - windowStart >= MIN_CHANGE_SIZE
 
+    // Consider these regions as no-change regions
     if (isStalled) noChangeRegions.push([windowStart, windowEnd])
 
     // Move the window to the next non-overlapping position
@@ -196,9 +198,11 @@ export function applyExternalBodySpace(tracks) {
       const first = track.values.slice(start, start + size)
 
       // Freeze the animation track using the first value.
+      // ? should we really use the first value,
+      // ? or really just drag the keyframe to extend all frames?
       for (let frame = start; frame < end; frame++) {
         first.forEach((value, axis) => {
-          track.values[frame * size + axis] = value
+          track.values[frame * size + axis] = 0
         })
       }
     }

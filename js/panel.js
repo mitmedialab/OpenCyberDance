@@ -117,7 +117,7 @@ export class Panel {
 
   addSpaceControl() {
     this.spaceFolder
-      .add(this.params.space, 'delay', 0, 10, 0.001)
+      .add(this.params.space, 'delay', 0, 3, 0.001)
       .name('Delay Per Valley (s)')
       .listen()
       .onChange(this.handlers.space)

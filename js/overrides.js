@@ -203,10 +203,10 @@ export function applyExternalBodySpace(tracks, options) {
     const endFrames = noChangeRegions.map(([start]) => start)
 
     // Current region's delay offset.
-    let localDelay = 0
+    let delayPerFrame = 0
 
-    // Accumulated delay from previous delay regions.
-    let totalDelay = 0
+    // Total accumulated delay from previous delay regions.
+    let globalDelay = 0
 
     // Are we currently adjusting the delay?
     let isAdjusting = true
@@ -214,21 +214,26 @@ export function applyExternalBodySpace(tracks, options) {
     track.times.forEach((time, frame) => {
       if (endFrames.includes(frame)) {
         isAdjusting = false
-        totalDelay += localDelay
+        globalDelay += delay
+        delayPerFrame = 0
       }
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
-        localDelay += delay
+        const [_, end] =
+          noChangeRegions[startFrames.findIndex((s) => s === frame)]
+        const numFrames = Math.abs(end - frame)
+
+        delayPerFrame = delay / numFrames
         isAdjusting = true
       }
 
       // Apply the accumulated delay.
-      track.times[frame] += totalDelay
+      track.times[frame] += globalDelay
 
       // Apply the local delay for each frame.
       if (isAdjusting) {
-        track.times[frame] += localDelay
+        track.times[frame] += delayPerFrame
       }
     })
 

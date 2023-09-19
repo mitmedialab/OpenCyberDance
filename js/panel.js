@@ -86,11 +86,13 @@ export class Panel {
 
     this.curveFolder
       .add(this.params.curve, 'equation', eqs)
+      .name('Equation')
       .listen()
       .onChange(this.handlers.curve)
 
     this.curveFolder
       .add(this.params.curve, 'threshold', 0, 1, 0.01)
+      .name('Threshold')
       .listen()
       .onChange(this.handlers.curve)
 
@@ -111,6 +113,32 @@ export class Panel {
         .listen()
         .onChange(this.handlers.curve)
     }
+  }
+
+  addSpaceControl() {
+    this.spaceFolder
+      .add(this.params.space, 'delay', 0, 5, 0.001)
+      .name('Delay (Seconds)')
+      .listen()
+      .onChange(this.handlers.space)
+
+    this.spaceFolder
+      .add(this.params.space, 'threshold', -1, 1, 0.001)
+      .name('Threshold')
+      .listen()
+      .onChange(this.handlers.space)
+
+    this.spaceFolder
+      .add(this.params.space, 'minWindow', 1, 10, 1)
+      .listen()
+      .name('Minimum Window')
+      .onChange(this.handlers.space)
+
+    this.spaceFolder
+      .add(this.params.space, 'windowSize', 1, 10, 1)
+      .name('Window Size')
+      .listen()
+      .onChange(this.handlers.space)
   }
 
   createPanel() {
@@ -169,11 +197,7 @@ export class Panel {
     }
 
     this.addCurveControl()
-
-    this.spaceFolder
-      .add(this.params, 'space', 0, 4, 0.001)
-      .listen()
-      .onChange(this.handlers.space)
+    this.addSpaceControl()
 
     this.commandFolder.open()
     this.rotationFolder.open()

@@ -10,8 +10,8 @@ import AnnotationPlugin from 'chartjs-plugin-annotation'
 import {AXES, keyframesAt} from './keyframes.js'
 
 const p = {
-  u: profile('chart', 15),
-  o: profile('plotter', 30),
+  u: profile('chart', 30),
+  o: profile('plotter', 80),
 }
 
 const colors = {

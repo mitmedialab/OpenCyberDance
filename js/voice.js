@@ -179,7 +179,7 @@ export class VoiceController {
       return
     }
 
-    this.world.updateParams({core: true})
+    this.world.updateParams({timing: true})
   }
 
   setSynchronic(v) {

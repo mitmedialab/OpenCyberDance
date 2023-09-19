@@ -8,9 +8,9 @@ export const profile = (label, threshold) => (callback) => {
 
   const m = performance.measure(label, `${label}-s`, `${label}-e`)
 
-  // if (m.duration > threshold) {
-  //   console.log(`> ${label} took ${m.duration}ms`)
-  // }
+  if (m.duration > threshold) {
+    console.log(`> ${label} took ${m.duration}ms`)
+  }
 
   return value
 }

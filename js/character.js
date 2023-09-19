@@ -24,12 +24,18 @@ import {
 } from './overrides.js'
 import {KeyframeAnalyzer} from './analyze.js'
 import {applyTrackTransform, transformers} from './transforms.js'
+import {profile} from './perf.js'
 
 /** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
 /** @typedef {number|string|RegExp} Q */
 
 const loader = new GLTFLoader()
 const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
+
+// Attach a profiler
+const p = {
+  ebs: profile('external body space', 20),
+}
 
 export class Character {
   /**
@@ -320,7 +326,7 @@ export class Character {
   /**
    * Update animation parameters.
    */
-  updateParams(flags = {core: true}) {
+  updateParams(flags = {timing: true}) {
     const {lockPosition: lock} = flags
 
     const {freezeParams} = this.options
@@ -349,16 +355,16 @@ export class Character {
 
       if (freezeParams) return
 
-      // Reset the keyframe times.
-      track.times = original.timings.slice(0)
-
       // Reset the keyframe values when circle and curve formula changes.
       if (flags.curve) {
         track.values = original.values.slice(0)
       }
 
-      if (flags.core) {
-        // Override energy
+      if (flags.timing) {
+        // Reset the keyframe times.
+        track.times = original.timings.slice(0)
+
+        // Override energy.
         const part = trackNameToPart(track.name, 'core')
         if (!part) return
 
@@ -388,8 +394,13 @@ export class Character {
       clip[index] = track
     })
 
-    if (flags.space) {
-      clip.tracks = applyExternalBodySpace(clip.tracks, this.params.space)
+    // External body space is always applied for timing changes.
+    if (flags.timing) {
+      p.ebs(() => {
+        if (!this.params) return
+
+        clip.tracks = applyExternalBodySpace(clip.tracks, this.params.space)
+      })
     }
 
     this.fadeIntoModifiedAction(clip)

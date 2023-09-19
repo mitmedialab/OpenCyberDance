@@ -195,7 +195,7 @@ export function applyExternalBodySpace(tracks, options) {
   }
 
   // Every track must apply the same rotation freeze.
-  const out = tracks.map((track, ti) => {
+  tracks.forEach((track, ti) => {
     // Only apply external body space for rotations
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
@@ -240,7 +240,7 @@ export function applyExternalBodySpace(tracks, options) {
     tracks[ti] = track
   })
 
-  console.log({averages, noChangeRegions, out})
+  console.log({averages, noChangeRegions})
 
   return tracks
 }

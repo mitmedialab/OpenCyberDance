@@ -191,32 +191,36 @@ export function applyExternalBodySpace(tracks) {
     // Only apply external body space for rotations
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
-    const size = track.getValueSize()
-
-    // Apply external body space to the track.
-    for (const [start, end] of noChangeRegions) {
-      const first = track.values.slice(start, start + size)
-
-      // Freeze the animation track using the first value.
-      // ? should we really use the first value,
-      // ? or really just drag the keyframe to extend all frames?
-      for (let frame = start; frame < end; frame++) {
-        first.forEach((value, axis) => {
-          track.values[frame * size + axis] = 0
-        })
-      }
-    }
-
     const startFrames = noChangeRegions.map(([start]) => start)
-    let delayOffset = 0
+    const endFrames = noChangeRegions.map(([start]) => start)
+
+    // Current region's delay offset.
+    let delayBy = 0
+
+    // Accumulated delay from previous delay regions.
+    let totalDelay = 0
+
+    // Are we currently adjusting the delay?
+    let isAdjusting = true
 
     track.times.forEach((time, frame) => {
-      // Delay the animation by X seconds.
-      track.times[frame] = time + delayOffset
+      if (endFrames.includes(frame)) {
+        isAdjusting = false
+        totalDelay += delayBy
+      }
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
-        delayOffset += DELAY
+        delayBy += DELAY
+        isAdjusting = true
+      }
+
+      // Apply the accumulated delay.
+      track.times[frame] += totalDelay
+
+      // Apply the delay for each frame.
+      if (isAdjusting) {
+        track.times[frame] += delayBy
       }
     })
 

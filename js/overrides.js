@@ -11,8 +11,20 @@ export class Params {
   paused = false
   lockPosition = false
 
-  // External body space
-  space = 0
+  /** External body space */
+  space = {
+    /** Stall the movement by X seconds. */
+    delay: 0.05,
+
+    /** Ignore changes below this threshold. */
+    threshold: 0.005,
+
+    /** Ignore region of change smaller than this window. */
+    minWindow: 3,
+
+    /** The window size to calculate the averages. */
+    windowSize: 5,
+  }
 
   curve = {
     /** @type {Record<keyof typeof curveParts, boolean>} */
@@ -128,20 +140,14 @@ export function overrideDelay(track, config) {
 
 /**
  * @param {THREE.KeyframeTrack[]} tracks
+ * @param {typeof Params.prototype.space} options
  * @returns {THREE.KeyframeTrack[]}
  */
 export function applyExternalBodySpace(tracks, options) {
   const {
-    // Stall the movement by X seconds.
     delay = 0.05,
-
-    // Ignore changes below this threshold.
     threshold = 0.005,
-
-    // Ignore region of change smaller than this window.
     minWindow = 3,
-
-    // The window size to calculate the averages.
     windowSize = 5,
   } = options ?? {}
 

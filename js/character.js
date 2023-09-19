@@ -389,7 +389,7 @@ export class Character {
     })
 
     if (flags.space) {
-      clip.tracks = applyExternalBodySpace(clip.tracks)
+      clip.tracks = applyExternalBodySpace(clip.tracks, this.params.space)
     }
 
     this.fadeIntoModifiedAction(clip)

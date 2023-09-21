@@ -272,6 +272,7 @@ export class Plotter {
     // Setup the charts if it hasn't been done yet.
     for (const c of this.world.characters) {
       this.setupCharts(c.options.name)
+      this.update(c)
     }
   }
 

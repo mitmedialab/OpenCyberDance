@@ -308,6 +308,11 @@ export class World {
       this.voice.toggle()
     }
 
+    /** @param {boolean} visible */
+    this.panel.handlers.showGraph = (visible) => {
+      this.plotter.updateVisibility(visible)
+    }
+
     this.panel.handlers.seek = (time) => {
       this.characters.forEach((c) => c.mixer.setTime(time))
       this.updatePlotterOnPause()

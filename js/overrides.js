@@ -10,6 +10,7 @@ export class Params {
   timescale = 1
   paused = false
   lockPosition = false
+  showGraph = true
 
   /** External body space */
   space = {

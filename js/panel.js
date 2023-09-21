@@ -25,6 +25,7 @@ export class Panel {
     pause: () => {},
     curve: () => {},
     space: () => {},
+    showGraph: () => {},
   }
 
   constructor(params) {
@@ -190,6 +191,12 @@ export class Panel {
       .name('Lock Position')
       .listen()
       .onChange(this.handlers.lockPosition)
+
+    this.playbackFolder
+      .add(this.params, 'showGraph')
+      .name('Graph Visible?')
+      .listen()
+      .onChange(this.handlers.showGraph)
 
     for (const key in this.params.characters) {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)

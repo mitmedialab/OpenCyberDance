@@ -37,6 +37,11 @@ export class Plotter {
   fps = 1
 
   /**
+   * Is the plotter visible?
+   */
+  visible = true
+
+  /**
    * Number of keyframes to show; indicates how wide the time window is.
    */
   windowSize = 250
@@ -104,6 +109,9 @@ export class Plotter {
   }
 
   createChart(chrId, trackId) {
+    // Do not create charts when the plotter is invisible.
+    if (!this.visible) return
+
     const track = this.trackById(trackId, chrId)
     if (!track) return
 
@@ -252,11 +260,30 @@ export class Plotter {
   }
 
   /**
+   * @param {boolean} visible
+   * @returns
+   */
+  updateVisibility(visible) {
+    this.visible = visible
+
+    if (!visible) return this.destroy()
+    if (!this.world?.characters) return
+
+    // Setup the charts if it hasn't been done yet.
+    for (const c of this.world.characters) {
+      this.setupCharts(c.options.name)
+    }
+  }
+
+  /**
    * @param {Character} char
    */
   update(char, options = {seeking: false}) {
     if (!this.domElement) return
     if (this.world?.params.paused && !options.seeking) return
+
+    // Destroy the chart if it is not visible.
+    if (!this.visible) return
 
     const {name} = char.options
 
@@ -294,6 +321,28 @@ export class Plotter {
         charts?.get(t)?.chart?.update()
       })
     })
+  }
+
+  // Fully destroy the chart.
+  destroy() {
+    if (this.charts.size === 0) return
+
+    for (const [character, tracks] of this.charts) {
+      for (const [track, state] of tracks) {
+        const {chart, canvas} = state
+
+        chart.destroy()
+        canvas.remove()
+
+        this.charts.get(character)?.delete(track)
+      }
+
+      this.charts.delete(character)
+    }
+
+    document
+      .querySelectorAll('div[data-plotter-character]')
+      .forEach((c) => c.remove())
   }
 
   /**

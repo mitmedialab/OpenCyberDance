@@ -352,7 +352,7 @@ export class World {
     }
   }
 
-  setCamera(presetKey = 'one') {
+  setCamera(presetKey = 'front') {
     const config = CAMERA_PRESETS[presetKey]
     if (!config) return
 

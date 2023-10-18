@@ -4,6 +4,7 @@ import {Params} from './overrides.js'
 
 import {Character} from './character.js'
 import {transformers} from './transforms.js'
+import {CAMERA_PRESETS} from './camera.js'
 
 export class Panel {
   panel = new GUI({width: 310})
@@ -169,11 +170,6 @@ export class Panel {
       .name('Voice')
       .listen()
 
-    this.commandFolder
-      .add({setCamera: this.handlers.setCamera.bind(this)}, 'setCamera')
-      .name('Front Camera')
-      .listen()
-
     this.playbackFolder
       .add(this.params, 'timescale', 0, 5, 0.01)
       .name('Animation Speed')
@@ -203,6 +199,12 @@ export class Panel {
       .name('Graph Visible?')
       .listen()
       .onChange(this.handlers.showGraph)
+
+    this.playbackFolder
+      .add(this.params, 'camera', Object.keys(CAMERA_PRESETS))
+      .name('Camera Angle')
+      .listen()
+      .onChange(this.handlers.setCamera)
 
     for (const key in this.params.characters) {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)

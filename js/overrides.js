@@ -11,6 +11,7 @@ export class Params {
   paused = false
   lockPosition = false
   showGraph = true
+  camera = 'front'
 
   /** External body space */
   space = {

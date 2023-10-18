@@ -26,6 +26,7 @@ export class Panel {
     curve: () => {},
     space: () => {},
     showGraph: () => {},
+    setCamera: () => {},
   }
 
   constructor(params) {
@@ -166,6 +167,11 @@ export class Panel {
     this.commandFolder
       .add({voice: this.handlers.voice.bind(this)}, 'voice')
       .name('Voice')
+      .listen()
+
+    this.commandFolder
+      .add({setCamera: this.handlers.setCamera.bind(this)}, 'setCamera')
+      .name('Front Camera')
       .listen()
 
     this.playbackFolder

@@ -11,7 +11,7 @@ import {debounce} from './utils.js'
 import {VoiceController} from './voice.js'
 import {Plotter} from './plotter.js'
 import {formulaRanges} from './transforms.js'
-import {curveParts} from './parts.js'
+import {CAMERA_PRESETS} from './camera.js'
 
 export class World {
   clock = new THREE.Clock()
@@ -135,7 +135,7 @@ export class World {
     // Setup camera
     const aspect = window.innerWidth / window.innerHeight
     this.camera = new THREE.PerspectiveCamera(45, aspect, 1, 100)
-    this.camera.position.set(-1, 2, 3)
+    this.setCamera()
   }
 
   setupControls() {
@@ -144,6 +144,7 @@ export class World {
     controls.enableZoom = true
     controls.target.set(0, 1, 0)
     controls.update()
+    this.controls = controls
   }
 
   addResizeHandler() {
@@ -282,6 +283,8 @@ export class World {
       }
     }
 
+    this.panel.handlers.setCamera = this.setCamera.bind(this)
+
     /** @param {keyof typeof Params.prototype.characters} name */
     this.panel.handlers.character = async (name) => {
       const char = this.characterByName(name)
@@ -340,5 +343,22 @@ export class World {
    */
   query(...query) {
     return this.first.query(...query)
+  }
+
+  get cameraConfig() {
+    return {
+      rotation: this.camera.rotation.toArray(),
+      position: this.camera.position.toArray(),
+    }
+  }
+
+  setCamera(presetKey = 'one') {
+    const config = CAMERA_PRESETS[presetKey]
+    if (!config) return
+
+    this.camera.rotation.set(...config.rotation)
+    this.camera.position.set(...config.position)
+
+    if (this.controls) this.controls.update()
   }
 }

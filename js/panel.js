@@ -228,14 +228,21 @@ export class Panel {
   }
 
   updateKey() {
-    localStorage.setItem(
-      'OPENAI_KEY',
-      prompt('Set API Key', localStorage.getItem('OPENAI_KEY') ?? '')
-    )
+    const key = prompt('Set API Key', localStorage.getItem('OPENAI_KEY') ?? '')
+    if (!key) return
+
+    localStorage.setItem('OPENAI_KEY', key)
+  }
+
+  get hasKey() {
+    const key = localStorage.getItem('OPENAI_KEY')
+    if (key === 'null') return false
+
+    return !!key
   }
 
   triggerVoice() {
-    if (!localStorage.getItem('OPENAI_KEY')) {
+    if (!this.hasKey) {
       this.updateKey()
       return
     }
@@ -244,7 +251,7 @@ export class Panel {
   }
 
   triggerPrompt() {
-    if (!localStorage.getItem('OPENAI_KEY')) {
+    if (!this.hasKey) {
       this.updateKey()
       return
     }

@@ -1,6 +1,7 @@
 import {World} from './world.js'
 import {gpt} from './prompt.js'
 import {randVariance} from './math.js'
+import {Params} from './overrides.js'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
@@ -46,8 +47,8 @@ const PROMPT = `
       windowSize: number
     }
 
-    circle: {
-      // Equation of the circle.
+    curve: {
+      // Equation of the curve.
       equation: "none" | "lowpass" | "highpass" | "gaussian" | "derivative" | "capMin" | "capMax"
 
       // Float between 0 and 1. Precision of 2 decimals.
@@ -100,6 +101,8 @@ export class VoiceController {
   }
 
   setOpenAIKey(key) {
+    if (!key) return
+
     localStorage.setItem('OPENAI_KEY', key)
   }
 
@@ -223,12 +226,31 @@ export class VoiceController {
         this.setSynchronic(v)
       },
 
-      circle: (v) => {
-        console.log('circle:', v)
+      curve: (data) => {
+        for (let key in data) {
+          const value = data[key]
+          console.log(`curve#${key}:`, value)
+
+          if (['equation', 'threshold'].includes(key)) {
+            p.curve[key] = value
+          } else if (key === 'axes') {
+            for (let axis in value) {
+              console.log(`curve.axes#${axis}:`, value[axis])
+              p.curve.axes[axis] = value[axis]
+            }
+          } else if (key === 'parts') {
+            for (let part in value) {
+              console.log(`curve.parts#${part}:`, value[part])
+              p.curve.parts[part] = value[part]
+            }
+          }
+        }
       },
 
-      externalBodySpace: (v) => {
-        console.log('space:', v)
+      externalBodySpace: (data) => {
+        for (let key in data) {
+          p.space[key] = data[key]
+        }
       },
     }
 

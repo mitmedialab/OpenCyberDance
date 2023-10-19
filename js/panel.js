@@ -247,7 +247,7 @@ export class Panel {
       return
     }
 
-    this.handlers.voice.bind(this)
+    this.handlers.voice.call(this)
   }
 
   triggerPrompt() {

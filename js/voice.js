@@ -99,6 +99,10 @@ export class VoiceController {
     this.world = world
   }
 
+  setOpenAIKey(key) {
+    localStorage.setItem('OPENAI_KEY', key)
+  }
+
   start() {
     if (this.active) return
     console.log('> starting recognition')
@@ -176,6 +180,11 @@ export class VoiceController {
   }
 
   async execute(input) {
+    if (!localStorage.getItem('OPENAI_KEY')) {
+      console.warn('[ai] missing OPENAI_KEY')
+      return
+    }
+
     const action = await gpt(PROMPT, input)
     console.log('[ai]', action)
 

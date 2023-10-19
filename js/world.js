@@ -325,6 +325,10 @@ export class World {
       paused ? this.clock.stop() : this.clock.start()
     }
 
+    this.panel.handlers.prompt = (input) => {
+      this.voice.execute(input)
+    }
+
     this.panel.createPanel()
   }
 

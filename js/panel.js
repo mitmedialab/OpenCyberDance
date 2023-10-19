@@ -21,6 +21,7 @@ export class Panel {
     character: () => {},
     reset: () => {},
     voice: () => {},
+    prompt: () => {},
     lockPosition: () => {},
     seek: () => {},
     pause: () => {},
@@ -166,8 +167,13 @@ export class Panel {
       .listen()
 
     this.commandFolder
-      .add({voice: this.handlers.voice.bind(this)}, 'voice')
+      .add({voice: this.triggerVoice.bind(this)}, 'voice')
       .name('Voice')
+      .listen()
+
+    this.commandFolder
+      .add({setKey: this.triggerPrompt.bind(this)}, 'setKey')
+      .name('Prompt')
       .listen()
 
     this.playbackFolder
@@ -219,6 +225,32 @@ export class Panel {
     this.energyFolder.open()
     this.delayFolder.open()
     this.characterFolder.open()
+  }
+
+  updateKey() {
+    localStorage.setItem(
+      'OPENAI_KEY',
+      prompt('Set API Key', localStorage.getItem('OPENAI_KEY') ?? '')
+    )
+  }
+
+  triggerVoice() {
+    if (!localStorage.getItem('OPENAI_KEY')) {
+      this.updateKey()
+      return
+    }
+
+    this.handlers.voice.bind(this)
+  }
+
+  triggerPrompt() {
+    if (!localStorage.getItem('OPENAI_KEY')) {
+      this.updateKey()
+      return
+    }
+
+    const command = prompt('User Command')
+    this.handlers.prompt.call(this, command)
   }
 
   reset() {

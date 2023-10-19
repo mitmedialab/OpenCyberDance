@@ -5,6 +5,84 @@ import {randVariance} from './math.js'
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
 
+const PROMPT = `
+  This is a system that evaluates the natural language command, and generate a JSON code with these variables,
+  according to the following TypeScript interface.
+
+  interface VoiceCommand {
+    // Reset the system?
+    reset: boolean
+
+    // Changes the energy of the head, body or foot. Float of 1 to 8. Precision of 2 decimals. Default to 1.
+    // If the body part (head, body, foot) is not specified, set all fields to the given value.
+    energy: {
+      head: number,
+      body: number,
+      foot: number,
+    }
+
+    // Changes the rotation of the axes. Float of 1 to 1.5. Precision of 3 decimals. Default to 1.
+    // If the axis (x, y, z) is not specified, set all axes to the given value.
+    rotation: {
+      x: number,
+      y: number,
+      z: number,
+    }
+
+    // Integer between -10 and 10. Default to 0.
+    synchronicLimbs: number
+
+    externalBodySpace: {
+      // Float of 0 to 3. Precision of 2 decimals.
+      delay: number
+
+      // Float of 0 to 0.2. Precision of 3 decimals. Default to 1.
+      threshold: number
+
+      // Integer of 1 to 4.
+      minWindow: number
+
+      // Integer of 1 to 120.
+      windowSize: number
+    }
+
+    circle: {
+      // Equation of the circle.
+      equation: "none" | "lowpass" | "highpass" | "gaussian" | "derivative" | "capMin" | "capMax"
+
+      // Float between 0 and 1. Precision of 2 decimals.
+      threshold: number
+
+      axes: {
+        // default to true
+        x: boolean,
+
+        y: boolean,
+        z: boolean
+      }
+
+      parts: {
+        head: boolean,
+        body: boolean,
+
+        // default to true
+        leftArm: boolean,
+
+        // default to true
+        rightArm: boolean,
+
+        // default to true
+        leftLeg: boolean,
+
+        // default to true
+        rightLeg: boolean,
+      }
+    }
+  }
+
+  If the variable is not mentioned, omit the key entirely.
+`
+
 export class VoiceController {
   recognition = null
   active = false
@@ -90,15 +168,7 @@ export class VoiceController {
 
     if (!this.active) return
 
-    const prompt = `
-      This is the system that evaluate the input, and generate a JSON code with these variables:
-      - energyHead, energyBody, energyFoot, reset
-      - rotationX, rotationY, rotationZ
-      - synchronicLimbs, axisPoint, externalBodySpace, circleAndCurve.
-
-      All value should be an integer.
-      If the variable is not mentioned, give null as default.
-    `.trim()
+    const prompt = PROMPT.trim()
 
     console.log('human:', text)
     this.speak(text)
@@ -114,49 +184,39 @@ export class VoiceController {
 
     if (!output) {
       console.warn('> invalid command:', cmd)
-      this.speak(`I don't understand.`)
+
       return
     }
 
     const p = this.world.params
 
     const handlers = {
-      // energy: (v) => {
-      //   p.energy.body = v
-      //   p.energy.head = v
-      //   p.energy.legs = v
-      // },
-
-      energyHead: (v) => {
-        p.energy.head = v
+      reset: (v) => {
+        console.log('reset:', v)
+        this.world.panel.reset()
       },
 
-      energyBody: (v) => {
-        p.energy.body = v
+      energy: (v) => {
+        console.log('energy:', v)
+        // p.energy.foot = v
       },
 
-      energyFoot: (v) => {
-        p.energy.foot = v
-      },
-
-      rotationX: (v) => {
-        p.rotations.x = v
-      },
-
-      rotationY: (v) => {
-        p.rotations.y = v
-      },
-
-      rotationZ: (v) => {
-        p.rotations.z = v
+      rotation: (v) => {
+        console.log('rotation:', v)
+        // p.rotations.x = v
       },
 
       synchronicLimbs: (v) => {
+        console.log('limbs:', v)
         this.setSynchronic(v)
       },
 
-      reset: (v) => {
-        this.world.panel.reset()
+      circle: (v) => {
+        console.log('circle:', v)
+      },
+
+      externalBodySpace: (v) => {
+        console.log('space:', v)
       },
     }
 

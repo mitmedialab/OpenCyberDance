@@ -81,7 +81,7 @@ const PROMPT = `
   }
 
   If the variable is not mentioned, omit the key entirely.
-`
+`.trim()
 
 export class VoiceController {
   recognition = null
@@ -168,22 +168,25 @@ export class VoiceController {
 
     if (!this.active) return
 
-    const prompt = PROMPT.trim()
+    if (text) {
+      console.log('[human]', text)
+      this.speak(text)
+      this.execute(text)
+    }
+  }
 
-    console.log('human:', text)
-    this.speak(text)
-
-    const cmd = await gpt(prompt, text)
-    console.log('ai:', cmd)
+  async execute(input) {
+    const action = await gpt(PROMPT, input)
+    console.log('[ai]', action)
 
     let output = null
 
     try {
-      output = JSON.parse(cmd)
+      output = JSON.parse(action)
     } catch (err) {}
 
     if (!output) {
-      console.warn('> invalid command:', cmd)
+      console.warn('> invalid command:', action)
 
       return
     }

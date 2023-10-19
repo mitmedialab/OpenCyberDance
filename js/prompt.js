@@ -7,7 +7,7 @@ export async function gpt(system, input) {
   const endpoint = 'https://api.openai.com/v1/chat/completions'
 
   // TODO: domain-restrict this!
-  const token = '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'
+  const token = ''
 
   try {
     const res = await fetch(endpoint, {

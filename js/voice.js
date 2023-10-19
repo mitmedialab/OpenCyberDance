@@ -236,7 +236,7 @@ export class VoiceController {
     if (!out) return
 
     const [key, value] = out
-    console.log(`set> ${key} = ${value}`)
+    console.log(`set> ${key} =`, value)
 
     const handler = handlers[key]?.bind(this)
     handler?.(value)

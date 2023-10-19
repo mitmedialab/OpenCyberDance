@@ -209,17 +209,23 @@ export class VoiceController {
     const handlers = {
       reset: (v) => {
         console.log('reset:', v)
-        this.world.panel.reset()
+        if (v) this.world.panel.reset()
       },
 
-      energy: (v) => {
-        console.log('energy:', v)
-        // p.energy.foot = v
+      energy: (data) => {
+        console.log('energy:', data)
+
+        for (let key in data) {
+          p.energy[key] = data[key]
+        }
       },
 
-      rotation: (v) => {
-        console.log('rotation:', v)
-        // p.rotations.x = v
+      rotation: (data) => {
+        console.log('rotation:', data)
+
+        for (let key in data) {
+          p.rotations[key] = data[key]
+        }
       },
 
       synchronicLimbs: (v) => {

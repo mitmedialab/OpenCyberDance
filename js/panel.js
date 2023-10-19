@@ -61,7 +61,7 @@ export class Panel {
   addRotations() {
     for (const axis of ['x', 'y', 'z']) {
       this.rotationFolder
-        .add(this.params.rotations, axis, 1, 1.2)
+        .add(this.params.rotations, axis, 1, 1.5)
         .listen()
         .onChange(this.handlers.rotation)
     }

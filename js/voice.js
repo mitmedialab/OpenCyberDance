@@ -47,6 +47,7 @@ const PROMPT = `
       windowSize: number
     }
 
+    // Circle and curve.
     curve: {
       // Equation of the curve.
       equation: "none" | "lowpass" | "highpass" | "gaussian" | "derivative" | "capMin" | "capMax"

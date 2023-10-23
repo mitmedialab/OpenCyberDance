@@ -22,7 +22,7 @@ const PROMPT = `
       foot: number,
     }
 
-    // Changes the rotation of the axes. Float of 1 to 1.5. Precision of 3 decimals. Default to 1.
+    // Changes the rotation of the axes. Float of 1 to 5. Precision of 3 decimals. Default to 1.
     // If the axis (x, y, z) is not specified, set all axes to the given value.
     rotation: {
       x: number,

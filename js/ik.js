@@ -1,4 +1,7 @@
 import THREE, {SkinnedMesh} from 'three'
+
+import {bones} from './bones.js'
+
 import {CCDIKSolver} from '../jsm/animation/CCDIKSolver.js'
 
 export class IKManager {
@@ -31,22 +34,37 @@ export class IKManager {
     return this.skeleton.bones.findIndex((b) => name === b.name)
   }
 
+  valid(id) {
+    if (id === -1) return false
+
+    return typeof id === 'number'
+  }
+
   setup() {
     this.selectMesh()
-
-    const iks = [
-      {
-        target: this.bone('LeftLeg'),
-        effector: this.bone('RightLeg'),
-        links: [{index: this.bone('LeftUpLeg')}],
-      },
-    ]
 
     window.boneIds = this.skeleton.bones.map((b) => b.name)
 
     if (this.mesh) {
-      this.ik = new CCDIKSolver(this.mesh, iks)
+      this.ik = new CCDIKSolver(this.mesh, [])
     }
+  }
+
+  validate(iks) {
+    if (!iks) return false
+
+    for (const ik of iks) {
+      if (!this.valid(ik.target)) return false
+      if (!this.valid(ik.effector)) return false
+
+      for (const link of ik.links) {
+        if (!this.valid(link.index)) return false
+      }
+    }
+
+    console.debug('Valid IK definitions')
+
+    return true
   }
 
   selectMesh() {
@@ -58,5 +76,21 @@ export class IKManager {
   update() {
     // Update all IK bones
     this.ik.update()
+  }
+
+  /**
+   * @param {Object[]} iks
+   */
+  set(iks) {
+    if (!this.validate(iks)) {
+      console.error('invalid IK definitions')
+      return
+    }
+
+    this.ik.iks = iks
+  }
+
+  clear() {
+    this.set([])
   }
 }

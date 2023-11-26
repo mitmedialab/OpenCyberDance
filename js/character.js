@@ -219,9 +219,18 @@ export class Character {
     this.scene.add(this.model)
 
     // Cast shadows
-    this.model.traverse((object) => {
+    this.model.traverse((o) => {
       // @ts-ignore
-      if (object.isMesh) object.castShadow = true
+      if (o.isMesh) o.castShadow = true
+
+      if (o instanceof THREE.SkinnedMesh) {
+        if (!window.skinMaterials) window.skinMaterials = {}
+        window.skinMaterials[this.options.name] = o.material
+
+        if (o.material instanceof THREE.MeshStandardMaterial) {
+          // ?
+        }
+      }
     })
 
     // Adjust character scale
@@ -235,6 +244,7 @@ export class Character {
     this.skeleton = new THREE.SkeletonHelper(this.model)
     this.skeleton.visible = false
     this.ik = new IKManager(this.skeleton, this.model)
+    this.scene.add(this.ik.ik.createHelper())
     this.scene.add(this.skeleton)
 
     // Create individual animation mixer

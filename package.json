@@ -4,5 +4,8 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "three-ik": "^0.1.0"
   }
 }

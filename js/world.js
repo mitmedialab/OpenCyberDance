@@ -89,6 +89,7 @@ export class World {
 
       for (const c of this.characters) {
         c.mixer?.update(delta)
+        c.ik?.update()
       }
     }
 

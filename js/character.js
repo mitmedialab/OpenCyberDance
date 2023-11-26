@@ -25,6 +25,7 @@ import {
 import {KeyframeAnalyzer} from './analyze.js'
 import {applyTrackTransform, transformers} from './transforms.js'
 import {profile} from './perf.js'
+import {IKManager} from './ik.js'
 
 /** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
 /** @typedef {number|string|RegExp} Q */
@@ -64,6 +65,9 @@ export class Character {
 
   /** @type {KeyframeAnalyzer | null} */
   analyzer = null
+
+  /** @type {IKManager} */
+  ik
 
   options = {
     /** @type {keyof typeof Params.prototype.characters} */
@@ -230,6 +234,7 @@ export class Character {
     // Add model skeleton
     this.skeleton = new THREE.SkeletonHelper(this.model)
     this.skeleton.visible = false
+    this.ik = new IKManager(this.skeleton, this.model)
     this.scene.add(this.skeleton)
 
     // Create individual animation mixer
@@ -253,6 +258,8 @@ export class Character {
 
     // Play the first animation
     this.updateAction()
+
+    console.log('>>> setup completed', this.skeleton)
   }
 
   updateAction() {

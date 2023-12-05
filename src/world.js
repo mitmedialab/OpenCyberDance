@@ -19,7 +19,7 @@ export class World {
   renderer = new THREE.WebGLRenderer({antialias: true})
   stats = new Stats()
   plotter = new Plotter(this)
-  container = document.getElementById('container')
+  container = document.getElementById('app')
   params = new Params()
   panel = new Panel(this.params)
   voice = new VoiceController(this)

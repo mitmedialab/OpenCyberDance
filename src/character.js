@@ -197,7 +197,7 @@ export class Character {
     if (config.model === 'none') return
 
     // Get the model url based on the character model
-    const url = Character.sources[config.model]
+    const url = `/models/${Character.sources[config.model]}`
     if (url === 'none' || !url) return
 
     const gltf = await loadModel(url)

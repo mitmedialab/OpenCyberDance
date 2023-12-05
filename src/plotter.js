@@ -3,7 +3,7 @@ import {World} from './world.js'
 import {profile} from './perf.js'
 import * as THREE from 'three'
 
-import {Chart} from 'chart.js'
+import {Chart, registerables} from 'chart.js'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
 import {AXES, keyframesAt} from './keyframes.js'
 
@@ -77,7 +77,7 @@ export class Plotter {
   constructor(world) {
     this.world = world
 
-    Chart.register(AnnotationPlugin)
+    Chart.register(...registerables, AnnotationPlugin)
 
     this.prepare()
     this.run()

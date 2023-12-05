@@ -1,11 +1,11 @@
-import { Character } from './character.js'
-import { World } from './world.js'
-import { profile } from './perf.js'
-import * as THREE from 'three'
-
 import { Chart, registerables } from 'chart.js'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
+import * as THREE from 'three'
+
+import { Character } from './character.js'
 import { AXES, keyframesAt } from './keyframes.js'
+import { profile } from './perf.js'
+import { World } from './world.js'
 
 const p = {
   u: profile('chart', 30),

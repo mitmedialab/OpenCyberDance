@@ -1,31 +1,26 @@
 import * as THREE from 'three'
 import { QuaternionKeyframeTrack } from 'three'
-
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import { trackToEuler } from './math.js'
-
+import { KeyframeAnalyzer } from './analyze.js'
+import { dispose } from './dispose.js'
+import { IKManager } from './ik.js'
 import {
   getAcceleration,
   keyframesAt,
   lengthenKeyframeTracks,
 } from './keyframes.js'
-
-import { trackNameToPart } from './parts.js'
-import { dispose } from './dispose.js'
-import { curveParts } from './parts.js'
-
+import { trackToEuler } from './math.js'
 import {
   applyExternalBodySpace,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
 } from './overrides.js'
-
-import { KeyframeAnalyzer } from './analyze.js'
-import { applyTrackTransform, transformers } from './transforms.js'
+import { trackNameToPart } from './parts.js'
+import { curveParts } from './parts.js'
 import { profile } from './perf.js'
-import { IKManager } from './ik.js'
+import { applyTrackTransform, transformers } from './transforms.js'
 
 /** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
 /** @typedef {number|string|RegExp} Q */
@@ -352,7 +347,7 @@ export class Character {
     const clip = this.currentClip
     if (!clip || !this.params) return
 
-    let _curve = {}
+    const _curve = {}
 
     if (flags.curve) {
       _curve.equation = transformers[this.params.curve.equation]

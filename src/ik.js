@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { SkinnedMesh } from 'three'
-
 import { CCDIKSolver } from 'three/examples/jsm/animation/CCDIKSolver.js'
 
 import { BoneKey } from './bones.js'

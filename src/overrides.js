@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { trackNameToPart, coreParts, delayParts, curveParts } from './parts.js'
+import { coreParts, curveParts, delayParts, trackNameToPart } from './parts.js'
 import { transformers } from './transforms.js'
 
 export class Params {

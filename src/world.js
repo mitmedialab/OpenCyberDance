@@ -1,17 +1,16 @@
 import * as THREE from 'three'
-
-import Stats from 'three/addons/libs/stats.module.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import Stats from 'three/addons/libs/stats.module.js'
 
-import { Panel } from './panel.js'
+import { CAMERA_PRESETS } from './camera.js'
 import { Character } from './character.js'
 import { Params } from './overrides.js'
+import { Panel } from './panel.js'
 import { profile } from './perf.js'
-import { debounce } from './utils.js'
-import { VoiceController } from './voice.js'
 import { Plotter } from './plotter.js'
 import { formulaRanges } from './transforms.js'
-import { CAMERA_PRESETS } from './camera.js'
+import { debounce } from './utils.js'
+import { VoiceController } from './voice.js'
 
 export class World {
   clock = new THREE.Clock()

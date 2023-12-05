@@ -1,6 +1,5 @@
 import * as THREE from 'three'
-
-import { Quaternion, KeyframeTrack, VectorKeyframeTrack } from 'three'
+import { KeyframeTrack, Quaternion, VectorKeyframeTrack } from 'three'
 
 /** @type {Axis[]} */
 

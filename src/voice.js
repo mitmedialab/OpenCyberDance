@@ -1,7 +1,7 @@
-import { World } from './world.js'
-import { gpt } from './prompt.js'
 import { randVariance } from './math.js'
 import { Params } from './overrides.js'
+import { gpt } from './prompt.js'
+import { World } from './world.js'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition

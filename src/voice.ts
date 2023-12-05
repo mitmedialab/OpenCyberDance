@@ -1,10 +1,12 @@
 import { randVariance } from './math'
-import { Params } from './overrides'
 import { gpt } from './prompt'
 import { World } from './world'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
+
+// @ts-expect-error - it's a UMD global
+const responsiveVoice = window.responsiveVoice
 
 const PROMPT = `
   This is a system that evaluates the natural language command, and generate a JSON code with these variables,
@@ -86,22 +88,16 @@ const PROMPT = `
 `.trim()
 
 export class VoiceController {
-  recognition = null
+  recognition: SpeechRecognition | null = null
   active = false
-
-  /** @type {World} */
-  world
-
+  world: World
   transcript = ''
 
-  /**
-   * @param {World} world
-   */
-  constructor(world) {
+  constructor(world: World) {
     this.world = world
   }
 
-  setOpenAIKey(key) {
+  setOpenAIKey(key: string) {
     if (!key) return
 
     localStorage.setItem('OPENAI_KEY', key)
@@ -111,12 +107,12 @@ export class VoiceController {
     if (this.active) return
     console.log('> starting recognition')
 
-    if (this.recognition) this.recognition.abort()
+    this.recognition?.abort()
 
     this.active = true
 
     this.createRecognition()
-    this.recognition.start()
+    this.recognition?.start()
   }
 
   stop() {
@@ -152,10 +148,7 @@ export class VoiceController {
     })
   }
 
-  /**
-   * @param {string} text
-   */
-  speak(text) {
+  speak(text: string) {
     if (!responsiveVoice) {
       console.error('ResponsiveVoice not loaded!')
       return
@@ -183,7 +176,7 @@ export class VoiceController {
     }
   }
 
-  async execute(input) {
+  async execute(input: string) {
     if (!localStorage.getItem('OPENAI_KEY')) {
       console.warn('[ai] missing OPENAI_KEY')
       return
@@ -217,7 +210,7 @@ export class VoiceController {
       energy: (data) => {
         console.log('energy:', data)
 
-        for (let key in data) {
+        for (const key in data) {
           p.energy[key] = data[key]
         }
       },
@@ -225,7 +218,7 @@ export class VoiceController {
       rotation: (data) => {
         console.log('rotation:', data)
 
-        for (let key in data) {
+        for (const key in data) {
           p.rotations[key] = data[key]
         }
       },
@@ -236,19 +229,19 @@ export class VoiceController {
       },
 
       curve: (data) => {
-        for (let key in data) {
+        for (const key in data) {
           const value = data[key]
           console.log(`curve#${key}:`, value)
 
           if (['equation', 'threshold'].includes(key)) {
             p.curve[key] = value
           } else if (key === 'axes') {
-            for (let axis in value) {
+            for (const axis in value) {
               console.log(`curve.axes#${axis}:`, value[axis])
               p.curve.axes[axis] = value[axis]
             }
           } else if (key === 'parts') {
-            for (let part in value) {
+            for (const part in value) {
               console.log(`curve.parts#${part}:`, value[part])
               p.curve.parts[part] = value[part]
             }
@@ -257,7 +250,7 @@ export class VoiceController {
       },
 
       externalBodySpace: (data) => {
-        for (let key in data) {
+        for (const key in data) {
           p.space[key] = data[key]
         }
       },

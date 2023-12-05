@@ -1,10 +1,12 @@
-import { Chart, registerables } from 'chart'
+import { Chart, registerables } from 'chart.js'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
-import * as THREE from 'three'
+import { KeyframeTrack } from 'three'
 
 import { Character } from './character'
 import { AXES, keyframesAt } from './keyframes'
 import { profile } from './perf'
+import { Axis } from './transforms'
+import { Matcher } from './types'
 import { World } from './world'
 
 const p = {
@@ -28,62 +30,46 @@ const layout = {
   py: 5,
 }
 
+// Map<CharacterName, Map<TrackId, *>>
+type ChartMap = Map<
+  string,
+  Map<number, { chart: Chart; canvas: HTMLCanvasElement }>
+>
+
 export class Plotter {
-  /**
-   * How many frames per second to plot?
-   */
+  /** How many frames per second to plot? */
   fps = 1
 
-  /**
-   * Is the plotter visible?
-   */
+  /** Is the plotter visible? */
   visible = true
 
-  /**
-   * Number of keyframes to show; indicates how wide the time window is.
-   */
+  /** Number of keyframes to show; indicates how wide the time window is. */
   windowSize = 250
 
-  /**
-   * Number of keyframes to skip; indicates how far back in time to start.
-   */
+  /** Number of keyframes to skip; indicates how far back in time to start. */
   offset = -30
 
-  /**
-   * Track index of the animation to plot.
-   * @type {Set<number>}
-   */
-  tracks = new Set()
+  /** Track index of the animation to plot. */
+  tracks: Set<number> = new Set()
 
-  /** @type {HTMLDivElement | null} */
-  domElement = null
+  domElement: HTMLDivElement | null = null
 
-  /**
-   * Map<CharacterName, Map<TrackId, *>>
-   * @type {Map<string, Map<number, {chart: Chart, canvas: HTMLCanvasElement}>>}
-   **/
-  charts = new Map()
-
-  /** @type {World | null} */
-  world = null
+  world: World
+  charts: ChartMap = new Map()
 
   /// Internal timer
   timer = 0
 
   /// Visible axis
-  /** @type {import('./transforms').Axis[]} */
-  axes = [...AXES]
+  axes: Axis[] = [...AXES]
 
-  constructor(world) {
+  constructor(world: World) {
     this.world = world
 
     Chart.register(...registerables, AnnotationPlugin)
 
     this.prepare()
     this.run()
-
-    // @ts-ignore
-    window.p = this
   }
 
   get trackNames() {
@@ -106,7 +92,7 @@ export class Plotter {
     return this.world?.characterByName(chr)?.trackByKey(id)
   }
 
-  createChart(chrId, trackId) {
+  createChart(chrId: string, trackId: number) {
     // Do not create charts when the plotter is invisible.
     if (!this.visible) return
 
@@ -157,23 +143,10 @@ export class Plotter {
           },
           tooltip: {
             enabled: false,
-            external(t) {
-              // @ts-ignore
-              // window.t = t
-            },
           },
           decimation: {
             enabled: true,
             algorithm: 'min-max',
-          },
-          annotation: {
-            annotations: [
-              // {
-              //   type: 'line',
-              //   scaleID: 'x',
-              //   value: Math.abs(this.offset),
-              // },
-            ],
           },
         },
       },
@@ -190,14 +163,13 @@ export class Plotter {
     this.charts.get(chrId)?.set(trackId, { chart, canvas })
   }
 
-  containerOf(id) {
-    return this.domElement?.querySelector(`[data-plotter-character="${id}"]`)
+  containerOf(character: string) {
+    return this.domElement?.querySelector(
+      `[data-plotter-character="${character}"]`,
+    )
   }
 
-  /**
-   * @param {import('./character').Q[]} query
-   */
-  select(...query) {
+  select(...query: Matcher[]) {
     if (!this.world) return
 
     const next = this.world.query(...query)
@@ -233,7 +205,7 @@ export class Plotter {
     })
   }
 
-  setupCharts(name) {
+  setupCharts(name: string) {
     if (this.charts.has(name)) return
 
     // Initialize the plotter container.
@@ -246,22 +218,19 @@ export class Plotter {
     this.tracks.forEach((id) => this.createChart(name, id))
   }
 
-  /** @param {number} id */
-  current(id = [...this.tracks][0]) {
+  current(id: number = [...this.tracks][0]) {
     if (!this.world) return []
 
     const c = this.world.first
+    if (!c) return
+
     const track = c.currentClip?.tracks[id]
     if (!track || !c.mixer) return []
 
     return this.view(track, c.mixer.time)
   }
 
-  /**
-   * @param {boolean} visible
-   * @returns
-   */
-  updateVisibility(visible) {
+  updateVisibility(visible: boolean) {
     this.visible = visible
 
     if (!visible) return this.destroy()
@@ -274,10 +243,7 @@ export class Plotter {
     }
   }
 
-  /**
-   * @param {Character} char
-   */
-  update(char, options = { seeking: false }) {
+  update(char: Character, options = { seeking: false }) {
     if (!this.domElement) return
     if (this.world?.params.paused && !options.seeking) return
 
@@ -304,12 +270,12 @@ export class Plotter {
       // Adjust the chart scaling.
       const scale = chart.config.options?.scales?.x
 
-      if (scale) {
+      if (scale && view) {
         scale.min = view.start
         scale.max = view.end
       }
 
-      view.series.forEach((points, axis) => {
+      view?.series.forEach((points, axis) => {
         chart.data.datasets[axis].data = points
         chart.data.datasets[axis].clip = false
       })
@@ -344,11 +310,7 @@ export class Plotter {
       .forEach((c) => c.remove())
   }
 
-  /**
-   * @param {THREE.KeyframeTrack} track
-   * @param {number} now
-   */
-  view(track, now) {
+  view(track: KeyframeTrack, now: number) {
     return keyframesAt(track, {
       from: now,
       axes: this.axes,
@@ -366,7 +328,7 @@ export class Plotter {
 
     this.timer = setInterval(() => {
       p.o(() => {
-        this.world?.characters?.forEach(this.update.bind(this))
+        this.world?.characters?.forEach((character) => this.update(character))
       })
     }, this.interval)
   }

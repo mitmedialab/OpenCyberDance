@@ -1,8 +1,28 @@
 import THREE, {SkinnedMesh} from 'three'
 
-import {bones} from './bones.js'
+import {BoneKey} from './bones.js'
 
 import {CCDIKSolver} from '../jsm/animation/CCDIKSolver.js'
+
+/** @param {THREE.Bone[]} bones */
+const axisPointBones = (bones) => {
+  /** @param {BoneKeys} key */
+  const find = (key) => bones.find((b) => b.name === key)
+
+  return {
+    forehead() {
+      const ref = find(BoneKey.Head)
+    },
+
+    neck() {
+      const ref = find(BoneKey.Neck)
+    },
+
+    body() {
+      const ref = find(BoneKey.Spine)
+    },
+  }
+}
 
 export class IKManager {
   /** @type {CCDIKSolver} */

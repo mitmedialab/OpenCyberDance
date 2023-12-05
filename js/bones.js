@@ -1,4 +1,4 @@
-export const bones = {
+export const BoneKey = {
   Hips: 'Hips',
   RightUpLeg: 'RightUpLeg',
   RightLeg: 'RightLeg',

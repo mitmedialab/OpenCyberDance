@@ -24,7 +24,7 @@ import {
   overrideRotation,
   Params,
 } from './overrides'
-import { CurvePartKey, curveParts, trackNameToPart } from './parts'
+import { CorePartKey, CurvePartKey, curveParts, trackNameToPart } from './parts'
 import { profile } from './perf'
 import {
   applyTrackTransform,
@@ -68,7 +68,7 @@ export type CharacterKey = keyof typeof Params.prototype.characters
 
 export interface CharacterOptions {
   name: CharacterKey
-  action: string
+  action: string | null
   model: ModelKey
   scale: number
   position: [number, number, number]
@@ -130,8 +130,11 @@ export class Character {
     if (options) this.options = { ...this.options, ...options }
   }
 
-  get currentClip() {
-    return this.actions.get(this.options.action)?.getClip()
+  get currentClip(): AnimationClip | null {
+    const { action } = this.options
+    if (!action) return null
+
+    return this.actions.get(action)?.getClip() ?? null
   }
 
   handlers: Handlers = {
@@ -164,9 +167,12 @@ export class Character {
     if (!action) return
 
     const name = action.getClip().name
+    const currAction = this.options.action
+    if (!currAction) return
 
     // Cross-fade previously running actions
-    const prev = this.actions.get(this.options.action)
+    const prev = this.actions.get(currAction)
+
     if (prev?.isRunning && prev.getClip().name !== name) {
       action.time = prev.time
       prev.crossFadeTo(action, 0.35, true)
@@ -321,7 +327,10 @@ export class Character {
 
   /** Get the original animation timings and values. */
   originalOf(index: number) {
-    const sources = this.original.get(this.options.action)
+    const { action } = this.options
+    if (!action) return
+
+    const sources = this.original.get(action)
     if (!sources) return
 
     return sources[index]
@@ -384,7 +393,7 @@ export class Character {
         // Override delays
         overrideDelay(track, this.params.delays)
 
-        const energy = this.params.energy[part]
+        const energy = this.params.energy[part as CorePartKey]
         overrideEnergy(track, energy)
       }
 
@@ -512,24 +521,27 @@ export class Character {
 
   transform(
     transform: TransformKey | Transform | 'none',
-    options: TransformOptions & { tracks: Matcher | Matcher[] },
+    options: Omit<TransformOptions, 'tracks'> & { tracks: Matcher | Matcher[] },
   ) {
+    let tracks: number[]
     if (this.options.freezeParams) return
 
     if (options.tracks) {
-      // Convert a single track query to an array.
-      if (!Array.isArray(options.tracks)) {
-        options.tracks = [options.tracks]
-      }
+      const _tracks = Array.isArray(options.tracks)
+        ? options.tracks
+        : [options.tracks]
 
       // Query the track ids.
-      options.tracks = this.query(...options.tracks)
+      tracks = this.query(..._tracks)
     }
 
     const isKey = typeof transform === 'string'
     const name = isKey ? transform : transform.name
 
-    const transformer = isKey ? transformers[transform] : transform
+    const transformer = isKey
+      ? transformers[transform as TransformKey]
+      : transform
+
     if (!transformer) return
 
     console.log(`> applying ${name} transform`, options)
@@ -541,10 +553,14 @@ export class Character {
       if (!transformer) return
 
       // Exclude the tracks that does not match.
-      if (options.tracks && !options.tracks?.includes(id)) return
+      if (options.tracks && !tracks?.includes(id)) return
 
       // Apply the transform to each track.
-      const values = applyTrackTransform(track, transformer, options)
+      const values = applyTrackTransform(track, transformer, {
+        ...options,
+        tracks,
+      })
+
       track.values = values
       track.validate()
     })

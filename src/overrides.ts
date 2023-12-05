@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
+import { ModelKey } from './character'
 import {
   CorePartKey,
   CurvePartKey,
@@ -16,6 +17,8 @@ interface CurveConfig {
   threshold: number
   dirty: boolean
 }
+
+type CharacterOptions = Record<string, { model: ModelKey; action: string }>
 
 export class Params {
   time = 0
@@ -83,7 +86,7 @@ export class Params {
     rightLeg: 0,
   }
 
-  characters = {
+  characters: CharacterOptions = {
     first: {
       model: 'abstract',
       action: '',

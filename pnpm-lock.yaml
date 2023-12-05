@@ -25,6 +25,9 @@ devDependencies:
   '@types/three':
     specifier: ^0.159.0
     version: 0.159.0
+  husky:
+    specifier: ^8.0.3
+    version: 8.0.3
   three-ik:
     specifier: ^0.1.0
     version: 0.1.0(three@0.159.0)
@@ -432,6 +435,12 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /husky@8.0.3:
+    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /meshoptimizer@0.18.1:
     resolution: {integrity: sha512-ZhoIoL7TNV4s5B6+rx5mC//fw8/POGyNxS/DZyCJeiZ12ScLfVwRE/GfsxwiTkMYYD5DmK2/JXnEVXqL4rF+Sw==}

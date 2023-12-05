@@ -1,3 +1,5 @@
+import './main.css'
+
 import { World } from './world'
 
 window.addEventListener('DOMContentLoaded', async () => {

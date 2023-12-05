@@ -12,7 +12,7 @@ import { TransformKey } from './transforms'
 interface CurveConfig {
   parts: Record<CurvePartKey, boolean>
   equation: TransformKey | 'none'
-  axes: { x: number; y: number; z: number }
+  axes: { x: boolean; y: boolean; z: boolean }
   threshold: number
   dirty: boolean
 }

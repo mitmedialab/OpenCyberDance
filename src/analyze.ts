@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-
 import {
   KeyframeTrack,
   QuaternionKeyframeTrack,
@@ -8,36 +7,29 @@ import {
 
 /**
  * Value of movement for analysis.
- * @typedef {{v: THREE.Vector3|THREE.Quaternion}} MoveValue
  */
-
-/**
- * @typedef {{track: string, value: MoveValue}} Keyframe
- */
-
-/**
- * @param {THREE.Quarternion} q
- */
-export function toEuler(q) {
-  return new THREE.Euler().setFromQuaternion(q, 'XYZ')
+interface MoveValue {
+  v: THREE.Vector3 | THREE.Quaternion
 }
 
-export function toBone(name) {
-  return name.replace(/\.(position|quaternion)/, '')
+interface Keyframe {
+  track: string
+  value: MoveValue
 }
+
+type Matcher = string | RegExp | null
+
+export const toEuler = (q: THREE.Quaternion) =>
+  new THREE.Euler().setFromQuaternion(q, 'XYZ')
+
+export const toBone = (name: string) =>
+  name.replace(/\.(position|quaternion)/, '')
 
 export class KeyframeAnalyzer {
-  /** @type {KeyframeTrack[]} */
-  tracks = []
-
-  /** @type {number[]} */
-  times = []
-
-  /** @type {Map<string, {time: number, value: MoveValue}[]>} */
-  movesByTrack = new Map()
-
-  /** @type {Map<number, Keyframes>} */
-  movesByTime = new Map()
+  tracks: KeyframeTrack[] = []
+  times: number[] = []
+  movesByTrack: Map<string, {time: number; value: MoveValue}[]> = new Map()
+  movesByTime: Map<number, Keyframe[]> = new Map()
 
   get ready() {
     return this.movesByTime.size > 0
@@ -45,57 +37,41 @@ export class KeyframeAnalyzer {
 
   /**
    * Reset the analyzer's internal state.
-   * @param {KeyframeTrack[]} tracks
    */
-  reset(tracks) {
+  reset(tracks: KeyframeTrack[]) {
     if (tracks) this.tracks = tracks
 
     this.movesByTrack.clear()
     this.movesByTime.clear()
   }
 
-  /**
-   * @param {number} time
-   * @param {string} track
-   * @param {MoveValue} value
-   */
-  addMove(time, track, value) {
+  addMove(time: number, track: string, value: MoveValue) {
     if (!this.movesByTrack.has(track)) this.movesByTrack.set(track, [])
     if (!this.movesByTime.has(time)) this.movesByTime.set(time, [])
 
-    this.movesByTime.get(time).push({track, value})
-    this.movesByTrack.get(track).push({time, ...value})
+    this.movesByTime.get(time)?.push({track, value})
+    this.movesByTrack.get(track)?.push({time, value})
   }
 
-  /**
-   * @param {number} index
-   * @param {string|RegExp} matcher
-   */
-  getKeyframes(index, matcher) {
+  getKeyframes(index: number, matcher: Matcher) {
     const time = this.times[index]
 
-    return {time, keyframes: this.getKeyframesAtTime(matcher, time)}
+    return {time, keyframes: this.getKeyframesAtTime(time, matcher)}
   }
 
-  /**
-   * @param {number} time
-   * @param {string|RegExp|null} matcher
-   * @returns
-   */
-  getKeyframesAtTime(time, matcher) {
+  getKeyframesAtTime(time: number, matcher: Matcher) {
     const keyframes = this.movesByTime.get(time)
     if (!keyframes || keyframes.length === 0) return []
 
     return this.filterKeyframes(keyframes, matcher) ?? []
   }
 
-  /**
-   * @param {number} time
-   * @param {string|RegExp|null} matcher
-   * @param {number} range
-   * @returns {Keyframe[]}
-   */
-  searchKeyframesAroundTime(time, matcher, range = 0.1, limit = 1) {
+  searchKeyframesAroundTime(
+    time: number,
+    matcher: Matcher,
+    range = 0.1,
+    limit = 1
+  ): Keyframe[] {
     // If there is an exact match, use that value.
     const keyframes = this.getKeyframesAtTime(time, matcher) ?? []
     if (keyframes.length > 0) return keyframes
@@ -107,21 +83,11 @@ export class KeyframeAnalyzer {
       .reduce((a, b) => [...a, ...b], [])
   }
 
-  /**
-   * @param {number} time
-   * @param {number} range
-   */
-  nearbyTimes(time, range = 0.1) {
-    // t >= time - range &&
+  nearbyTimes(time: number, range = 0.1) {
     return this.times.filter((t) => t <= time + range)
   }
 
-  /**
-   * @param {Keyframe[]} keyframes
-   * @param {string|RegExp|null} matcher
-   * @returns
-   */
-  filterKeyframes(keyframes, matcher) {
+  filterKeyframes(keyframes: Keyframe[], matcher: Matcher) {
     if (!matcher) return keyframes ?? []
 
     if (typeof matcher === 'string') {
@@ -137,12 +103,11 @@ export class KeyframeAnalyzer {
 
   /**
    * Analyze a particular keyframe track.
-   * @param {KeyframeTrack[]} tracks
    */
-  analyze(tracks) {
+  analyze(tracks: KeyframeTrack[]) {
     this.reset(tracks)
 
-    this.tracks.forEach((track, trackIdx) => {
+    this.tracks.forEach((track) => {
       const valueSize = track.getValueSize()
 
       // Translation and scaling

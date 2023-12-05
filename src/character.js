@@ -22,7 +22,7 @@ import {
   overrideEnergy,
   overrideRotation,
 } from './overrides.js'
-import {KeyframeAnalyzer} from './analyze.js'
+import {KeyframeAnalyzer} from './analyze'
 import {applyTrackTransform, transformers} from './transforms.js'
 import {profile} from './perf.js'
 import {IKManager} from './ik.js'

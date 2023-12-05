@@ -1,16 +1,16 @@
-// @ts-check
-
 import * as THREE from 'three'
 import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
 
-import {GLTFLoader} from '../jsm/loaders/GLTFLoader.js'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import {trackToEuler} from './math.js'
+
 import {
   getAcceleration,
   keyframesAt,
   lengthenKeyframeTracks,
 } from './keyframes.js'
+
 import {trackNameToPart} from './parts.js'
 import {dispose} from './dispose.js'
 import {curveParts} from './parts.js'

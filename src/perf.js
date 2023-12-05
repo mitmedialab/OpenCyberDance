@@ -1,5 +1,3 @@
-// @ts-check
-
 export const profile = (label, threshold) => (callback) => {
   performance.mark(`${label}-s`)
 

@@ -1,5 +1,3 @@
-// @ts-check
-
 import {Character} from './character.js'
 import {World} from './world.js'
 import {profile} from './perf.js'

@@ -1,5 +1,3 @@
-// @ts-check
-
 import * as THREE from 'three'
 
 import {Quaternion, KeyframeTrack, VectorKeyframeTrack} from 'three'

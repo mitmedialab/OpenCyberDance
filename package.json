@@ -9,7 +9,16 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/three": "^0.159.0",
+    "three-ik": "^0.1.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-annotation": "^3.0.1",
+    "date-fns": "^2.30.0",
+    "three": "^0.159.0"
   }
 }

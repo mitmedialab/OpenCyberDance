@@ -1,5 +1,3 @@
-// @ts-check
-
 import {f32Append} from './floats.js'
 
 /** @type {import('./transforms.js').Axis[]} */

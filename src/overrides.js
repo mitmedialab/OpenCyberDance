@@ -1,5 +1,3 @@
-// @ts-check
-
 import * as THREE from 'three'
 
 import {trackNameToPart, coreParts, delayParts, curveParts} from './parts.js'

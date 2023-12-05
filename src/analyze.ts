@@ -1,9 +1,13 @@
-import * as THREE from 'three'
 import {
+  Euler,
   KeyframeTrack,
+  Quaternion,
   QuaternionKeyframeTrack,
+  Vector3,
   VectorKeyframeTrack,
 } from 'three'
+
+import { Matcher } from './types'
 
 /**
  * Value of movement for analysis.
@@ -17,10 +21,8 @@ interface Keyframe {
   value: MoveValue
 }
 
-type Matcher = string | RegExp | null
-
 export const toEuler = (q: THREE.Quaternion) =>
-  new THREE.Euler().setFromQuaternion(q, 'XYZ')
+  new Euler().setFromQuaternion(q, 'XYZ')
 
 export const toBone = (name: string) =>
   name.replace(/\.(position|quaternion)/, '')
@@ -114,7 +116,7 @@ export class KeyframeAnalyzer {
       if (track instanceof VectorKeyframeTrack) {
         track.times.forEach((time, timeIdx) => {
           const offset = timeIdx * valueSize
-          const vector = new THREE.Vector3().fromArray(track.values, offset)
+          const vector = new Vector3().fromArray(track.values, offset)
 
           this.addMove(time, track.name, { v: vector })
         })
@@ -124,7 +126,7 @@ export class KeyframeAnalyzer {
       if (track instanceof QuaternionKeyframeTrack) {
         track.times.forEach((time, timeIdx) => {
           const offset = timeIdx * valueSize
-          const q = new THREE.Quaternion().fromArray(track.values, offset)
+          const q = new Quaternion().fromArray(track.values, offset)
 
           this.addMove(time, track.name, { v: q })
         })

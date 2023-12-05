@@ -1,11 +1,11 @@
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables } from 'chart'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
 import * as THREE from 'three'
 
-import { Character } from './character.js'
-import { AXES, keyframesAt } from './keyframes.js'
-import { profile } from './perf.js'
-import { World } from './world.js'
+import { Character } from './character'
+import { AXES, keyframesAt } from './keyframes'
+import { profile } from './perf'
+import { World } from './world'
 
 const p = {
   u: profile('chart', 30),
@@ -71,7 +71,7 @@ export class Plotter {
   timer = 0
 
   /// Visible axis
-  /** @type {import('./transforms.js').Axis[]} */
+  /** @type {import('./transforms').Axis[]} */
   axes = [...AXES]
 
   constructor(world) {
@@ -195,7 +195,7 @@ export class Plotter {
   }
 
   /**
-   * @param {import('./character.js').Q[]} query
+   * @param {import('./character').Q[]} query
    */
   select(...query) {
     if (!this.world) return

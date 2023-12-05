@@ -1,13 +1,12 @@
 import * as THREE from 'three'
 import { SkinnedMesh } from 'three'
-import { CCDIKSolver } from 'three/examples/jsm/animation/CCDIKSolver.js'
+import { CCDIKSolver } from 'three/examples/jsm/animation/CCDIKSolver'
 
-import { BoneKey } from './bones.js'
+import { BoneKey } from './bones'
 
 /** @param {THREE.Bone[]} bones */
 const axisPointBones = (bones) => {
-  /** @param {BoneKeys} key */
-  const find = (key) => bones.find((b) => b.name === key)
+  const find = (key: BoneKey) => bones.find((b) => b.name === key)
 
   return {
     forehead() {
@@ -25,11 +24,9 @@ const axisPointBones = (bones) => {
 }
 
 export class IKManager {
-  /** @type {CCDIKSolver} */
-  ik
+  ik: CCDIKSolver | null = null
 
-  /** @type {THREE.SkeletonHelper} */
-  skeleton
+  skeleton: THREE.SkeletonHelper
 
   /** @type {THREE.Scene} */
   model
@@ -44,30 +41,20 @@ export class IKManager {
   constructor(skeleton, model) {
     this.skeleton = skeleton
     this.model = model
-    this.setup()
+
+    this.model.traverse((o) => {
+      if (o instanceof SkinnedMesh) this.mesh = o
+    })
+
+    this.ik = new CCDIKSolver(this.mesh, [])
   }
 
-  /**
-   * @param {string} name
-   */
-  bone(name) {
+  bone(name: string) {
     return this.skeleton.bones.findIndex((b) => name === b.name)
   }
 
-  valid(id) {
-    if (id === -1) return false
-
+  valid(id: number | undefined | null) {
     return typeof id === 'number'
-  }
-
-  setup() {
-    this.selectMesh()
-
-    window.boneIds = this.skeleton.bones.map((b) => b.name)
-
-    if (this.mesh) {
-      this.ik = new CCDIKSolver(this.mesh, [])
-    }
   }
 
   validate(iks) {
@@ -87,11 +74,7 @@ export class IKManager {
     return true
   }
 
-  selectMesh() {
-    this.model.traverse((o) => {
-      if (o instanceof SkinnedMesh) this.mesh = o
-    })
-  }
+  selectMesh() {}
 
   update() {
     // Update all IK bones

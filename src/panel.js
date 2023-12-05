@@ -1,9 +1,8 @@
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
 
-import { CAMERA_PRESETS } from './camera.js'
-import { Character } from './character.js'
-import { Params } from './overrides.js'
-import { transformers } from './transforms.js'
+import { CAMERA_PRESETS } from './camera'
+import { Character } from './character'
+import { transformers } from './transforms'
 
 export class Panel {
   panel = new GUI({ width: 310 })

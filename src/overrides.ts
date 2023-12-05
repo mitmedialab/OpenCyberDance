@@ -1,7 +1,16 @@
 import * as THREE from 'three'
+import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
-import { coreParts, curveParts, delayParts, trackNameToPart } from './parts.js'
-import { transformers } from './transforms.js'
+import { CurvePartKey, trackNameToPart } from './parts'
+import { TransformKey } from './transforms'
+
+interface CurveConfig {
+  parts: Record<CurvePartKey, boolean>
+  equation: TransformKey | 'none'
+  axes: Record<'x' | 'y' | 'z', boolean>
+  threshold: number
+  dirty: boolean
+}
 
 export class Params {
   time = 0
@@ -26,8 +35,7 @@ export class Params {
     windowSize: 30,
   }
 
-  curve = {
-    /** @type {Record<keyof typeof curveParts, boolean>} */
+  curve: CurveConfig = {
     parts: {
       head: false,
       body: false,
@@ -43,7 +51,6 @@ export class Params {
       z: false,
     },
 
-    /** @type {keyof typeof transformers | 'none'} */
     equation: 'none',
     threshold: 1,
 
@@ -87,10 +94,8 @@ export class Params {
 
 /**
  * Scale up or down keyframe tracks.
- *
- * @param {THREE.KeyframeTrack} track
  */
-export function overrideEnergy(track, factor = 1) {
+export function overrideEnergy(track: THREE.KeyframeTrack, factor = 1) {
   track.times = track.times.map((t) => {
     if (factor === 1) return t
 
@@ -101,14 +106,12 @@ export function overrideEnergy(track, factor = 1) {
   })
 }
 
-/**
- * @param {THREE.KeyframeTrack} track
- * @param {{x: number, y: number, z: number}} config
- * @param {THREE.Euler[]} base
- * @returns
- */
-export function overrideRotation(track, config, base) {
-  if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
+export function overrideRotation(
+  track: KeyframeTrack,
+  config: { x: number; y: number; z: number },
+  base: Euler[],
+) {
+  if (!(track instanceof QuaternionKeyframeTrack)) return
 
   const size = track.getValueSize()
 
@@ -120,17 +123,14 @@ export function overrideRotation(track, config, base) {
     euler.y *= config.y
     euler.z *= config.z
 
-    const q = new THREE.Quaternion()
-      .setFromEuler(euler)
-      .toArray(track.values, i * size)
+    new THREE.Quaternion().setFromEuler(euler).toArray(track.values, i * size)
   })
 }
 
-/**
- * @param {THREE.KeyframeTrack} track
- * @param {Map<string, number>} config
- */
-export function overrideDelay(track, config) {
+export function overrideDelay(
+  track: KeyframeTrack,
+  config: Record<string, number>,
+) {
   const part = trackNameToPart(track.name, 'delay')
   if (!part) return
 
@@ -138,12 +138,10 @@ export function overrideDelay(track, config) {
   if (offset > 0) track.shift(offset)
 }
 
-/**
- * @param {THREE.KeyframeTrack[]} tracks
- * @param {typeof Params.prototype.space} options
- * @returns {THREE.KeyframeTrack[]}
- */
-export function applyExternalBodySpace(tracks, options) {
+export function applyExternalBodySpace(
+  tracks: KeyframeTrack[],
+  options: typeof Params.prototype.space,
+): THREE.KeyframeTrack[] {
   const { delay, threshold, minWindow, windowSize } = options ?? {}
 
   // Do not compute anything if the delay is zero.
@@ -169,7 +167,7 @@ export function applyExternalBodySpace(tracks, options) {
   })
 
   // Valleys in a graph with low change.
-  const valleys = []
+  const valleys: [start: number, end: number][] = []
 
   let windowStart = 0
   let windowEnd = windowSize - 1
@@ -211,7 +209,7 @@ export function applyExternalBodySpace(tracks, options) {
     // Are we currently adjusting the delay?
     let isAdjusting = true
 
-    track.times.forEach((time, frame) => {
+    track.times.forEach((_, frame) => {
       if (endFrames.includes(frame)) {
         isAdjusting = false
         globalDelay += delay
@@ -220,7 +218,7 @@ export function applyExternalBodySpace(tracks, options) {
 
       // Increase the offset if the frame is a start frame.
       if (startFrames.includes(frame)) {
-        const [_, end] = valleys[startFrames.findIndex((s) => s === frame)]
+        const [, end] = valleys[startFrames.findIndex((s) => s === frame)]
         const numFrames = Math.abs(end - frame)
 
         delayPerFrame = delay / numFrames
@@ -240,9 +238,6 @@ export function applyExternalBodySpace(tracks, options) {
   })
 
   console.log(`Found ${valleys.length} valleys with low change.`)
-
-  // @ts-ignore
-  window.valleys = valleys
 
   return tracks
 }

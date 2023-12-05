@@ -1,8 +1,10 @@
+type PartMap = Record<string, RegExp>
+
 export const coreParts = {
   head: /Neck|Head/,
   foot: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
   body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
-}
+} satisfies PartMap
 
 export const delayParts = {
   head: /Head|Neck/,
@@ -11,7 +13,7 @@ export const delayParts = {
   rightArm: /RightShoulder|RightArm|RightForeArm|RightHand|RightInHand/,
   leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
   rightLeg: /RightUpLeg|RightLeg|RightFoot/,
-}
+} satisfies PartMap
 
 export const curveParts = {
   head: /Head|Neck/,
@@ -20,34 +22,28 @@ export const curveParts = {
   rightArm: /RightShoulder|RightArm|RightForeArm/,
   leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
   rightLeg: /RightUpLeg|RightLeg|RightFoot/,
-}
+} satisfies PartMap
 
-/**
- * @param {keyof typeof coreParts} part
- * @param {string} name
- * @returns {boolean}
- */
-export const isCorePart = (part, name) => coreParts[part].test(name)
+export type CorePartKey = keyof typeof coreParts
+export type DelayPartKey = keyof typeof delayParts
+export type CurvePartKey = keyof typeof curveParts
 
-/**
- * @param {keyof typeof delayParts} part
- * @param {string} name
- * @returns {boolean}
- */
-export const isDelayPart = (part, name) => delayParts[part]?.test(name)
+export const isCorePart = (part: CorePartKey, name: string): boolean =>
+  coreParts[part].test(name)
 
-/**
- * @param {string} name
- * @param {'core' | 'delay'} type
- */
-export function trackNameToPart(name, type) {
+export const isDelayPart = (part: DelayPartKey, name: string): boolean =>
+  delayParts[part]?.test(name)
+
+export function trackNameToPart(name: string, type: 'core' | 'delay') {
   if (type === 'core') {
-    for (const part of Object.keys(coreParts)) {
-      if (isCorePart(part, name)) return part
+    for (const part in coreParts) {
+      if (isCorePart(part as CorePartKey, name)) return part
     }
-  } else if (type === 'delay') {
-    for (const part of Object.keys(delayParts)) {
-      if (isDelayPart(part, name)) return part
+  }
+
+  if (type === 'delay') {
+    for (const part in delayParts) {
+      if (isDelayPart(part as DelayPartKey, name)) return part
     }
   }
 }

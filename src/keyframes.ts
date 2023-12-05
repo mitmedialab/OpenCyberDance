@@ -1,16 +1,16 @@
-import { f32Append } from './floats.js'
+import { KeyframeTrack } from 'three'
 
-/** @type {import('./transforms.js').Axis[]} */
-export const AXES = ['x', 'y', 'z', 'w']
+import { f32Append } from './floats'
+import { Axis } from './transforms'
+
+export const AXES: Axis[] = ['x', 'y', 'z', 'w']
 
 /**
  * Lengthen the keyframe tracks, so that it loops properly.
  * We are only using one animation clip, so we need to lengthen the tracks.
- *
- * @param {THREE.KeyframeTrack[]} tracks
  */
-export function lengthenKeyframeTracks(tracks) {
-  tracks.forEach((track) => {
+export function lengthenKeyframeTracks(tracks: KeyframeTrack[]) {
+  for (const track of tracks) {
     const finalTime = track.times[track.times.length - 1]
     const next = [...track.times].map((t) => t + finalTime)
 
@@ -18,16 +18,21 @@ export function lengthenKeyframeTracks(tracks) {
     track.values = f32Append(track.values, [...track.values])
 
     track.validate()
-  })
+  }
 }
 
-/**
- * @param {THREE.KeyframeTrack} track
- * @param {{from: number, offset: number, windowSize: number, axes: import('./transforms.js').Axis[]}} options
- * @returns
- */
-export function keyframesAt(track, options) {
+interface KeyframesOptions {
+  from: number
+  offset: number
+  windowSize: number
+  axes: Axis[]
+}
+
+export function keyframesAt(track: KeyframeTrack, options?: KeyframesOptions) {
   const { offset, windowSize, axes = AXES, from } = options ?? {}
+
+  if (typeof from !== 'number' || typeof offset !== 'number') return
+  if (typeof windowSize !== 'number') return
 
   let start = track.times.findIndex((t) => t >= from)
   start = Math.max(0, start, start + offset)
@@ -35,8 +40,9 @@ export function keyframesAt(track, options) {
   const end = Math.min(start + windowSize, track.times.length)
   const valueSize = track.getValueSize()
 
-  /** @type {{x: number, y: number}[][]} */
-  const series = Array.from({ length: valueSize }).map(() => [])
+  const series: { x: number; y: number }[][] = Array.from({
+    length: valueSize,
+  }).map(() => [])
 
   const visibility = AXES.map((a) => axes.includes(a))
 
@@ -54,8 +60,7 @@ export function keyframesAt(track, options) {
   return { series, start: track.times[start], end: track.times[end] }
 }
 
-/** @param {{x: number, y: number}[]} data */
-export function getAcceleration(data) {
+export function getAcceleration(data: { x: number; y: number }[]) {
   const start = data[0]
   const end = data[data.length - 1]
 

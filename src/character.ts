@@ -1,87 +1,108 @@
 import * as THREE from 'three'
-import { QuaternionKeyframeTrack } from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {
+  AnimationAction,
+  AnimationClip,
+  Mesh,
+  QuaternionKeyframeTrack,
+  Scene,
+} from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
-import { KeyframeAnalyzer } from './analyze.js'
-import { dispose } from './dispose.js'
-import { IKManager } from './ik.js'
+import { KeyframeAnalyzer } from './analyze'
+import { dispose } from './dispose'
+import { IKManager } from './ik'
 import {
   getAcceleration,
   keyframesAt,
   lengthenKeyframeTracks,
-} from './keyframes.js'
-import { trackToEuler } from './math.js'
+} from './keyframes'
+import { trackToEuler } from './math'
 import {
   applyExternalBodySpace,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
-} from './overrides.js'
-import { trackNameToPart } from './parts.js'
-import { curveParts } from './parts.js'
-import { profile } from './perf.js'
-import { applyTrackTransform, transformers } from './transforms.js'
+  Params,
+} from './overrides'
+import { curveParts, trackNameToPart } from './parts'
+import { profile } from './perf'
+import {
+  applyTrackTransform,
+  Axis,
+  Transform,
+  transformers,
+  TransformKey,
+  TransformOptions,
+} from './transforms'
+import { Matcher } from './types'
 
-/** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
-/** @typedef {number|string|RegExp} Q */
+export interface AnimationSource {
+  eulers: THREE.Euler[]
+  values: Float32Array
+  timings: Float32Array
+  duration: number
+}
+
+interface MovementOptions {
+  windowSize: number
+  threshold?: number
+  skip?: number
+}
+
+export interface UpdateParamFlags {
+  curve?: boolean
+  timing?: boolean
+  lockPosition?: boolean
+}
 
 const loader = new GLTFLoader()
-const loadModel = (url) => new Promise((resolve) => loader.load(url, resolve))
 
 // Attach a profiler
 const p = {
   ebs: profile('external body space', 20),
 }
 
+export type ModelKey = keyof typeof Character.sources
+export type CharacterKey = keyof typeof Params.prototype.characters
+
+export interface CharacterOptions {
+  name: CharacterKey
+  action: string
+  model: ModelKey
+  scale: number
+  position: [number, number, number]
+  analyze: boolean
+
+  /** Freeze the parameters. Used to compare characters side-by-side. */
+  freezeParams: boolean
+
+  /** Lengthen keyframe tracks */
+  lengthen: number
+}
+
+type Handlers = {
+  animationLoaded(character: Character): void
+}
+
 export class Character {
-  /**
-   * Reference to scene.
-   * @type {THREE.Scene | null}
-   **/
-  scene = null
+  scene: THREE.Scene | null = null
+  mixer: THREE.AnimationMixer | null = null
+  skeleton: THREE.SkeletonHelper | null = null
+  model: THREE.Group | null = null
+  original: Map<string, AnimationSource[]> = new Map()
+  actions: Map<string, AnimationAction> = new Map()
+  params: Params | null = null
+  analyzer: KeyframeAnalyzer | null = null
+  ik: IKManager | null = null
 
-  /** @type {THREE.AnimationMixer | null} */
-  mixer = null
-
-  /** @type {THREE.SkeletonHelper | null} */
-  skeleton = null
-
-  /** @type {THREE.Scene | null} */
-  model = null
-
-  /** @type {Map<string, AnimationSource[]>} */
-  original = new Map()
-
-  /** @type {Map<string, AnimationAction>} */
-  actions = new Map()
-
-  /** @type {Params | null} */
-  params = null
-
-  /** @type {KeyframeAnalyzer | null} */
-  analyzer = null
-
-  /** @type {IKManager} */
-  ik
-
-  options = {
-    /** @type {keyof typeof Params.prototype.characters} */
+  options: CharacterOptions = {
     name: 'first',
-
     action: '',
-
-    /** @type {keyof typeof Character.sources} */
     model: 'robot',
-
     scale: 0.008,
     position: [0, 0, 0],
-
-    // Lengthen keyframe tracks.
     lengthen: 0,
-
-    // Freeze parameters.
     freezeParams: false,
-
     analyze: false,
   }
 
@@ -95,8 +116,7 @@ export class Character {
     tranimid: 'tranimid.glb',
   }
 
-  /** @type {Record<keyof typeof Character.sources, string>} */
-  static defaultActions = {
+  static defaultActions: Record<ModelKey, string> = {
     none: '',
     abstract: 'no.33_.',
     robot: 'no.33_..001',
@@ -105,10 +125,7 @@ export class Character {
     tranimid: 'tranimid_Tas',
   }
 
-  /**
-   * @param {typeof Character.prototype.options} options
-   **/
-  constructor(options) {
+  constructor(options?: CharacterOptions) {
     if (options) this.options = { ...this.options, ...options }
   }
 
@@ -116,9 +133,8 @@ export class Character {
     return this.actions.get(this.options.action)?.getClip()
   }
 
-  handlers = {
-    /** @param {Character} character */
-    animationLoaded: (character) => {},
+  handlers: Handlers = {
+    animationLoaded: () => {},
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -128,10 +144,6 @@ export class Character {
   clear() {
     if (!this.scene || !this.model) return
 
-    // @ts-ignore
-    dispose(this.mixer)
-
-    // Remove the character model
     dispose(this.model)
     this.scene.remove(this.model)
 
@@ -147,12 +159,10 @@ export class Character {
     return [...this.actions.values()]
   }
 
-  /** @param {AnimationAction} action */
-  play(action) {
+  play(action: AnimationAction) {
     if (!action) return
 
     const name = action.getClip().name
-    console.log('Playing:', name)
 
     // Cross-fade previously running actions
     const prev = this.actions.get(this.options.action)
@@ -172,15 +182,14 @@ export class Character {
     }
   }
 
-  /** @param {string} action */
-  playByName(action) {
+  playByName(action: string) {
     if (!this.actions.has(action)) return
 
     this.options.action = action
     this.updateAction()
   }
 
-  async setup(scene, params) {
+  async setup(scene: Scene, params: Params) {
     const config = this.options
 
     if (scene) this.scene = scene
@@ -195,7 +204,7 @@ export class Character {
     const url = `/models/${Character.sources[config.model]}`
     if (url === 'none' || !url) return
 
-    const gltf = await loadModel(url)
+    const gltf = await loader.loadAsync(url)
 
     // Set the default actions.
     if (!config.action) {
@@ -215,17 +224,7 @@ export class Character {
 
     // Cast shadows
     this.model.traverse((o) => {
-      // @ts-ignore
-      if (o.isMesh) o.castShadow = true
-
-      if (o instanceof THREE.SkinnedMesh) {
-        if (!window.skinMaterials) window.skinMaterials = {}
-        window.skinMaterials[this.options.name] = o.material
-
-        if (o.material instanceof THREE.MeshStandardMaterial) {
-          // ?
-        }
-      }
+      if (o instanceof Mesh) o.castShadow = true
     })
 
     // Adjust character scale
@@ -246,8 +245,7 @@ export class Character {
     this.mixer = new THREE.AnimationMixer(this.model)
     this.mixer.timeScale = this.params.timescale
 
-    /** @type {AnimationClip[]} */
-    const clips = gltf.animations
+    const clips: AnimationClip[] = gltf.animations
 
     for (const clip of clips) {
       // Process the individual animation clips.
@@ -287,10 +285,7 @@ export class Character {
     this.play(action)
   }
 
-  /**
-   * @param {THREE.AnimationClip} clip
-   */
-  processClip(clip) {
+  processClip(clip: AnimationClip) {
     const { lengthen, freezeParams } = this.options
 
     // Make keyframes track longer for track-level looping.
@@ -307,8 +302,7 @@ export class Character {
       const values = track.values.slice(0)
       const duration = track.times[track.times.length - 1] - track.times[0]
 
-      /** @type {AnimationSource} */
-      const source = { timings, values, duration, eulers: [] }
+      const source: AnimationSource = { timings, values, duration, eulers: [] }
 
       // Cache euler angles for rotation tracks.
       if (!freezeParams && track instanceof QuaternionKeyframeTrack) {
@@ -324,11 +318,8 @@ export class Character {
     })
   }
 
-  /**
-   * Get the original animation timings and values.
-   * @param {number} index
-   */
-  originalOf(index) {
+  /** Get the original animation timings and values. */
+  originalOf(index: number) {
     const sources = this.original.get(this.options.action)
     if (!sources) return
 
@@ -338,7 +329,7 @@ export class Character {
   /**
    * Update animation parameters.
    */
-  updateParams(flags = { timing: true }) {
+  updateParams(flags: UpdateParamFlags = { timing: true }) {
     const { lockPosition: lock } = flags
 
     const { freezeParams } = this.options
@@ -347,7 +338,7 @@ export class Character {
     const clip = this.currentClip
     if (!clip || !this.params) return
 
-    const _curve = {}
+    const _curve: { equation: Transform; axis: Axis[]; tracks: number[] } = {}
 
     if (flags.curve) {
       _curve.equation = transformers[this.params.curve.equation]
@@ -418,10 +409,7 @@ export class Character {
     this.fadeIntoModifiedAction(clip)
   }
 
-  /**
-   * @returns {{tracks: Q[], axis: import('./transforms.js').Axis[]}}
-   */
-  get curveConfig() {
+  get curveConfig(): { tracks: Matcher[]; axis: Axis[] } {
     const c = this.params?.curve
     if (!c) return { tracks: [], axis: [] }
 
@@ -430,10 +418,9 @@ export class Character {
       .map(([p]) => curveParts[p])
 
     const axis = Object.entries(c.axes)
-      .filter(([_, v]) => v === true)
-      .map(([k]) => k)
+      .filter(([, v]) => v === true)
+      .map(([k]) => k) as Axis[]
 
-    // @ts-ignore
     return { tracks, axis }
   }
 
@@ -537,12 +524,10 @@ export class Character {
     return clip
   }
 
-  /**
-   *
-   * @param {keyof typeof import('./transforms.js').transformers | 'none' | import('./transforms.js').Transform} transform
-   * @param {import('./transforms.js').Options & {tracks: Q | Q[]}} options
-   */
-  transform(transform, options) {
+  transform(
+    transform: TransformKey | Transform | 'none',
+    options: TransformOptions & { tracks: Matcher | Matcher[] },
+  ) {
     if (this.options.freezeParams) return
 
     if (options.tracks) {
@@ -581,32 +566,25 @@ export class Character {
     this.fadeIntoModifiedAction(clip)
   }
 
-  /** @param {number | string | RegExp} key */
-  trackIdByKey(key) {
+  trackIdByKey(key: Matcher) {
     if (typeof key === 'number') return key
 
     return this.currentClip?.tracks.findIndex(({ name }) => {
-      return key instanceof RegExp ? key.test(name) : name.includes(key)
+      if (key instanceof RegExp) return key.test(name)
+      if (key) return name.includes(key)
     })
   }
 
-  /** @param {number | string | RegExp} key */
-  trackByKey(key) {
+  trackByKey(key: Matcher) {
     const id = this.trackIdByKey(key)
     if (!id) return
 
     return this.currentClip?.tracks[id]
   }
 
-  /**
-   * Queries the track id by name of regex.
-   *
-   * @param {Q[]} query
-   * @returns {number[]}
-   */
-  query(...query) {
-    /** @type {Set<number>} */
-    const ids = new Set()
+  /** Queries the track id by name or regex. */
+  query(...query: Matcher[]): number[] {
+    const ids: Set<number> = new Set()
     query.forEach((q) => typeof q === 'number' && ids.add(q))
 
     const tracks = this.currentClip?.tracks
@@ -624,17 +602,16 @@ export class Character {
     return [...ids]
   }
 
-  /** @param {number[]} ids */
-  getTrackNames(ids) {
+  getTrackNames(ids: number[]): string[] {
     return (
       this.currentClip?.tracks
-        .filter((t, i) => ids.includes(i))
+        .filter((_, i) => ids.includes(i))
         .map((t) => t.name) ?? []
     )
   }
 
-  getMovementStats(key, options) {
-    const { windowSize = 200, threshold = 0.01, skip = 1 } = options ?? {}
+  getMovementStats(key: string, options?: MovementOptions) {
+    const { windowSize = 200 } = options ?? {}
 
     const track = this.trackByKey(key)
     if (!track) return

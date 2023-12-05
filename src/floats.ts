@@ -1,9 +1,4 @@
-/**
- * @param {Float32Array} source
- * @param {number[]} items
- * @returns
- */
-export function f32Append(source, items) {
+export function f32Append(source: Float32Array, items: number[]) {
   const dest = new Float32Array(source.length + items.length)
   dest.set(source)
   dest.set(items, source.length)

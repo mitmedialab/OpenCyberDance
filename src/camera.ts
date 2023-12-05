@@ -1,3 +1,8 @@
+export interface CameraPreset {
+  position: [number, number, number]
+  rotation: [number, number, number, 'XYZ']
+}
+
 export const CAMERA_PRESETS = {
   front: {
     rotation: [
@@ -20,4 +25,6 @@ export const CAMERA_PRESETS = {
 
     position: [0.017562729875999012, 0.4385453544466625, 2.184576428532982],
   },
-}
+} satisfies Record<string, CameraPreset>
+
+export type CameraPresetKey = keyof typeof CAMERA_PRESETS

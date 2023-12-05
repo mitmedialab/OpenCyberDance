@@ -1,45 +1,56 @@
+import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import Stats from 'three/addons/libs/stats.module.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import Stats from 'three/examples/jsm/libs/stats.module'
 
-import { CAMERA_PRESETS } from './camera.js'
-import { Character } from './character.js'
-import { Params } from './overrides.js'
-import { Panel } from './panel.js'
-import { profile } from './perf.js'
-import { Plotter } from './plotter.js'
-import { formulaRanges } from './transforms.js'
-import { debounce } from './utils.js'
-import { VoiceController } from './voice.js'
+import { CAMERA_PRESETS, CameraPresetKey } from './camera'
+import {
+  Character,
+  CharacterKey,
+  CharacterOptions,
+  UpdateParamFlags,
+} from './character'
+import { Params } from './overrides'
+import { Panel } from './panel'
+import { profile } from './perf'
+import { Plotter } from './plotter'
+import {
+  formulaRanges,
+  Transform,
+  TransformKey,
+  TransformOptions,
+} from './transforms'
+import { Matcher } from './types'
+import { debounce } from './utils'
+import { VoiceController } from './voice'
 
 export class World {
-  clock = new THREE.Clock()
-  scene = new THREE.Scene()
-  renderer = new THREE.WebGLRenderer({ antialias: true })
+  clock = new Clock()
+  scene = new Scene()
+  renderer = new WebGLRenderer({ antialias: true })
   stats = new Stats()
   plotter = new Plotter(this)
   container = document.getElementById('app')
   params = new Params()
   panel = new Panel(this.params)
   voice = new VoiceController(this)
-
-  /** @type {Character[]} */
-  characters = []
-
-  /** @type {THREE.PerspectiveCamera} */
-  camera = null
+  characters: Character[] = []
+  camera: PerspectiveCamera | null = null
+  controls: OrbitControls | null = null
 
   get first() {
     return this.characterByName('first')
   }
 
   get trackNames() {
-    return this.first.currentClip.tracks.map((t) => t.name)
+    return this.first?.currentClip?.tracks.map((t) => t.name)
   }
 
-  /** @type {typeof Character.prototype.transform} */
-  transform(t, o) {
-    this.first.transform(t, o)
+  transform(
+    transform: TransformKey | Transform | 'none',
+    options: TransformOptions & { tracks: Matcher | Matcher[] },
+  ) {
+    this.first?.transform(transform, options)
     this.updatePlotterOnPause()
   }
 
@@ -62,12 +73,12 @@ export class World {
     this.handleCurveFormulaChange()
 
     // Setup elements
-    this.container.appendChild(this.renderer.domElement)
-    this.container.appendChild(this.stats.domElement)
-    this.container.appendChild(this.plotter.domElement)
+    this.container?.appendChild(this.renderer.domElement)
+    this.container?.appendChild(this.stats.dom)
 
-    // Expose the world instance as `w`
-    window.w = this
+    if (this.plotter.domElement) {
+      this.container?.appendChild(this.plotter.domElement)
+    }
   }
 
   // Update the time in the seek bar
@@ -75,7 +86,7 @@ export class World {
     setInterval(() => {
       if (this.params.paused || !this.first) return
 
-      this.params.time = Math.round(this.first.mixer.time * 100) / 100
+      this.params.time = Math.round((this.first?.mixer?.time ?? 1) * 100) / 100
     }, 1000)
   }
 
@@ -92,9 +103,11 @@ export class World {
       }
     }
 
-    // Render the scene
     this.stats.update()
-    this.renderer.render(this.scene, this.camera)
+
+    if (this.camera) {
+      this.renderer.render(this.scene, this.camera)
+    }
   }
 
   setupLights() {
@@ -134,13 +147,14 @@ export class World {
   }
 
   setupCamera() {
-    // Setup camera
     const aspect = window.innerWidth / window.innerHeight
     this.camera = new THREE.PerspectiveCamera(45, aspect, 1, 100)
     this.setCamera()
   }
 
   setupControls() {
+    if (!this.camera) return
+
     const controls = new OrbitControls(this.camera, this.renderer.domElement)
     controls.enablePan = true
     controls.enableZoom = true
@@ -151,6 +165,8 @@ export class World {
 
   addResizeHandler() {
     window.addEventListener('resize', () => {
+      if (!this.camera) return
+
       this.camera.aspect = window.innerWidth / window.innerHeight
       this.camera.updateProjectionMatrix()
 
@@ -158,15 +174,11 @@ export class World {
     })
   }
 
-  /**
-   * @param {string} name
-   * @returns {Character}
-   */
-  characterByName(name) {
-    return this.characters.find((c) => c.options.name === name)
+  characterByName(name: string): Character | null {
+    return this.characters.find((c) => c.options.name === name) ?? null
   }
 
-  updateParams(flags) {
+  updateParams(flags: UpdateParamFlags) {
     const b = profile('updateParams', 100)
 
     b(() => {
@@ -178,10 +190,7 @@ export class World {
     })
   }
 
-  /**
-   * @param {typeof Character.prototype.options} config
-   **/
-  async addCharacter(config) {
+  async addCharacter(config: CharacterOptions) {
     const character = new Character(config)
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
 
@@ -189,14 +198,11 @@ export class World {
     this.characters.push(character)
   }
 
-  /**
-   * @param {Character} char
-   */
-  handleAnimationChange(char) {
+  handleAnimationChange(char: Character) {
     const { name, action } = char.options
 
     // Update the dropdown animation's active state
-    let dropdown = this.panel.characterFolder.children
+    const dropdown = this.panel.characterFolder.children
       .find((k) => k.character === name)
       .controllers.find((c) => c.property === 'action')
       .options([...char.actions.keys()])
@@ -217,7 +223,7 @@ export class World {
   }
 
   handleCurveFormulaChange() {
-    const { axis, tracks } = this.first.curveConfig
+    const { axis, tracks } = this.first?.curveConfig
 
     this.plotter.axes = axis
     this.plotter.select(...tracks)
@@ -267,7 +273,7 @@ export class World {
     this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
     this.panel.handlers.space = debounce(() => this.updateParams(), 500)
 
-    this.panel.handlers.lockPosition = (lock) => {
+    this.panel.handlers.lockPosition = (lock: boolean) => {
       this.updateParams({ lockPosition: lock })
     }
 
@@ -287,20 +293,18 @@ export class World {
 
     this.panel.handlers.setCamera = this.setCamera.bind(this)
 
-    /** @param {keyof typeof Params.prototype.characters} name */
-    this.panel.handlers.character = async (name) => {
+    this.panel.handlers.character = async (name: CharacterKey) => {
       const char = this.characterByName(name)
       if (!char) return
 
       await char.reset()
 
       // Sync animation timing with a peer.
-      const peer = this.characters.find((c) => c.name !== name)
-      if (peer) char.mixer.setTime(peer.mixer.time)
+      const peer = this.characters.find((c) => c.options.name !== name)
+      if (peer?.mixer && char.mixer) char.mixer.setTime(peer.mixer.time)
     }
 
-    /** @param {keyof typeof Params.prototype.characters} name */
-    this.panel.handlers.action = (name) => {
+    this.panel.handlers.action = (name: CharacterKey) => {
       const action = this.params.characters[name].action
       const character = this.characterByName(name)
       if (!character || !action) return
@@ -313,21 +317,20 @@ export class World {
       this.voice.toggle()
     }
 
-    /** @param {boolean} visible */
-    this.panel.handlers.showGraph = (visible) => {
+    this.panel.handlers.showGraph = (visible: boolean) => {
       this.plotter.updateVisibility(visible)
     }
 
-    this.panel.handlers.seek = (time) => {
-      this.characters.forEach((c) => c.mixer.setTime(time))
+    this.panel.handlers.seek = (time: number) => {
+      this.characters.forEach((c) => c.mixer?.setTime(time))
       this.updatePlotterOnPause()
     }
 
-    this.panel.handlers.pause = (paused) => {
+    this.panel.handlers.pause = (paused: number) => {
       paused ? this.clock.stop() : this.clock.start()
     }
 
-    this.panel.handlers.prompt = (input) => {
+    this.panel.handlers.prompt = (input: string) => {
       this.voice.execute(input)
     }
 
@@ -341,29 +344,24 @@ export class World {
     this.characters.forEach((c) => this.plotter?.update(c, { seeking: true }))
   }, 200)
 
-  /**
-   * Queries the track id by name of regex.
-   *
-   * @param {(import('./character.js').Q)[]} query
-   * @returns {number[]}
-   */
-  query(...query) {
-    return this.first.query(...query)
+  /** Queries the track id by name or regex. */
+  query(...query: Matcher[]): number[] {
+    return this.first?.query(...query)
   }
 
   get cameraConfig() {
     return {
-      rotation: this.camera.rotation.toArray(),
-      position: this.camera.position.toArray(),
+      rotation: this.camera?.rotation.toArray(),
+      position: this.camera?.position.toArray(),
     }
   }
 
-  setCamera(presetKey = 'front') {
-    const config = CAMERA_PRESETS[presetKey]
-    if (!config) return
+  setCamera(presetKey: CameraPresetKey = 'front') {
+    const preset = CAMERA_PRESETS[presetKey]
+    if (!preset) return
 
-    this.camera.rotation.set(...config.rotation)
-    this.camera.position.set(...config.position)
+    this.camera?.rotation.set(...preset.rotation)
+    this.camera?.position.set(...preset.position)
 
     if (this.controls) this.controls.update()
   }

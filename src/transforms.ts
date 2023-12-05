@@ -1,18 +1,20 @@
 import * as THREE from 'three'
 import { KeyframeTrack, Quaternion, VectorKeyframeTrack } from 'three'
 
-/** @type {Axis[]} */
+export type Axis = 'x' | 'y' | 'z' | 'w'
 
-/** @typedef {'x' | 'y' | 'z' | 'w'} Axis */
-/** @typedef {{threshold?: number, axis?: Axis[], tracks?: number[]}} Options */
-/** @typedef {(v: number[], o: Options) => number[]} Transform */
+export interface TransformOptions {
+  threshold?: number
+  axis?: Axis[]
+  tracks?: number[]
+}
+
+export type Transform = (v: number[], o: TransformOptions) => number[]
 
 /// We are transforming in Euler space, so we don't need `w`
-/** @type {Axis[]} */
-const AXES = ['x', 'y', 'z']
+const AXES: readonly Axis[] = ['x', 'y', 'z'] as const
 
-/** @param {number} n */
-function factorial(n) {
+function factorial(n: number) {
   let result = 1
 
   for (let i = 2; i <= n; i++) {
@@ -22,28 +24,25 @@ function factorial(n) {
   return result
 }
 
-/**
- * @param {KeyframeTrack} track
- * @param {Transform} transform
- * @param {Options} options
- * @returns {Float32Array}
- **/
-export function applyTrackTransform(track, transform, options = {}) {
+export function applyTrackTransform(
+  track: KeyframeTrack,
+  transform: Transform,
+  options: TransformOptions = {},
+): Float32Array {
   const { axis } = options ?? {}
 
   // Temporarily disable transform for vector tracks.
   const isVector = track instanceof VectorKeyframeTrack
   if (isVector) return track.values
 
-  /** @type {Record<string, number[]>} */
-  const series = {}
+  const series: Record<string, number[]> = {}
 
   // Setup each axis' series
   for (const a of AXES) series[a] = []
 
   const size = track.getValueSize()
 
-  track.times.forEach((time, timeIdx) => {
+  track.times.forEach((_, timeIdx) => {
     const offset = timeIdx * size
 
     const q = new Quaternion().fromArray(track.values, offset)
@@ -52,7 +51,9 @@ export function applyTrackTransform(track, transform, options = {}) {
     const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
 
     // Append each axis' value to their series
-    for (const a of AXES) series[a].push(e[a])
+    series.x.push(e.x)
+    series.y.push(e.y)
+    series.z.push(e.z)
   })
 
   // Process each axis' data
@@ -77,8 +78,7 @@ export function applyTrackTransform(track, transform, options = {}) {
   return new Float32Array(values)
 }
 
-/** @type {Transform} */
-export function lowpass(source, options) {
+export const lowpass: Transform = (source, options) => {
   const out = []
 
   const { threshold: windowSize = 2 } = options ?? {}
@@ -98,8 +98,7 @@ export function lowpass(source, options) {
   return out
 }
 
-/** @type {Transform} */
-export function highpass(source, options) {
+export const highpass: Transform = (source, options) => {
   const out = []
 
   const { threshold: windowSize = 2 } = options ?? {}
@@ -119,8 +118,7 @@ export function highpass(source, options) {
   return out
 }
 
-/** @type {Transform} */
-export function gaussian(source, options) {
+export const gaussian: Transform = (source, options) => {
   const { threshold: windowSize = 2 } = options ?? {}
 
   const sigma = windowSize / 2.0
@@ -135,7 +133,7 @@ export function gaussian(source, options) {
     x <= Math.floor(windowSize / 2);
     x++
   ) {
-    let g =
+    const g =
       Math.exp(-(0.5 * (x / sigma) * (x / sigma))) /
       (sigma * Math.sqrt(2 * Math.PI))
     gaussianKernel.push(g)
@@ -149,7 +147,6 @@ export function gaussian(source, options) {
 
   for (let i = 0; i < source.length; i++) {
     let newValue = 0
-    let kernelIndex = 0
 
     for (
       let j = Math.max(0, i - Math.floor(windowSize / 2));
@@ -157,7 +154,6 @@ export function gaussian(source, options) {
       j++
     ) {
       newValue += source[j] * gaussianKernel[Math.abs(i - j)]
-      kernelIndex++
     }
 
     // const deviation = source[i] - newValue
@@ -180,14 +176,13 @@ export function gaussian(source, options) {
   return out
 }
 
-/** @type {Transform} */
-function derivative(source, options) {
+const derivative: Transform = (source, options) => {
   const { threshold: order = 2 } = options ?? {}
 
   const out = []
 
   // this represents the difference in points which is assumed to be 1
-  let h = 1
+  const h = 1
 
   for (let i = 0; i < source.length; i++) {
     if (i - order < 0 || i + order >= source.length) {
@@ -198,7 +193,7 @@ function derivative(source, options) {
 
       for (let j = -order; j <= order; j++) {
         if (j != 0) {
-          let coeff =
+          const coeff =
             (Math.pow(-1, Math.abs(j) - 1 + order) *
               Math.pow(h, order - 1) *
               Math.pow(j, order - 1)) /
@@ -215,10 +210,9 @@ function derivative(source, options) {
   return out
 }
 
-/** @type {Transform} */
-function capMin(source, options) {
+const capMin: Transform = (source, options) => {
   const { threshold = 0.1 } = options ?? {}
-  let out = []
+  const out = []
   let previous = source[0]
 
   for (let i = 0; i < source.length; i++) {
@@ -233,11 +227,10 @@ function capMin(source, options) {
   return out
 }
 
-/** @type {Transform} */
-function capMax(source, options) {
+const capMax: Transform = (source, options) => {
   const { threshold = 0.1 } = options ?? {}
 
-  let out = []
+  const out = []
 
   let previous = source[0]
 
@@ -260,14 +253,14 @@ export const transformers = {
   derivative,
   capMin,
   capMax,
-}
+} satisfies Record<string, Transform>
 
-/** @typedef {[min: number, max: number, step: number, initial: number]} FormulaRange */
+export type TransformKey = keyof typeof transformers
 
-/** @type {FormulaRange} */
-const rWindow = [1, 2000, 1, 1]
+type FormulaRange = [min: number, max: number, step: number, initial: number]
 
-/** @type {Record<keyof typeof transformers, FormulaRange>} */
+const rWindow: FormulaRange = [1, 2000, 1, 1]
+
 export const formulaRanges = {
   capMin: [-2, 3, 0.01, 0.1],
   capMax: [-2, 3, 0.01, 0.1],
@@ -275,4 +268,4 @@ export const formulaRanges = {
   highpass: rWindow,
   gaussian: rWindow,
   derivative: [0, 3, 1, 0],
-}
+} satisfies Record<TransformKey, FormulaRange>

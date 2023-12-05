@@ -1,8 +1,37 @@
 {
+  "name": "opencyberdance",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prepare": "husky install",
+    "lint": "eslint --ext .ts,.js src",
+    "lint:fix": "eslint --fix --ext .ts,.js src"
+  },
+  "devDependencies": {
+    "@types/dom-speech-recognition": "^0.0.4",
+    "@types/three": "^0.159.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.1.0",
+    "three-ik": "^0.1.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  },
   "dependencies": {
-    "chart.js": "^4.4.0",
+    "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "lil-gui": "^0.19.1",
+    "three": "^0.159.0"
   }
 }

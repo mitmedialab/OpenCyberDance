@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - additive animation - skinning</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link type="text/css" rel="stylesheet" href="main.css" />
+
+    <style>
+      a {
+        color: blue;
+      }
+
+      .control-inactive button {
+        color: #888;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script
+      src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+      async
+    ></script>
+
+    <script
+      src="https://code.responsivevoice.org/responsivevoice.js?key=auvTMQpf"
+      async
+      defer
+    ></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three/+esm",
+          "three/addons/": "./jsm/",
+          "three-ik": "https://cdn.jsdelivr.net/npm/three-ik/+esm",
+          "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/auto/+esm",
+          "chartjs-plugin-annotation": "https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/+esm"
+        }
+      }
+    </script>
+
+    <script type="module" src="js/main.js" defer></script>
+  </body>
+</html>

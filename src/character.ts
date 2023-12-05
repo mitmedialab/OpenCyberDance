@@ -403,7 +403,7 @@ export class Character {
         })
       }
 
-      clip[index] = track
+      clip.tracks[index] = track
     })
 
     // External body space is always applied for timing changes.

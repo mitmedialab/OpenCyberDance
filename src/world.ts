@@ -215,13 +215,18 @@ export class World {
       .listen()
       .onChange(() => this.panel.handlers.action(name))
 
-    this.params.characters[name].action = action
+    if (action) {
+      this.params.characters[name].action = action
+    }
+
     controller?.updateDisplay()
 
     if (name === 'first') {
       const seek = this.panel.playbackFolder?.children.find(
         (c) => 'property' in c && c.property === 'time',
       ) as GUIController
+
+      if (!action) return
 
       const currentAction = char.actions.get(action)
       if (!currentAction || !seek) return

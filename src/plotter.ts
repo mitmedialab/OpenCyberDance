@@ -61,7 +61,7 @@ export class Plotter {
   timer = 0
 
   /// Visible axis
-  axes: Axis[] = [...AXES]
+  axes: Axis[] = ['x', 'y', 'z']
 
   constructor(world: World) {
     this.world = world
@@ -73,7 +73,7 @@ export class Plotter {
   }
 
   get trackNames() {
-    return [...this.tracks].map((i) => this.world?.trackNames[i])
+    return [...this.tracks].map((i) => this.world?.trackNames?.[i])
   }
 
   prepare() {
@@ -88,8 +88,12 @@ export class Plotter {
     s.display = 'flex'
   }
 
-  trackById(id, chr = 'first') {
-    return this.world?.characterByName(chr)?.trackByKey(id)
+  trackByKey(key: Matcher, chr = 'first') {
+    return this.world?.characterByName(chr)?.trackByKey(key)
+  }
+
+  trackById(id: number, chr = 'first') {
+    return this.world?.characterByName(chr)?.currentClip?.tracks[id]
   }
 
   createChart(chrId: string, trackId: number) {

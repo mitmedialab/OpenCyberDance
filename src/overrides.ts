@@ -10,7 +10,7 @@ import {
 } from './parts'
 import { TransformKey } from './transforms'
 
-interface CurveConfig {
+export interface CurveConfig {
   parts: Record<CurvePartKey, boolean>
   equation: TransformKey | 'none'
   axes: { x: boolean; y: boolean; z: boolean }
@@ -19,6 +19,20 @@ interface CurveConfig {
 }
 
 type CharacterOptions = Record<string, { model: ModelKey; action: string }>
+
+export interface SpaceConfig {
+  /** Slow down the movement for the entire valley for X seconds. */
+  delay: 0
+
+  /** Ignore changes below this threshold. */
+  threshold: 0.005
+
+  /** Ignore region of change smaller than this window. */
+  minWindow: 3
+
+  /** The window size to calculate the averages. */
+  windowSize: 30
+}
 
 export class Params {
   time = 0
@@ -29,17 +43,10 @@ export class Params {
   camera = 'front'
 
   /** External body space */
-  space = {
-    /** Slow down the movement for the entire valley for X seconds. */
+  space: SpaceConfig = {
     delay: 0,
-
-    /** Ignore changes below this threshold. */
     threshold: 0.005,
-
-    /** Ignore region of change smaller than this window. */
     minWindow: 3,
-
-    /** The window size to calculate the averages. */
     windowSize: 30,
   }
 

@@ -1,9 +1,4 @@
-/**
- * @param {string} system
- * @param {string} input
- * @returns {string}
- */
-export async function gpt(system, input) {
+export async function gpt(system: string, input: string) {
   const endpoint = 'https://api.openai.com/v1/chat/completions'
 
   // TODO: domain-restrict this!

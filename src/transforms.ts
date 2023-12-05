@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import { KeyframeTrack, Quaternion, VectorKeyframeTrack } from 'three'
 
-export type Axis = 'x' | 'y' | 'z' | 'w'
+export type Axis = 'x' | 'y' | 'z'
+export type QAxis = Axis | 'w'
 
 export interface TransformOptions {
   threshold?: number

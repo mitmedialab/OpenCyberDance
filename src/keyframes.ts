@@ -1,9 +1,9 @@
 import { KeyframeTrack } from 'three'
 
 import { f32Append } from './floats'
-import { Axis } from './transforms'
+import { QAxis } from './transforms'
 
-export const AXES: Axis[] = ['x', 'y', 'z', 'w']
+export const AXES: QAxis[] = ['x', 'y', 'z', 'w']
 
 /**
  * Lengthen the keyframe tracks, so that it loops properly.
@@ -25,7 +25,7 @@ interface KeyframesOptions {
   from: number
   offset: number
   windowSize: number
-  axes: Axis[]
+  axes: QAxis[]
 }
 
 export function keyframesAt(track: KeyframeTrack, options?: KeyframesOptions) {

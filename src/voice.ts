@@ -1,5 +1,8 @@
 import { randVariance } from './math'
+import { CurveConfig, SpaceConfig } from './overrides'
+import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
+import { Axis } from './transforms'
 import { World } from './world'
 
 const SpeechRecognition =
@@ -202,73 +205,83 @@ export class VoiceController {
     const p = this.world.params
 
     const handlers = {
-      reset: (v) => {
+      reset: (v: boolean) => {
         console.log('reset:', v)
+
         if (v) this.world.panel.reset()
       },
 
-      energy: (data) => {
+      energy: (data: Partial<Record<CorePartKey, number>>) => {
         console.log('energy:', data)
 
         for (const key in data) {
-          p.energy[key] = data[key]
+          p.energy[key as CorePartKey] = data[key as CorePartKey] ?? 0
         }
       },
 
-      rotation: (data) => {
+      rotation: (data: { x: number; y: number; z: number }) => {
         console.log('rotation:', data)
 
         for (const key in data) {
-          p.rotations[key] = data[key]
+          p.rotations[key as Axis] = data[key as Axis]
         }
       },
 
-      synchronicLimbs: (v) => {
+      synchronicLimbs: (v: number) => {
         console.log('limbs:', v)
         this.setSynchronic(v)
       },
 
-      curve: (data) => {
+      curve: (data: Partial<CurveConfig>) => {
         for (const key in data) {
+          // @ts-expect-error - to fix
           const value = data[key]
           console.log(`curve#${key}:`, value)
 
           if (['equation', 'threshold'].includes(key)) {
+            // @ts-expect-error - to fix
             p.curve[key] = value
           } else if (key === 'axes') {
             for (const axis in value) {
               console.log(`curve.axes#${axis}:`, value[axis])
-              p.curve.axes[axis] = value[axis]
+
+              p.curve.axes[axis as Axis] = value[axis]
             }
           } else if (key === 'parts') {
             for (const part in value) {
               console.log(`curve.parts#${part}:`, value[part])
-              p.curve.parts[part] = value[part]
+
+              p.curve.parts[part as CurvePartKey] = value[part]
             }
           }
         }
       },
 
-      externalBodySpace: (data) => {
+      externalBodySpace: (data: SpaceConfig) => {
         for (const key in data) {
+          // @ts-expect-error - to fix
           p.space[key] = data[key]
         }
       },
-    }
+    } as const
 
-    const out = Object.entries(output).find(([k, v]) => v !== null)
+    type HandleKey = keyof typeof handlers
+
+    const out = Object.entries(output).find(([, v]) => v !== null)
     if (!out) return
 
     const [key, value] = out
     console.log(`set> ${key} =`, value)
 
-    const handler = handlers[key]?.bind(this)
+    const handler = handlers[key as HandleKey]?.bind(this)
+
+    // @ts-expect-error - to fix
     handler?.(value)
 
     this.sync(key)
   }
 
-  sync(key) {
+  sync(key: string | string[]) {
     // Sync rotation fields
     if (key.includes('rotation')) {
       this.world.updateParams({ rotation: true })
@@ -278,12 +291,12 @@ export class VoiceController {
     this.world.updateParams({ timing: true })
   }
 
-  setSynchronic(v) {
+  setSynchronic(v: number) {
     const p = this.world.params
     console.log('synchronic:', v)
 
     for (const key in p.delays) {
-      p.delays[key] = randVariance(v)
+      p.delays[key as DelayPartKey] = randVariance(v)
     }
   }
 }

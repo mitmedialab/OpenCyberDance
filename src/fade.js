@@ -1,4 +1,4 @@
-import {AnimationMixer} from 'three'
+import { AnimationMixer } from 'three'
 
 export class Fader {
   current = 'none'

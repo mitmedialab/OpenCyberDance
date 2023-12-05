@@ -19,8 +19,8 @@ export async function gpt(system, input) {
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: [
-          {role: 'system', content: system},
-          {role: 'user', content: input},
+          { role: 'system', content: system },
+          { role: 'user', content: input },
         ],
         temperature: 0,
         max_tokens: 125,

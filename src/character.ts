@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import {AnimationAction, AnimationClip, QuaternionKeyframeTrack} from 'three'
+import { QuaternionKeyframeTrack } from 'three'
 
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import {trackToEuler} from './math.js'
+import { trackToEuler } from './math.js'
 
 import {
   getAcceleration,
@@ -11,21 +11,21 @@ import {
   lengthenKeyframeTracks,
 } from './keyframes.js'
 
-import {trackNameToPart} from './parts.js'
-import {dispose} from './dispose.js'
-import {curveParts} from './parts.js'
+import { trackNameToPart } from './parts.js'
+import { dispose } from './dispose.js'
+import { curveParts } from './parts.js'
 
 import {
-  Params,
   applyExternalBodySpace,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
 } from './overrides.js'
-import {KeyframeAnalyzer} from './analyze'
-import {applyTrackTransform, transformers} from './transforms.js'
-import {profile} from './perf.js'
-import {IKManager} from './ik.js'
+
+import { KeyframeAnalyzer } from './analyze.js'
+import { applyTrackTransform, transformers } from './transforms.js'
+import { profile } from './perf.js'
+import { IKManager } from './ik.js'
 
 /** @typedef {{eulers: THREE.Euler[], values: Float32Array, timings: Float32Array, duration: number}} AnimationSource */
 /** @typedef {number|string|RegExp} Q */
@@ -114,7 +114,7 @@ export class Character {
    * @param {typeof Character.prototype.options} options
    **/
   constructor(options) {
-    if (options) this.options = {...this.options, ...options}
+    if (options) this.options = { ...this.options, ...options }
   }
 
   get currentClip() {
@@ -296,7 +296,7 @@ export class Character {
    * @param {THREE.AnimationClip} clip
    */
   processClip(clip) {
-    const {lengthen, freezeParams} = this.options
+    const { lengthen, freezeParams } = this.options
 
     // Make keyframes track longer for track-level looping.
     if (lengthen > 0) {
@@ -313,7 +313,7 @@ export class Character {
       const duration = track.times[track.times.length - 1] - track.times[0]
 
       /** @type {AnimationSource} */
-      const source = {timings, values, duration, eulers: []}
+      const source = { timings, values, duration, eulers: [] }
 
       // Cache euler angles for rotation tracks.
       if (!freezeParams && track instanceof QuaternionKeyframeTrack) {
@@ -343,10 +343,10 @@ export class Character {
   /**
    * Update animation parameters.
    */
-  updateParams(flags = {timing: true}) {
-    const {lockPosition: lock} = flags
+  updateParams(flags = { timing: true }) {
+    const { lockPosition: lock } = flags
 
-    const {freezeParams} = this.options
+    const { freezeParams } = this.options
     if (freezeParams && lock === undefined) return
 
     const clip = this.currentClip
@@ -428,7 +428,7 @@ export class Character {
    */
   get curveConfig() {
     const c = this.params?.curve
-    if (!c) return {tracks: [], axis: []}
+    if (!c) return { tracks: [], axis: [] }
 
     const tracks = Object.entries(c.parts)
       .filter(([_, v]) => v === true)
@@ -439,7 +439,7 @@ export class Character {
       .map(([k]) => k)
 
     // @ts-ignore
-    return {tracks, axis}
+    return { tracks, axis }
   }
 
   /**
@@ -590,7 +590,7 @@ export class Character {
   trackIdByKey(key) {
     if (typeof key === 'number') return key
 
-    return this.currentClip?.tracks.findIndex(({name}) => {
+    return this.currentClip?.tracks.findIndex(({ name }) => {
       return key instanceof RegExp ? key.test(name) : name.includes(key)
     })
   }
@@ -639,12 +639,12 @@ export class Character {
   }
 
   getMovementStats(key, options) {
-    const {windowSize = 200, threshold = 0.01, skip = 1} = options ?? {}
+    const { windowSize = 200, threshold = 0.01, skip = 1 } = options ?? {}
 
     const track = this.trackByKey(key)
     if (!track) return
 
-    const {series} = keyframesAt(track, {
+    const { series } = keyframesAt(track, {
       from: this.mixer?.time ?? 0,
       windowSize,
       offset: 0,

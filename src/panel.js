@@ -1,13 +1,13 @@
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
 
-import {Params} from './overrides.js'
+import { Params } from './overrides.js'
 
-import {Character} from './character.js'
-import {transformers} from './transforms.js'
-import {CAMERA_PRESETS} from './camera.js'
+import { Character } from './character.js'
+import { transformers } from './transforms.js'
+import { CAMERA_PRESETS } from './camera.js'
 
 export class Panel {
-  panel = new GUI({width: 310})
+  panel = new GUI({ width: 310 })
 
   /** @type {Params} */
   params = null
@@ -162,17 +162,17 @@ export class Panel {
     this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
 
     this.commandFolder
-      .add({reset: this.reset.bind(this)}, 'reset')
+      .add({ reset: this.reset.bind(this) }, 'reset')
       .name('Reset')
       .listen()
 
     this.commandFolder
-      .add({voice: this.triggerVoice.bind(this)}, 'voice')
+      .add({ voice: this.triggerVoice.bind(this) }, 'voice')
       .name('Voice')
       .listen()
 
     this.commandFolder
-      .add({setKey: this.triggerPrompt.bind(this)}, 'setKey')
+      .add({ setKey: this.triggerPrompt.bind(this) }, 'setKey')
       .name('Prompt')
       .listen()
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import {Quaternion, KeyframeTrack, VectorKeyframeTrack} from 'three'
+import { Quaternion, KeyframeTrack, VectorKeyframeTrack } from 'three'
 
 /** @type {Axis[]} */
 
@@ -30,7 +30,7 @@ function factorial(n) {
  * @returns {Float32Array}
  **/
 export function applyTrackTransform(track, transform, options = {}) {
-  const {axis} = options ?? {}
+  const { axis } = options ?? {}
 
   // Temporarily disable transform for vector tracks.
   const isVector = track instanceof VectorKeyframeTrack
@@ -82,7 +82,7 @@ export function applyTrackTransform(track, transform, options = {}) {
 export function lowpass(source, options) {
   const out = []
 
-  const {threshold: windowSize = 2} = options ?? {}
+  const { threshold: windowSize = 2 } = options ?? {}
 
   for (let i = 0; i < source.length; i++) {
     let sum = 0
@@ -103,7 +103,7 @@ export function lowpass(source, options) {
 export function highpass(source, options) {
   const out = []
 
-  const {threshold: windowSize = 2} = options ?? {}
+  const { threshold: windowSize = 2 } = options ?? {}
 
   for (let i = 0; i < source.length; i++) {
     let sum = 0
@@ -122,7 +122,7 @@ export function highpass(source, options) {
 
 /** @type {Transform} */
 export function gaussian(source, options) {
-  const {threshold: windowSize = 2} = options ?? {}
+  const { threshold: windowSize = 2 } = options ?? {}
 
   const sigma = windowSize / 2.0
   let sum = 0
@@ -183,7 +183,7 @@ export function gaussian(source, options) {
 
 /** @type {Transform} */
 function derivative(source, options) {
-  const {threshold: order = 2} = options ?? {}
+  const { threshold: order = 2 } = options ?? {}
 
   const out = []
 
@@ -218,7 +218,7 @@ function derivative(source, options) {
 
 /** @type {Transform} */
 function capMin(source, options) {
-  const {threshold = 0.1} = options ?? {}
+  const { threshold = 0.1 } = options ?? {}
   let out = []
   let previous = source[0]
 
@@ -236,7 +236,7 @@ function capMin(source, options) {
 
 /** @type {Transform} */
 function capMax(source, options) {
-  const {threshold = 0.1} = options ?? {}
+  const { threshold = 0.1 } = options ?? {}
 
   let out = []
 

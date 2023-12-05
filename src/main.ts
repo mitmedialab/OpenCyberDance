@@ -1,4 +1,4 @@
-import {World} from './world.js'
+import { World } from './world.js'
 
 window.addEventListener('DOMContentLoaded', async () => {
   const world = new World()

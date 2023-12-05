@@ -28,7 +28,7 @@ export const toBone = (name: string) =>
 export class KeyframeAnalyzer {
   tracks: KeyframeTrack[] = []
   times: number[] = []
-  movesByTrack: Map<string, {time: number; value: MoveValue}[]> = new Map()
+  movesByTrack: Map<string, { time: number; value: MoveValue }[]> = new Map()
   movesByTime: Map<number, Keyframe[]> = new Map()
 
   get ready() {
@@ -49,14 +49,14 @@ export class KeyframeAnalyzer {
     if (!this.movesByTrack.has(track)) this.movesByTrack.set(track, [])
     if (!this.movesByTime.has(time)) this.movesByTime.set(time, [])
 
-    this.movesByTime.get(time)?.push({track, value})
-    this.movesByTrack.get(track)?.push({time, value})
+    this.movesByTime.get(time)?.push({ track, value })
+    this.movesByTrack.get(track)?.push({ time, value })
   }
 
   getKeyframes(index: number, matcher: Matcher) {
     const time = this.times[index]
 
-    return {time, keyframes: this.getKeyframesAtTime(time, matcher)}
+    return { time, keyframes: this.getKeyframesAtTime(time, matcher) }
   }
 
   getKeyframesAtTime(time: number, matcher: Matcher) {
@@ -70,7 +70,7 @@ export class KeyframeAnalyzer {
     time: number,
     matcher: Matcher,
     range = 0.1,
-    limit = 1
+    limit = 1,
   ): Keyframe[] {
     // If there is an exact match, use that value.
     const keyframes = this.getKeyframesAtTime(time, matcher) ?? []
@@ -116,7 +116,7 @@ export class KeyframeAnalyzer {
           const offset = timeIdx * valueSize
           const vector = new THREE.Vector3().fromArray(track.values, offset)
 
-          this.addMove(time, track.name, {v: vector})
+          this.addMove(time, track.name, { v: vector })
         })
       }
 
@@ -126,7 +126,7 @@ export class KeyframeAnalyzer {
           const offset = timeIdx * valueSize
           const q = new THREE.Quaternion().fromArray(track.values, offset)
 
-          this.addMove(time, track.name, {v: q})
+          this.addMove(time, track.name, { v: q })
         })
       }
     })

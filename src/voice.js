@@ -1,7 +1,7 @@
-import {World} from './world.js'
-import {gpt} from './prompt.js'
-import {randVariance} from './math.js'
-import {Params} from './overrides.js'
+import { World } from './world.js'
+import { gpt } from './prompt.js'
+import { randVariance } from './math.js'
+import { Params } from './overrides.js'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
@@ -276,11 +276,11 @@ export class VoiceController {
   sync(key) {
     // Sync rotation fields
     if (key.includes('rotation')) {
-      this.world.updateParams({rotation: true})
+      this.world.updateParams({ rotation: true })
       return
     }
 
-    this.world.updateParams({timing: true})
+    this.world.updateParams({ timing: true })
   }
 
   setSynchronic(v) {

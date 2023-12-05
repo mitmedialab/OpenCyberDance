@@ -9,6 +9,7 @@
 ## Feature: Graph
 
 - Graph Legends
+
   - Legend: character left/right
   - Legend: color legend (แดง x, เขียว y)
   - Legend: parts, e.g. "Hand", etc.
@@ -16,6 +17,7 @@
 - Scrollable views in graph
 
 - Graphing energy and delays
+
   - Energy and delays applies to timing, so they affect the x (time) scale, unlike others which affect the y scale.
 
 - Detect loop, fix timing
@@ -54,12 +56,12 @@ w.transform('capMax', {
   threshold: 0.7,
 
   // Define body parts to apply to (regex match)
-  tracks: /leg/i
+  tracks: /leg/i,
 })
 
 w.transform('capMin', {
   axis: ['y'],
   threshold: 0.2,
-  tracks: /hand/i
+  tracks: /hand/i,
 })
 ```

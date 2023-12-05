@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
-import {trackNameToPart, coreParts, delayParts, curveParts} from './parts.js'
-import {transformers} from './transforms.js'
+import { trackNameToPart, coreParts, delayParts, curveParts } from './parts.js'
+import { transformers } from './transforms.js'
 
 export class Params {
   time = 0
@@ -144,7 +144,7 @@ export function overrideDelay(track, config) {
  * @returns {THREE.KeyframeTrack[]}
  */
 export function applyExternalBodySpace(tracks, options) {
-  const {delay, threshold, minWindow, windowSize} = options ?? {}
+  const { delay, threshold, minWindow, windowSize } = options ?? {}
 
   // Do not compute anything if the delay is zero.
   if (delay === 0) return tracks

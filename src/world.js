@@ -1,22 +1,22 @@
 import * as THREE from 'three'
 
 import Stats from 'three/addons/libs/stats.module.js'
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-import {Panel} from './panel.js'
-import {Character} from './character.js'
-import {Params} from './overrides.js'
-import {profile} from './perf.js'
-import {debounce} from './utils.js'
-import {VoiceController} from './voice.js'
-import {Plotter} from './plotter.js'
-import {formulaRanges} from './transforms.js'
-import {CAMERA_PRESETS} from './camera.js'
+import { Panel } from './panel.js'
+import { Character } from './character.js'
+import { Params } from './overrides.js'
+import { profile } from './perf.js'
+import { debounce } from './utils.js'
+import { VoiceController } from './voice.js'
+import { Plotter } from './plotter.js'
+import { formulaRanges } from './transforms.js'
+import { CAMERA_PRESETS } from './camera.js'
 
 export class World {
   clock = new THREE.Clock()
   scene = new THREE.Scene()
-  renderer = new THREE.WebGLRenderer({antialias: true})
+  renderer = new THREE.WebGLRenderer({ antialias: true })
   stats = new Stats()
   plotter = new Plotter(this)
   container = document.getElementById('app')
@@ -118,7 +118,7 @@ export class World {
   setupPlane() {
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(100, 100),
-      new THREE.MeshPhongMaterial({color: 0xcbcbcb, depthWrite: false})
+      new THREE.MeshPhongMaterial({ color: 0xcbcbcb, depthWrite: false }),
     )
 
     plane.rotation.x = -Math.PI / 2
@@ -194,7 +194,7 @@ export class World {
    * @param {Character} char
    */
   handleAnimationChange(char) {
-    const {name, action} = char.options
+    const { name, action } = char.options
 
     // Update the dropdown animation's active state
     let dropdown = this.panel.characterFolder.children
@@ -209,22 +209,22 @@ export class World {
 
     if (name === 'first') {
       const seek = this.panel.playbackFolder.children.find(
-        (c) => c.property === 'time'
+        (c) => c.property === 'time',
       )
 
-      const {duration} = char.actions.get(action).getClip()
+      const { duration } = char.actions.get(action).getClip()
       if (duration) seek.max(Math.round(duration * 100) / 100)
     }
   }
 
   handleCurveFormulaChange() {
-    const {axis, tracks} = this.first.curveConfig
+    const { axis, tracks } = this.first.curveConfig
 
     this.plotter.axes = axis
     this.plotter.select(...tracks)
 
     const dropdown = this.panel.curveFolder.children.find(
-      (c) => c.property === 'threshold'
+      (c) => c.property === 'threshold',
     )
 
     if (dropdown) {
@@ -269,15 +269,15 @@ export class World {
     this.panel.handlers.space = debounce(() => this.updateParams(), 500)
 
     this.panel.handlers.lockPosition = (lock) => {
-      this.updateParams({lockPosition: lock})
+      this.updateParams({ lockPosition: lock })
     }
 
     this.panel.handlers.curve = debounce(() => {
-      this.updateParams({curve: true})
+      this.updateParams({ curve: true })
     }, 500)
 
     this.panel.handlers.rotation = debounce(() => {
-      this.updateParams({rotation: true})
+      this.updateParams({ rotation: true })
     }, 100)
 
     this.panel.handlers.timescale = (timescale) => {
@@ -339,7 +339,7 @@ export class World {
   updatePlotterOnPause = debounce(() => {
     if (!this.params.paused) return
 
-    this.characters.forEach((c) => this.plotter?.update(c, {seeking: true}))
+    this.characters.forEach((c) => this.plotter?.update(c, { seeking: true }))
   }, 200)
 
   /**

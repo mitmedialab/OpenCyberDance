@@ -1,11 +1,11 @@
-import {Character} from './character.js'
-import {World} from './world.js'
-import {profile} from './perf.js'
+import { Character } from './character.js'
+import { World } from './world.js'
+import { profile } from './perf.js'
 import * as THREE from 'three'
 
-import {Chart, registerables} from 'chart.js'
+import { Chart, registerables } from 'chart.js'
 import AnnotationPlugin from 'chartjs-plugin-annotation'
-import {AXES, keyframesAt} from './keyframes.js'
+import { AXES, keyframesAt } from './keyframes.js'
 
 const p = {
   u: profile('chart', 30),
@@ -148,8 +148,8 @@ export class Plotter {
         responsive: false,
         maintainAspectRatio: false,
         scales: {
-          x: {display: false, type: 'linear'},
-          y: {display: false, type: 'linear', stacked: true},
+          x: { display: false, type: 'linear' },
+          y: { display: false, type: 'linear', stacked: true },
         },
         plugins: {
           legend: {
@@ -187,7 +187,7 @@ export class Plotter {
       container?.appendChild(canvas)
     }
 
-    this.charts.get(chrId)?.set(trackId, {chart, canvas})
+    this.charts.get(chrId)?.set(trackId, { chart, canvas })
   }
 
   containerOf(id) {
@@ -277,14 +277,14 @@ export class Plotter {
   /**
    * @param {Character} char
    */
-  update(char, options = {seeking: false}) {
+  update(char, options = { seeking: false }) {
     if (!this.domElement) return
     if (this.world?.params.paused && !options.seeking) return
 
     // Destroy the chart if it is not visible.
     if (!this.visible) return
 
-    const {name} = char.options
+    const { name } = char.options
 
     const charts = this.charts.get(name)
 
@@ -295,7 +295,7 @@ export class Plotter {
       const track = char.currentClip?.tracks[id]
       if (!track) return
 
-      const {chart} = charts?.get(id) ?? {}
+      const { chart } = charts?.get(id) ?? {}
       if (!chart || !char.mixer) return
 
       // Apply the dataset.
@@ -328,7 +328,7 @@ export class Plotter {
 
     for (const [character, tracks] of this.charts) {
       for (const [track, state] of tracks) {
-        const {chart, canvas} = state
+        const { chart, canvas } = state
 
         chart.destroy()
         canvas.remove()

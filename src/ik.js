@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import {SkinnedMesh} from 'three'
+import { SkinnedMesh } from 'three'
 
-import {CCDIKSolver} from 'three/examples/jsm/animation/CCDIKSolver.js'
+import { CCDIKSolver } from 'three/examples/jsm/animation/CCDIKSolver.js'
 
-import {BoneKey} from './bones.js'
+import { BoneKey } from './bones.js'
 
 /** @param {THREE.Bone[]} bones */
 const axisPointBones = (bones) => {

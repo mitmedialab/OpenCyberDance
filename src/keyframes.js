@@ -1,4 +1,4 @@
-import {f32Append} from './floats.js'
+import { f32Append } from './floats.js'
 
 /** @type {import('./transforms.js').Axis[]} */
 export const AXES = ['x', 'y', 'z', 'w']
@@ -27,7 +27,7 @@ export function lengthenKeyframeTracks(tracks) {
  * @returns
  */
 export function keyframesAt(track, options) {
-  const {offset, windowSize, axes = AXES, from} = options ?? {}
+  const { offset, windowSize, axes = AXES, from } = options ?? {}
 
   let start = track.times.findIndex((t) => t >= from)
   start = Math.max(0, start, start + offset)
@@ -36,7 +36,7 @@ export function keyframesAt(track, options) {
   const valueSize = track.getValueSize()
 
   /** @type {{x: number, y: number}[][]} */
-  const series = Array.from({length: valueSize}).map(() => [])
+  const series = Array.from({ length: valueSize }).map(() => [])
 
   const visibility = AXES.map((a) => axes.includes(a))
 
@@ -47,11 +47,11 @@ export function keyframesAt(track, options) {
       // Do not render the axis that are not visible.
       if (!visibility[axis]) continue
 
-      series[axis].push({x: time, y: track.values[frame * valueSize + axis]})
+      series[axis].push({ x: time, y: track.values[frame * valueSize + axis] })
     }
   }
 
-  return {series, start: track.times[start], end: track.times[end]}
+  return { series, start: track.times[start], end: track.times[end] }
 }
 
 /** @param {{x: number, y: number}[]} data */

@@ -24,10 +24,10 @@ const axisPointBones = (bones: Bone[]) => {
 export class IKManager {
   ik: CCDIKSolver
   skeleton: THREE.SkeletonHelper
-  model: THREE.Scene
+  model: THREE.Group
   mesh: THREE.SkinnedMesh
 
-  constructor(skeleton: THREE.SkeletonHelper, model: THREE.Scene) {
+  constructor(skeleton: THREE.SkeletonHelper, model: THREE.Group) {
     this.skeleton = skeleton
     this.model = model
 

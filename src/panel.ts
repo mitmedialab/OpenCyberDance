@@ -10,18 +10,18 @@ interface Handlers {
   energy(): void
   delay(): void
   rotation(): void
-  timescale(): void
+  timescale(scale: number): void
   action(char: string): void
   character(char: string): void
   reset(): void
   voice(): void
   prompt(command: string): void
-  lockPosition(): void
-  seek(): void
-  pause(): void
+  lockPosition(lock: boolean): void
+  seek(time: number): void
+  pause(paused: boolean): void
   curve(): void
   space(): void
-  showGraph(): void
+  showGraph(visible: boolean): void
   setCamera(): void
 }
 

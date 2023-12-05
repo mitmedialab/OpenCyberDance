@@ -24,7 +24,7 @@ import {
   overrideRotation,
   Params,
 } from './overrides'
-import { curveParts, trackNameToPart } from './parts'
+import { CurvePartKey, curveParts, trackNameToPart } from './parts'
 import { profile } from './perf'
 import {
   applyTrackTransform,
@@ -53,6 +53,7 @@ export interface UpdateParamFlags {
   curve?: boolean
   timing?: boolean
   lockPosition?: boolean
+  rotation?: boolean
 }
 
 const loader = new GLTFLoader()
@@ -338,10 +339,19 @@ export class Character {
     const clip = this.currentClip
     if (!clip || !this.params) return
 
-    const _curve: { equation: Transform; axis: Axis[]; tracks: number[] } = {}
+    const _curve: {
+      equation: Transform
+      axis: Axis[]
+      tracks: number[]
+    } = { equation: () => [], axis: [], tracks: [] }
 
     if (flags.curve) {
-      _curve.equation = transformers[this.params.curve.equation]
+      const { equation } = this.params.curve
+
+      if (equation && equation !== 'none') {
+        _curve.equation = transformers[equation]
+      }
+
       _curve.axis = this.curveConfig.axis
       _curve.tracks = this.query(...this.curveConfig.tracks)
     }
@@ -372,7 +382,6 @@ export class Character {
         if (!part) return
 
         // Override delays
-        // @ts-ignore
         overrideDelay(track, this.params.delays)
 
         const energy = this.params.energy[part]
@@ -414,8 +423,8 @@ export class Character {
     if (!c) return { tracks: [], axis: [] }
 
     const tracks = Object.entries(c.parts)
-      .filter(([_, v]) => v === true)
-      .map(([p]) => curveParts[p])
+      .filter(([, v]) => v === true)
+      .map(([p]) => curveParts[p as CurvePartKey])
 
     const axis = Object.entries(c.axes)
       .filter(([, v]) => v === true)
@@ -449,10 +458,7 @@ export class Character {
     console.log('>>> Resetting character!')
     const config = this.params.characters[this.options.name]
 
-    // @ts-ignore
     this.options.model = config.model
-
-    // @ts-ignore
     this.options.action = null
 
     await this.setup()

@@ -1,3 +1,4 @@
+import GUI, { Controller as GUIController } from 'lil-gui'
 import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -178,7 +179,7 @@ export class World {
     return this.characters.find((c) => c.options.name === name) ?? null
   }
 
-  updateParams(flags: UpdateParamFlags) {
+  updateParams(flags?: UpdateParamFlags) {
     const b = profile('updateParams', 100)
 
     b(() => {
@@ -190,7 +191,7 @@ export class World {
     })
   }
 
-  async addCharacter(config: CharacterOptions) {
+  async addCharacter(config: Partial<CharacterOptions>) {
     const character = new Character(config)
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
 
@@ -199,57 +200,68 @@ export class World {
   }
 
   handleAnimationChange(char: Character) {
+    if (!this.panel.characterFolder) return
+
     const { name, action } = char.options
 
+    const dropdown = this.panel.characterFolder?.children
+      // @ts-expect-error - character is a custom property
+      ?.find((k) => k.character === name) as GUI
+
     // Update the dropdown animation's active state
-    const dropdown = this.panel.characterFolder.children
-      .find((k) => k.character === name)
-      .controllers.find((c) => c.property === 'action')
-      .options([...char.actions.keys()])
+    const controller = dropdown.controllers
+      .find((c) => c.property === 'action')
+      ?.options([...char.actions.keys()])
       .listen()
       .onChange(() => this.panel.handlers.action(name))
 
     this.params.characters[name].action = action
-    dropdown.updateDisplay()
+    controller?.updateDisplay()
 
     if (name === 'first') {
-      const seek = this.panel.playbackFolder.children.find(
-        (c) => c.property === 'time',
-      )
+      const seek = this.panel.playbackFolder?.children.find(
+        (c) => 'property' in c && c.property === 'time',
+      ) as GUIController
 
-      const { duration } = char.actions.get(action).getClip()
+      const currentAction = char.actions.get(action)
+      if (!currentAction || !seek) return
+
+      const { duration } = currentAction.getClip()
       if (duration) seek.max(Math.round(duration * 100) / 100)
     }
   }
 
   handleCurveFormulaChange() {
-    const { axis, tracks } = this.first?.curveConfig
+    const { axis = [], tracks = [] } = this.first?.curveConfig ?? {}
 
     this.plotter.axes = axis
     this.plotter.select(...tracks)
 
-    const dropdown = this.panel.curveFolder.children.find(
-      (c) => c.property === 'threshold',
-    )
+    const dropdown = this.panel.curveFolder?.children.find(
+      (c) => 'property' in c && c.property === 'threshold',
+    ) as GUIController
 
-    if (dropdown) {
-      const range = formulaRanges[this.params.curve.equation]
-      if (!range) return
+    if (!dropdown) return
 
-      const [fMin, fMax, fStep, fInitial] = range
-      dropdown._min = fMin
-      dropdown._max = fMax
-      dropdown._step = fStep
-      dropdown.initialValue = fInitial
+    const { equation } = this.params.curve
+    if (equation === 'none') return
 
-      const current = dropdown.getValue()
+    const range = formulaRanges[equation]
+    if (!range) return
 
-      if (current < fMin || current > fMax) {
-        dropdown.setValue(fInitial)
-      }
+    const [fMin, fMax, fStep, fInitial] = range
+    dropdown.min(fMin)
+    dropdown.max(fMax)
+    dropdown.step(fStep)
+    dropdown.initialValue = fInitial
 
-      dropdown.updateDisplay()
+    const current = dropdown.getValue()
+
+    if (current < fMin || current > fMax) {
+      dropdown.setValue(fInitial)
     }
+
+    dropdown.updateDisplay()
   }
 
   async setupCharacters() {
@@ -287,6 +299,8 @@ export class World {
 
     this.panel.handlers.timescale = (timescale) => {
       for (const character of this.characters) {
+        if (!character.mixer) continue
+
         character.mixer.timeScale = timescale
       }
     }
@@ -313,20 +327,19 @@ export class World {
     }
 
     this.panel.handlers.voice = () => {
-      console.log('Voice')
       this.voice.toggle()
     }
 
-    this.panel.handlers.showGraph = (visible: boolean) => {
+    this.panel.handlers.showGraph = (visible) => {
       this.plotter.updateVisibility(visible)
     }
 
-    this.panel.handlers.seek = (time: number) => {
+    this.panel.handlers.seek = (time) => {
       this.characters.forEach((c) => c.mixer?.setTime(time))
       this.updatePlotterOnPause()
     }
 
-    this.panel.handlers.pause = (paused: number) => {
+    this.panel.handlers.pause = (paused) => {
       paused ? this.clock.stop() : this.clock.start()
     }
 
@@ -346,14 +359,7 @@ export class World {
 
   /** Queries the track id by name or regex. */
   query(...query: Matcher[]): number[] {
-    return this.first?.query(...query)
-  }
-
-  get cameraConfig() {
-    return {
-      rotation: this.camera?.rotation.toArray(),
-      position: this.camera?.position.toArray(),
-    }
+    return this.first?.query(...query) ?? []
   }
 
   setCamera(presetKey: CameraPresetKey = 'front') {

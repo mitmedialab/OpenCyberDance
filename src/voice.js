@@ -196,7 +196,9 @@ export class VoiceController {
 
     try {
       output = JSON.parse(action)
-    } catch (err) {}
+    } catch (err) {
+      // TODO: handle error
+    }
 
     if (!output) {
       console.warn('> invalid command:', action)

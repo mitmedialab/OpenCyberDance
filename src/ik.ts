@@ -1,51 +1,45 @@
-import * as THREE from 'three'
-import { SkinnedMesh } from 'three'
-import { CCDIKSolver } from 'three/examples/jsm/animation/CCDIKSolver'
+import { Bone, SkinnedMesh } from 'three'
+import { CCDIKSolver, IKS } from 'three/examples/jsm/animation/CCDIKSolver'
 
 import { BoneKey } from './bones'
 
-/** @param {THREE.Bone[]} bones */
-const axisPointBones = (bones) => {
+const axisPointBones = (bones: Bone[]) => {
   const find = (key: BoneKey) => bones.find((b) => b.name === key)
 
   return {
     forehead() {
-      const ref = find(BoneKey.Head)
+      const ref = find('Head')
     },
 
     neck() {
-      const ref = find(BoneKey.Neck)
+      const ref = find('Neck')
     },
 
     body() {
-      const ref = find(BoneKey.Spine)
+      const ref = find('Spine')
     },
   }
 }
 
 export class IKManager {
-  ik: CCDIKSolver | null = null
-
+  ik: CCDIKSolver
   skeleton: THREE.SkeletonHelper
+  model: THREE.Scene
+  mesh: THREE.SkinnedMesh
 
-  /** @type {THREE.Scene} */
-  model
-
-  /** @type {THREE.SkinnedMesh} */
-  mesh
-
-  /**
-   * @param {THREE.SkeletonHelper} skeleton
-   * @param {THREE.Scene} model
-   */
-  constructor(skeleton, model) {
+  constructor(skeleton: THREE.SkeletonHelper, model: THREE.Scene) {
     this.skeleton = skeleton
     this.model = model
 
+    let mesh: SkinnedMesh | null = null
+
     this.model.traverse((o) => {
-      if (o instanceof SkinnedMesh) this.mesh = o
+      if (o instanceof SkinnedMesh) mesh = o
     })
 
+    if (!mesh) throw new Error('No mesh found')
+
+    this.mesh = mesh
     this.ik = new CCDIKSolver(this.mesh, [])
   }
 
@@ -57,7 +51,7 @@ export class IKManager {
     return typeof id === 'number'
   }
 
-  validate(iks) {
+  validate(iks: IKS[]) {
     if (!iks) return false
 
     for (const ik of iks) {
@@ -81,15 +75,13 @@ export class IKManager {
     this.ik.update()
   }
 
-  /**
-   * @param {Object[]} iks
-   */
-  set(iks) {
+  set(iks: IKS[]) {
     if (!this.validate(iks)) {
       console.error('invalid IK definitions')
       return
     }
 
+    // @ts-expect-error - ik.iks is private
     this.ik.iks = iks
   }
 

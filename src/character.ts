@@ -125,7 +125,7 @@ export class Character {
     tranimid: 'tranimid_Tas',
   }
 
-  constructor(options?: CharacterOptions) {
+  constructor(options?: Partial<CharacterOptions>) {
     if (options) this.options = { ...this.options, ...options }
   }
 
@@ -189,7 +189,7 @@ export class Character {
     this.updateAction()
   }
 
-  async setup(scene: Scene, params: Params) {
+  async setup(scene?: Scene, params?: Params) {
     const config = this.options
 
     if (scene) this.scene = scene
@@ -424,10 +424,7 @@ export class Character {
     return { tracks, axis }
   }
 
-  /**
-   * @param {AnimationClip} clip
-   */
-  fadeIntoModifiedAction(clip) {
+  fadeIntoModifiedAction(clip: THREE.AnimationClip) {
     if (!this.mixer) return
 
     const prevAction = this.actions.get(clip.name)
@@ -461,54 +458,37 @@ export class Character {
     await this.setup()
   }
 
-  /**
-   * @param {string|number} key
-   * @param {Float32Array | number[]} values
-   * @param {(Float32Array | number[])?} times
-   */
-  overrideTrack(key, values, times = null) {
-    key = this.trackIdByKey(key) ?? 0
+  overrideTrack(
+    key: Matcher,
+    values: Float32Array | number[],
+    times?: Float32Array | number[],
+  ) {
+    const id = this.trackIdByKey(key) ?? 0
 
     const clip = this.currentClip
     if (!clip) return
 
-    const track = clip.tracks[key]
+    const track = clip.tracks[id]
     if (!track) return
 
-    console.log(`>> altering ${track.name} (id: ${key})`)
-
     const size = track.values.length
-    console.log(`>> length before: ${size}`)
 
     if (values.length !== size) {
       console.warn(`track length mismatch. ${size} != ${values.length}`)
     }
 
     if (times) {
-      clip.tracks[key].times = new Float32Array(times)
+      clip.tracks[id].times = new Float32Array(times)
     }
 
-    clip.tracks[key].values = new Float32Array(values)
-    clip.tracks[key].validate()
-    console.log(`>> length after: ${clip.tracks[key].values.length}`)
+    clip.tracks[id].values = new Float32Array(values)
+    clip.tracks[id].validate()
 
     this.fadeIntoModifiedAction(clip)
   }
 
-  async loadTrackOverride(url) {
-    const f = await fetch(url)
-    const v = await f.json()
-
-    for (const [id, values] of Object.entries(v)) {
-      this.overrideTrack(id, values)
-    }
-  }
-
-  /**
-   * Get the original keyframe track.
-   * @param {number[]?} ids track ids
-   */
-  originalClip(ids) {
+  /** Get the original keyframe track. */
+  originalClip(ids: number[]) {
     const clip = this.currentClip
     if (!clip) return
 
@@ -616,15 +596,17 @@ export class Character {
     const track = this.trackByKey(key)
     if (!track) return
 
-    const { series } = keyframesAt(track, {
+    const keyframe = keyframesAt(track, {
       from: this.mixer?.time ?? 0,
       windowSize,
       offset: 0,
       axes: ['x', 'y', 'z', 'w'],
     })
 
-    return {
-      acceleration: series.map(getAcceleration),
-    }
+    if (!keyframe) return
+
+    const { series } = keyframe
+
+    return { acceleration: series.map(getAcceleration) }
   }
 }

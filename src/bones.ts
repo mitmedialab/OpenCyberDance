@@ -1,4 +1,4 @@
-export const BoneKey = {
+export const boneNames = {
   Hips: 'Hips',
   RightUpLeg: 'RightUpLeg',
   RightLeg: 'RightLeg',
@@ -59,3 +59,5 @@ export const BoneKey = {
   LeftHandPinky2: 'LeftHandPinky2',
   LeftHandPinky3: 'LeftHandPinky3',
 }
+
+export type BoneKey = keyof typeof boneNames

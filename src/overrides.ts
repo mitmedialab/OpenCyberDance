@@ -1,13 +1,18 @@
 import * as THREE from 'three'
 import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
-import { CurvePartKey, trackNameToPart } from './parts'
+import {
+  CorePartKey,
+  CurvePartKey,
+  DelayPartKey,
+  trackNameToPart,
+} from './parts'
 import { TransformKey } from './transforms'
 
 interface CurveConfig {
   parts: Record<CurvePartKey, boolean>
   equation: TransformKey | 'none'
-  axes: Record<'x' | 'y' | 'z', boolean>
+  axes: { x: number; y: number; z: number }
   threshold: number
   dirty: boolean
 }
@@ -63,15 +68,13 @@ export class Params {
     z: 1,
   }
 
-  /** @type {Record<keyof typeof coreParts, number>} */
-  energy = {
+  energy: Record<CorePartKey, number> = {
     head: 1,
     body: 1,
     foot: 1,
   }
 
-  /** @type {Record<keyof typeof delayParts, number>} */
-  delays = {
+  delays: Record<DelayPartKey, number> = {
     head: 0,
     body: 0,
     leftArm: 0,
@@ -92,10 +95,8 @@ export class Params {
   }
 }
 
-/**
- * Scale up or down keyframe tracks.
- */
-export function overrideEnergy(track: THREE.KeyframeTrack, factor = 1) {
+/** Scale up or down keyframe tracks. */
+export function overrideEnergy(track: KeyframeTrack, factor = 1) {
   track.times = track.times.map((t) => {
     if (factor === 1) return t
 

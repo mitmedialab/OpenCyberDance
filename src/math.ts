@@ -1,22 +1,15 @@
 import * as THREE from 'three'
 
-/**
- *
- * @param {THREE.KeyframeTrack} track
- * @param {number} offset
- * @returns
- */
-export function trackToEuler(track, offset) {
+export function trackToEuler(
+  track: THREE.QuaternionKeyframeTrack,
+  offset: number | undefined,
+) {
   const quaternion = new THREE.Quaternion().fromArray(track.values, offset)
 
   return new THREE.Euler().setFromQuaternion(quaternion, 'XYZ')
 }
 
-/**
- * @param {number} variance
- * @returns
- */
-export function randVariance(variance) {
+export function randVariance(variance: number) {
   if (variance < 0 || variance > 10) {
     throw new Error('variance must be between 0 and 10!')
   }

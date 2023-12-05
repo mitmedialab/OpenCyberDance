@@ -1,16 +1,46 @@
-import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.18/+esm'
+import GUI from 'lil-gui'
 
 import { CAMERA_PRESETS } from './camera'
-import { Character } from './character'
+import { Character, CharacterKey } from './character'
+import { Params } from './overrides'
+import { CorePartKey, DelayPartKey } from './parts'
 import { transformers } from './transforms'
 
+interface Handlers {
+  energy(): void
+  delay(): void
+  rotation(): void
+  timescale(): void
+  action(char: string): void
+  character(char: string): void
+  reset(): void
+  voice(): void
+  prompt(command: string): void
+  lockPosition(): void
+  seek(): void
+  pause(): void
+  curve(): void
+  space(): void
+  showGraph(): void
+  setCamera(): void
+}
+
 export class Panel {
+  params: Params
   panel = new GUI({ width: 310 })
 
-  /** @type {Params} */
-  params = null
+  energyFolder: GUI | null = null
+  spaceFolder: GUI | null = null
+  delayFolder: GUI | null = null
+  rotationFolder: GUI | null = null
+  curveFolder: GUI | null = null
+  curvePartsFolder: GUI | null = null
+  curveAxisFolder: GUI | null = null
+  playbackFolder: GUI | null = null
+  commandFolder: GUI | null = null
+  characterFolder: GUI | null = null
 
-  handlers = {
+  handlers: Handlers = {
     energy: () => {},
     delay: () => {},
     rotation: () => {},
@@ -29,29 +59,23 @@ export class Panel {
     setCamera: () => {},
   }
 
-  constructor(params) {
+  constructor(params: Params) {
     this.params = params
   }
 
-  /**
-   * @param {keyof typeof coreParts} parts
-   */
-  addEnergy(...parts) {
+  addEnergy(...parts: CorePartKey[]) {
     for (const part of parts) {
       this.energyFolder
-        .add(this.params.energy, part, 1, 8, 0.01)
+        ?.add(this.params.energy, part, 1, 8, 0.01)
         .listen()
         .onChange(this.handlers.energy)
     }
   }
 
-  /**
-   * @param {keyof typeof delayParts} parts
-   */
-  addDelay(...parts) {
+  addDelay(...parts: DelayPartKey[]) {
     for (const part of parts) {
       this.delayFolder
-        .add(this.params.delays, part, -10, 10, 0.01)
+        ?.add(this.params.delays, part, -10, 10, 0.01)
         .listen()
         .onChange(this.handlers.delay)
     }
@@ -60,16 +84,16 @@ export class Panel {
   addRotations() {
     for (const axis of ['x', 'y', 'z']) {
       this.rotationFolder
-        .add(this.params.rotations, axis, 1, 5)
+        ?.add(this.params.rotations, axis, 1, 5)
         .listen()
         .onChange(this.handlers.rotation)
     }
   }
 
-  /** @param {keyof typeof Params.prototype.characters} char */
-  addCharacterControl(folder, char) {
+  addCharacterControl(folder: GUI, char: CharacterKey) {
     const field = this.params.characters[char]
 
+    // @ts-expect-error - attached field
     folder.character = char
 
     folder
@@ -84,6 +108,8 @@ export class Panel {
   }
 
   addCurveControl() {
+    if (!this.curveFolder) return
+
     const eqs = ['none', ...Object.keys(transformers)]
 
     this.curveFolder
@@ -107,7 +133,7 @@ export class Panel {
         .onChange(this.handlers.curve)
     }
 
-    this.curveAxisFolder = this.curveFolder.addFolder('Select Axis')
+    this.curveAxisFolder = this.curveFolder?.addFolder('Select Axis')
 
     for (const axis of ['x', 'y', 'z']) {
       this.curveAxisFolder
@@ -118,6 +144,8 @@ export class Panel {
   }
 
   addSpaceControl() {
+    if (!this.spaceFolder) return
+
     this.spaceFolder
       .add(this.params.space, 'delay', 0, 3, 0.001)
       .name('Delay Per Valley (s)')
@@ -212,7 +240,8 @@ export class Panel {
 
     for (const key in this.params.characters) {
       const folder = this.characterFolder.addFolder(`Character: ${key}`)
-      this.addCharacterControl(folder, key)
+
+      this.addCharacterControl(folder, key as CharacterKey)
     }
 
     this.addCurveControl()
@@ -255,7 +284,9 @@ export class Panel {
     }
 
     const command = prompt('User Command')
-    this.handlers.prompt.call(this, command)
+    if (!command) return
+
+    this.handlers.prompt.bind(this)(command)
   }
 
   reset() {

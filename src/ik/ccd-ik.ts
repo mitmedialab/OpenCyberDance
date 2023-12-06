@@ -10,7 +10,7 @@ interface IKLink {
   rotationMax?: Vector3
 }
 
-export interface IKS {
+export interface IK {
   effector: number
   iteration?: number | undefined
   links: IKLink[]
@@ -54,30 +54,26 @@ export const _matrix = new Matrix4()
 
 export class CCDIKSolver {
   mesh: SkinnedMesh
-  iks: IKS[] = []
+  iks: IK[] = []
 
-  constructor(mesh: SkinnedMesh, iks: IKS[] = []) {
+  constructor(mesh: SkinnedMesh, iks: IK[] = []) {
     this.mesh = mesh
     this.set(iks)
   }
 
-  public set(iks: IKS[]) {
+  public set(iks: IK[]) {
     this.iks = iks
 
-    this._valid()
+    this.validate()
   }
 
   public update() {
-    const iks = this.iks
-
-    for (let i = 0, il = iks.length; i < il; i++) {
-      this.updateOne(iks[i])
+    for (const ik of this.iks) {
+      this.updateOne(ik)
     }
-
-    return this
   }
 
-  public updateOne(ik: IKS) {
+  public updateOne(ik: IK) {
     const bones = this.mesh.skeleton.bones
 
     // for reference overhead reduction in loop
@@ -90,22 +86,19 @@ export class CCDIKSolver {
     // because it calls updateMatrixWorld( true ) inside.
     _targetPos.setFromMatrixPosition(target.matrixWorld)
 
-    const links = ik.links
     const iteration = ik.iteration !== undefined ? ik.iteration : 1
 
     for (let i = 0; i < iteration; i++) {
       let rotated = false
 
-      for (let j = 0, jl = links.length; j < jl; j++) {
-        const link = bones[links[j].index]
+      for (const linkConfig of ik.links) {
+        const link = bones[linkConfig.index]
 
         // skip this link and following links.
         // this skip is used for MMD performance optimization.
-        if (links[j].enabled === false) break
+        if (!linkConfig.enabled) break
 
-        const limitation = links[j].limitation
-        const rotationMin = links[j].rotationMin
-        const rotationMax = links[j].rotationMax
+        const { limitation, rotationMin, rotationMax } = linkConfig
 
         // don't use getWorldPosition/Quaternion() here for the performance
         // because they call updateMatrixWorld( true ) inside.
@@ -183,15 +176,13 @@ export class CCDIKSolver {
 
       if (!rotated) break
     }
-
-    return this
   }
 
   public createHelper() {
     return new CCDIKHelper(this.mesh, this.iks)
   }
 
-  private _valid() {
+  private validate() {
     const iks = this.iks
     const bones = this.mesh.skeleton.bones
 

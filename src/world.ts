@@ -106,11 +106,9 @@ export class World {
     if (!this.params.paused) {
       const delta = this.clock.getDelta()
 
-      for (const c of this.characters) {
-        c.mixer?.update(delta)
-        c.ik?.update()
-
-        if (c.ik) window.ik = c.ik
+      for (const char of this.characters) {
+        char.mixer?.update(delta)
+        char.ik?.update()
       }
     }
 

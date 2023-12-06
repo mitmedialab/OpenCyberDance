@@ -14,7 +14,7 @@ import {
 import {
   _matrix,
   getPosition,
-  IKS,
+  IK,
   setPositionOfBoneToAttributeArray,
 } from './ccd-ik'
 
@@ -24,14 +24,14 @@ import {
 
 export class CCDIKHelper extends Object3D {
   root: SkinnedMesh
-  iks: IKS[]
+  iks: IK[]
   sphereGeometry: SphereGeometry
   targetSphereMaterial: MeshBasicMaterial
   effectorSphereMaterial: MeshBasicMaterial
   linkSphereMaterial: MeshBasicMaterial
   lineMaterial: LineBasicMaterial
 
-  constructor(mesh: SkinnedMesh, iks: IKS[] = [], sphereSize = 0.25) {
+  constructor(mesh: SkinnedMesh, iks: IK[] = [], sphereSize = 0.25) {
     super()
 
     this.root = mesh
@@ -159,7 +159,7 @@ export class CCDIKHelper extends Object3D {
     const scope = this
     const iks = this.iks
 
-    function createLineGeometry(ik: IKS) {
+    function createLineGeometry(ik: IK) {
       const geometry = new BufferGeometry()
       const vertices = new Float32Array((2 + ik.links.length) * 3)
       geometry.setAttribute('position', new BufferAttribute(vertices, 3))
@@ -179,7 +179,7 @@ export class CCDIKHelper extends Object3D {
       return new Mesh(scope.sphereGeometry, scope.linkSphereMaterial)
     }
 
-    function createLine(ik: IKS) {
+    function createLine(ik: IK) {
       return new Line(createLineGeometry(ik), scope.lineMaterial)
     }
 

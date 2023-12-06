@@ -1,7 +1,7 @@
 import { Bone, SkinnedMesh, Vector3 } from 'three'
 
 import { BoneKey } from '../bones'
-import { CCDIKSolver, IKS } from './ccd-ik'
+import { CCDIKSolver, IK } from './ccd-ik'
 
 declare global {
   interface Window {
@@ -103,7 +103,7 @@ export class IKManager {
     return typeof id === 'number'
   }
 
-  validate(iks: IKS[]) {
+  validate(iks: IK[]) {
     if (!iks) return false
 
     for (const ik of iks) {
@@ -125,12 +125,7 @@ export class IKManager {
     this.ik.update()
   }
 
-  set(iks: IKS[]) {
-    if (!this.validate(iks)) {
-      console.error('invalid IK definitions')
-      return
-    }
-
+  set(iks: IK[]) {
     this.ik.set(iks)
   }
 
@@ -138,20 +133,16 @@ export class IKManager {
     this.set([])
   }
 
-  createMorph(axis: BoneKey, control: BoneKey, links: BoneKey[]): IKS {
+  createMorph(axis: BoneKey, control: BoneKey, links: BoneKey[]): IK {
     const axisId = this.boneIdByName(axis)
     const controlId = this.boneIdByName(control)
     const linkIds = links.map((name) => this.boneIdByName(name))
 
     return {
-      minAngle: 0,
-      maxAngle: 360,
       target: axisId,
       effector: controlId,
       links: linkIds.map((index) => ({
         index,
-        rotationMin: new Vector3(0, 0, 0),
-        rotationMax: new Vector3(360, 360, 360),
       })),
     }
   }
@@ -159,7 +150,24 @@ export class IKManager {
   morph() {
     this.set([
       this.createMorph('Head', 'LeftHand', ['LeftForeArm', 'LeftArm']),
-      this.createMorph('Head', 'RightHand', ['RightForeArm', 'RightArm']),
+      {
+        // minAngle: 300,
+        // maxAngle: 360,
+        target: this.boneIdByName('Head'),
+        effector: this.boneIdByName('RightHand'),
+        links: [
+          {
+            index: this.boneIdByName('RightForeArm'),
+            rotationMin: new Vector3(-0.5, -0.5, -0.5),
+            rotationMax: new Vector3(10, 10, 10),
+          },
+          {
+            index: this.boneIdByName('RightArm'),
+            // rotationMin: new Vector3(-0.5, -0.5, -0.5),
+            // rotationMax: new Vector3(1, 1, 1),
+          },
+        ],
+      },
       this.createMorph('Spine1', 'LeftFoot', ['LeftLeg']),
       this.createMorph('Spine1', 'RightFoot', ['RightLeg']),
     ])

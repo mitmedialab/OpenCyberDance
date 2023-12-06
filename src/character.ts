@@ -275,9 +275,9 @@ export class Character {
       const ikHelper = this.ik.ik.createHelper()
       this.scene.add(ikHelper)
 
-      // this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
-      // this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
-      // this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
+      this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
+      this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
+      this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
     }
 
     // Create individual animation mixer

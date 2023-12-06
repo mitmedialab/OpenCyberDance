@@ -158,8 +158,8 @@ export class IKManager {
 
   morph() {
     this.set([
-      this.createMorph('Head', 'LeftHand', ['LeftArm']),
-      this.createMorph('Head', 'RightHand', ['RightArm']),
+      this.createMorph('Head', 'LeftHand', ['LeftForeArm', 'LeftArm']),
+      this.createMorph('Head', 'RightHand', ['RightForeArm', 'RightArm']),
       this.createMorph('Spine1', 'LeftFoot', ['LeftLeg']),
       this.createMorph('Spine1', 'RightFoot', ['RightLeg']),
     ])

@@ -1,7 +1,7 @@
 import { Bone, SkinnedMesh, Vector3 } from 'three'
-import { CCDIKSolver, IKS } from 'three/examples/jsm/animation/CCDIKSolver'
 
 import { BoneKey } from './bones'
+import { CCDIKSolver } from './ccd-ik'
 
 declare global {
   interface Window {

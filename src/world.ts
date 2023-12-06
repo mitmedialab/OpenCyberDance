@@ -109,6 +109,8 @@ export class World {
       for (const c of this.characters) {
         c.mixer?.update(delta)
         c.ik?.update()
+
+        if (c.ik) window.ik = c.ik
       }
     }
 

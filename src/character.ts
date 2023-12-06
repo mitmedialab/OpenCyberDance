@@ -4,7 +4,6 @@ import {
   AnimationClip,
   Bone,
   LineBasicMaterial,
-  Material,
   Mesh,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,

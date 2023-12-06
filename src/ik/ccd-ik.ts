@@ -142,13 +142,12 @@ export class CCDIKSolver {
         _q.setFromAxisAngle(_axis, angle)
         link.quaternion.multiply(_q)
 
-        // TODO: re-consider the limitation specification
         if (limitation !== undefined) {
           let c = link.quaternion.w
-
           if (c > 1.0) c = 1.0
 
           const c2 = math.sqrt(1 - c * c)
+
           link.quaternion.set(
             limitation.x * c2,
             limitation.y * c2,
@@ -170,7 +169,6 @@ export class CCDIKSolver {
         }
 
         link.updateMatrixWorld(true)
-
         rotated = true
       }
 

@@ -2,12 +2,14 @@ import * as THREE from 'three'
 import {
   AnimationAction,
   AnimationClip,
+  Bone,
   LineBasicMaterial,
   Material,
   Mesh,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
+  SkeletonHelper,
   SkinnedMesh,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
@@ -89,6 +91,8 @@ type Handlers = {
   animationLoaded(character: Character): void
 }
 
+type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
+
 export class Character {
   scene: THREE.Scene | null = null
   mixer: THREE.AnimationMixer | null = null
@@ -99,6 +103,8 @@ export class Character {
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
+
+  debugSpheres: DebugSpheres = {}
 
   options: CharacterOptions = {
     name: 'first',
@@ -183,7 +189,6 @@ export class Character {
     }
 
     action.play()
-
     this.options.action = name
 
     // Analyze the keyframe
@@ -255,22 +260,26 @@ export class Character {
     const [x, y, z] = config.position
     this.model.position.set(x, y, z)
 
-    // Add model skeleton
     const skinnedMesh = this.model.getObjectById(skinnedMeshId) as SkinnedMesh
     if (!skinnedMesh) return
 
-    this.skeletonHelper = new THREE.SkeletonHelper(skinnedMesh)
+    const rootBone = skinnedMesh.skeleton.bones[0].parent
+    this.skeletonHelper = new SkeletonHelper(rootBone!)
 
     const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial
-    skeletonMaterial.linewidth = 20
-    skeletonMaterial.visible = true
-
-    this.skeletonHelper.visible = true
-    this.skeletonHelper.castShadow = true
-
-    this.ik = new IKManager(skinnedMesh)
-    this.scene.add(this.ik.ik.createHelper())
+    skeletonMaterial.linewidth = 10
     this.scene.add(this.skeletonHelper)
+
+    if (!this.options.freezeParams) {
+      this.ik = new IKManager(skinnedMesh)
+
+      const ikHelper = this.ik.ik.createHelper()
+      this.scene.add(ikHelper)
+
+      // this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
+      // this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
+      // this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
+    }
 
     // Create individual animation mixer
     this.mixer = new THREE.AnimationMixer(this.model)
@@ -294,6 +303,31 @@ export class Character {
     this.updateAction()
 
     console.log('>>> setup completed')
+  }
+
+  createDebugSphere(color = 0xff0000) {
+    const geometry = new THREE.SphereGeometry(15, 32, 16)
+    const material = new THREE.MeshBasicMaterial({ color })
+
+    return new THREE.Mesh(geometry, material)
+  }
+
+  addBoneSphere(bone: Bone, color = 0xff0000) {
+    const sphere = this.createDebugSphere(color)
+    const size = 0.003
+    sphere.scale.set(size, size, size)
+
+    this.updateSphereFromBone(sphere, bone)
+    this.scene?.add(sphere)
+
+    return sphere
+  }
+
+  updateSphereFromBone(sphere?: Mesh, bone?: Bone) {
+    if (!bone || !sphere) return
+
+    bone.getWorldPosition(sphere.position)
+    bone.getWorldQuaternion(sphere.quaternion)
   }
 
   updateAction() {
@@ -656,5 +690,14 @@ export class Character {
     const { series } = keyframe
 
     return { acceleration: series.map(getAcceleration) }
+  }
+
+  updateDebug() {
+    const bones = this.ik?.axisBones
+    if (!bones) return
+
+    this.updateSphereFromBone(this.debugSpheres.forehead, bones.forehead)
+    this.updateSphereFromBone(this.debugSpheres.body, bones.body)
+    this.updateSphereFromBone(this.debugSpheres.neck, bones.neck)
   }
 }

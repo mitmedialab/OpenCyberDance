@@ -25,6 +25,12 @@ import { Matcher } from './types'
 import { debounce } from './utils'
 import { VoiceController } from './voice'
 
+declare global {
+  interface Window {
+    world: World
+  }
+}
+
 export class World {
   clock = new Clock()
   scene = new Scene()
@@ -80,6 +86,8 @@ export class World {
     if (this.plotter.domElement) {
       this.container?.appendChild(this.plotter.domElement)
     }
+
+    window.world = this
   }
 
   // Update the time in the seek bar

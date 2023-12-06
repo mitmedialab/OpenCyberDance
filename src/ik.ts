@@ -1,59 +1,105 @@
-import { Bone, SkinnedMesh } from 'three'
+import { Bone, SkinnedMesh, Vector3 } from 'three'
 import { CCDIKSolver, IKS } from 'three/examples/jsm/animation/CCDIKSolver'
 
 import { BoneKey } from './bones'
 
-// import { BoneKey } from './bones'
-
 declare global {
   interface Window {
-    axisBone: ReturnType<typeof createAxisPointBones>
+    ikManager: IKManager
   }
 }
 
-const createAxisPointBones = (bones: Bone[]) => {
-  const find = (key: BoneKey) => bones.find((b) => b.name === key)
+interface ControlBones {
+  leftArm: Bone
+  rightArm: Bone
+  leftHand: Bone
+  rightHand: Bone
+}
 
-  return {
-    forehead() {
-      const ref = find('Head')
-      if (!ref) return
-
-      ref.visible = true
-
-      // TODO: tweak target forehead bone
-      const fore = new Bone()
-      fore.position.set(ref.position.x, ref.position.y, ref.position.z)
-      fore.rotation.set(ref.rotation.x, ref.rotation.y, ref.rotation.z, 'XYZ')
-
-      return fore
-    },
-
-    neck() {
-      const ref = find('Neck')
-      if (!ref) return
-    },
-
-    body() {
-      const ref = find('Spine')
-    },
-  }
+interface AxisBones {
+  forehead: Bone
+  neck: Bone
+  body: Bone
 }
 
 export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
+  axisBones: AxisBones
+  controlBones: ControlBones
 
   constructor(mesh: SkinnedMesh) {
     this.mesh = mesh
-    this.ik = new CCDIKSolver(this.mesh, [])
 
-    const axisBone = createAxisPointBones(this.mesh.skeleton.bones)
-    window.axisBone = axisBone
+    this.controlBones = {
+      leftArm: this.boneByName('LeftArm')!,
+      rightArm: this.boneByName('RightArm')!,
+
+      leftHand: this.boneByName('LeftHand')!,
+      rightHand: this.boneByName('RightHand')!,
+    }
+
+    this.axisBones = {
+      forehead: this.createForeheadBone()!,
+      neck: this.createNeckBone()!,
+      body: this.createBodyCenterBone()!,
+    }
+
+    // this.axisBones.forehead.parent = this.boneByName('Neck1')!
+    // this.addBone(this.axisBones.forehead)
+
+    this.ik = new CCDIKSolver(this.mesh, [])
+    this.morph()
+
+    window.ikManager = this
   }
 
-  bone(name: string) {
-    return this.mesh.skeleton.bones.findIndex((b) => name === b.name)
+  get bones() {
+    return this.mesh.skeleton.bones
+  }
+
+  get root() {
+    return this.bones[0].parent!
+  }
+
+  boneByName(key: BoneKey) {
+    return this.bones.find((b) => b.name === key)
+  }
+
+  boneIdByName(name: BoneKey): number {
+    return this.bones.findIndex((b) => name === b.name)
+  }
+
+  createForeheadBone() {
+    const ref = this.boneByName('Head')
+    if (!ref) return
+
+    const fore = new Bone()
+    fore.visible = true
+
+    ref.getWorldPosition(fore.position)
+    fore.rotation.setFromQuaternion(ref.quaternion)
+    fore.position.y += 0.15
+
+    return fore
+  }
+
+  // ? we use the existing neck bone for now
+  createNeckBone() {
+    return this.boneByName('Neck')
+  }
+
+  addBone(bone: Bone) {
+    // TODO: this crashes skeleton.update()
+    // this.mesh.skeleton.bones.push(bone)
+
+    this.mesh.add(bone)
+    this.mesh.skeleton.update()
+  }
+
+  // ? we use the existing spine bone for now
+  createBodyCenterBone() {
+    return this.boneByName('Spine1')
   }
 
   valid(id: number | undefined | null) {
@@ -77,8 +123,6 @@ export class IKManager {
     return true
   }
 
-  selectMesh() {}
-
   update() {
     // Update all IK bones
     this.ik.update()
@@ -96,5 +140,32 @@ export class IKManager {
 
   clear() {
     this.set([])
+  }
+
+  createMorph(axis: BoneKey, control: BoneKey, links: BoneKey[]): IKS {
+    const axisId = this.boneIdByName(axis)
+    const controlId = this.boneIdByName(control)
+    const linkIds = links.map((name) => this.boneIdByName(name))
+
+    return {
+      minAngle: 0,
+      maxAngle: 360,
+      target: axisId,
+      effector: controlId,
+      links: linkIds.map((index) => ({
+        index,
+        rotationMin: new Vector3(0, 0, 0),
+        rotationMax: new Vector3(360, 360, 360),
+      })),
+    }
+  }
+
+  morph() {
+    this.set([
+      this.createMorph('Head', 'LeftHand', ['LeftArm']),
+      this.createMorph('Head', 'RightHand', ['RightArm']),
+      this.createMorph('Spine1', 'LeftFoot', ['LeftLeg']),
+      this.createMorph('Spine1', 'RightFoot', ['RightLeg']),
+    ])
   }
 }

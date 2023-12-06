@@ -1,50 +1,59 @@
-import { SkinnedMesh } from 'three'
+import { Bone, SkinnedMesh } from 'three'
 import { CCDIKSolver, IKS } from 'three/examples/jsm/animation/CCDIKSolver'
+
+import { BoneKey } from './bones'
 
 // import { BoneKey } from './bones'
 
-// const axisPointBones = (bones: Bone[]) => {
-//   const find = (key: BoneKey) => bones.find((b) => b.name === key)
+declare global {
+  interface Window {
+    axisBone: ReturnType<typeof createAxisPointBones>
+  }
+}
 
-//   return {
-//     forehead() {
-//       const ref = find('Head')
-//     },
+const createAxisPointBones = (bones: Bone[]) => {
+  const find = (key: BoneKey) => bones.find((b) => b.name === key)
 
-//     neck() {
-//       const ref = find('Neck')
-//     },
+  return {
+    forehead() {
+      const ref = find('Head')
+      if (!ref) return
 
-//     body() {
-//       const ref = find('Spine')
-//     },
-//   }
-// }
+      ref.visible = true
+
+      // TODO: tweak target forehead bone
+      const fore = new Bone()
+      fore.position.set(ref.position.x, ref.position.y, ref.position.z)
+      fore.rotation.set(ref.rotation.x, ref.rotation.y, ref.rotation.z, 'XYZ')
+
+      return fore
+    },
+
+    neck() {
+      const ref = find('Neck')
+      if (!ref) return
+    },
+
+    body() {
+      const ref = find('Spine')
+    },
+  }
+}
 
 export class IKManager {
   ik: CCDIKSolver
-  skeleton: THREE.SkeletonHelper
-  model: THREE.Group
-  mesh: THREE.SkinnedMesh
+  mesh: SkinnedMesh
 
-  constructor(skeleton: THREE.SkeletonHelper, model: THREE.Group) {
-    this.skeleton = skeleton
-    this.model = model
-
-    let mesh: SkinnedMesh | null = null
-
-    this.model.traverse((o) => {
-      if (o instanceof SkinnedMesh) mesh = o
-    })
-
-    if (!mesh) throw new Error('No mesh found')
-
+  constructor(mesh: SkinnedMesh) {
     this.mesh = mesh
     this.ik = new CCDIKSolver(this.mesh, [])
+
+    const axisBone = createAxisPointBones(this.mesh.skeleton.bones)
+    window.axisBone = axisBone
   }
 
   bone(name: string) {
-    return this.skeleton.bones.findIndex((b) => name === b.name)
+    return this.mesh.skeleton.bones.findIndex((b) => name === b.name)
   }
 
   valid(id: number | undefined | null) {

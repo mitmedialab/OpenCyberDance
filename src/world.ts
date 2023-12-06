@@ -249,21 +249,21 @@ export class World {
     if (!dropdown) return
 
     const { equation } = this.params.curve
-    if (equation === 'none') return
 
-    const range = formulaRanges[equation]
-    if (!range) return
+    if (equation !== 'none') {
+      const range = formulaRanges[equation]
 
-    const [fMin, fMax, fStep, fInitial] = range
-    dropdown.min(fMin)
-    dropdown.max(fMax)
-    dropdown.step(fStep)
-    dropdown.initialValue = fInitial
+      const [fMin, fMax, fStep, fInitial] = range
+      dropdown.min(fMin)
+      dropdown.max(fMax)
+      dropdown.step(fStep)
+      dropdown.initialValue = fInitial
 
-    const current = dropdown.getValue()
+      const current = dropdown.getValue()
 
-    if (current < fMin || current > fMax) {
-      dropdown.setValue(fInitial)
+      if (current < fMin || current > fMax) {
+        dropdown.setValue(fInitial)
+      }
     }
 
     dropdown.updateDisplay()

@@ -2,9 +2,13 @@ import * as THREE from 'three'
 import {
   AnimationAction,
   AnimationClip,
+  LineBasicMaterial,
+  Material,
   Mesh,
+  MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
+  SkinnedMesh,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
@@ -88,7 +92,7 @@ type Handlers = {
 export class Character {
   scene: THREE.Scene | null = null
   mixer: THREE.AnimationMixer | null = null
-  skeleton: THREE.SkeletonHelper | null = null
+  skeletonHelper: THREE.SkeletonHelper | null = null
   model: THREE.Group | null = null
   original: Map<string, AnimationSource[]> = new Map()
   actions: Map<string, AnimationAction> = new Map()
@@ -152,7 +156,7 @@ export class Character {
     this.scene.remove(this.model)
 
     this.mixer = null
-    this.skeleton = null
+    this.skeletonHelper = null
     this.model = null
 
     this.original.clear()
@@ -229,9 +233,19 @@ export class Character {
 
     this.scene.add(this.model)
 
+    let skinnedMeshId = 0
+
     // Cast shadows
     this.model.traverse((o) => {
-      if (o instanceof Mesh) o.castShadow = true
+      if (o instanceof SkinnedMesh) {
+        o.castShadow = true
+
+        if (o.material instanceof MeshStandardMaterial) {
+          o.material.wireframe = false
+        }
+
+        skinnedMeshId = o.id
+      }
     })
 
     // Adjust character scale
@@ -242,11 +256,21 @@ export class Character {
     this.model.position.set(x, y, z)
 
     // Add model skeleton
-    this.skeleton = new THREE.SkeletonHelper(this.model)
-    this.skeleton.visible = false
-    this.ik = new IKManager(this.skeleton, this.model)
-    this.scene.add(this.skeleton)
+    const skinnedMesh = this.model.getObjectById(skinnedMeshId) as SkinnedMesh
+    if (!skinnedMesh) return
+
+    this.skeletonHelper = new THREE.SkeletonHelper(skinnedMesh)
+
+    const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial
+    skeletonMaterial.linewidth = 20
+    skeletonMaterial.visible = true
+
+    this.skeletonHelper.visible = true
+    this.skeletonHelper.castShadow = true
+
+    this.ik = new IKManager(skinnedMesh)
     this.scene.add(this.ik.ik.createHelper())
+    this.scene.add(this.skeletonHelper)
 
     // Create individual animation mixer
     this.mixer = new THREE.AnimationMixer(this.model)
@@ -269,7 +293,7 @@ export class Character {
     // Play the first animation
     this.updateAction()
 
-    console.log('>>> setup completed', this.skeleton)
+    console.log('>>> setup completed')
   }
 
   updateAction() {
@@ -359,6 +383,8 @@ export class Character {
 
       if (equation && equation !== 'none') {
         _curve.equation = transformers[equation]
+      } else if (equation === 'none') {
+        _curve.equation = (v) => v
       }
 
       _curve.axis = this.curveConfig.axis

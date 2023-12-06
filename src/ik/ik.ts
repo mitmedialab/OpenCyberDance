@@ -1,6 +1,6 @@
 import { Bone, SkinnedMesh, Vector3 } from 'three'
 
-import { BoneKey } from './bones'
+import { BoneKey } from '../bones'
 import { CCDIKSolver, IKS } from './ccd-ik'
 
 declare global {

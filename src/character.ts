@@ -15,7 +15,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { KeyframeAnalyzer } from './analyze'
 import { dispose } from './dispose'
-import { IKManager } from './ik'
+import { IKManager } from './ik/ik'
 import {
   getAcceleration,
   keyframesAt,

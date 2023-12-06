@@ -58,12 +58,16 @@ export class CCDIKSolver {
 
   constructor(mesh: SkinnedMesh, iks: IKS[] = []) {
     this.mesh = mesh
+    this.set(iks)
+  }
+
+  public set(iks: IKS[]) {
     this.iks = iks
 
     this._valid()
   }
 
-  update() {
+  public update() {
     const iks = this.iks
 
     for (let i = 0, il = iks.length; i < il; i++) {
@@ -73,7 +77,7 @@ export class CCDIKSolver {
     return this
   }
 
-  updateOne(ik: IKS) {
+  public updateOne(ik: IKS) {
     const bones = this.mesh.skeleton.bones
 
     // for reference overhead reduction in loop
@@ -183,7 +187,7 @@ export class CCDIKSolver {
     return this
   }
 
-  createHelper() {
+  public createHelper() {
     return new CCDIKHelper(this.mesh, this.iks)
   }
 

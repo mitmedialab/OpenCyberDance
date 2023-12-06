@@ -1,7 +1,7 @@
 import { Bone, SkinnedMesh, Vector3 } from 'three'
 
 import { BoneKey } from './bones'
-import { CCDIKSolver } from './ccd-ik'
+import { CCDIKSolver, IKS } from './ccd-ik'
 
 declare global {
   interface Window {
@@ -44,9 +44,6 @@ export class IKManager {
       neck: this.createNeckBone()!,
       body: this.createBodyCenterBone()!,
     }
-
-    // this.axisBones.forehead.parent = this.boneByName('Neck1')!
-    // this.addBone(this.axisBones.forehead)
 
     this.ik = new CCDIKSolver(this.mesh, [])
     this.morph()
@@ -134,8 +131,7 @@ export class IKManager {
       return
     }
 
-    // @ts-expect-error - ik.iks is private
-    this.ik.iks = iks
+    this.ik.set(iks)
   }
 
   clear() {

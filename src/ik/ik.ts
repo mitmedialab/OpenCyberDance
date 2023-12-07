@@ -1,12 +1,4 @@
-import {
-  Bone,
-  Matrix4,
-  Quaternion,
-  Skeleton,
-  SkinnedMesh,
-  Vector3,
-} from 'three'
-import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils'
+import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
@@ -76,21 +68,27 @@ export class IKManager {
       leftArm: [
         { index: this.idOf('LeftForeArm') },
         { index: this.idOf('LeftArm') },
+        // { index: this.idOf('LeftShoulder') },
+        // { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
         { index: this.idOf('RightForeArm') },
         { index: this.idOf('RightArm') },
+        // { index: this.idOf('RightShoulder') },
+        // { index: this.idOf('Spine2') },
       ],
 
       leftLeg: [
         { index: this.idOf('LeftLeg') },
         { index: this.idOf('LeftUpLeg') },
+        // { index: this.idOf('Hips') },
       ],
 
       rightLeg: [
         { index: this.idOf('RightLeg') },
         { index: this.idOf('RightUpLeg') },
+        // { index: this.idOf('Hips') },
       ],
     }
   }
@@ -100,7 +98,7 @@ export class IKManager {
     const target = this.targetBoneIds[targetPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
-    return { target, effector, links, iteration: 2 }
+    return { target, effector, links, iteration: 3 }
   }
 
   get skeleton() {
@@ -223,7 +221,7 @@ export class IKManager {
     const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
-    const target: AxisPoint = 'body'
+    const target: AxisPoint = 'forehead'
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts

@@ -436,8 +436,6 @@ export class Character {
       const original = this.originalOf(index)
       if (!original || !this.params) return
 
-      let shouldMorphAxisPoint = false
-
       // Lock and unlock hips position hips position.
       if (track.name === 'Hips.position') {
         track.values = lock ? track.values.fill(0) : original.values.slice(0)
@@ -472,8 +470,6 @@ export class Character {
               track.values[i + 2] = data[j++]
               track.values[i + 3] = data[j++]
             }
-
-            shouldMorphAxisPoint = true
           }
         }
       }
@@ -508,7 +504,7 @@ export class Character {
         })
       }
 
-      if (flags.axisPoint && shouldMorphAxisPoint && this.ik) {
+      if (flags.axisPoint && this.ik) {
         this.ik.setPartMorph(this.params.axisPoint)
       }
 

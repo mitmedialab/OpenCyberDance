@@ -509,7 +509,7 @@ export class Character {
       }
 
       if (flags.axisPoint && shouldMorphAxisPoint && this.ik) {
-        this.ik.set([])
+        this.ik.setPartMorph(this.params.axisPoint)
       }
 
       clip.tracks[index] = track

@@ -1,7 +1,9 @@
 import { Bone, SkinnedMesh, Vector3 } from 'three'
 
 import { BoneKey } from '../bones'
-import { CCDIKSolver, IK } from './ccd-ik'
+import { AxisPointConfig } from '../overrides'
+import { AxisPointControlParts } from '../parts'
+import { CCDIKSolver, IK, IKLink } from './ccd-ik'
 
 declare global {
   interface Window {
@@ -9,35 +11,34 @@ declare global {
   }
 }
 
-interface ControlBones {
-  leftArm: Bone
-  rightArm: Bone
-  leftHand: Bone
-  rightHand: Bone
+export type ControlPoint = AxisPointControlParts
+export type AxisPoint = 'forehead' | 'neck' | 'body'
+
+export type AxisBones = Record<AxisPoint, Bone>
+export type ControlBones = Record<ControlPoint, Bone>
+
+const effectorBones: Record<ControlPoint, BoneKey> = {
+  leftArm: 'LeftHand',
+  rightArm: 'RightHand',
+  leftLeg: 'LeftFoot',
+  rightLeg: 'RightFoot',
 }
 
-interface AxisBones {
-  forehead: Bone
-  neck: Bone
-  body: Bone
+const targetBones: Record<AxisPoint, BoneKey> = {
+  // TODO: change to "forehead"
+  forehead: 'Head',
+
+  neck: 'Neck',
+  body: 'Spine1',
 }
 
 export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
   axisBones: AxisBones
-  controlBones: ControlBones
 
   constructor(mesh: SkinnedMesh) {
     this.mesh = mesh
-
-    this.controlBones = {
-      leftArm: this.boneByName('LeftArm')!,
-      rightArm: this.boneByName('RightArm')!,
-
-      leftHand: this.boneByName('LeftHand')!,
-      rightHand: this.boneByName('RightHand')!,
-    }
 
     this.axisBones = {
       forehead: this.createForeheadBone()!,
@@ -50,6 +51,38 @@ export class IKManager {
     window.ikManager = this
   }
 
+  get linksByControl(): Record<ControlPoint, IKLink[]> {
+    return {
+      leftArm: [
+        { index: this.idOf('LeftForeArm') },
+        { index: this.idOf('LeftArm') },
+      ],
+
+      rightArm: [
+        { index: this.idOf('RightForeArm') },
+        { index: this.idOf('RightArm') },
+      ],
+
+      leftLeg: [
+        { index: this.idOf('LeftLeg') },
+        { index: this.idOf('LeftUpLeg') },
+      ],
+
+      rightLeg: [
+        { index: this.idOf('RightLeg') },
+        { index: this.idOf('RightUpLeg') },
+      ],
+    }
+  }
+
+  getIKConfig(controlPoint: ControlPoint, targetPoint: AxisPoint): IK {
+    const effector = this.idOf(effectorBones[controlPoint])
+    const target = this.idOf(targetBones[targetPoint])
+    const links = this.linksByControl[controlPoint] ?? []
+
+    return { target, effector, links }
+  }
+
   get bones() {
     return this.mesh.skeleton.bones
   }
@@ -58,16 +91,16 @@ export class IKManager {
     return this.bones[0].parent!
   }
 
-  boneByName(key: BoneKey) {
+  boneOf(key: BoneKey) {
     return this.bones.find((b) => b.name === key)
   }
 
-  boneIdByName(name: BoneKey): number {
+  idOf(name: BoneKey): number {
     return this.bones.findIndex((b) => name === b.name)
   }
 
   createForeheadBone() {
-    const ref = this.boneByName('Head')
+    const ref = this.boneOf('Head')
     if (!ref) return
 
     const fore = new Bone()
@@ -82,7 +115,7 @@ export class IKManager {
 
   // ? we use the existing neck bone for now
   createNeckBone() {
-    return this.boneByName('Neck')
+    return this.boneOf('Neck')
   }
 
   addBone(bone: Bone) {
@@ -95,7 +128,7 @@ export class IKManager {
 
   // ? we use the existing spine bone for now
   createBodyCenterBone() {
-    return this.boneByName('Spine1')
+    return this.boneOf('Spine1')
   }
 
   valid(id: number | undefined | null) {
@@ -132,17 +165,18 @@ export class IKManager {
     this.set([])
   }
 
-  createMorph(axis: BoneKey, control: BoneKey, links: BoneKey[]): IK {
-    const target = this.boneIdByName(axis)
-    const effector = this.boneIdByName(control)
+  setPartMorph(config: AxisPointConfig) {
+    const iks: IK[] = []
 
-    return {
-      target,
-      effector,
-      links: links
-        .map((name) => this.boneIdByName(name))
-        .map((index) => ({ index })),
+    for (const _part in config.parts) {
+      const part = _part as AxisPointControlParts
+      if (!config.parts[part]) continue
+
+      const ik = this.getIKConfig(part, 'body')
+      iks.push(ik)
     }
+
+    this.set(iks)
   }
 
   public getMorphedPartIds(): number[] {

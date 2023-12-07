@@ -2,7 +2,7 @@ import { Bone, Matrix4, Quaternion, SkinnedMesh, Vector3 } from 'three'
 
 import { CCDIKHelper } from './ccd-ik-helper'
 
-interface IKLink {
+export interface IKLink {
   enabled?: boolean | undefined
   index: number
   limitation?: Vector3

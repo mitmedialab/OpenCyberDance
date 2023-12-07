@@ -19,7 +19,7 @@ const PROMPT = `
     // Reset the system?
     reset: boolean
 
-    // Changes the energy of the head, body or foot. Float of 1 to 8. Precision of 2 decimals. Default to 1.
+    // Changes the energy of the head, body or foot. Float of 1 to 3. Precision of 2 decimals. Default to 1.
     // If the body part (head, body, foot) is not specified, set all fields to the given value.
     energy: {
       head: number,

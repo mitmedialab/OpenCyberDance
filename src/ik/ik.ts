@@ -150,9 +150,9 @@ export class IKManager {
   getInterpolatedTargets(
     control: ControlPoint,
     target: AxisPoint,
+    steps = 10,
   ): InterpolatedKeyframe[] {
     const frames: InterpolatedKeyframe[] = []
-    const steps = 10
 
     const effectorBone = this.boneOf(effectorBones[control])!
     const controlPos = effectorBone.position
@@ -227,27 +227,25 @@ export class IKManager {
     return true
   }
 
-  update() {
-    // Update all IK bones
-    this.ik.update()
-
+  update(time: number) {
     // Update the interpolation keyframes.
-    // TODO: time the keyframes correctly!
     if (this.interpolating) {
       for (const _control in this.targetFrames) {
         const control = _control as ControlPoint
 
-        const frames = this.targetFrames[control]
-        if (frames === null) continue
-
         const frameId = this.frameCounters[control]
         if (frameId === null) continue
+
+        const frames = this.targetFrames[control]
+        if (frames === null) continue
 
         const frame = frames[frameId]
         if (!frame) continue
 
-        const bone = this.bones[this.targetBoneIds[control]]
-        // console.log(`Moving ${control} to frame ${frameId}`)
+        const targetBoneId = this.targetBoneIds[control]
+        const bone = this.mesh.skeleton.bones[targetBoneId]
+
+        // console.log(`${control} to frame ${frameId} ~ time ${time}`)
 
         bone.position.copy(frame.position)
         bone.quaternion.copy(frame.rotation)
@@ -259,6 +257,9 @@ export class IKManager {
           this.frameCounters[control] = 0
         }
       }
+
+      // Update all IK bones
+      this.ik.update()
     }
   }
 

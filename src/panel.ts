@@ -69,7 +69,7 @@ export class Panel {
   addEnergy(...parts: CorePartKey[]) {
     for (const part of parts) {
       this.energyFolder
-        ?.add(this.params.energy, part, 1, 8, 0.01)
+        ?.add(this.params.energy, part, 1, 3, 0.01)
         .listen()
         .onChange(this.handlers.energy)
     }

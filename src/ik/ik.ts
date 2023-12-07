@@ -20,10 +20,10 @@ export type ControlBones = Record<ControlPoint, Bone>
 /**
  * The targets to interpolate to.
  */
-interface InterpolatedTarget {
+interface InterpolatedKeyframe {
   position: Vector3
   rotation: Quaternion
-  time: number
+  step: number
 }
 
 const effectorBones: Record<ControlPoint, BoneKey> = {
@@ -121,10 +121,34 @@ export class IKManager {
     return this.bones.findIndex((b) => name === b.name)
   }
 
-  getInterpolatedTargets(): InterpolatedTarget[] {
-    const targets: InterpolatedTarget[] = []
+  getInterpolatedTargets(
+    control: ControlPoint,
+    target: AxisPoint,
+  ): InterpolatedKeyframe[] {
+    const frames: InterpolatedKeyframe[] = []
+    const steps = 10
 
-    return targets
+    // TODO: calculate control point position (i.e. left hand, left feet)
+    const controlPos = new Vector3()
+    const controlRot = new Quaternion()
+
+    // TODO: calculate target point position (i.e. forehead, neck, body center)
+    const targetPos = new Vector3()
+    const targetRot = new Quaternion()
+
+    for (let step = 0; step < steps; step++) {
+      const t = step / steps
+
+      const position = new Vector3()
+      position.lerpVectors(controlPos, targetPos, t)
+
+      const rotation = new Quaternion()
+      rotation.slerpQuaternions(controlRot, targetRot, t)
+
+      frames.push({ position, rotation, step })
+    }
+
+    return frames
   }
 
   private createForeheadTargetBone() {

@@ -37,6 +37,22 @@ export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
 
+  private interpolating = false
+
+  frameCounters: Record<ControlPoint, number | null> = {
+    leftArm: null,
+    rightArm: null,
+    leftLeg: null,
+    rightLeg: null,
+  }
+
+  targetFrames: Record<ControlPoint, InterpolatedKeyframe[] | null> = {
+    leftArm: null,
+    rightArm: null,
+    leftLeg: null,
+    rightLeg: null,
+  }
+
   targetBoneIds: Record<AxisPoint, number> = {
     forehead: -1,
     neck: -1,
@@ -229,14 +245,16 @@ export class IKManager {
   update() {
     // Update all IK bones
     this.ik.update()
-  }
 
-  set(iks: IK[]) {
-    this.ik.set(iks)
+    // Update the interpolation keyframes.
+    // TODO: time the keyframes correctly!
+    if (this.interpolating) {
+      // ?
+    }
   }
 
   clear() {
-    this.set([])
+    this.ik.set([])
   }
 
   setPartMorph(config: AxisPointConfig) {
@@ -247,13 +265,24 @@ export class IKManager {
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts
-      if (!config.parts[part]) continue
 
+      if (!config.parts[part]) {
+        this.targetFrames[part] = null
+        continue
+      }
+
+      // Setup IK configuration
       const ik = this.getIKConfig(part, target)
       iks.push(ik)
+
+      // Define interpolated keyframes to move the target bone around.
+      // ? should we run the same frames over and over, or freeze?
+      // ? what happens after the morph ends?
+      this.frameCounters[part] = 0
+      this.targetFrames[part] = this.getInterpolatedTargets(part, target)
     }
 
-    this.set(iks)
+    this.ik.set(iks)
   }
 
   public getMorphedPartIds(): number[] {

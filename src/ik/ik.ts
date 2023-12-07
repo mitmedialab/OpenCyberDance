@@ -43,6 +43,9 @@ export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
 
+  waitFrames = 0
+  maxWaitFrames = 10
+
   private interpolating = false
 
   frameCounters: Record<ControlPoint, number | null> = {
@@ -154,9 +157,9 @@ export class IKManager {
   ): InterpolatedKeyframe[] {
     const frames: InterpolatedKeyframe[] = []
 
-    const effectorBone = this.boneOf(effectorBones[control])!
-    const controlPos = effectorBone.position
-    const controlRot = new Quaternion().setFromEuler(effectorBone.rotation)
+    const controlBone = this.boneOf(effectorBones[control])!
+    const controlPos = controlBone.position
+    const controlRot = new Quaternion().setFromEuler(controlBone.rotation)
 
     // Determine the original axis points: forehead, neck, body.
     const refTargetBoneId = refAxisBones[target]
@@ -168,7 +171,7 @@ export class IKManager {
       refTargetPos.y += 0.1
     }
 
-    const targetRot = new Quaternion().setFromEuler(refTargetBone.rotation)
+    const refTargetRot = new Quaternion().setFromEuler(refTargetBone.rotation)
 
     for (let step = 0; step < steps; step++) {
       const t = step / steps
@@ -176,7 +179,7 @@ export class IKManager {
       position.lerpVectors(controlPos, refTargetPos, t)
 
       const rotation = new Quaternion()
-      rotation.slerpQuaternions(controlRot, targetRot, t)
+      rotation.slerpQuaternions(controlRot, refTargetRot, t)
       frames.push({ position, rotation, step })
     }
 
@@ -228,6 +231,11 @@ export class IKManager {
   }
 
   update(time: number) {
+    this.waitFrames++
+
+    if (this.waitFrames < this.maxWaitFrames) return
+    this.waitFrames = 0
+
     // Update the interpolation keyframes.
     if (this.interpolating) {
       for (const _control in this.targetFrames) {
@@ -244,8 +252,7 @@ export class IKManager {
 
         const targetBoneId = this.targetBoneIds[control]
         const bone = this.mesh.skeleton.bones[targetBoneId]
-
-        // console.log(`${control} to frame ${frameId} ~ time ${time}`)
+        console.log(`${control} to frame ${frameId} ~ time ${time}`)
 
         bone.position.copy(frame.position)
         bone.quaternion.copy(frame.rotation)

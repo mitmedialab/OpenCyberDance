@@ -457,10 +457,22 @@ export class Character {
         if (part) {
           const enabled = parts[part as AxisPointControlParts]
 
-          // Zero-fill the animation chain.
-          // TODO: fill with current frame instead to freeze in place.
           if (enabled) {
-            track.values = track.values.fill(0)
+            const time = this.mixer?.time ?? 1
+            const len = track.times.length - 1
+            const frame = Math.round((time / track.times[len]) * len)
+            const data = track.values.slice(frame * 4, frame * 4 + 4)
+
+            // Modify the entire keyframe values to this moment in time.
+            for (let i = 0; i < track.values.length; i += 4) {
+              let j = 0
+
+              track.values[i] = data[j++]
+              track.values[i + 1] = data[j++]
+              track.values[i + 2] = data[j++]
+              track.values[i + 3] = data[j++]
+            }
+
             shouldMorphAxisPoint = true
           }
         }

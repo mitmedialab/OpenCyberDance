@@ -244,23 +244,26 @@ export class IKManager {
         const frameId = this.frameCounters[control]
         if (frameId === null) continue
 
-        const frames = this.targetFrames[control]
-        if (frames === null) continue
+        const keyframes = this.targetFrames[control]
+        if (keyframes === null) continue
 
-        const frame = frames[frameId]
-        if (!frame) continue
+        const keyframe = keyframes[frameId]
+        if (!keyframe) continue
 
         const targetBoneId = this.targetBoneIds[control]
         const bone = this.mesh.skeleton.bones[targetBoneId]
-        console.log(`${control} to frame ${frameId} ~ time ${time}`)
 
-        bone.position.copy(frame.position)
-        bone.quaternion.copy(frame.rotation)
+        // console.log(
+        //   `${control} to frame ${frameId} ~ time ${time}, step ${keyframe.step}`,
+        // )
+
+        bone.position.copy(keyframe.position)
+        bone.quaternion.copy(keyframe.rotation)
 
         this.frameCounters[control]!++
 
         // ? do we really want to loop the frames?
-        if (this.frameCounters[control]! >= frames.length) {
+        if (this.frameCounters[control]! >= keyframes.length) {
           this.frameCounters[control] = 0
         }
       }
@@ -275,8 +278,6 @@ export class IKManager {
   }
 
   setPartMorph(config: AxisPointConfig) {
-    console.log(`--- set part morph ---`)
-
     const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part

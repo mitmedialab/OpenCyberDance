@@ -514,12 +514,12 @@ export class Character {
         })
       }
 
-      if (flags.axisPoint && this.ik) {
-        this.ik.setPartMorph(this.params.axisPoint)
-      }
-
       clip.tracks[index] = track
     })
+
+    if (flags.axisPoint && this.ik) {
+      this.ik.setPartMorph(this.params.axisPoint)
+    }
 
     // External body space is always applied for timing changes.
     if (flags.timing) {

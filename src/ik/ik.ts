@@ -275,6 +275,8 @@ export class IKManager {
   }
 
   setPartMorph(config: AxisPointConfig) {
+    console.log(`--- set part morph ---`)
+
     const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
@@ -293,6 +295,8 @@ export class IKManager {
       // ? what happens after the morph ends?
       this.frameCounters[part] = 0
       this.targetFrames[part] = this.getInterpolatedTargets(part, target)
+
+      console.log(`interpolated: ${part}`, this.targetFrames[part])
 
       // Setup IK configuration
       const ik = this.getIKConfig(part)

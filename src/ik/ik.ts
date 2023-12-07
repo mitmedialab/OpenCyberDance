@@ -1,4 +1,11 @@
-import { Bone, Quaternion, Skeleton, SkinnedMesh, Vector3 } from 'three'
+import {
+  Bone,
+  Matrix4,
+  Quaternion,
+  Skeleton,
+  SkinnedMesh,
+  Vector3,
+} from 'three'
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils'
 
 import { BoneKey } from '../bones'
@@ -165,15 +172,15 @@ export class IKManager {
   }
 
   updateSkeleton() {
-    const bones = this.skeleton.bones
-    // const skeleton = new Skeleton(bones)
-
-    this.mesh.bind(this.skeleton, this.mesh.bindMatrix)
+    this.skeleton.update()
   }
 
   addBone(bone: Bone): number {
-    // this.skeleton.bones.push(bone)
-    this.mesh.add(bone)
+    bone.updateMatrixWorld(true)
+    this.skeleton.bones.push(bone)
+
+    // Add the inverse matrix of the bone
+    this.mesh.skeleton.boneInverses.push(bone.matrixWorld.clone().invert())
 
     return this.bones.length - 1
   }

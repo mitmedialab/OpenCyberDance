@@ -283,7 +283,13 @@ export class Character {
     this.model.position.set(x, y, z)
 
     if (DEBUG_SKELETON) {
-      const rootBone = skinnedMesh.skeleton.bones[0].parent
+      const rootBone = skinnedMesh.skeleton.bones?.[0]?.parent
+
+      if (!rootBone) {
+        console.error('root bone not found in skeleton')
+        return
+      }
+
       this.skeletonHelper = new SkeletonHelper(rootBone!)
 
       const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial

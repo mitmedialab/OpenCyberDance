@@ -33,6 +33,12 @@ const effectorBones: Record<ControlPoint, BoneKey> = {
   rightLeg: 'RightFoot',
 }
 
+const refAxisBones: Record<AxisPoint, BoneKey> = {
+  forehead: 'Head',
+  neck: 'Neck',
+  body: 'Spine1',
+}
+
 export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
@@ -53,10 +59,13 @@ export class IKManager {
     rightLeg: null,
   }
 
-  targetBoneIds: Record<AxisPoint, number> = {
-    forehead: -1,
-    neck: -1,
-    body: -1,
+  // The target bones are not part of the original skeleton.
+  // They are created dynamically to be used as moving targets for the IK solver.
+  targetBoneIds: Record<ControlPoint, number> = {
+    leftArm: -1,
+    rightArm: -1,
+    leftLeg: -1,
+    rightLeg: -1,
   }
 
   constructor(mesh: SkinnedMesh) {
@@ -74,9 +83,10 @@ export class IKManager {
    * We will move these bones around to interpolate the movement.
    **/
   private createTargetBones() {
-    this.createForeheadTargetBone()
-    this.createNeckTargetBone()
-    this.createBodyCenterTargetBone()
+    this.createTargetBone('leftArm', 'LeftArmTarget')
+    this.createTargetBone('leftLeg', 'LeftLegTarget')
+    this.createTargetBone('rightArm', 'RightArmTarget')
+    this.createTargetBone('rightLeg', 'RightLegTarget')
   }
 
   get linksByControl(): Record<ControlPoint, IKLink[]> {
@@ -109,9 +119,9 @@ export class IKManager {
     }
   }
 
-  getIKConfig(controlPoint: ControlPoint, targetPoint: AxisPoint): IK {
+  getIKConfig(controlPoint: ControlPoint): IK {
     const effector = this.idOf(effectorBones[controlPoint])
-    const target = this.targetBoneIds[targetPoint]
+    const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
     return { target, effector, links, iteration: 3 }
@@ -148,14 +158,22 @@ export class IKManager {
     const controlPos = effectorBone.position
     const controlRot = new Quaternion().setFromEuler(effectorBone.rotation)
 
-    const targetBone = this.bones[this.targetBoneIds[target]]
-    const targetPos = targetBone.position
-    const targetRot = new Quaternion().setFromEuler(targetBone.rotation)
+    // Determine the original axis points: forehead, neck, body.
+    const refTargetBoneId = refAxisBones[target]
+    const refTargetBone = this.boneOf(refTargetBoneId)!
+    const refTargetPos = refTargetBone.position.clone()
+
+    // The forehead should be a bit higher than the head.
+    if (target === 'forehead') {
+      refTargetPos.y += 0.1
+    }
+
+    const targetRot = new Quaternion().setFromEuler(refTargetBone.rotation)
 
     for (let step = 0; step < steps; step++) {
       const t = step / steps
       const position = new Vector3()
-      position.lerpVectors(controlPos, targetPos, t)
+      position.lerpVectors(controlPos, refTargetPos, t)
 
       const rotation = new Quaternion()
       rotation.slerpQuaternions(controlRot, targetRot, t)
@@ -165,46 +183,13 @@ export class IKManager {
     return frames
   }
 
-  private createForeheadTargetBone() {
-    const target = this.createBoneFromRef('Head')
-    if (!target) return
-
-    target.position.y += 0.15
-    target.name = 'ForeheadTarget'
-
-    this.targetBoneIds.forehead = this.addBone(target)
-  }
-
-  private createNeckTargetBone() {
-    const target = this.createBoneFromRef('Neck')
-    if (!target) return
-
-    target.name = 'NeckTarget'
-
-    this.targetBoneIds.neck = this.addBone(target)
-  }
-
-  private createBodyCenterTargetBone() {
-    const target = this.createBoneFromRef('Spine1')
-    if (!target) return
-
-    target.name = 'BodyCenterTarget'
-
-    this.targetBoneIds.body = this.addBone(target)
-  }
-
-  createBoneFromRef(refKey: BoneKey) {
-    const ref = this.boneOf(refKey)
-    if (!ref) return
-
+  private createTargetBone(point: ControlPoint, name: string) {
     const target = new Bone()
     target.visible = true
-
-    ref.getWorldPosition(target.position)
-    target.rotation.setFromQuaternion(ref.quaternion)
+    target.name = name
     target.parent = this.root.parent
 
-    return target
+    this.targetBoneIds[point as ControlPoint] = this.addBone(target)
   }
 
   updateSkeleton() {
@@ -249,7 +234,28 @@ export class IKManager {
     // Update the interpolation keyframes.
     // TODO: time the keyframes correctly!
     if (this.interpolating) {
-      // ?
+      for (const _control in this.targetFrames) {
+        const control = _control as ControlPoint
+
+        const frames = this.targetFrames[control]
+        if (frames === null) continue
+
+        const frameId = this.frameCounters[control]
+        if (frameId === null) continue
+
+        const frame = frames[frameId]
+        const bone = this.bones[this.targetBoneIds[control]]
+
+        bone.position.copy(frame.position)
+        bone.quaternion.copy(frame.rotation)
+
+        this.frameCounters[control]!++
+
+        // ? do we really want to loop the frames?
+        // if (this.frameCounters[control]! >= frames.length) {
+        //   this.frameCounters[control] = 0
+        // }
+      }
     }
   }
 
@@ -271,18 +277,19 @@ export class IKManager {
         continue
       }
 
-      // Setup IK configuration
-      const ik = this.getIKConfig(part, target)
-      iks.push(ik)
-
       // Define interpolated keyframes to move the target bone around.
       // ? should we run the same frames over and over, or freeze?
       // ? what happens after the morph ends?
       this.frameCounters[part] = 0
       this.targetFrames[part] = this.getInterpolatedTargets(part, target)
+
+      // Setup IK configuration
+      const ik = this.getIKConfig(part)
+      iks.push(ik)
     }
 
     this.ik.set(iks)
+    this.interpolating = Object.values(this.targetFrames).some((s) => s)
   }
 
   public getMorphedPartIds(): number[] {

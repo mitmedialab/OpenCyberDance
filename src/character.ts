@@ -737,13 +737,4 @@ export class Character {
 
     return { acceleration: series.map(getAcceleration) }
   }
-
-  updateDebug() {
-    const bones = this.ik?.targetBones
-    if (!bones) return
-
-    this.updateSphereFromBone(this.debugSpheres.forehead, bones.forehead)
-    this.updateSphereFromBone(this.debugSpheres.body, bones.body)
-    this.updateSphereFromBone(this.debugSpheres.neck, bones.neck)
-  }
 }

@@ -436,6 +436,8 @@ export class Character {
       const original = this.originalOf(index)
       if (!original || !this.params) return
 
+      let shouldMorphAxisPoint = false
+
       // Lock and unlock hips position hips position.
       if (track.name === 'Hips.position') {
         track.values = lock ? track.values.fill(0) : original.values.slice(0)
@@ -446,6 +448,22 @@ export class Character {
       // Reset the keyframe values when circle and curve formula changes.
       if (flags.curve || flags.axisPoint) {
         track.values = original.values.slice(0)
+      }
+
+      if (flags.axisPoint) {
+        const { parts } = this.params.axisPoint
+        const part = trackNameToPart(track.name, 'axis')
+
+        if (part) {
+          const enabled = parts[part as AxisPointControlParts]
+
+          // Zero-fill the animation chain.
+          // TODO: fill with current frame instead to freeze in place.
+          if (enabled) {
+            track.values = track.values.fill(0)
+            shouldMorphAxisPoint = true
+          }
+        }
       }
 
       if (flags.timing) {
@@ -478,25 +496,8 @@ export class Character {
         })
       }
 
-      if (flags.axisPoint) {
-        const { parts } = this.params.axisPoint
-
-        let shouldEnable = false
-        const part = trackNameToPart(track.name, 'axis')
-
-        if (part) {
-          const enabled = parts[part as AxisPointControlParts]
-
-          // Override the entire animation chain.
-          if (enabled) {
-            track.values = track.values.fill(0)
-            shouldEnable = true
-          }
-        }
-
-        if (shouldEnable && this.ik) {
-          this.ik.set([])
-        }
+      if (flags.axisPoint && shouldMorphAxisPoint && this.ik) {
+        this.ik.set([])
       }
 
       clip.tracks[index] = track

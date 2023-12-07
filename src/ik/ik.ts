@@ -128,23 +128,21 @@ export class IKManager {
     const frames: InterpolatedKeyframe[] = []
     const steps = 10
 
-    // TODO: calculate control point position (i.e. left hand, left feet)
-    const controlPos = new Vector3()
-    const controlRot = new Quaternion()
+    const effectorBone = this.boneOf(effectorBones[control])!
+    const controlPos = effectorBone.position
+    const controlRot = new Quaternion().setFromEuler(effectorBone.rotation)
 
-    // TODO: calculate target point position (i.e. forehead, neck, body center)
-    const targetPos = new Vector3()
-    const targetRot = new Quaternion()
+    const targetBone = this.bones[this.targetBoneIds[target]]
+    const targetPos = targetBone.position
+    const targetRot = new Quaternion().setFromEuler(targetBone.rotation)
 
     for (let step = 0; step < steps; step++) {
       const t = step / steps
-
       const position = new Vector3()
       position.lerpVectors(controlPos, targetPos, t)
 
       const rotation = new Quaternion()
       rotation.slerpQuaternions(controlRot, targetRot, t)
-
       frames.push({ position, rotation, step })
     }
 

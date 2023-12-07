@@ -1,4 +1,5 @@
-import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
+import { Bone, Quaternion, Skeleton, SkinnedMesh, Vector3 } from 'three'
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
@@ -46,6 +47,7 @@ export class IKManager {
   constructor(mesh: SkinnedMesh) {
     this.mesh = mesh
     this.createTargetBones()
+    this.updateSkeleton()
 
     this.ik = new CCDIKSolver(this.mesh, [])
 
@@ -94,8 +96,12 @@ export class IKManager {
     return { target, effector, links, iteration: 2 }
   }
 
+  get skeleton() {
+    return this.mesh.skeleton
+  }
+
   get bones() {
-    return this.mesh.skeleton.bones
+    return this.skeleton.bones
   }
 
   get root() {
@@ -103,7 +109,7 @@ export class IKManager {
   }
 
   boneOf(key: BoneKey) {
-    return this.bones.find((b) => b.name === key)
+    return this.skeleton.getBoneByName(key)
   }
 
   idOf(name: BoneKey): number {
@@ -117,46 +123,60 @@ export class IKManager {
   }
 
   private createForeheadTargetBone() {
-    const ref = this.boneOf('Head')
+    const target = this.createBoneFromRef('Head')
+    if (!target) return
+
+    target.position.y += 0.15
+    target.name = 'ForeheadTarget'
+
+    this.targetBoneIds.forehead = this.addBone(target)
+  }
+
+  private createNeckTargetBone() {
+    const target = this.createBoneFromRef('Neck')
+    if (!target) return
+
+    target.name = 'NeckTarget'
+
+    this.targetBoneIds.neck = this.addBone(target)
+  }
+
+  private createBodyCenterTargetBone() {
+    const target = this.createBoneFromRef('Spine1')
+    if (!target) return
+
+    target.name = 'BodyCenterTarget'
+
+    this.targetBoneIds.body = this.addBone(target)
+  }
+
+  createBoneFromRef(refKey: BoneKey) {
+    const ref = this.boneOf(refKey)
     if (!ref) return
 
     const target = new Bone()
-    target.name = 'ForeheadTarget'
     target.visible = true
 
     ref.getWorldPosition(target.position)
     target.rotation.setFromQuaternion(ref.quaternion)
-    target.position.y += 0.15
+    target.parent = this.root.parent
 
-    return this.addBone(target)
+    return target
   }
 
-  private createNeckTargetBone() {
-    const ref = this.boneOf('Neck')
-    if (!ref) return
-
-    const target = new Bone()
-    target.name = 'NeckTarget'
-    target.visible = true
-
-    return this.addBone(target)
+  updateSkeleton() {
+    // const bones = this.skeleton.bones.slice(0)
+    // const skeleton = new Skeleton(bones)
+    // this.mesh.bind(skeleton)
+    // this.mesh.normalizeSkinWeights()
+    // this.mesh.updateMatrix()
   }
 
-  // ? we use the existing spine bone for now
-  private createBodyCenterTargetBone() {
-    const target = new Bone()
-    target.name = 'BodyCenterTarget'
-    target.visible = true
-
-    return this.addBone(target)
-  }
-
-  // TODO: add the bone without adding it to the skeleton
   addBone(bone: Bone): number {
-    this.mesh.add(bone)
-    this.mesh.skeleton.update()
+    // this.skeleton.bones.push(bone)
+    // this.mesh.add(bone)
 
-    return 0
+    return this.bones.length - 1
   }
 
   valid(id: number | undefined | null) {

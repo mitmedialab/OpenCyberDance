@@ -1,4 +1,4 @@
-import { Group, Mesh, Scene } from 'three'
+import { Group, Material, Scene, SkinnedMesh } from 'three'
 
 export const dispose = (...scenes: (Scene | Group | null)[]) => {
   scenes.forEach((scene) => {
@@ -6,7 +6,8 @@ export const dispose = (...scenes: (Scene | Group | null)[]) => {
 
     if ('traverse' in scene) {
       scene.traverse((o) => {
-        if (o instanceof Mesh) {
+        if (o instanceof SkinnedMesh) {
+          o.skeleton.dispose()
           o.geometry.dispose()
 
           if (o.material) {
@@ -18,6 +19,10 @@ export const dispose = (...scenes: (Scene | Group | null)[]) => {
               o.material.dispose()
             }
           }
+        }
+
+        if (o instanceof Material) {
+          o.dispose()
         }
       })
     }

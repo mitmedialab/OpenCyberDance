@@ -15,6 +15,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { KeyframeAnalyzer } from './analyze'
 import { dispose } from './dispose'
+import { CCDIKHelper } from './ik/ccd-ik-helper'
 import { IKManager } from './ik/ik'
 import {
   getAcceleration,
@@ -99,6 +100,8 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
+const DEBUG_SKELETON = false
+
 export class Character {
   scene: THREE.Scene | null = null
   mixer: THREE.AnimationMixer | null = null
@@ -163,6 +166,11 @@ export class Character {
 
   clear() {
     if (!this.scene || !this.model) return
+
+    this.scene.traverse((o) => {
+      if (o instanceof CCDIKHelper) o.dispose()
+      if (o instanceof SkeletonHelper) o.dispose()
+    })
 
     dispose(this.model)
     this.scene.remove(this.model)
@@ -269,22 +277,22 @@ export class Character {
     const skinnedMesh = this.model.getObjectById(skinnedMeshId) as SkinnedMesh
     if (!skinnedMesh) return
 
-    const rootBone = skinnedMesh.skeleton.bones[0].parent
-    this.skeletonHelper = new SkeletonHelper(rootBone!)
+    if (DEBUG_SKELETON) {
+      const rootBone = skinnedMesh.skeleton.bones[0].parent
+      this.skeletonHelper = new SkeletonHelper(rootBone!)
 
-    const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial
-    skeletonMaterial.linewidth = 10
-    this.scene.add(this.skeletonHelper)
+      const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial
+      skeletonMaterial.linewidth = 10
+      this.scene.add(this.skeletonHelper)
+    }
 
     if (!this.options.freezeParams) {
       this.ik = new IKManager(skinnedMesh)
 
-      const ikHelper = this.ik.ik.createHelper()
-      this.scene.add(ikHelper)
-
-      // this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
-      // this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
-      // this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
+      if (DEBUG_SKELETON) {
+        const ikHelper = this.ik.ik.createHelper()
+        this.scene.add(ikHelper)
+      }
     }
 
     // Create individual animation mixer

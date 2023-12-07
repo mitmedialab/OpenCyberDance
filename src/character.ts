@@ -252,9 +252,8 @@ export class Character {
 
     this.scene.add(this.model)
 
-    let skinnedMeshId = 0
+    let skinnedMesh: SkinnedMesh | null = {} as unknown as SkinnedMesh
 
-    // Cast shadows
     this.model.traverse((o) => {
       if (o instanceof SkinnedMesh) {
         o.castShadow = true
@@ -263,9 +262,11 @@ export class Character {
           o.material.wireframe = false
         }
 
-        skinnedMeshId = o.id
+        skinnedMesh = o
       }
     })
+
+    if (!skinnedMesh) return
 
     // Adjust character scale
     const scale = config.scale
@@ -273,9 +274,6 @@ export class Character {
 
     const [x, y, z] = config.position
     this.model.position.set(x, y, z)
-
-    const skinnedMesh = this.model.getObjectById(skinnedMeshId) as SkinnedMesh
-    if (!skinnedMesh) return
 
     if (DEBUG_SKELETON) {
       const rootBone = skinnedMesh.skeleton.bones[0].parent

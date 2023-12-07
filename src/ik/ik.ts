@@ -244,6 +244,8 @@ export class IKManager {
         if (frameId === null) continue
 
         const frame = frames[frameId]
+        if (!frame) continue
+
         const bone = this.bones[this.targetBoneIds[control]]
 
         bone.position.copy(frame.position)

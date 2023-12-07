@@ -80,7 +80,7 @@ export class IKManager {
     const target = this.idOf(targetBones[targetPoint])
     const links = this.linksByControl[controlPoint] ?? []
 
-    return { target, effector, links }
+    return { target, effector, links, iteration: 2 }
   }
 
   get bones() {

@@ -29,7 +29,13 @@ import {
   overrideRotation,
   Params,
 } from './overrides'
-import { CorePartKey, CurvePartKey, curveParts, trackNameToPart } from './parts'
+import {
+  AxisPointControlParts,
+  CorePartKey,
+  CurvePartKey,
+  curveParts,
+  trackNameToPart,
+} from './parts'
 import { profile } from './perf'
 import {
   applyTrackTransform,
@@ -59,6 +65,7 @@ export interface UpdateParamFlags {
   timing?: boolean
   lockPosition?: boolean
   rotation?: boolean
+  axisPoint?: boolean
 }
 
 const loader = new GLTFLoader()
@@ -275,9 +282,9 @@ export class Character {
       const ikHelper = this.ik.ik.createHelper()
       this.scene.add(ikHelper)
 
-      this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
-      this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
-      this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
+      // this.addBoneSphere(this.ik.axisBones.body, 0xff0000)
+      // this.addBoneSphere(this.ik.axisBones.forehead, 0x00ff00)
+      // this.addBoneSphere(this.ik.axisBones.neck, 0xffff00)
     }
 
     // Create individual animation mixer
@@ -437,7 +444,7 @@ export class Character {
       if (freezeParams) return
 
       // Reset the keyframe values when circle and curve formula changes.
-      if (flags.curve) {
+      if (flags.curve || flags.axisPoint) {
         track.values = original.values.slice(0)
       }
 
@@ -469,6 +476,27 @@ export class Character {
           tracks: _curve.tracks,
           threshold: this.params.curve.threshold,
         })
+      }
+
+      if (flags.axisPoint) {
+        const { parts } = this.params.axisPoint
+
+        let shouldEnable = false
+        const part = trackNameToPart(track.name, 'axis')
+
+        if (part) {
+          const enabled = parts[part as AxisPointControlParts]
+
+          // Override the entire animation chain.
+          if (enabled) {
+            track.values = track.values.fill(0)
+            shouldEnable = true
+          }
+        }
+
+        if (shouldEnable && this.ik) {
+          this.ik.set([])
+        }
       }
 
       clip.tracks[index] = track

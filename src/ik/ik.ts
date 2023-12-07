@@ -46,7 +46,6 @@ export class IKManager {
     }
 
     this.ik = new CCDIKSolver(this.mesh, [])
-    this.morph()
 
     window.ikManager = this
   }
@@ -134,42 +133,19 @@ export class IKManager {
   }
 
   createMorph(axis: BoneKey, control: BoneKey, links: BoneKey[]): IK {
-    const axisId = this.boneIdByName(axis)
-    const controlId = this.boneIdByName(control)
-    const linkIds = links.map((name) => this.boneIdByName(name))
+    const target = this.boneIdByName(axis)
+    const effector = this.boneIdByName(control)
 
     return {
-      target: axisId,
-      effector: controlId,
-      links: linkIds.map((index) => ({
-        index,
-      })),
+      target,
+      effector,
+      links: links
+        .map((name) => this.boneIdByName(name))
+        .map((index) => ({ index })),
     }
   }
 
-  morph() {
-    this.set([
-      this.createMorph('Head', 'LeftHand', ['LeftForeArm', 'LeftArm']),
-      {
-        // minAngle: 300,
-        // maxAngle: 360,
-        target: this.boneIdByName('Head'),
-        effector: this.boneIdByName('RightHand'),
-        links: [
-          {
-            index: this.boneIdByName('RightForeArm'),
-            rotationMin: new Vector3(-0.5, -0.5, -0.5),
-            rotationMax: new Vector3(10, 10, 10),
-          },
-          {
-            index: this.boneIdByName('RightArm'),
-            // rotationMin: new Vector3(-0.5, -0.5, -0.5),
-            // rotationMax: new Vector3(1, 1, 1),
-          },
-        ],
-      },
-      this.createMorph('Spine1', 'LeftFoot', ['LeftLeg']),
-      this.createMorph('Spine1', 'RightFoot', ['RightLeg']),
-    ])
+  public getMorphedPartIds(): number[] {
+    return this.ik.iks.map((ik) => ik.effector)
   }
 }

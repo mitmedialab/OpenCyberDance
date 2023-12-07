@@ -86,19 +86,23 @@ export class CCDIKSolver {
     // because it calls updateMatrixWorld( true ) inside.
     _targetPos.setFromMatrixPosition(target.matrixWorld)
 
+    const links = ik.links
     const iteration = ik.iteration !== undefined ? ik.iteration : 1
 
     for (let i = 0; i < iteration; i++) {
       let rotated = false
 
-      for (const linkConfig of ik.links) {
+      for (let j = 0, jl = links.length; j < jl; j++) {
+        const linkConfig = links[j]
         const link = bones[linkConfig.index]
 
         // skip this link and following links.
         // this skip is used for MMD performance optimization.
-        if (!linkConfig.enabled) break
+        if (linkConfig.enabled === false) break
 
-        const { limitation, rotationMin, rotationMax } = linkConfig
+        const limitation = linkConfig.limitation
+        const rotationMin = linkConfig.rotationMin
+        const rotationMax = linkConfig.rotationMax
 
         // don't use getWorldPosition/Quaternion() here for the performance
         // because they call updateMatrixWorld( true ) inside.
@@ -142,12 +146,13 @@ export class CCDIKSolver {
         _q.setFromAxisAngle(_axis, angle)
         link.quaternion.multiply(_q)
 
+        // TODO: re-consider the limitation specification
         if (limitation !== undefined) {
           let c = link.quaternion.w
+
           if (c > 1.0) c = 1.0
 
           const c2 = math.sqrt(1 - c * c)
-
           link.quaternion.set(
             limitation.x * c2,
             limitation.y * c2,
@@ -169,11 +174,14 @@ export class CCDIKSolver {
         }
 
         link.updateMatrixWorld(true)
+
         rotated = true
       }
 
       if (!rotated) break
     }
+
+    return this
   }
 
   public createHelper() {

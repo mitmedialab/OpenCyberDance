@@ -3,7 +3,7 @@ import GUI from 'lil-gui'
 import { CAMERA_PRESETS } from './camera'
 import { Character, CharacterKey } from './character'
 import { Params } from './overrides'
-import { CorePartKey, DelayPartKey } from './parts'
+import { axisPointControlParts, CorePartKey, DelayPartKey } from './parts'
 import { transformers } from './transforms'
 
 interface Handlers {
@@ -23,6 +23,7 @@ interface Handlers {
   space(): void
   showGraph(visible: boolean): void
   setCamera(): void
+  axisPoint(): void
 }
 
 export class Panel {
@@ -39,6 +40,7 @@ export class Panel {
   playbackFolder: GUI | null = null
   commandFolder: GUI | null = null
   characterFolder: GUI | null = null
+  axisPointFolder: GUI | null = null
 
   handlers: Handlers = {
     energy: () => {},
@@ -57,6 +59,7 @@ export class Panel {
     space: () => {},
     showGraph: () => {},
     setCamera: () => {},
+    axisPoint: () => {},
   }
 
   constructor(params: Params) {
@@ -181,6 +184,7 @@ export class Panel {
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
     this.curveFolder = panel.addFolder('Circle and Curve')
     this.spaceFolder = panel.addFolder('External Body Space')
+    this.axisPointFolder = panel.addFolder('Axis Point')
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
@@ -246,12 +250,29 @@ export class Panel {
 
     this.addCurveControl()
     this.addSpaceControl()
+    this.addAxisPointControl()
 
     this.commandFolder.open()
     this.rotationFolder.open()
     this.energyFolder.open()
     this.delayFolder.open()
     this.characterFolder.open()
+  }
+
+  addAxisPointControl() {
+    if (!this.axisPointFolder) return
+
+    this.axisPointFolder
+      .add(this.params.axisPoint, 'threshold', 0, 10, 0.001)
+      .listen()
+      .onChange(this.handlers.axisPoint)
+
+    for (const part of Object.keys(axisPointControlParts)) {
+      this.axisPointFolder
+        ?.add(this.params.axisPoint.parts, part)
+        .listen()
+        .onChange(this.handlers.axisPoint)
+    }
   }
 
   updateKey() {

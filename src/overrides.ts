@@ -3,6 +3,7 @@ import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
 import { ModelKey } from './character'
 import {
+  AxisPointControlParts,
   CorePartKey,
   CurvePartKey,
   DelayPartKey,
@@ -32,6 +33,11 @@ export interface SpaceConfig {
 
   /** The window size to calculate the averages. */
   windowSize: 30
+}
+
+export interface AxisPointConfig {
+  threshold: number
+  parts: Record<AxisPointControlParts, boolean>
 }
 
 export class Params {
@@ -91,6 +97,17 @@ export class Params {
     rightArm: 0,
     leftLeg: 0,
     rightLeg: 0,
+  }
+
+  axisPoint: AxisPointConfig = {
+    threshold: 0,
+
+    parts: {
+      leftArm: false,
+      rightArm: false,
+      leftLeg: false,
+      rightLeg: false,
+    },
   }
 
   characters: CharacterOptions = {

@@ -310,6 +310,10 @@ export class World {
       this.updateParams({ rotation: true })
     }, 100)
 
+    this.panel.handlers.axisPoint = debounce(() => {
+      this.updateParams({ axisPoint: true })
+    }, 100)
+
     this.panel.handlers.timescale = (timescale) => {
       for (const character of this.characters) {
         if (!character.mixer) continue

@@ -158,20 +158,21 @@ export class IKManager {
     const frames: InterpolatedKeyframe[] = []
 
     const controlBone = this.boneOf(effectorBones[control])!
-    const controlPos = controlBone.position
-    const controlRot = new Quaternion().setFromEuler(controlBone.rotation)
+    const controlPos = new Vector3()
+    const controlRot = controlBone.quaternion.clone()
+    controlBone.getWorldPosition(controlPos)
 
     // Determine the original axis points: forehead, neck, body.
     const refTargetBoneId = refAxisBones[target]
     const refTargetBone = this.boneOf(refTargetBoneId)!
-    const refTargetPos = refTargetBone.position.clone()
+    const refTargetPos = new Vector3()
+    const refTargetRot = refTargetBone.quaternion.clone()
+    refTargetBone.getWorldPosition(refTargetPos)
 
     // The forehead should be a bit higher than the head.
     if (target === 'forehead') {
       refTargetPos.y += 0.1
     }
-
-    const refTargetRot = new Quaternion().setFromEuler(refTargetBone.rotation)
 
     for (let step = 0; step < steps; step++) {
       const t = step / steps

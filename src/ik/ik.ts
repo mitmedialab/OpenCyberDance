@@ -247,6 +247,7 @@ export class IKManager {
         if (!frame) continue
 
         const bone = this.bones[this.targetBoneIds[control]]
+        // console.log(`Moving ${control} to frame ${frameId}`)
 
         bone.position.copy(frame.position)
         bone.quaternion.copy(frame.rotation)
@@ -254,9 +255,9 @@ export class IKManager {
         this.frameCounters[control]!++
 
         // ? do we really want to loop the frames?
-        // if (this.frameCounters[control]! >= frames.length) {
-        //   this.frameCounters[control] = 0
-        // }
+        if (this.frameCounters[control]! >= frames.length) {
+          this.frameCounters[control] = 0
+        }
       }
     }
   }

@@ -729,7 +729,7 @@ export class Character {
   }
 
   updateDebug() {
-    const bones = this.ik?.axisBones
+    const bones = this.ik?.targetBones
     if (!bones) return
 
     this.updateSphereFromBone(this.debugSpheres.forehead, bones.forehead)

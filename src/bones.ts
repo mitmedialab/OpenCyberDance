@@ -58,9 +58,6 @@ export const boneNames = {
   LeftHandPinky1: 'LeftHandPinky1',
   LeftHandPinky2: 'LeftHandPinky2',
   LeftHandPinky3: 'LeftHandPinky3',
-
-  // --- Custom bones defined below ~ does not exist in the GLTF model ---
-  ForeHead: 'ForeHead',
 }
 
 export type BoneKey = keyof typeof boneNames

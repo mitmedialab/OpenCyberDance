@@ -1,4 +1,4 @@
-import { Bone, SkinnedMesh, Vector3 } from 'three'
+import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
@@ -14,8 +14,17 @@ declare global {
 export type ControlPoint = AxisPointControlParts
 export type AxisPoint = 'forehead' | 'neck' | 'body'
 
-export type AxisBones = Record<AxisPoint, Bone>
+export type TargetBones = Record<AxisPoint, Bone>
 export type ControlBones = Record<ControlPoint, Bone>
+
+/**
+ * The targets to interpolate to.
+ */
+interface InterpolatedTarget {
+  position: Vector3
+  rotation: Quaternion
+  time: number
+}
 
 const effectorBones: Record<ControlPoint, BoneKey> = {
   leftArm: 'LeftHand',
@@ -24,31 +33,33 @@ const effectorBones: Record<ControlPoint, BoneKey> = {
   rightLeg: 'RightFoot',
 }
 
-const targetBones: Record<AxisPoint, BoneKey> = {
-  // TODO: change to "forehead"
-  forehead: 'Head',
-
-  neck: 'Neck',
-  body: 'Spine1',
-}
-
 export class IKManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
-  axisBones: AxisBones
+
+  targetBoneIds: Record<AxisPoint, number> = {
+    forehead: -1,
+    neck: -1,
+    body: -1,
+  }
 
   constructor(mesh: SkinnedMesh) {
     this.mesh = mesh
-
-    this.axisBones = {
-      forehead: this.createForeheadBone()!,
-      neck: this.createNeckBone()!,
-      body: this.createBodyCenterBone()!,
-    }
+    this.createTargetBones()
 
     this.ik = new CCDIKSolver(this.mesh, [])
 
     window.ikManager = this
+  }
+
+  /**
+   * We create custom bones to use as targets for the IK solver.
+   * We will move these bones around to interpolate the movement.
+   **/
+  private createTargetBones() {
+    this.createForeheadTargetBone()
+    this.createNeckTargetBone()
+    this.createBodyCenterTargetBone()
   }
 
   get linksByControl(): Record<ControlPoint, IKLink[]> {
@@ -77,7 +88,7 @@ export class IKManager {
 
   getIKConfig(controlPoint: ControlPoint, targetPoint: AxisPoint): IK {
     const effector = this.idOf(effectorBones[controlPoint])
-    const target = this.idOf(targetBones[targetPoint])
+    const target = this.targetBoneIds[targetPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
     return { target, effector, links, iteration: 2 }
@@ -99,36 +110,53 @@ export class IKManager {
     return this.bones.findIndex((b) => name === b.name)
   }
 
-  createForeheadBone() {
+  getInterpolatedTargets(): InterpolatedTarget[] {
+    const targets: InterpolatedTarget[] = []
+
+    return targets
+  }
+
+  private createForeheadTargetBone() {
     const ref = this.boneOf('Head')
     if (!ref) return
 
-    const fore = new Bone()
-    fore.visible = true
+    const target = new Bone()
+    target.name = 'ForeheadTarget'
+    target.visible = true
 
-    ref.getWorldPosition(fore.position)
-    fore.rotation.setFromQuaternion(ref.quaternion)
-    fore.position.y += 0.15
+    ref.getWorldPosition(target.position)
+    target.rotation.setFromQuaternion(ref.quaternion)
+    target.position.y += 0.15
 
-    return fore
+    return this.addBone(target)
   }
 
-  // ? we use the existing neck bone for now
-  createNeckBone() {
-    return this.boneOf('Neck')
-  }
+  private createNeckTargetBone() {
+    const ref = this.boneOf('Neck')
+    if (!ref) return
 
-  addBone(bone: Bone) {
-    // TODO: this crashes skeleton.update()
-    // this.mesh.skeleton.bones.push(bone)
+    const target = new Bone()
+    target.name = 'NeckTarget'
+    target.visible = true
 
-    this.mesh.add(bone)
-    this.mesh.skeleton.update()
+    return this.addBone(target)
   }
 
   // ? we use the existing spine bone for now
-  createBodyCenterBone() {
-    return this.boneOf('Spine1')
+  private createBodyCenterTargetBone() {
+    const target = new Bone()
+    target.name = 'BodyCenterTarget'
+    target.visible = true
+
+    return this.addBone(target)
+  }
+
+  // TODO: add the bone without adding it to the skeleton
+  addBone(bone: Bone): number {
+    this.mesh.add(bone)
+    this.mesh.skeleton.update()
+
+    return 0
   }
 
   valid(id: number | undefined | null) {

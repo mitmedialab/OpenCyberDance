@@ -168,11 +168,14 @@ export class IKManager {
   setPartMorph(config: AxisPointConfig) {
     const iks: IK[] = []
 
+    // TODO: we must compute the closest target bone to the part
+    const target: AxisPoint = 'body'
+
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts
       if (!config.parts[part]) continue
 
-      const ik = this.getIKConfig(part, 'body')
+      const ik = this.getIKConfig(part, target)
       iks.push(ik)
     }
 

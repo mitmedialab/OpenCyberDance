@@ -100,7 +100,7 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
-const DEBUG_SKELETON = false
+const DEBUG_SKELETON = true
 
 export class Character {
   scene: THREE.Scene | null = null
@@ -234,7 +234,7 @@ export class Character {
     const url = `/models/${Character.sources[config.model]}`
     if (url === 'none' || !url) return
 
-    const gltf = await loader.loadAsync(url)
+    const gltfModel = await loader.loadAsync(url)
 
     // Set the default actions.
     if (!config.action) {
@@ -245,16 +245,11 @@ export class Character {
       }
     }
 
-    // Add the character model
-    this.model = gltf.scene
-
-    if (!this.scene || !this.model || !this.params) return
-
-    this.scene.add(this.model)
+    if (!this.scene || !this.params) return
 
     let skinnedMesh: SkinnedMesh | null = {} as unknown as SkinnedMesh
 
-    this.model.traverse((o) => {
+    gltfModel.scene.traverse((o) => {
       if (o instanceof SkinnedMesh) {
         o.castShadow = true
 
@@ -267,6 +262,18 @@ export class Character {
     })
 
     if (!skinnedMesh) return
+
+    if (!this.options.freezeParams) {
+      this.ik = new IKManager(skinnedMesh)
+
+      if (DEBUG_SKELETON) {
+        const ikHelper = this.ik.ik.createHelper()
+        this.scene.add(ikHelper)
+      }
+    }
+
+    this.model = gltfModel.scene
+    this.scene.add(this.model)
 
     // Adjust character scale
     const scale = config.scale
@@ -284,20 +291,11 @@ export class Character {
       this.scene.add(this.skeletonHelper)
     }
 
-    if (!this.options.freezeParams) {
-      this.ik = new IKManager(skinnedMesh)
-
-      if (DEBUG_SKELETON) {
-        const ikHelper = this.ik.ik.createHelper()
-        this.scene.add(ikHelper)
-      }
-    }
-
     // Create individual animation mixer
     this.mixer = new THREE.AnimationMixer(this.model)
     this.mixer.timeScale = this.params.timescale
 
-    const clips: AnimationClip[] = gltf.animations
+    const clips: AnimationClip[] = gltfModel.animations
 
     for (const clip of clips) {
       // Process the individual animation clips.

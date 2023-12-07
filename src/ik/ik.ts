@@ -165,16 +165,15 @@ export class IKManager {
   }
 
   updateSkeleton() {
-    // const bones = this.skeleton.bones.slice(0)
+    const bones = this.skeleton.bones
     // const skeleton = new Skeleton(bones)
-    // this.mesh.bind(skeleton)
-    // this.mesh.normalizeSkinWeights()
-    // this.mesh.updateMatrix()
+
+    this.mesh.bind(this.skeleton, this.mesh.bindMatrix)
   }
 
   addBone(bone: Bone): number {
     // this.skeleton.bones.push(bone)
-    // this.mesh.add(bone)
+    this.mesh.add(bone)
 
     return this.bones.length - 1
   }

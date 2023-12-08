@@ -4,6 +4,7 @@ import { KeyframeTrack } from 'three'
 
 import { Character } from './character'
 import { AXES, keyframesAt } from './keyframes'
+import { Params } from './overrides'
 import { profile } from './perf'
 import { Axis } from './transforms'
 import { Matcher } from './types'
@@ -41,7 +42,7 @@ export class Plotter {
   fps = 1
 
   /** Is the plotter visible? */
-  visible = true
+  visible = false
 
   /** Number of keyframes to show; indicates how wide the time window is. */
   windowSize = 250

@@ -15,12 +15,17 @@ const PROMPT = `
   This is a system that evaluates the natural language command, and generate a JSON code with these variables,
   according to the following TypeScript interface.
 
+  If they didn't give a command but a more general description, e.g. "drunk", you can interpret that
+  as changes in the variable. for example, drunk person might have more rotation and energy.
+
   interface VoiceCommand {
     // Reset the system?
     reset: boolean
 
-    // Changes the energy of the head, body or foot. Float of 1 to 3. Precision of 2 decimals. Default to 1.
-    // If the body part (head, body, foot) is not specified, set all fields to the given value.
+    // Changes the energy of the head, body or foot.
+    // Float of 1 to 3. Precision of 2 decimals. Default to 1.
+    // If the body part (head, body, foot) is not specified,
+    // set all fields to the given value.
     energy: {
       head: number,
       body: number,
@@ -29,13 +34,17 @@ const PROMPT = `
 
     // Changes the rotation of the axes. Float of 1 to 5. Precision of 3 decimals. Default to 1.
     // If the axis (x, y, z) is not specified, set all axes to the given value.
+    // You can also say "location" or "turn" or "rotate"
     rotation: {
       x: number,
       y: number,
+
+      // They can also say "C"
       z: number,
     }
 
     // Integer between -10 and 10. Default to 0.
+    // You can also say "shifting"
     synchronicLimbs: number
 
     externalBodySpace: {
@@ -90,14 +99,33 @@ const PROMPT = `
   If the variable is not mentioned, omit the key entirely.
 `.trim()
 
+type ListeningStatus = 'offline' | 'listening' | 'thinking' | 'speaking'
+
 export class VoiceController {
   recognition: SpeechRecognition | null = null
   active = false
   world: World
   transcript = ''
+  status: ListeningStatus = 'offline'
+
+  rootElement: HTMLDivElement = document.createElement('div')
+  displayElement: HTMLDivElement = document.createElement('div')
+  transcriptionElement: HTMLDivElement = document.createElement('div')
+  statusElement: HTMLDivElement = document.createElement('div')
+
+  recognitionWatchdogTimer: number | null = null
 
   constructor(world: World) {
     this.world = world
+  }
+
+  // If it cannot hear us for 5 seconds, restart the recognition.
+  // This prevents the recognition from stalling.
+  watchdog() {}
+
+  // Update the status display
+  updateStatus(status: ListeningStatus) {
+    this.status = status
   }
 
   setOpenAIKey(key: string) {
@@ -138,11 +166,13 @@ export class VoiceController {
 
   createRecognition() {
     this.recognition = new SpeechRecognition()
-    this.recognition.lang = 'en-US'
+    this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
 
     this.recognition.addEventListener('result', (e) => {
       this.transcript = [...e.results].map((r) => r?.[0]?.transcript).join('')
+      this.transcriptionElement.innerText = this.transcript
+
       console.log('$', this.transcript)
     })
 
@@ -156,6 +186,10 @@ export class VoiceController {
       console.error('ResponsiveVoice not loaded!')
       return
     }
+
+    this.updateStatus('speaking')
+
+    console.log(`> [speaking] ${text}`)
 
     responsiveVoice.speak(text, 'US English Male', {
       pitch: 0.2,
@@ -296,7 +330,11 @@ export class VoiceController {
     console.log('synchronic:', v)
 
     for (const key in p.delays) {
-      p.delays[key as DelayPartKey] = randVariance(v)
+      // variance must be between 0 and 10
+      let variance = Math.abs(v)
+      variance = Math.min(variance, 10) // max variance is 10.
+      variance = Math.max(variance, 0) // min variance is 0.
+      p.delays[key as DelayPartKey] = randVariance(variance)
     }
   }
 }

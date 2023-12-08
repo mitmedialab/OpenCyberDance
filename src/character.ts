@@ -100,7 +100,7 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
-const DEBUG_SKELETON = true
+const DEBUG_SKELETON = false
 
 export class Character {
   scene: THREE.Scene | null = null
@@ -134,6 +134,12 @@ export class Character {
     abstract57: '575859_tas.glb',
     kukpat: 'Kukpat.glb',
     tranimid: 'tranimid.glb',
+
+    // awesome solo dances
+    terry: 'terry.glb',
+    changhung: 'changhung.glb',
+    yokrob: 'YOKROB.glb',
+    yokroblingImprovise: 'YOKROBlingimprovise.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
@@ -143,6 +149,12 @@ export class Character {
     abstract57: 'no57_Tas',
     kukpat: 'kukpat_Tas',
     tranimid: 'tranimid_Tas',
+
+    // animation track names for solo dances
+    terry: 'terry_chr02',
+    changhung: 'Changhung002_chr02',
+    yokrob: 'Yokrobyak3_Tas',
+    yokroblingImprovise: 'yokrobling002_Tas',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
@@ -157,7 +169,7 @@ export class Character {
   }
 
   handlers: Handlers = {
-    animationLoaded: () => {},
+    animationLoaded: () => { },
   }
 
   setPosition(x = 0, y = 0, z = 0) {

@@ -27,11 +27,13 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
     "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "date-fns": "^2.30.0",
     "lil-gui": "^0.19.1",
-    "three": "^0.159.0"
+    "three": "^0.159.0",
+    "vue": "^3.3.10"
   }
 }

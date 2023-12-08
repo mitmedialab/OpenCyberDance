@@ -1,9 +1,9 @@
 import './main.css'
 
-import { World } from './world'
+import { createApp } from 'vue'
 
-window.addEventListener('DOMContentLoaded', async () => {
-  const world = new World()
-  await world.setup()
-  world.render()
-})
+import App from './view/App.vue'
+
+export const app = createApp(App)
+
+app.mount('#app')

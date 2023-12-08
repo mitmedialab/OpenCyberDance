@@ -37,7 +37,6 @@ export class World {
   renderer = new WebGLRenderer({ antialias: true })
   stats = new Stats()
   plotter = new Plotter(this)
-  container = document.getElementById('app')
   params = new Params()
   panel = new Panel(this.params)
   voice = new VoiceController(this)
@@ -78,14 +77,6 @@ export class World {
     this.addResizeHandler()
     this.addSeekBarUpdater()
     this.handleCurveFormulaChange()
-
-    // Setup elements
-    this.container?.appendChild(this.renderer.domElement)
-    this.container?.appendChild(this.stats.dom)
-
-    if (this.plotter.domElement) {
-      this.container?.appendChild(this.plotter.domElement)
-    }
 
     window.world = this
   }

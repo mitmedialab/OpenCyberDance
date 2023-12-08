@@ -17,8 +17,10 @@ export async function gpt(system: string, input: string) {
           { role: 'system', content: system },
           { role: 'user', content: input },
         ],
+
+        // how crazy it should be. 0 is not crazy, 1 is crazy
         temperature: 0,
-        max_tokens: 125,
+        max_tokens: 200,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,

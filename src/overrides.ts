@@ -45,7 +45,7 @@ export class Params {
   timescale = 1
   paused = false
   lockPosition = false
-  showGraph = true
+  showGraph = false
   camera = 'front'
 
   /** External body space */

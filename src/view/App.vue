@@ -25,7 +25,7 @@ onMounted(async () => {
 <template>
   <div>
     <div ref="rendererElement" />
-    <div ref="plotterContainer" />
+    <div ref="plotterContainer" pointer-events-none />
     <div ref="statsContainer" />
   </div>
 </template>

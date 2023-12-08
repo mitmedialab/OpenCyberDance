@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@nanostores/vue':
+    specifier: ^0.10.0
+    version: 0.10.0(@nanostores/logger@0.2.4)(@vue/devtools-api@6.5.1)(nanostores@0.9.5)(vue@3.3.10)
   '@vitejs/plugin-vue':
     specifier: ^4.5.2
     version: 4.5.2(vite@5.0.5)(vue@3.3.10)
@@ -23,6 +26,9 @@ dependencies:
   lil-gui:
     specifier: ^0.19.1
     version: 0.19.1
+  nanostores:
+    specifier: ^0.9.5
+    version: 0.9.5
   three:
     specifier: ^0.159.0
     version: 0.159.0
@@ -31,6 +37,9 @@ dependencies:
     version: 3.3.10(typescript@5.3.2)
 
 devDependencies:
+  '@nanostores/logger':
+    specifier: ^0.2.4
+    version: 0.2.4(nanostores@0.9.5)
   '@types/dom-speech-recognition':
     specifier: ^0.0.4
     version: 0.0.4
@@ -46,6 +55,9 @@ devDependencies:
   '@unocss/preset-wind':
     specifier: ^0.58.0
     version: 0.58.0
+  '@vue/devtools-api':
+    specifier: ^6.5.1
+    version: 6.5.1
   eslint:
     specifier: ^8.55.0
     version: 8.55.0
@@ -702,6 +714,34 @@ packages:
     resolution: {integrity: sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==}
     dev: false
 
+  /@nanostores/logger@0.2.4(nanostores@0.9.5):
+    resolution: {integrity: sha512-yFRp/R67DVLBDE0QqhnZr9wF1CtdiugOyioom2At3Gnui4LgDbqiizhnvnZIhN+bcpffZtpo0C1p8PK3E4JELg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      nanostores: '>=0.9.2'
+    dependencies:
+      nanostores: 0.9.5
+
+  /@nanostores/vue@0.10.0(@nanostores/logger@0.2.4)(@vue/devtools-api@6.5.1)(nanostores@0.9.5)(vue@3.3.10):
+    resolution: {integrity: sha512-832RAUbzRfHPs1CdqVEwfvgB2+RD/INji4Zo8bUSEfRO2pQRMMeq479gydnohGpRaa0oNwlfKo7TGFXCghq/1g==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      '@nanostores/logger': '>=0.2.3'
+      '@vue/devtools-api': '>=6.5.0'
+      nanostores: '>=0.9.2'
+      vue: '>=3.3.1'
+    peerDependenciesMeta:
+      '@nanostores/logger':
+        optional: true
+      '@vue/devtools-api':
+        optional: true
+    dependencies:
+      '@nanostores/logger': 0.2.4(nanostores@0.9.5)
+      '@vue/devtools-api': 6.5.1
+      nanostores: 0.9.5
+      vue: 3.3.10(typescript@5.3.2)
+    dev: false
+
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1267,6 +1307,9 @@ packages:
       '@vue/compiler-dom': 3.3.10
       '@vue/shared': 3.3.10
     dev: false
+
+  /@vue/devtools-api@6.5.1:
+    resolution: {integrity: sha512-+KpckaAQyfbvshdDW5xQylLni1asvNSGme1JFs8I1+/H5pHEhqUKMEQD/qn3Nx5+/nycBq11qAEi8lk+LXI2dA==}
 
   /@vue/reactivity-transform@3.3.10:
     resolution: {integrity: sha512-0xBdk+CKHWT+Gev8oZ63Tc0qFfj935YZx+UAynlutnrDZ4diFCVFMWixn65HzjE3S1iJppWOo6Tt1OzASH7VEg==}
@@ -2281,6 +2324,10 @@ packages:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanostores@0.9.5:
+    resolution: {integrity: sha512-Z+p+g8E7yzaWwOe5gEUB2Ox0rCEeXWYIZWmYvw/ajNYX8DlXdMvMDj8DWfM/subqPAcsf8l8Td4iAwO1DeIIRQ==}
+    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
 
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}

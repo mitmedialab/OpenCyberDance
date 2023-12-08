@@ -12,11 +12,13 @@
     "lint:fix": "eslint --fix --ext .ts,.js src"
   },
   "devDependencies": {
+    "@nanostores/logger": "^0.2.4",
     "@types/dom-speech-recognition": "^0.0.4",
     "@types/three": "^0.159.0",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "@unocss/preset-wind": "^0.58.0",
+    "@vue/devtools-api": "^6.5.1",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
@@ -29,12 +31,14 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "@nanostores/vue": "^0.10.0",
     "@vitejs/plugin-vue": "^4.5.2",
     "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "date-fns": "^2.30.0",
     "lil-gui": "^0.19.1",
+    "nanostores": "^0.9.5",
     "three": "^0.159.0",
     "vue": "^3.3.10"
   }

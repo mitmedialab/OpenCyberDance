@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 
 import { World } from '../world'
 
+import VoiceStatus from './VoiceStatus.vue'
+
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 const statsContainer = ref<HTMLDivElement>()
@@ -27,5 +29,7 @@ onMounted(async () => {
     <div ref="rendererElement" />
     <div ref="plotterContainer" pointer-events-none />
     <div ref="statsContainer" />
+
+    <VoiceStatus />
   </div>
 </template>

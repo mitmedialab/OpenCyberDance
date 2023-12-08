@@ -2,6 +2,7 @@ import { randVariance } from './math'
 import { CurveConfig, SpaceConfig } from './overrides'
 import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
+import { $status, $transcript } from './store/status'
 import { Axis } from './transforms'
 import { World } from './world'
 
@@ -99,14 +100,19 @@ const PROMPT = `
   If the variable is not mentioned, omit the key entirely.
 `.trim()
 
-type ListeningStatus = 'offline' | 'listening' | 'thinking' | 'speaking'
+export type ListeningStatus = 'disabled' | 'listening' | 'thinking' | 'speaking'
 
 export class VoiceController {
   recognition: SpeechRecognition | null = null
-  active = false
   world: World
-  transcript = ''
-  status: ListeningStatus = 'offline'
+
+  get transcript() {
+    return $transcript.get()
+  }
+
+  get status() {
+    return $status.get()
+  }
 
   rootElement: HTMLDivElement = document.createElement('div')
   displayElement: HTMLDivElement = document.createElement('div')
@@ -121,11 +127,26 @@ export class VoiceController {
 
   // If it cannot hear us for 5 seconds, restart the recognition.
   // This prevents the recognition from stalling.
-  watchdog() {}
+  watchdog() {
+    // Reset existing timer
+    if (this.recognitionWatchdogTimer !== null) {
+      clearTimeout(this.recognitionWatchdogTimer ?? 0)
+      this.recognitionWatchdogTimer = null
+    }
+
+    const transcript = `${this.transcript}`
+
+    this.recognitionWatchdogTimer = setTimeout(() => {
+      if (transcript === this.transcript) {
+        this.stop()
+        this.start()
+      }
+    }, 5000)
+  }
 
   // Update the status display
   updateStatus(status: ListeningStatus) {
-    this.status = status
+    $status.set(status)
   }
 
   setOpenAIKey(key: string) {
@@ -135,28 +156,39 @@ export class VoiceController {
   }
 
   start() {
-    if (this.active) return
+    const status = this.status
+
+    if (status !== 'disabled') return
+
     console.log('> starting recognition')
 
     this.recognition?.abort()
 
-    this.active = true
+    this.updateStatus('listening')
 
     this.createRecognition()
-    this.recognition?.start()
+    this.listen()
+  }
+
+  listen() {
+    try {
+      this.recognition?.start()
+    } catch (err) {}
+
+    this.updateStatus('listening')
   }
 
   stop() {
     console.log('> stopped recognition')
 
-    if (this.recognition) this.recognition.abort()
+    this.recognition?.abort()
 
-    this.active = false
+    this.updateStatus('disabled')
     this.recognition = null
   }
 
   toggle() {
-    if (!this.active) {
+    if (this.status === 'disabled') {
       this.start()
       return
     }
@@ -169,15 +201,19 @@ export class VoiceController {
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
 
-    this.recognition.addEventListener('result', (e) => {
-      this.transcript = [...e.results].map((r) => r?.[0]?.transcript).join('')
-      this.transcriptionElement.innerText = this.transcript
+    this.watchdog()
 
-      console.log('$', this.transcript)
+    this.recognition.addEventListener('result', (e) => {
+      const transcript = [...e.results].map((r) => r?.[0]?.transcript).join('')
+      $transcript.set(transcript)
+
+      this.watchdog()
+      console.log('$', transcript)
     })
 
     this.recognition.addEventListener('end', () => {
-      this.handleVoice().then()
+      this.watchdog()
+      this.onVoiceReceived().then()
     })
   }
 
@@ -188,27 +224,35 @@ export class VoiceController {
     }
 
     this.updateStatus('speaking')
-
     console.log(`> [speaking] ${text}`)
 
-    responsiveVoice.speak(text, 'US English Male', {
+    // don't speak too much.
+    const spokenText = text.slice(0, 150)
+
+    responsiveVoice.speak(spokenText, 'US English Male', {
       pitch: 0.2,
       rate: 1,
       onend: () => {
-        if (this.recognition) this.recognition.start()
+        this.updateStatus('disabled')
+        this.stop()
+        $transcript.set('')
+
+        setTimeout(() => {
+          this.start()
+        }, 1000)
       },
     })
   }
 
-  async handleVoice() {
+  async onVoiceReceived() {
     const text = this.transcript
-    this.transcript = ''
-
-    if (!this.active) return
+    if (this.status === 'disabled') return
 
     if (text) {
       console.log('[human]', text)
+
       this.speak(text)
+      this.updateStatus('thinking')
       this.execute(text)
     }
   }

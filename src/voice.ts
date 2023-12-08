@@ -2,7 +2,7 @@ import { randVariance } from './math'
 import { CurveConfig, SpaceConfig } from './overrides'
 import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
-import { $status, $transcript } from './store/status'
+import { $gptResult, $status, $transcript } from './store/status'
 import { Axis } from './transforms'
 import { World } from './world'
 
@@ -12,6 +12,60 @@ const SpeechRecognition =
 // @ts-expect-error - it's a UMD global
 const responsiveVoice = window.responsiveVoice
 
+// You can only recognize things that are in this grammar.
+const SPEECH_GRAMMAR = `
+#JSGF V1.0;
+
+grammar VoiceCommand;
+
+public <command> = (reset)
+  | (energy [<bodyPart>] to <energyValue>)
+  | (set rotation [<axis>] to <rotationValue>)
+  | (set synchronic limbs to <limbValue>)
+  | (set external body space <externalBodySpaceDetails>)
+
+<curveDetails> = (curve like <curveType>);
+
+<curveType> = (none)
+           | (lowpass)
+           | (highpass)
+           | (gaussian)
+           | (derivative)
+           | (capMin)
+           | (capMax);
+
+<externalBodySpaceDetails> = (delay <delayValue>)
+                        | (threshold <thresholdValue>)
+                        | (min window <minWindowValue>)
+                        | (window size <windowSizeValue>);
+
+<bodyPart> = (head)
+          | (body)
+          | (foot);
+
+<axis> = (x)
+      | (y)
+      | (z);
+
+<energyValue> = (one dot <decimal> | two dots <decimal>);
+
+<rotationValue> = (one dot <decimal> | two dots <decimal> | three dots <decimal>);
+
+<limbValue> = (<integer>);
+
+<decimal> = (zero | one | two | three | four | five | six | seven | eight | nine);
+
+<integer> = (zero | one | two | three | four | five | six | seven | eight | nine);
+
+<delayValue> = (<decimal> <decimal>);
+
+<thresholdValue> = (<decimal> <decimal>);
+
+<minWindowValue> = (<integer>);
+
+<windowSizeValue> = (<integer>);
+`
+
 const PROMPT = `
   This is a system that evaluates the natural language command, and generate a JSON code with these variables,
   according to the following TypeScript interface.
@@ -20,6 +74,12 @@ const PROMPT = `
   as changes in the variable. for example, drunk person might have more rotation and energy.
 
   interface VoiceCommand {
+    // Do we understand their request? Set error = true if we don't.
+    error: boolean
+
+    // Message that the system wants to say. Pretend you're Number 60, a nice bot. Can be anything.
+    message: string
+
     // Reset the system?
     reset: boolean
 
@@ -201,6 +261,10 @@ export class VoiceController {
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
 
+    // const grammars = new SpeechGrammarList()
+    // grammars.addFromString(SPEECH_GRAMMAR, 10)
+    // this.recognition.grammars = grammars
+
     this.watchdog()
 
     this.recognition.addEventListener('result', (e) => {
@@ -214,6 +278,7 @@ export class VoiceController {
     this.recognition.addEventListener('end', () => {
       this.watchdog()
       this.onVoiceReceived().then()
+      $gptResult.set('')
     })
   }
 
@@ -239,7 +304,7 @@ export class VoiceController {
 
         setTimeout(() => {
           this.start()
-        }, 1000)
+        }, 300)
       },
     })
   }
@@ -264,6 +329,7 @@ export class VoiceController {
     }
 
     const action = await gpt(PROMPT, input)
+    $gptResult.set(action)
     console.log('[ai]', action)
 
     let output = null
@@ -332,6 +398,11 @@ export class VoiceController {
               p.curve.parts[part as CurvePartKey] = value[part]
             }
           }
+        }
+
+        // set a fallback
+        if (data.threshold && !data.equation) {
+          p.curve.equation = 'gaussian'
         }
       },
 

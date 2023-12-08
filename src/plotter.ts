@@ -4,7 +4,6 @@ import { KeyframeTrack } from 'three'
 
 import { Character } from './character'
 import { AXES, keyframesAt } from './keyframes'
-import { Params } from './overrides'
 import { profile } from './perf'
 import { Axis } from './transforms'
 import { Matcher } from './types'
@@ -84,8 +83,6 @@ export class Plotter {
     s.position = 'fixed'
     s.left = '0px'
     s.top = `${layout.top}px`
-    // s.pointerEvents = 'none'
-
     s.display = 'flex'
   }
 

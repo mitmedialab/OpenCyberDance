@@ -226,8 +226,6 @@ export class IKManager {
       }
     }
 
-    console.debug('Valid IK definitions')
-
     return true
   }
 
@@ -254,18 +252,14 @@ export class IKManager {
         const targetBoneId = this.targetBoneIds[control]
         const bone = this.mesh.skeleton.bones[targetBoneId]
 
-        // console.log(
-        //   `${control} to frame ${frameId} ~ time ${time}, step ${keyframe.step}`,
-        // )
-
         bone.position.copy(keyframe.position)
         bone.quaternion.copy(keyframe.rotation)
 
         this.frameCounters[control]!++
 
-        // ? do we really want to loop the frames?
+        // TODO: decide how to handle the end of the interpolation
         if (this.frameCounters[control]! >= keyframes.length) {
-          this.frameCounters[control] = 0
+          this.frameCounters[control] = keyframes.length - 1
         }
       }
 
@@ -297,8 +291,6 @@ export class IKManager {
       // ? what happens after the morph ends?
       this.frameCounters[part] = 0
       this.targetFrames[part] = this.getInterpolatedTargets(part, target)
-
-      console.log(`interpolated: ${part}`, this.targetFrames[part])
 
       // Setup IK configuration
       const ik = this.getIKConfig(part)

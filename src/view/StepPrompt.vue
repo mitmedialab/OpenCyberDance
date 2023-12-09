@@ -78,9 +78,9 @@ const numeric = (value: string) => {
       flex
       v-if="completed"
       class="cursor-pointer py-1 px-2 animate__animated fadeIn"
-      :class="[{ 'bg-red-7 text-white px-4 rounded-l pl-4': completed }]"
+      :class="[{ 'bg-red-7 text-white px-4 rounded-l pl-4 pr-4': completed }]"
     >
-      > executing
+      > executed
     </div>
 
     <div flex flex-col v-if="!selectedChoiceKey">

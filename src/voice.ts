@@ -133,6 +133,12 @@ export class VoiceController {
       if (e.error === 'aborted') return
 
       this.updateStatus('failed')
+
+      console.warn('recognition failed:', e.error)
+
+      setTimeout(() => {
+        this.continueListening('restart after error')
+      }, 1000)
     })
 
     this.recognition.addEventListener('nomatch', () => {

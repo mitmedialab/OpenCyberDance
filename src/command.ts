@@ -8,6 +8,7 @@ import {
   delayParts,
 } from './parts.ts'
 import { ChoiceKey, choices } from './step-input'
+import { appendLog } from './store/status.ts'
 import { switchDance } from './switch-dance.ts'
 import { Axis, TransformKey } from './transforms.ts'
 import { world } from './world'
@@ -44,6 +45,8 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
     spokenSentence += ` ${argsText}`
   }
+
+  appendLog(spokenSentence)
 
   world.voice.stop('run command done')
   world.voice.speak(spokenSentence).then()

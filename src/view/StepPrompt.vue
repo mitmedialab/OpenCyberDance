@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStore } from '@nanostores/vue'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 import { choices } from '../step-input'
 
@@ -16,13 +16,20 @@ import {
   $valueCompleted,
 } from '../store/choice.ts'
 
-import { $result, $status, $transcript, $voiceError } from '../store/status.ts'
+import {
+  $result,
+  $status,
+  $transcript,
+  $voiceError,
+  $logs,
+} from '../store/status.ts'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
 const selectedStepChoices = useStore($selectedValues)
 const completed = useStore($valueCompleted)
+const logs = useStore($logs)
 
 const status = useStore($status)
 const transcript = useStore($transcript)
@@ -58,7 +65,9 @@ const numeric = (value: string) => {
 </script>
 
 <template>
-  <div class="fixed top-10 left-10 animate__animated animate__fadeInUp">
+  <div
+    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4"
+  >
     <div
       class="flex items-start justify-start gap-x-6 text-5 font-zed animate__animated"
       :class="{ 'bg-black text-white rounded': completed }"
@@ -152,6 +161,17 @@ const numeric = (value: string) => {
         >
           &lt; back
         </div>
+      </div>
+    </div>
+
+    <div v-if="completed" class="flex flex-col font-zed gap-y-1">
+      <div
+        v-for="(log, id) in logs"
+        :key="id"
+        class="text-[14px] text-gray-4"
+        v-show="id !== logs.length - 1"
+      >
+        $ {{ log }}
       </div>
     </div>
   </div>

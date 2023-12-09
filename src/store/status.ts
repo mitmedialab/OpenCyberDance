@@ -6,6 +6,17 @@ export const $status = atom<ListeningStatus>('disabled')
 export const $transcript = atom('')
 export const $gptResult = atom('')
 export const $voiceError = atom<SpeechRecognitionErrorEvent | null>(null)
+export const $logs = atom<string[]>([])
+
+export function appendLog(data: string) {
+  const logs = $logs.get()
+
+  $logs.set([...logs, data])
+
+  if (logs.length > 6) {
+    $logs.set(logs.slice(1))
+  }
+}
 
 export const $result = computed($gptResult, (result) => {
   if (!result) return null

@@ -59,9 +59,10 @@ const selectedStepChoiceTitles = computed(() => {
       :class="[
         {
           'bg-gray-4': isOffline,
-          'bg-red-8': (!isListening && isConfused) || completed,
+          'bg-red-9': !isListening && isConfused,
           'bg-black': isListening && !isConfused,
           'bg-red-7 rotating': isThinking,
+          'bg-red-8': completed,
         },
       ]"
     />

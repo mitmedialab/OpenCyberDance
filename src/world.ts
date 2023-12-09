@@ -179,7 +179,7 @@ export class World {
   }
 
   updateParams(flags?: UpdateParamFlags) {
-    const b = profile('updateParams', 100)
+    const b = profile('updateParams', 10)
 
     b(() => {
       if (flags?.curve) this.handleCurveFormulaChange()

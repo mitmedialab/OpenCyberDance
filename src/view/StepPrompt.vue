@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import {useStore} from '@nanostores/vue'
-import {computed} from 'vue'
+import { useStore } from '@nanostores/vue'
+import { computed } from 'vue'
 
 import { choices, Choice, ChoiceKey } from '../step-input'
 
@@ -8,19 +8,19 @@ import {
   $selectedChoice,
   $selectedChoiceKey,
   $currentStep,
-  $currentStepId,
   setChoice,
   clearMainChoice,
   prevStep,
   addValue,
-  $selectedValues
-} from "../store/choice.ts";
+  $selectedValues,
+  $valueCompleted,
+} from '../store/choice.ts'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
-const currentStepId = useStore($currentStepId)
 const selectedStepChoices = useStore($selectedValues)
+const completed = useStore($valueCompleted)
 
 const selectedStepChoiceTitles = computed(() => {
   const steps = selectedChoice.value?.steps
@@ -31,13 +31,12 @@ const selectedStepChoiceTitles = computed(() => {
     if (!step) return key
 
     if (step.type === 'choice') {
-      return step.choices.find(c => c.key === key)?.title ?? key
+      return step.choices.find((c) => c.key === key)?.title ?? key
     }
 
     return key
   })
 })
-
 </script>
 
 <template>
@@ -55,6 +54,7 @@ const selectedStepChoiceTitles = computed(() => {
   >
     <div min-w-10 min-h-10 bg-gray-9 />
     <div />
+    <div flex v-if="completed">> executing</div>
     <div flex flex-col v-if="!selectedChoiceKey">
       <div
         :class="[{ 'bg-gray-9 text-white': selectedChoiceKey === key }]"
@@ -75,14 +75,17 @@ const selectedStepChoiceTitles = computed(() => {
     >
       > {{ choices[selectedChoiceKey]?.title }}
     </div>
-    <div v-for="(choice, index) in selectedStepChoiceTitles" class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded">
+    <div
+      v-for="(choice, index) in selectedStepChoiceTitles"
+      class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"
+    >
       > {{ choice }}
     </div>
-    <div flex flex-col v-if="currentStep?.type === 'choice'">
+    <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
       <div
         :class="[{ 'bg-gray-9 text-white': false }]"
         class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"
-        v-for="(choice) in currentStep.choices"
+        v-for="choice in currentStep.choices"
         @click="addValue(choice.key)"
       >
         > {{ choice.title }}
@@ -95,8 +98,10 @@ const selectedStepChoiceTitles = computed(() => {
         > back
       </div>
     </div>
-    <div flex flex-col v-if="currentStep?.type === 'percent'">
-      <div py-1 px-2 @click="addValue('50')">> say a percentage (0% - 100%)</div>
+    <div flex flex-col v-if="currentStep?.type === 'percent' && !completed">
+      <div py-1 px-2 @click="addValue('50')">
+        > say a percentage (0% - 100%)
+      </div>
       <div
         :class="[{ 'bg-gray-9 text-white': false }]"
         class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"

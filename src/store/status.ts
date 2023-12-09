@@ -1,6 +1,9 @@
 import { atom, computed } from 'nanostores'
+import { watch } from 'vue'
 
 import { ListeningStatus } from '../voice'
+import { world } from '../world.ts'
+import { $showPrompt } from './choice.ts'
 
 export const $status = atom<ListeningStatus>('disabled')
 export const $transcript = atom('')

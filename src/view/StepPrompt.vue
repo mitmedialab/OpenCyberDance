@@ -36,18 +36,11 @@ const completed = useStore($valueCompleted)
 const status = useStore($status)
 const transcript = useStore($transcript)
 const result = useStore($result)
-const showPrompt = useStore($showPrompt)
 
 const isListening = computed(() => status.value === 'listening')
 const isThinking = computed(() => status.value === 'thinking')
 const isOffline = computed(() => status.value === 'disabled')
-
-watch(isOffline, (offline) => {
-  if (offline && showPrompt) {
-    console.log('woah! restarting voice.')
-    world.voice.start()
-  }
-})
+const isConfused = computed(() => status.value === 'confused')
 
 const selectedStepChoiceTitles = computed(() => {
   const steps = selectedChoice.value?.steps
@@ -71,12 +64,13 @@ const selectedStepChoiceTitles = computed(() => {
     class="fixed top-10 left-10 flex items-start justify-start gap-x-6 text-5 font-zed w-full"
   >
     <div
-      class="min-w-10 min-h-10"
+      class="min-w-10 min-h-10 shadow shadow-2xl relative z-2 flex items-center justify-center"
       :class="[
         {
           'bg-gray-4': isOffline,
-          'bg-black': isListening,
-          'bg-red-6': isThinking,
+          'bg-red-9': !isListening && isConfused,
+          'bg-black': isListening && !isConfused,
+          'bg-red-6 rotating': isThinking || completed,
         },
       ]"
     />
@@ -140,9 +134,7 @@ const selectedStepChoiceTitles = computed(() => {
       </div>
     </div>
     <div flex flex-col v-if="currentStep?.type === 'percent' && !completed">
-      <div py-1 px-2 @click="addValue('50')">
-        > say a percentage (0% - 100%)
-      </div>
+      <div py-1 px-2 @click="addValue('50')">> percent (0% - 100%)</div>
       <div
         :class="[{ 'bg-gray-9 text-white': false }]"
         class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"

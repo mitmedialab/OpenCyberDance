@@ -2,8 +2,9 @@ import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command.ts'
-import { Choice, ChoiceKey, choices } from '../step-input.ts'
+import { Choice, ChoiceKey, ChoiceOption, choices } from '../step-input.ts'
 import { world } from '../world.ts'
+import { $status } from './status.ts'
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -95,6 +96,7 @@ export function addValue(key: string) {
   const completed = $valueCompleted.get()
   if (!completed) return
 
+  world.voice.stop()
   runCommand($selectedChoiceKey.get()!, $selectedValues.get())
 
   setTimeout(() => {
@@ -102,8 +104,6 @@ export function addValue(key: string) {
 
     resetPrompt()
     $showPrompt.set(false)
-
-    world.voice.start()
   }, 3000)
 }
 
@@ -120,7 +120,7 @@ export const clearMainChoice = () => {
 const choicesKey = Object.keys(choices)
 
 export function handleVoiceSelection(
-  input: string,
+  input: string | number,
   type?: 'choice' | 'percent' | 'any',
 ): boolean {
   const selectedChoiceKey = $selectedChoiceKey.get()
@@ -137,22 +137,39 @@ export function handleVoiceSelection(
 
   if (!currentStep) return false
   if (!input) return false
-  if (typeof input !== 'string') return false
+  if (input === null || input === undefined) return false
 
-  if (input.includes('back')) {
+  if (typeof input === 'string' && input.includes('back')) {
     prevStep()
     return true
   }
 
   if (currentStep.type === 'choice') {
-    const choice = currentStep.choices.find((x) => x.title === input)
-    if (!choice) return false
+    if (typeof input === 'number') return false
 
-    addValue(choice.key)
-    return true
+    const title = input.toLowerCase()
+
+    const choice = currentStep.choices.find(
+      (x) => x.title.toLowerCase() === title,
+    )
+
+    if (choice) {
+      addValue(choice.key)
+      return true
+    }
+
+    if (title === 'why') {
+      addValue('y')
+      return true
+    }
   }
 
   if (currentStep.type === 'percent') {
+    if (typeof input === 'number') {
+      addValue(`${input}`)
+      return true
+    }
+
     const percent = parseInt(input)
 
     if (isNaN(percent)) return false
@@ -200,9 +217,30 @@ export function createGrammarFromState(): string | null {
   `
 
   if (hasChoice) {
-    grammar += `public <choice> = ${params.choices?.join(' | ') || ''};`
+    const choiceGrammar = `public <choice> = ${
+      params.choices?.join(' | ') || ''
+    };`
+
+    grammar += choiceGrammar
+    console.log('choice grammar:', choiceGrammar)
+
     return grammar
   }
 
   return null
 }
+
+export const $isNotListening = computed(
+  [$showPrompt, $status],
+  (show, status) => show && status === 'disabled',
+)
+
+$isNotListening.listen((value) => {
+  if (value) {
+    console.log('re-starting voice...')
+
+    setTimeout(() => {
+      world.voice.start()
+    }, 50)
+  }
+})

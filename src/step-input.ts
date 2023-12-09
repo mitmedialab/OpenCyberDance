@@ -5,12 +5,18 @@ const armatureParts = [
   { title: 'right leg', key: 'rightLeg' },
 ]
 
-const toOptions = (...options: string[]) =>
+export interface ChoiceOption {
+  title: string
+  key: string
+  alts?: string[]
+}
+
+const toOptions = (...options: string[]): ChoiceOption[] =>
   options.map((option) => ({ title: option, key: option }))
 
 export type Step =
   | { type: 'percent' }
-  | { type: 'choice'; choices: { title: string; key: string }[] }
+  | { type: 'choice'; choices: ChoiceOption[] }
 
 export const steps = {
   percent: { type: 'percent' },
@@ -35,11 +41,11 @@ export const steps = {
   curveEquation: {
     type: 'choice',
     choices: [
-      { title: 'a. low pass', key: 'lowpass' },
-      { title: 'b. gaussian', key: 'gaussian' },
-      { title: 'c. derivative', key: 'derivative' },
-      { title: 'd. cap min', key: 'capMin' },
-      { title: 'e. cap max', key: 'capMax' },
+      { title: 'low pass', key: 'lowpass' },
+      { title: 'gaussian', key: 'gaussian' },
+      { title: 'derivative', key: 'derivative' },
+      { title: 'cap min', key: 'capMin' },
+      { title: 'cap max', key: 'capMax' },
     ],
   },
 
@@ -53,18 +59,6 @@ export const steps = {
     choices: [...armatureParts, ...toOptions('all')],
   },
 } satisfies Record<string, Step>
-
-export const altWords = {
-  energy: ['energy'],
-  curve: ['curve', 'curves', 'curving'],
-  shifting: ['shifting', 'shift', 'shifts', 'shifted'],
-  space: ['space', 'spaces', 'spaced'],
-  axis: ['axis', 'axes', 'axises'],
-  rotations: ['rotation', 'rotations', 'rotate', 'rotating'],
-  reset: ['reset', 'resets', 'resetting'],
-  speed: ['speed'],
-  x: ['ex'],
-} satisfies Record<string, string[]>
 
 export type StepKey = keyof typeof steps
 

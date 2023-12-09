@@ -41,35 +41,8 @@ export class VoiceController {
     return $status.get()
   }
 
-  rootElement: HTMLDivElement = document.createElement('div')
-  displayElement: HTMLDivElement = document.createElement('div')
-  transcriptionElement: HTMLDivElement = document.createElement('div')
-  statusElement: HTMLDivElement = document.createElement('div')
-
-  recognitionWatchdogTimer: number | null = null
-
   constructor(world: World) {
     this.world = world
-  }
-
-  // If it cannot hear us for 5 seconds, restart the recognition.
-  // This prevents the recognition from stalling.
-  watchdog() {
-    // Reset existing timer
-    if (this.recognitionWatchdogTimer !== null) {
-      clearTimeout(this.recognitionWatchdogTimer ?? 0)
-      this.recognitionWatchdogTimer = null
-    }
-
-    const transcript = `${this.transcript}`
-
-    this.recognitionWatchdogTimer = setTimeout(() => {
-      if (transcript === this.transcript) {
-        // console.log('-- watchdog reset')
-        // this.stop()
-        // this.start()
-      }
-    }, 5000)
   }
 
   // Update the status display
@@ -124,44 +97,36 @@ export class VoiceController {
     const targetGrammar = createGrammarFromState()
 
     if (targetGrammar) {
-      console.log('target grammar injected', targetGrammar)
-
       const grammars = new SpeechGrammarList()
       grammars.addFromString(targetGrammar, 1)
       this.recognition.grammars = grammars
     }
 
-    this.recognition.addEventListener('start', (e) => {
-      console.log('> recognition started')
-      this.updateStatus('listening')
-    })
-
     this.recognition.addEventListener('error', (e) => {
       console.log('> recognition failed', e)
+      this.updateStatus('confused')
     })
 
     this.recognition.addEventListener('nomatch', (e) => {
       console.log('> no match')
+      this.updateStatus('confused')
     })
 
     this.recognition.addEventListener('audiostart', () => {
-      console.log('> recognition audio start')
-    })
-
-    this.recognition.addEventListener('audioend', () => {
-      console.log('> recognition audio end')
+      this.updateStatus('listening')
     })
 
     this.recognition.addEventListener('result', (e) => {
-      console.log('> recognition received')
+      this.updateStatus('thinking')
 
       this.onVoiceResult([...e.results]).then((status) => {
-        console.log({ status })
+        if (!status) {
+          this.updateStatus('confused')
+        }
       })
     })
 
     this.recognition.addEventListener('end', (e) => {
-      console.log('> recognition ended')
       this.updateStatus('disabled')
     })
   }
@@ -185,17 +150,11 @@ export class VoiceController {
         this.updateStatus('disabled')
         this.stop()
         $transcript.set('')
-
-        setTimeout(() => {
-          this.start()
-        }, 100)
       },
     })
   }
 
   async onVoiceResult(results: SpeechRecognitionResult[]): Promise<boolean> {
-    this.updateStatus('thinking')
-
     console.log(`[results]`, results)
 
     const params = getVoicePromptParams()
@@ -205,7 +164,7 @@ export class VoiceController {
       const voiceResult = results[i]
 
       const alts = [...voiceResult]
-        .filter((b) => b.confidence > 0.1)
+        .filter((b) => b.confidence > 0.000001)
         .sort((a, b) => b.confidence - a.confidence)
         .map((alt) => alt.transcript)
 
@@ -222,8 +181,8 @@ export class VoiceController {
           return true
         }
 
-        if (['x', 'y', 'z'].includes(alt)) {
-          handleVoiceSelection(alt, 'choice')
+        if (['x', 'y', 'z', 'why'].includes(alt.toLowerCase())) {
+          handleVoiceSelection(alt.toLowerCase(), 'choice')
           return true
         }
 
@@ -250,12 +209,10 @@ export class VoiceController {
       } catch (err) {}
 
       if (obj.percent) {
-        console.log('[parse:ai]', obj.choice)
         return handleVoiceSelection(obj.percent, 'percent')
       }
 
       if (obj.choice) {
-        console.log('[parse:ai]', obj.choice)
         return handleVoiceSelection(obj.choice, 'choice')
       }
     }

@@ -1,5 +1,12 @@
 import { percentToValue } from './math.ts'
-import { CorePartKey, CurvePartKey, curveParts, DelayPartKey } from './parts.ts'
+import {
+  CorePartKey,
+  coreParts,
+  CurvePartKey,
+  curveParts,
+  DelayPartKey,
+  delayParts,
+} from './parts.ts'
 import { ChoiceKey, choices } from './step-input'
 import { Axis, TransformKey } from './transforms.ts'
 import { world } from './world'
@@ -83,7 +90,16 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
   if (primary === 'energy') {
     const [partText, percText] = args
-    world.params.energy[partText as CorePartKey] = toValue(percText, 0, 3)
+
+    const value = toValue(percText, 0, 3)
+
+    if (partText === 'all') {
+      Object.keys(coreParts).forEach((part) => {
+        world.params.energy[part as CorePartKey] = value
+      })
+    } else {
+      world.params.energy[partText as CorePartKey] = value
+    }
 
     setTimeout(() => {
       world.updateParams()
@@ -94,7 +110,16 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
   if (primary === 'shifting') {
     const [partText, percText] = args
-    world.params.delays[partText as DelayPartKey] = toValue(percText, 0, 3)
+
+    const value = toValue(percText, 0, 3)
+
+    if (partText === 'all') {
+      Object.keys(delayParts).forEach((part) => {
+        world.params.delays[part as DelayPartKey] = value
+      })
+    } else {
+      world.params.delays[partText as DelayPartKey] = value
+    }
 
     setTimeout(() => {
       world.updateParams()
@@ -124,7 +149,16 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
   if (primary === 'rotations') {
     const [axis, perc] = args
-    world.params.rotations[axis as Axis] = toValue(perc, 1, 5)
+
+    const value = toValue(perc, 1, 5)
+
+    if (axis === 'all') {
+      world.params.rotations.x = value
+      world.params.rotations.y = value
+      world.params.rotations.z = value
+    } else {
+      world.params.rotations[axis as Axis] = value
+    }
 
     setTimeout(() => {
       world.updateParams({ rotation: true })

@@ -23,13 +23,13 @@ export const steps = {
 
   axes: {
     type: 'choice',
-    choices: toOptions('x', 'y', 'z'),
+    choices: toOptions('x', 'y', 'z', 'all'),
   },
 
   // select shifting relations part
   energyParts: {
     type: 'choice',
-    choices: toOptions('head', 'body', 'foot'),
+    choices: toOptions('head', 'body', 'foot', 'all'),
   },
 
   // select shifting relations part
@@ -51,7 +51,11 @@ export const steps = {
 
   curveParts: {
     type: 'choice',
-    choices: [...toOptions('head', 'body'), ...armatureParts],
+    choices: [
+      ...toOptions('head', 'body'),
+      ...armatureParts,
+      ...toOptions('all'),
+    ],
   },
 
   axisParts: {

@@ -240,7 +240,7 @@ export function handleVoiceSelection(
 
     if (isNaN(percent)) return false
     if (percent < 0) return false
-    if (percent >= Math.max(currentStep.max ?? 100, 100)) return false
+    if (percent > Math.max(currentStep.max ?? 100, 100)) return false
 
     addValue(`${percent}`)
     return true

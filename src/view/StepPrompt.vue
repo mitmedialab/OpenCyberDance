@@ -157,6 +157,9 @@ const numeric = (value: string) => {
   <div fixed bottom-4 left-4 class="text-[12px] font-zed text-gray-7">
     <div v-if="status">s: {{ status }}</div>
     <div v-if="transcript">h: {{ transcript }}</div>
-    <div v-if="voiceError">e: {{ voiceError.error }}</div>
+
+    <div v-if="voiceError">
+      e: {{ voiceError.error }} {{ voiceError.message }}
+    </div>
   </div>
 </template>

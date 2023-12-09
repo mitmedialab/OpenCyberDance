@@ -2,7 +2,7 @@ import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command.ts'
-import { Choice, ChoiceKey, ChoiceOption, choices } from '../step-input.ts'
+import { Choice, ChoiceKey, choices } from '../step-input.ts'
 import { world } from '../world.ts'
 import { $status } from './status.ts'
 

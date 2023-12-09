@@ -1,6 +1,5 @@
 import { randVariance } from './math'
-import { CurveConfig, SpaceConfig } from './overrides'
-import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
+import { DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
 import {
@@ -9,8 +8,7 @@ import {
   handleVoiceSelection,
   prevStep,
 } from './store/choice.ts'
-import { $gptResult, $status, $transcript } from './store/status'
-import { Axis } from './transforms'
+import { $status, $transcript } from './store/status'
 import { World } from './world'
 
 const SpeechRecognition =
@@ -103,7 +101,7 @@ export class VoiceController {
     }
 
     this.recognition.addEventListener('error', (e) => {
-      console.log('> recognition failed', e)
+      console.log('> recognition failed', e.message)
       this.updateStatus('confused')
     })
 

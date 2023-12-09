@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useStore } from '@nanostores/vue'
-import { computed, onMounted, watch } from 'vue'
+import { computed } from 'vue'
 
-import { choices, Choice, ChoiceKey } from '../step-input'
+import { choices } from '../step-input'
 
 import {
   $selectedChoice,
@@ -14,18 +14,9 @@ import {
   addValue,
   $selectedValues,
   $valueCompleted,
-  $showPrompt,
 } from '../store/choice.ts'
 
-import {
-  $gptResult,
-  $result,
-  $status,
-  $transcript,
-  $understand,
-} from '../store/status.ts'
-
-import { world } from '../world'
+import { $result, $status, $transcript } from '../store/status.ts'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
@@ -68,14 +59,13 @@ const selectedStepChoiceTitles = computed(() => {
       :class="[
         {
           'bg-gray-4': isOffline,
-          'bg-red-9': !isListening && isConfused,
+          'bg-red-8': (!isListening && isConfused) || completed,
           'bg-black': isListening && !isConfused,
-          'bg-red-6 rotating': isThinking || completed,
+          'bg-red-7 rotating': isThinking,
         },
       ]"
     />
 
-    <div />
     <div
       flex
       v-if="completed"

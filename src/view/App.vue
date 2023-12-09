@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
-import { useMagicKeys } from '@vueuse/core'
+import * as Tone from 'tone'
 
 import { $showPrompt, resetPrompt } from '../store/choice'
 
@@ -14,14 +14,28 @@ const showPrompt = useStore($showPrompt)
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
+function ding() {
+  const synth = new Tone.Synth().toDestination()
+  const now = Tone.now()
+
+  synth.triggerAttack('C4', now)
+  synth.triggerRelease(now + 1)
+}
+
 onMounted(async () => {
   await world.setup()
 
-  window.addEventListener('keydown', (event) => {
+  window.addEventListener('keydown', async (event) => {
+    await Tone.start()
+
     if (event.key === ' ') {
+      const next = !showPrompt.value
+
       resetPrompt()
-      $showPrompt.set(!showPrompt.value)
+      $showPrompt.set(next)
       world.voice.start()
+
+      if (next) ding()
     }
 
     if (event.key === 'i') {

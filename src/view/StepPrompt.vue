@@ -165,14 +165,16 @@ const numeric = (value: string) => {
     </div>
 
     <div v-if="completed" class="flex flex-col font-zed gap-y-1">
-      <div
-        v-for="(log, id) in logs"
-        :key="id"
-        class="text-[14px] text-gray-4"
-        v-show="id !== logs.length - 1"
-      >
-        $ {{ log }}
-      </div>
+      <TransitionGroup name="choice-list">
+        <div
+          v-for="(log, id) in logs.slice(0, 5)"
+          :key="log"
+          class="text-[14px] text-gray-4 animate__animated animate__fadeInUp transition-faster"
+          v-show="id !== logs.length - 1"
+        >
+          $ {{ log }}
+        </div>
+      </TransitionGroup>
     </div>
   </div>
 

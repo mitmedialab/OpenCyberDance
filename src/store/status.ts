@@ -13,7 +13,7 @@ export function appendLog(data: string) {
 
   $logs.set([...logs, data])
 
-  if (logs.length > 6) {
+  if (logs.length > 5) {
     $logs.set(logs.slice(1))
   }
 }

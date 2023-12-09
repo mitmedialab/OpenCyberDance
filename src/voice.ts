@@ -274,7 +274,12 @@ export class VoiceController {
       .map((alt) => alt.transcript)
 
     if (isPercent) {
-      const definitelyNumbers = alts.filter((alt) => Number(alt))
+      const definitelyNumbers = alts
+        .filter((alt) => Number(alt))
+        .filter(
+          (alt) => step?.type === 'percent' && Number(alt) <= (step.max ?? 100),
+        )
+        .sort((a, b) => Number(b) - Number(a))
 
       alts.unshift(...definitelyNumbers)
     }

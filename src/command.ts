@@ -1,5 +1,7 @@
 import { percentToValue } from './math.ts'
 import {
+  AxisPointControlParts,
+  axisPointControlParts,
   CorePartKey,
   coreParts,
   CurvePartKey,
@@ -56,14 +58,11 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
     const equation = equationText as TransformKey
 
     world.params.curve.equation = equation
-    console.log('--- curve [parts]')
 
     for (const part in curveParts) {
       world.params.curve.parts[part as CurvePartKey] =
         partText === 'all' ? true : partText === part
     }
-
-    console.log('--- curve [threshold]')
 
     switch (equation) {
       case 'derivative':
@@ -80,14 +79,9 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
         break
     }
 
-    console.log('--- curve [update:params]')
-    console.log(world.params.curve)
-
     setTimeout(() => {
       world.updateParams({ curve: true })
     }, 80)
-
-    console.log('--- curve [updated]')
 
     return
   }
@@ -151,7 +145,14 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
   // Axis Point
   if (primary === 'axis') {
     const [partText, percText] = args
-    // disable for now
+
+    for (const part in axisPointControlParts) {
+      world.params.axisPoint.parts[part as AxisPointControlParts] =
+        partText === 'all' ? true : partText === part
+    }
+
+    world.params.axisPoint.threshold = toValue(percText, 0, 10)
+
     return
   }
 

@@ -108,7 +108,9 @@ const numeric = (value: string) => {
             class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
             v-for="(choice, key) in choices"
             :key="key"
-            v-show="!selectedChoiceKey || selectedChoiceKey == key"
+            v-show="
+              (!selectedChoiceKey || selectedChoiceKey == key) && !choice.hidden
+            "
             @click="selectedChoiceKey ? clearMainChoice() : setChoice(key)"
           >
             > {{ choice.title }}

@@ -273,6 +273,12 @@ export class VoiceController {
       .sort((a, b) => b.confidence - a.confidence)
       .map((alt) => alt.transcript)
 
+    if (isPercent) {
+      const definitelyNumbers = alts.filter((alt) => Number(alt))
+
+      alts.unshift(...definitelyNumbers)
+    }
+
     if (alts.length === 0) return false
 
     console.log(

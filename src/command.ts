@@ -1,6 +1,6 @@
 import { percentToValue } from './math.ts'
 import { CorePartKey, CurvePartKey, curveParts, DelayPartKey } from './parts.ts'
-import { ChoiceKey } from './step-input'
+import { ChoiceKey, choices } from './step-input'
 import { Axis, TransformKey } from './transforms.ts'
 import { world } from './world'
 
@@ -10,9 +10,31 @@ const toValue = (v: string, min: number, max: number) =>
 export function runCommand(primary: ChoiceKey, args: string[]) {
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
 
-  let spokenSentence = `${primary}}`
+  const choice = choices[primary]
+
+  let spokenSentence = choice?.title ?? primary
+
   if (args.length > 0) {
-    spokenSentence += `${args.join(' ')}`
+    const argsText = args
+      .map((a, i) => {
+        const step = choice?.steps[i]
+
+        if (!step) return a
+        if (step.type === 'percent') return `${a} percent`
+
+        if (step.type === 'choice') {
+          const target = step.choices.find((c) => c.key === a || c.title === a)
+
+          if (target) {
+            return target.title
+          }
+        }
+
+        return a
+      })
+      .join(' ')
+
+    spokenSentence += argsText
   }
 
   world.voice.stop('run command done')

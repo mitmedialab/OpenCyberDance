@@ -150,7 +150,7 @@ export class VoiceController {
     })
 
     this.recognition.addEventListener('nomatch', () => {
-      this.onConfused('no match')
+      this.onConfused()
     })
 
     this.recognition.addEventListener('start', () => {
@@ -186,14 +186,12 @@ export class VoiceController {
         console.log(`> interpretation success (id: ${id})`)
         this.successFlags.set(id, true)
 
-        this.continueListening('after interpret success')
-
         return
       }
 
       console.log(`> cannot interpret result (id: ${id})`)
 
-      this.onConfused('after interpret failed')
+      this.onConfused()
     })
 
     this.recognition.addEventListener('end', () => {
@@ -206,9 +204,8 @@ export class VoiceController {
     })
   }
 
-  onConfused(key?: string) {
+  onConfused() {
     this.updateStatus('confused')
-    this.continueListening(key)
     this.restoreStatusTimer('confused')
   }
 
@@ -224,12 +221,16 @@ export class VoiceController {
 
   continueListening(key?: string) {
     const completed = $valueCompleted.get()
+
+    // do not continue if already completed.
     if (completed) return
 
     // if it's still not completed, then we need to continue!
     setTimeout(() => {
-      console.log(`[no op - continue listen] ${key}`)
-    }, 10)
+      if (!this.recognition) {
+        this.startRecognition(key)
+      }
+    }, 100)
   }
 
   speak(text: string): Promise<void> {
@@ -245,8 +246,7 @@ export class VoiceController {
       // don't speak too much.
       const spokenText = text.slice(0, 150)
 
-      responsiveVoice.speak(spokenText, 'US English Male', {
-        pitch: 0.2,
+      responsiveVoice.speak(spokenText, 'UK English Female', {
         rate: 1,
         onend: () => {
           resolve()

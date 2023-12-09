@@ -41,7 +41,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
       })
       .join(' ')
 
-    spokenSentence += argsText
+    spokenSentence += ` ${argsText}`
   }
 
   world.voice.stop('run command done')

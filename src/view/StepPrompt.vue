@@ -84,35 +84,30 @@ const numeric = (value: string) => {
       > executed
     </div>
 
-    <div flex flex-col v-if="!selectedChoiceKey">
-      <div
-        :class="[
-          {
-            'bg-gray-9 text-white': selectedChoiceKey == key,
-          },
-        ]"
-        class="hover:bg-gray-9 hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
-        v-for="(choice, key) in choices"
-        @click="setChoice(key)"
-      >
-        > {{ choice.title }}
-      </div>
-    </div>
-
-    <div
-      flex
-      flex-col
-      cursor-pointer
-      class="hover:bg-gray-9 hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
-      v-if="selectedChoiceKey"
-      @click="clearMainChoice()"
-    >
-      > {{ choices[selectedChoiceKey]?.title }}
+    <div flex flex-col relative>
+      <TransitionGroup name="choice-list">
+        <div
+          :class="[
+            {
+              'highlight-a-bit': selectedChoiceKey == key,
+              'go-away': selectedChoiceKey && selectedChoiceKey != key,
+              animate__fadeInUp: !selectedChoiceKey,
+            },
+          ]"
+          class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated"
+          v-for="(choice, key) in choices"
+          :key="key"
+          v-show="!selectedChoiceKey || selectedChoiceKey == key"
+          @click="selectedChoiceKey ? clearMainChoice() : setChoice(key)"
+        >
+          > {{ choice.title }}
+        </div>
+      </TransitionGroup>
     </div>
 
     <div
       v-for="choice in selectedStepChoiceTitles"
-      class="hover:bg-gray-9 hover:text-white hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
+      class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
     >
       <span v-if="numeric(choice)">> {{ choice }}%</span>
       <span v-else>> {{ choice }}</span>
@@ -120,7 +115,7 @@ const numeric = (value: string) => {
 
     <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
       <div
-        class="hover:bg-gray-9 hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
+        class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
         v-for="choice in currentStep.choices"
         @click="addValue(choice.key)"
       >
@@ -128,7 +123,7 @@ const numeric = (value: string) => {
       </div>
 
       <div
-        class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
+        class="hover:bg-black hover:text-white cursor-pointer py-1 px-2 animate__animated animate__fadeInUp"
         @click="prevStep()"
       >
         &lt; back
@@ -146,7 +141,7 @@ const numeric = (value: string) => {
       </div>
 
       <div
-        class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp"
+        class="hover:bg-black hover:text-white cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp"
         @click="prevStep()"
       >
         &lt; back

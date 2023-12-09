@@ -10,3 +10,43 @@ body {
 .rotating {
   animation: rotate 0.5s infinite linear;
 }
+
+@keyframes highlight {
+  0% {
+    color: black;
+    background-color: transparent;
+  }
+
+  15%, 90% {
+    color: white;
+    background-color: #000;
+  }
+
+  98% {
+    color: black;
+    background-color: transparent;
+  }
+}
+
+.highlight-a-bit {
+  animation: highlight 0.8s ease;
+}
+
+.choice-list-move,
+.choice-list-enter-active,
+.choice-list-leave-active {
+  transition: all 1.5s ease;
+}
+
+.choice-list-enter-from,
+.choice-list-leave-to {
+  opacity: 0;
+}
+
+.go-away {
+  opacity: 0.00001;
+}
+
+.choice-list-leave-active {
+  position: absolute;
+}

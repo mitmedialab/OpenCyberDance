@@ -8,25 +8,23 @@ const toValue = (v: string, min: number, max: number) =>
   percentToValue(parseInt(v), min, max)
 
 export function runCommand(primary: ChoiceKey, args: string[]) {
-  world.voice.stop()
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
+
+  world.voice.stop('run command done')
 
   if (primary === 'curve') {
     const [equationText, partText, percText] = args
-
     const equation = equationText as TransformKey
 
     world.params.curve.equation = equation
+    console.log('--- curve [parts]')
 
-    if (partText === 'all') {
-      Object.keys(curveParts).forEach((part) => {
-        world.params.curve.parts[part as CurvePartKey] = true
-      })
-    } else {
-      Object.keys(curveParts).forEach((part) => {
-        world.params.curve.parts[partText as CurvePartKey] = partText === part
-      })
+    for (const part in curveParts) {
+      world.params.curve.parts[part as CurvePartKey] =
+        partText === 'all' ? true : partText === part
     }
+
+    console.log('--- curve [threshold]')
 
     switch (equation) {
       case 'derivative':
@@ -34,7 +32,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
         world.params.curve.threshold = 1
         break
       case 'lowpass':
-        world.params.curve.threshold = toValue(percText, 1, 2000)
+        world.params.curve.threshold = toValue(percText, 1, 1500)
         break
       case 'gaussian':
       case 'capMin':
@@ -43,7 +41,16 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
         break
     }
 
-    world.updateParams({ curve: true })
+    console.log('--- curve [update:params]')
+    console.log(world.params.curve)
+
+    setTimeout(() => {
+      world.updateParams({ curve: true })
+    }, 200)
+
+    console.log('--- curve [updated]')
+
+    return
   }
 
   if (primary === 'energy') {

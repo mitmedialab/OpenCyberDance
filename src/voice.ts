@@ -3,6 +3,8 @@ import { DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
 import {
+  $showPrompt,
+  $valueCompleted,
   createGrammarFromState,
   getVoicePromptParams,
   handleVoiceSelection,
@@ -26,6 +28,7 @@ export type ListeningStatus =
   | 'thinking'
   | 'speaking'
   | 'confused'
+  | 'failed'
 
 export class VoiceController {
   recognition: SpeechRecognition | null = null
@@ -54,32 +57,50 @@ export class VoiceController {
     localStorage.setItem('OPENAI_KEY', key)
   }
 
-  start() {
-    const status = this.status
-    if (status !== 'disabled') return
-
-    this.recognition?.abort()
-    this.createRecognition()
-    this.listen()
+  enableVoice(key?: string) {
+    console.log(`[enable voice] ${key}`)
+    this.startRecognition('start method')
   }
 
-  listen() {
+  startRecognition(key?: string) {
     try {
-      this.recognition?.start()
-    } catch (err) {}
+      this.recognition?.abort()
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log('recognition failed to abort', error)
+      }
+    }
+
+    this.createRecognition()
+
+    if (!this.recognition) return
+
+    try {
+      this.recognition.start()
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log('recognition failed to start', error)
+      }
+    }
+
+    console.log(`[recognition started] ${key}`)
   }
 
-  stop() {
-    console.log('> stopped recognition')
+  stop(key?: string) {
     this.updateStatus('disabled')
 
-    this.recognition?.abort()
+    try {
+      this.recognition?.abort()
+    } catch (err) {}
+
     this.recognition = null
+
+    console.log(`[recognition stopped] ${key}`)
   }
 
   toggle() {
     if (this.status === 'disabled') {
-      this.start()
+      this.enableVoice('toggle')
       return
     }
 
@@ -91,6 +112,7 @@ export class VoiceController {
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
     this.recognition.maxAlternatives = 3
+    this.recognition.continuous = false
 
     const targetGrammar = createGrammarFromState()
 
@@ -101,32 +123,72 @@ export class VoiceController {
     }
 
     this.recognition.addEventListener('error', (e) => {
-      console.log('> recognition failed', e.message)
-      this.updateStatus('confused')
+      // do not update error status if manually aborted by us.
+      if (e.error === 'aborted') return
+
+      this.updateStatus('failed')
     })
 
-    this.recognition.addEventListener('nomatch', (e) => {
-      console.log('> no match')
-      this.updateStatus('confused')
+    this.recognition.addEventListener('nomatch', () => {
+      this.onConfused('no match')
+    })
+
+    this.recognition.addEventListener('start', () => {
+      this.updateStatus('listening')
     })
 
     this.recognition.addEventListener('audiostart', () => {
       this.updateStatus('listening')
     })
 
-    this.recognition.addEventListener('result', (e) => {
+    this.recognition.addEventListener('result', async (e) => {
       this.updateStatus('thinking')
 
-      this.onVoiceResult([...e.results]).then((status) => {
-        if (!status) {
-          this.updateStatus('confused')
-        }
-      })
+      const status = await this.onVoiceResult([...e.results])
+
+      if (status) {
+        console.log(`> interpretation success`)
+        this.continueListening('after interpret success')
+
+        return
+      }
+
+      console.log(`> cannot interpret result`)
+
+      this.onConfused('after interpret failed')
     })
 
-    this.recognition.addEventListener('end', (e) => {
-      this.updateStatus('disabled')
+    this.recognition.addEventListener('end', () => {
+      const completed = $valueCompleted.get()
+      const show = $showPrompt.get()
+
+      if (show && !completed) {
+        this.continueListening('after recognition disconnected')
+      }
     })
+  }
+
+  onConfused(key?: string) {
+    this.updateStatus('confused')
+    this.continueListening(key)
+
+    setTimeout(() => {
+      if ($status.get() === 'confused') {
+        if (this.recognition) {
+          this.updateStatus('listening')
+        }
+      }
+    }, 800)
+  }
+
+  continueListening(key?: string) {
+    const completed = $valueCompleted.get()
+    if (!completed) return
+
+    // if it's still not completed, then we need to continue!
+    setTimeout(() => {
+      this.startRecognition(key)
+    }, 100)
   }
 
   speak(text: string) {
@@ -146,7 +208,6 @@ export class VoiceController {
       rate: 1,
       onend: () => {
         this.updateStatus('disabled')
-        this.stop()
         $transcript.set('')
       },
     })
@@ -166,11 +227,9 @@ export class VoiceController {
         .sort((a, b) => b.confidence - a.confidence)
         .map((alt) => alt.transcript)
 
-      if (alts.length === 0) {
-        continue
-      }
+      if (alts.length === 0) continue
 
-      console.log(`[heard] ${alts.join(', ')}`)
+      console.log(`[heard] ${alts.join(', ')} (final=${voiceResult.isFinal})`)
 
       // PASS 1 - use speech recognition grammar
       for (const alt of alts) {
@@ -190,6 +249,9 @@ export class VoiceController {
           return true
         }
       }
+
+      // only use GPT for final results
+      if (!voiceResult.isFinal) return false
 
       // PASS 2 - use GPT
       const alt = alts?.[0]?.trim()

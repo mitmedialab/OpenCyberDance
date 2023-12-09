@@ -50,6 +50,12 @@ dependencies:
   vue:
     specifier: ^3.3.10
     version: 3.3.10(typescript@5.3.2)
+  vue-flip-toolkit:
+    specifier: ^1.6.0
+    version: 1.6.0
+  vue-overdrive:
+    specifier: ^1.2.0
+    version: 1.2.0
 
 devDependencies:
   '@nanostores/logger':
@@ -2017,6 +2023,13 @@ packages:
     resolution: {integrity: sha512-36yxDn5H7OFZQla0/jFJmbIKTdZAQHngCedGxiMmpNfEZM0sdEeT+WczLQrjK6D7o2aiyLYDnkw0R3JK0Qv1RQ==}
     dev: true
 
+  /flip-toolkit@7.1.0:
+    resolution: {integrity: sha512-tvids+uibr8gVFUp1xHMkNSIFvM4++Xr4jAJouUVsId2hv3YvhvC4Ht2FJzdxBZHhI4AeULPFAF6z9fhc20XWQ==}
+    engines: {node: '>=8', npm: '>=5'}
+    dependencies:
+      rematrix: 0.2.2
+    dev: false
+
   /fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
@@ -2586,6 +2599,12 @@ packages:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
     dev: true
 
+  /ramjet@0.6.0-alpha1:
+    resolution: {integrity: sha512-9LAEPtXfk8clXS2Ke74Bg8i5NVzobWmdYd2u5L1mj97lsCh9r1Jb9gPGZ7UuxvIOGkoQU/krJyddzLr2q1lw/Q==}
+    dependencies:
+      stacking-order: 1.0.1
+    dev: false
+
   /readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
@@ -2595,6 +2614,10 @@ packages:
 
   /regenerator-runtime@0.14.0:
     resolution: {integrity: sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==}
+    dev: false
+
+  /rematrix@0.2.2:
+    resolution: {integrity: sha512-agFFS3RzrLXJl5LY5xg/xYyXvUuVAnkhgKO7RaO9J1Ssth6yvbO+PIiV67V59MB5NCdAK2flvGvNT4mdKVniFA==}
     dev: false
 
   /resolve-from@4.0.0:
@@ -2692,6 +2715,10 @@ packages:
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
     engines: {node: '>=0.10.0'}
+
+  /stacking-order@1.0.1:
+    resolution: {integrity: sha512-IxD2jw+DDiQ3FaXr6QcvSt5uE2vDWBYcC7bbCWfI5R9kEoj8Zgi4rFwPXALOjTtE96iIdZjcJFLQVr7r7xIdAA==}
+    dev: false
 
   /standardized-audio-context@25.3.60:
     resolution: {integrity: sha512-h4ntLsHqnRESxyuU4C5/gvZTBqjBw1SoAR5lsQbqXPI4R3KKZTJWnMMpnRdiySr7cXokbEcepaPGGQ1V+UwlLw==}
@@ -2938,6 +2965,18 @@ packages:
         optional: true
     dependencies:
       vue: 3.3.10(typescript@5.3.2)
+    dev: false
+
+  /vue-flip-toolkit@1.6.0:
+    resolution: {integrity: sha512-ef/v+W46yrUu+2CroInsIzbMIf/oBpvUs5JDV6K3OMjvXKxFrXYM7UYfFZU0X8LsUv8woCg7QS1DTPPn8HEokA==}
+    dependencies:
+      flip-toolkit: 7.1.0
+    dev: false
+
+  /vue-overdrive@1.2.0:
+    resolution: {integrity: sha512-C+nzQwbE3TF4QHM3DMrLC3gUJKRyYf4FVCCIqJzkasQXukH5Gj1LQLpYTgKeMiF1bS20XaOYZYyUR+SSB70tow==}
+    dependencies:
+      ramjet: 0.6.0-alpha1
     dev: false
 
   /vue@3.3.10(typescript@5.3.2):

@@ -1,10 +1,9 @@
 import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
 
-import { runCommand } from '../command.ts'
-import { Choice, ChoiceKey, choices } from '../step-input.ts'
-import { world } from '../world.ts'
-import { $status } from './status.ts'
+import { runCommand } from '../command'
+import { ding } from '../ding'
+import { Choice, ChoiceKey, choices } from '../step-input'
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -47,8 +46,12 @@ export function isValueCompleted(step: number | null, choice: Choice | null) {
 
 export function nextStep() {
   const step = $currentStepId.get() || 0
+  const next = step + 1
 
-  $currentStepId.set(step + 1)
+  console.log(`[next step] is ${next}`)
+  ding(next + 1)
+
+  $currentStepId.set(next)
 }
 
 export function prevStep() {
@@ -90,21 +93,15 @@ export function clearStepChoice() {
 }
 
 export function addValue(key: string) {
+  console.log(`> added value: ${key}`)
+
   $selectedValues.set([...$selectedValues.get(), key])
   nextStep()
 
   const completed = $valueCompleted.get()
   if (!completed) return
 
-  world.voice.stop()
   runCommand($selectedChoiceKey.get()!, $selectedValues.get())
-
-  setTimeout(() => {
-    console.log('-- clearing prompt')
-
-    resetPrompt()
-    $showPrompt.set(false)
-  }, 3000)
 }
 
 export function resetPrompt() {
@@ -127,17 +124,16 @@ export function handleVoiceSelection(
   const currentStep = $currentStep.get()
 
   if (!selectedChoiceKey || !currentStep) {
-    if (choicesKey.includes(input)) {
-      console.log('--- select')
+    if (choicesKey.includes(input as string)) {
       setChoice(input as ChoiceKey)
+      ding(2)
 
       return true
     }
   }
 
   if (!currentStep) return false
-  if (!input) return false
-  if (input === null || input === undefined) return false
+  if (input === '' || input === null || input === undefined) return false
 
   if (typeof input === 'string' && input.includes('back')) {
     prevStep()
@@ -229,18 +225,3 @@ export function createGrammarFromState(): string | null {
 
   return null
 }
-
-export const $isNotListening = computed(
-  [$showPrompt, $status],
-  (show, status) => show && status === 'disabled',
-)
-
-$isNotListening.listen((value) => {
-  if (value) {
-    console.log('re-starting voice...')
-
-    setTimeout(() => {
-      world.voice.start()
-    }, 50)
-  }
-})

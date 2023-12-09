@@ -1,40 +1,45 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
-import * as Tone from 'tone'
 
-import { $showPrompt, resetPrompt } from '../store/choice'
+import { $showPrompt, $valueCompleted, resetPrompt } from '../store/choice'
 
 import { world } from '../world'
 
 import StepPrompt from './StepPrompt.vue'
+import { ding } from '../ding.ts'
 
 const showPrompt = useStore($showPrompt)
 
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
-import { Howl } from 'howler'
-
-function ding() {
-  const sound = new Howl({ src: '/sounds/khongwong.wav' })
-  sound.play()
-}
-
 onMounted(async () => {
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
-    await Tone.start()
-
     if (event.key === ' ') {
       const next = !showPrompt.value
 
+      world.voice.enableVoice('prompt activate')
+
+      const completed = $valueCompleted.get()
+
+      if (completed) {
+        ding(1)
+        resetPrompt()
+
+        return
+      }
+
       resetPrompt()
       $showPrompt.set(next)
-      world.voice.start()
 
-      if (next) ding()
+      if (next) {
+        ding(1)
+      } else {
+        world.voice.stop()
+      }
     }
 
     if (event.key === 'i') {

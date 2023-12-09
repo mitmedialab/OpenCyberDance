@@ -14,7 +14,7 @@ output { choice: "rotation"  }
 
 Returns a JSON with the exact choice key, e.g. { "choice": "foo" } . If you are not confident to make a match, return { "choice": null }
 
-If the input is { input: "fifty", "percent": true }, match the user's input to a number between 0 and 100, and return it as a number, e.g. { "percent": 50 } . If you are not confident to make a match, return { "percent": null }
+If the input is { input: "fifty", "percent": true }, match the user's input to a float between 0.0 and 200.0, and return it as a number, e.g. { "percent": 50 } . If you are not confident to make a match, return { "percent": null }
 
 `.trim()
 

@@ -93,7 +93,7 @@ export const choices = {
   rotations: {
     title: 'rotations',
     triggers: ['turn', 'rotation'],
-    steps: [steps.axes]
+    steps: [steps.axes, steps.percent]
   },
   reset: {
     title: 'reset',

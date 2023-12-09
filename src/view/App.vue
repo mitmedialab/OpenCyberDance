@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 
-import { World } from '../world'
+import { world } from '../world'
 import StepPrompt from './StepPrompt.vue'
 
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
 onMounted(async () => {
-  const world = new World()
   await world.setup()
 
   rendererElement.value?.appendChild(world.renderer.domElement)

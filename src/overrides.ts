@@ -23,16 +23,16 @@ type CharacterOptions = Record<string, { model: ModelKey; action: string }>
 
 export interface SpaceConfig {
   /** Slow down the movement for the entire valley for X seconds. */
-  delay: 0
+  delay: number
 
   /** Ignore changes below this threshold. */
-  threshold: 0.005
+  threshold: number
 
   /** Ignore region of change smaller than this window. */
-  minWindow: 3
+  minWindow: number
 
   /** The window size to calculate the averages. */
-  windowSize: 30
+  windowSize: number
 }
 
 export interface AxisPointConfig {

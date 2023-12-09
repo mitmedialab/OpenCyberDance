@@ -19,3 +19,15 @@ export function randVariance(variance: number) {
 
   return Math.random() * (maxRange - minRange) + minRange
 }
+
+export function percentToValue(
+  percent: number,
+  min: number,
+  max: number,
+): number {
+  // Ensure that percent is within the range [0, 100]
+  const perc = Math.min(100, Math.max(0, percent))
+
+  // Map the percentage to the range [min, max]
+  return min + (perc / 100) * (max - min)
+}

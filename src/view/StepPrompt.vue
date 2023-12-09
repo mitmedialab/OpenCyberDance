@@ -28,6 +28,7 @@ const selectedStepChoiceTitles = computed(() => {
 
   return selectedStepChoices.value.map((key, index) => {
     const step = steps[index]
+    if (!step) return key
 
     if (step.type === 'choice') {
       return step.choices.find(c => c.key === key)?.title ?? key

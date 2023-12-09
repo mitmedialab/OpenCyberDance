@@ -380,3 +380,5 @@ export class World {
     if (this.controls) this.controls.update()
   }
 }
+
+export const world = new World()

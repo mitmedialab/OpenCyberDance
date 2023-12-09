@@ -1,6 +1,7 @@
 import {atom, computed} from 'nanostores'
 import {ChoiceKey, choices} from "../step-input.ts";
 import {produce} from "immer";
+import {runCommand} from "../command.ts";
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -67,7 +68,7 @@ export function addValue(key: string) {
   $selectedValues.set([...$selectedValues.get(), key])
 
   if ($valueCompleted.get()) {
-    console.log('we are done!')
+    runCommand($selectedChoiceKey.get()!, $selectedValues.get())
     return
   }
 

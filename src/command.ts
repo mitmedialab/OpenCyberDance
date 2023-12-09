@@ -1,5 +1,5 @@
 import { percentToValue } from './math.ts'
-import { CorePartKey, CurvePartKey, DelayPartKey } from './parts.ts'
+import { CorePartKey, CurvePartKey, curveParts, DelayPartKey } from './parts.ts'
 import { ChoiceKey } from './step-input'
 import { Axis, TransformKey } from './transforms.ts'
 import { world } from './world'
@@ -8,16 +8,25 @@ const toValue = (v: string, min: number, max: number) =>
   percentToValue(parseInt(v), min, max)
 
 export function runCommand(primary: ChoiceKey, args: string[]) {
+  world.voice.stop()
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
 
   if (primary === 'curve') {
     const [equationText, partText, percText] = args
 
     const equation = equationText as TransformKey
-    const part = partText as CurvePartKey
 
     world.params.curve.equation = equation
-    world.params.curve.parts[part] = !world.params.curve.parts[part]
+
+    if (partText === 'all') {
+      Object.keys(curveParts).forEach((part) => {
+        world.params.curve.parts[part as CurvePartKey] = true
+      })
+    } else {
+      Object.keys(curveParts).forEach((part) => {
+        world.params.curve.parts[partText as CurvePartKey] = partText === part
+      })
+    }
 
     switch (equation) {
       case 'derivative':
@@ -40,6 +49,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'energy') {
     const [partText, percText] = args
     world.params.energy[partText as CorePartKey] = toValue(percText, 0, 3)
+
     world.updateParams()
     return
   }

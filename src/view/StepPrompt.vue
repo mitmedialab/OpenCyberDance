@@ -16,11 +16,26 @@ import {
   $valueCompleted,
 } from '../store/choice.ts'
 
+import {
+  $gptResult,
+  $result,
+  $status,
+  $transcript,
+  $understand,
+} from '../store/status.ts'
+
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
 const selectedStepChoices = useStore($selectedValues)
 const completed = useStore($valueCompleted)
+
+const status = useStore($status)
+const transcript = useStore($transcript)
+const result = useStore($result)
+
+const isListening = computed(() => status.value === 'listening')
+const isOffline = computed(() => status.value === 'offline')
 
 const selectedStepChoiceTitles = computed(() => {
   const steps = selectedChoice.value?.steps
@@ -41,18 +56,13 @@ const selectedStepChoiceTitles = computed(() => {
 
 <template>
   <div
-    fixed
-    top-10
-    left-10
-    flex
-    items-start
-    justify-start
-    gap-x-6
-    text-5
-    font-zed
-    w-full
+    class="fixed top-10 left-10 flex items-start justify-start gap-x-6 text-5 font-zed w-full"
   >
-    <div min-w-10 min-h-10 bg-gray-9 />
+    <div
+      class="min-w-10 min-h-10 bg-gray-9"
+      :class="[{ 'bg-red-6': isListening }]"
+    />
+
     <div />
     <div
       flex

@@ -1,5 +1,6 @@
 import 'virtual:uno.css'
 import './main.css'
+import 'animate.css'
 
 import { devtools } from '@nanostores/vue/devtools'
 import { createApp } from 'vue'

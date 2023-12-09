@@ -20,6 +20,7 @@ onMounted(async () => {
   window.addEventListener('keydown', (event) => {
     if (event.key === ' ') {
       $showPrompt.set(!showPrompt.value)
+      world.voice.start()
     }
   })
 

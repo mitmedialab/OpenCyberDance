@@ -175,6 +175,8 @@ export class Panel {
   }
 
   createPanel() {
+    this.panel.hide()
+
     const panel = this.panel
 
     this.playbackFolder = panel.addFolder('Playback Settings')
@@ -252,11 +254,13 @@ export class Panel {
     this.addSpaceControl()
     this.addAxisPointControl()
 
-    this.commandFolder.open()
-    this.rotationFolder.open()
-    this.energyFolder.open()
-    this.delayFolder.open()
-    this.characterFolder.open()
+    this.panel.hide()
+
+    // this.commandFolder.open()
+    // this.rotationFolder.open()
+    // this.energyFolder.open()
+    // this.delayFolder.open()
+    // this.characterFolder.open()
   }
 
   addAxisPointControl() {

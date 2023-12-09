@@ -108,3 +108,63 @@ export function addValue(key: string) {
 export const clearMainChoice = () => {
   $selectedChoiceKey.set(null)
 }
+
+const choicesKey = Object.keys(choices)
+
+export function handleVoiceSelection(
+  input: string,
+  type: 'choice' | 'percent',
+) {
+  const selectedChoiceKey = $selectedChoiceKey.get()
+  const currentStep = $currentStep.get()
+
+  if (!selectedChoiceKey || !currentStep) {
+    if (choicesKey.includes(input)) {
+      console.log('--- select')
+      setChoice(input as ChoiceKey)
+    }
+
+    return
+  }
+
+  if (currentStep.type === 'choice') {
+    const choice = currentStep.choices.find((x) => x.title === input)
+    if (!choice) return
+
+    addValue(choice.key)
+    return
+  }
+
+  if (currentStep.type === 'percent') {
+    const percent = parseInt(input)
+
+    if (isNaN(percent)) return
+    if (percent < 0) return
+    if (percent > 300) return
+
+    addValue(`${percent}`)
+    return
+  }
+}
+
+export function getVoicePromptParams():
+  | { percent: true }
+  | { choices: string[] } {
+  const selectedChoiceKey = $selectedChoiceKey.get()
+  const choiceKeys = Object.keys(choices)
+
+  if (!selectedChoiceKey) return { choices: choiceKeys }
+
+  const currentStep = $currentStep.get()
+  if (!currentStep) return { choices: choiceKeys }
+
+  if (currentStep.type === 'choice') {
+    return { choices: currentStep.choices.map((x) => x.title) }
+  }
+
+  if (currentStep.type === 'percent') {
+    return { percent: true }
+  }
+
+  return { percent: true }
+}

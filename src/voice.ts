@@ -4,6 +4,7 @@ import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
 import { choices } from './step-input.ts'
+import { getVoicePromptParams, handleVoiceSelection } from './store/choice.ts'
 import { $gptResult, $status, $transcript } from './store/status'
 import { Axis } from './transforms'
 import { World } from './world'
@@ -52,8 +53,9 @@ export class VoiceController {
 
     this.recognitionWatchdogTimer = setTimeout(() => {
       if (transcript === this.transcript) {
-        this.stop()
-        this.start()
+        // console.log('-- watchdog reset')
+        // this.stop()
+        // this.start()
       }
     }, 5000)
   }
@@ -94,10 +96,9 @@ export class VoiceController {
 
   stop() {
     console.log('> stopped recognition')
+    this.updateStatus('disabled')
 
     this.recognition?.abort()
-
-    this.updateStatus('disabled')
     this.recognition = null
   }
 
@@ -119,20 +120,13 @@ export class VoiceController {
     // grammars.addFromString(SPEECH_GRAMMAR, 10)
     // this.recognition.grammars = grammars
 
-    this.watchdog()
-
     this.recognition.addEventListener('result', (e) => {
-      this.onVoiceResult([...e.results])
-
-      this.watchdog()
+      this.onVoiceResult([...e.results]).then()
     })
 
     this.recognition.addEventListener('end', (e) => {
-      console.log('end', e)
-
-      this.watchdog()
-      this.onVoiceEnd().then()
-      $gptResult.set('')
+      this.stop()
+      this.start()
     })
   }
 
@@ -168,33 +162,43 @@ export class VoiceController {
       const result = results[i]
 
       const alts = [...result]
-        .filter((b) => b.confidence > 0.4)
+        .filter((b) => b.confidence > 0.1)
         .sort((a, b) => b.confidence - a.confidence)
         .map((alt) => alt.transcript)
 
-      console.log(`[${i}]`, alts)
+      console.log(`[heard] ${alts.join(', ')}`)
 
       for (const alt of alts) {
-        const choiceKeys = Object.keys(choices)
-        const msg = JSON.stringify({ input: alt, choices: choiceKeys })
-        console.log('[gpt input]', msg)
+        console.log(`[alt]`, alt)
 
+        const params = getVoicePromptParams()
+        console.log(`[params]`, params)
+
+        const msg = JSON.stringify({ input: alt, ...params })
         const result = await gpt(CORRECTION_PROMPT, msg)
-        console.log('[correction]', result)
+        console.log(`[ai]`, result)
+
+        let obj = { choice: null } as {
+          choice: string | null
+          percent: string | null
+        }
+
+        try {
+          obj = JSON.parse(result)
+        } catch (err) {}
+
+        if (obj.choice) {
+          console.log('[selection]', obj.choice)
+          handleVoiceSelection(obj.choice, 'choice')
+          break
+        }
+
+        if (obj.percent) {
+          console.log('[selection]', obj.choice)
+          handleVoiceSelection(obj.percent, 'percent')
+          break
+        }
       }
-    }
-  }
-
-  async onVoiceEnd() {
-    const text = this.transcript
-    if (this.status === 'disabled') return
-
-    if (text) {
-      console.log('[human]', text)
-
-      this.speak(text)
-      this.updateStatus('thinking')
-      this.execute(text)
     }
   }
 

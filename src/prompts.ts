@@ -6,13 +6,16 @@ examples
 input { input: "kap mak", choices: ["a. low pass", "b. gaussian", "c. derivative", "d. cap max"] }
 output { choice: "cap max" }
 
-input { input: "location", "external body space", "axis point", "circle and curve", "rotation"]}
+input { input: "location", choices: ["external body space", "axis point", "circle and curve", "rotation"]}
 output { choice: "rotation"  }
 
-input { input: "turn", "external body space", "axis point", "circle and curve", "rotation"]}
+input { input: "turn", choices: ["external body space", "axis point", "circle and curve", "rotation"]}
 output { choice: "rotation"  }
 
 Returns a JSON with the exact choice key, e.g. { "choice": "foo" } . If you are not confident to make a match, return { "choice": null }
+
+If the input is { input: "fifty", "percent": true }, match the user's input to a number between 0 and 100, and return it as a number, e.g. { "percent": 50 } . If you are not confident to make a match, return { "percent": null }
+
 `.trim()
 
 export const SPEECH_GRAMMAR = `

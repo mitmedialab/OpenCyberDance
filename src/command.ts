@@ -101,6 +101,10 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
       Object.keys(coreParts).forEach((part) => {
         world.params.energy[part as CorePartKey] = value
       })
+    } else if (partText === 'reset') {
+      for (const part in coreParts) {
+        world.params.energy[part as CorePartKey] = 1
+      }
     } else {
       world.params.energy[partText as CorePartKey] = value
     }

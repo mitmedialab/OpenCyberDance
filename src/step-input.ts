@@ -29,7 +29,7 @@ export const steps = {
   // select shifting relations part
   energyParts: {
     type: 'choice',
-    choices: toOptions('head', 'body', 'foot', 'all'),
+    choices: toOptions('head', 'body', 'foot', 'all', 'reset'),
   },
 
   // select shifting relations part

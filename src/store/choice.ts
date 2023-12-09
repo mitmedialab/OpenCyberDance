@@ -48,8 +48,7 @@ export function nextStep() {
   const step = $currentStepId.get() || 0
   const next = step + 1
 
-  console.log(`[next step] is ${next}`)
-  ding(next + 1)
+  ding(next + 2)
 
   $currentStepId.set(next)
 }

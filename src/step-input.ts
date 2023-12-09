@@ -15,7 +15,7 @@ const toOptions = (...options: string[]): ChoiceOption[] =>
   options.map((option) => ({ title: option, key: option }))
 
 export type Step =
-  | { type: 'percent' }
+  | { type: 'percent'; max?: number }
   | { type: 'choice'; choices: ChoiceOption[] }
 
 export const steps = {
@@ -113,7 +113,7 @@ export const choices = {
   speed: {
     title: 'animation speed',
     triggers: ['speed'],
-    steps: [steps.percent],
+    steps: [{ type: 'percent', max: 300 }],
   },
 } satisfies Record<string, Choice>
 

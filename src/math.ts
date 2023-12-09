@@ -24,9 +24,10 @@ export function percentToValue(
   percent: number,
   min: number,
   max: number,
+  maxPercent = 100,
 ): number {
-  // Ensure that percent is within the range [0, 100]
-  const perc = Math.min(100, Math.max(0, percent))
+  // Ensure that percent is within the range [0, maxPercent]
+  const perc = Math.min(maxPercent, Math.max(0, percent))
 
   // Map the percentage to the range [min, max]
   return min + (perc / 100) * (max - min)

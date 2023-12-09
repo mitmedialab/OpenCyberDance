@@ -134,7 +134,7 @@ export function handleVoiceSelection(
       return selectChoice(input as ChoiceKey)
     }
 
-    if (/(rotation|rotations)/i.test(input as string)) {
+    if (/(rotate|rotation|rotations)/i.test(input as string)) {
       return selectChoice('rotations')
     }
 
@@ -176,9 +176,21 @@ export function handleVoiceSelection(
     const hasX = choiceKeys.includes('x')
     const hasY = choiceKeys.includes('y')
     const hasZ = choiceKeys.includes('z')
+    const hasAll = choiceKeys.includes('all')
+    const hasRightArm = choiceKeys.includes('rightArm')
 
     if (choice) {
       addValue(choice.key)
+      return true
+    }
+
+    if (/(light arm)/i.test(title) && hasRightArm) {
+      addValue('rightArm')
+      return true
+    }
+
+    if (/(all|oh)/i.test(title) && hasAll) {
+      addValue('all')
       return true
     }
 
@@ -208,7 +220,7 @@ export function handleVoiceSelection(
 
     if (isNaN(percent)) return false
     if (percent < 0) return false
-    if (percent > 300) return false
+    if (percent >= Math.max(currentStep.max ?? 100, 100)) return false
 
     addValue(`${percent}`)
     return true

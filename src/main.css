@@ -29,13 +29,20 @@ body {
 }
 
 .highlight-a-bit {
-  animation: highlight 0.8s ease;
+  animation: highlight 0.9s ease;
+}
+
+.transition-faster {
+  transition: all 0.3s ease;
 }
 
 .choice-list-move,
-.choice-list-enter-active,
+.choice-list-enter-active {
+  transition: all 1.05s ease;
+}
+
 .choice-list-leave-active {
-  transition: all 1.5s ease;
+  transition: all 1.05s ease;
 }
 
 .choice-list-enter-from,

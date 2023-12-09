@@ -184,7 +184,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
     for (const character of world.characters) {
       if (!character.mixer) continue
 
-      character.mixer.timeScale = toValue(percText, 0, 1)
+      character.mixer.timeScale = percentToValue(parseInt(percText), 0, 1, 300)
     }
   }
 }

@@ -153,6 +153,10 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
     world.params.axisPoint.threshold = toValue(percText, 0, 10)
 
+    setTimeout(() => {
+      world.updateParams({ axisPoint: true })
+    }, 80)
+
     return
   }
 

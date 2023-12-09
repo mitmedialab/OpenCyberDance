@@ -119,7 +119,7 @@ export const choices = {
     title: 'axis point',
     triggers: ['axis'],
     steps: [steps.axisParts, steps.percent],
-    hidden: false,
+    hidden: true,
   },
   rotations: {
     title: 'rotations',

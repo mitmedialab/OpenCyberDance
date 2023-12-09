@@ -3,6 +3,7 @@ import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command.ts'
 import { Choice, ChoiceKey, choices } from '../step-input.ts'
+import { world } from '../world.ts'
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -97,9 +98,12 @@ export function addValue(key: string) {
   runCommand($selectedChoiceKey.get()!, $selectedValues.get())
 
   setTimeout(() => {
-    console.log('resetting!')
+    console.log('-- clearing prompt')
+
     resetPrompt()
     $showPrompt.set(false)
+
+    world.voice.start()
   }, 3000)
 }
 
@@ -126,14 +130,16 @@ export function handleVoiceSelection(
     if (choicesKey.includes(input)) {
       console.log('--- select')
       setChoice(input as ChoiceKey)
-    }
 
-    return true
+      return true
+    }
   }
 
+  if (!currentStep) return false
   if (!input) return false
+  if (typeof input !== 'string') return false
 
-  if (typeof input === 'string' && input.includes('back')) {
+  if (input.includes('back')) {
     prevStep()
     return true
   }
@@ -182,11 +188,10 @@ export function getVoicePromptParams():
   return { percent: true }
 }
 
-export function createGrammarFromState() {
+export function createGrammarFromState(): string | null {
   const params = getVoicePromptParams()
 
   const hasChoice = 'choices' in params
-  const grammarSupported = hasChoice
 
   let grammar = `
     #JSGF V1.0;
@@ -196,7 +201,8 @@ export function createGrammarFromState() {
 
   if (hasChoice) {
     grammar += `public <choice> = ${params.choices?.join(' | ') || ''};`
+    return grammar
   }
 
-  return grammar
+  return null
 }

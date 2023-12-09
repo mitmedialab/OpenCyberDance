@@ -3,7 +3,6 @@ import { CurveConfig, SpaceConfig } from './overrides'
 import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
-import { choices } from './step-input.ts'
 import {
   createGrammarFromState,
   getVoicePromptParams,
@@ -17,10 +16,18 @@ import { World } from './world'
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
 
+const SpeechGrammarList =
+  window.SpeechGrammarList || window.webkitSpeechGrammarList
+
 // @ts-expect-error - it's a UMD global
 const responsiveVoice = window.responsiveVoice
 
-export type ListeningStatus = 'disabled' | 'listening' | 'thinking' | 'speaking'
+export type ListeningStatus =
+  | 'disabled'
+  | 'listening'
+  | 'thinking'
+  | 'speaking'
+  | 'confused'
 
 export class VoiceController {
   recognition: SpeechRecognition | null = null
@@ -78,15 +85,9 @@ export class VoiceController {
 
   start() {
     const status = this.status
-
     if (status !== 'disabled') return
 
-    console.log('> starting recognition')
-
     this.recognition?.abort()
-
-    this.updateStatus('listening')
-
     this.createRecognition()
     this.listen()
   }
@@ -95,8 +96,6 @@ export class VoiceController {
     try {
       this.recognition?.start()
     } catch (err) {}
-
-    this.updateStatus('listening')
   }
 
   stop() {
@@ -117,27 +116,53 @@ export class VoiceController {
   }
 
   createRecognition() {
-    console.log('--- recognition generated')
-
     this.recognition = new SpeechRecognition()
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
+    this.recognition.maxAlternatives = 3
 
     const targetGrammar = createGrammarFromState()
 
     if (targetGrammar) {
+      console.log('target grammar injected', targetGrammar)
+
       const grammars = new SpeechGrammarList()
-      grammars.addFromString(targetGrammar, 10)
+      grammars.addFromString(targetGrammar, 1)
       this.recognition.grammars = grammars
     }
 
+    this.recognition.addEventListener('start', (e) => {
+      console.log('> recognition started')
+      this.updateStatus('listening')
+    })
+
+    this.recognition.addEventListener('error', (e) => {
+      console.log('> recognition failed', e)
+    })
+
+    this.recognition.addEventListener('nomatch', (e) => {
+      console.log('> no match')
+    })
+
+    this.recognition.addEventListener('audiostart', () => {
+      console.log('> recognition audio start')
+    })
+
+    this.recognition.addEventListener('audioend', () => {
+      console.log('> recognition audio end')
+    })
+
     this.recognition.addEventListener('result', (e) => {
-      this.onVoiceResult([...e.results]).then()
+      console.log('> recognition received')
+
+      this.onVoiceResult([...e.results]).then((status) => {
+        console.log({ status })
+      })
     })
 
     this.recognition.addEventListener('end', (e) => {
-      this.stop()
-      this.start()
+      console.log('> recognition ended')
+      this.updateStatus('disabled')
     })
   }
 
@@ -168,170 +193,74 @@ export class VoiceController {
     })
   }
 
-  async onVoiceResult(results: SpeechRecognitionResult[]) {
-    for (const i in results) {
-      const result = results[i]
+  async onVoiceResult(results: SpeechRecognitionResult[]): Promise<boolean> {
+    this.updateStatus('thinking')
 
-      const alts = [...result]
+    console.log(`[results]`, results)
+
+    const params = getVoicePromptParams()
+    console.log(`[params]`, params)
+
+    for (const i in results) {
+      const voiceResult = results[i]
+
+      const alts = [...voiceResult]
         .filter((b) => b.confidence > 0.1)
         .sort((a, b) => b.confidence - a.confidence)
         .map((alt) => alt.transcript)
 
+      if (alts.length === 0) {
+        continue
+      }
+
       console.log(`[heard] ${alts.join(', ')}`)
 
+      // PASS 1 - use speech recognition grammar
       for (const alt of alts) {
-        console.log(`[alt]`, alt)
-
         if (alt === 'back') {
           prevStep()
-          break
+          return true
         }
 
         if (['x', 'y', 'z'].includes(alt)) {
           handleVoiceSelection(alt, 'choice')
-          break
+          return true
         }
 
-        const params = getVoicePromptParams()
-        console.log(`[params]`, params)
-
-        // const firstStep = handleVoiceSelection(alt, 'any')
-        // if (!firstStep) break
-
-        const msg = JSON.stringify({ input: alt, ...params })
-        const result = await gpt(CORRECTION_PROMPT, msg)
-        console.log(`[ai]`, result)
-
-        let obj = { choice: null } as {
-          choice: string | null
-          percent: string | null
-        }
-
-        try {
-          obj = JSON.parse(result)
-        } catch (err) {}
-
-        if (obj.percent) {
-          console.log('[selection]', obj.choice)
-          handleVoiceSelection(obj.percent, 'percent')
-          break
-        }
-
-        if (obj.choice) {
-          console.log('[selection]', obj.choice)
-          handleVoiceSelection(obj.choice, 'choice')
-          break
+        const primaryOk = handleVoiceSelection(alt, 'any')
+        if (primaryOk) {
+          console.log(`${alt} is detected by voice engine`)
+          return true
         }
       }
+
+      // PASS 2 - use GPT
+      const alt = alts?.[0]?.trim()
+      const msg = JSON.stringify({ input: alt, ...params })
+      const aiOutput = await gpt(CORRECTION_PROMPT, msg)
+      console.log(`[ai]`, aiOutput)
+
+      let obj = { choice: null } as {
+        choice: string | null
+        percent: string | null
+      }
+
+      try {
+        obj = JSON.parse(aiOutput)
+      } catch (err) {}
+
+      if (obj.percent) {
+        console.log('[parse:ai]', obj.choice)
+        return handleVoiceSelection(obj.percent, 'percent')
+      }
+
+      if (obj.choice) {
+        console.log('[parse:ai]', obj.choice)
+        return handleVoiceSelection(obj.choice, 'choice')
+      }
     }
-  }
 
-  async execute(input: string) {
-    if (!localStorage.getItem('OPENAI_KEY')) {
-      console.warn('[ai] missing OPENAI_KEY')
-      return
-    }
-
-    // const action = await gpt(PROMPT, input)
-    $gptResult.set(action)
-    console.log('[ai]', action)
-
-    let output = null
-
-    try {
-      output = JSON.parse(action)
-    } catch (err) {
-      // TODO: handle error
-    }
-
-    if (!output) {
-      console.warn('> invalid command:', action)
-
-      return
-    }
-
-    const p = this.world.params
-
-    const handlers = {
-      reset: (v: boolean) => {
-        console.log('reset:', v)
-
-        if (v) this.world.panel.reset()
-      },
-
-      energy: (data: Partial<Record<CorePartKey, number>>) => {
-        console.log('energy:', data)
-
-        for (const key in data) {
-          p.energy[key as CorePartKey] = data[key as CorePartKey] ?? 0
-        }
-      },
-
-      rotation: (data: { x: number; y: number; z: number }) => {
-        console.log('rotation:', data)
-
-        for (const key in data) {
-          p.rotations[key as Axis] = data[key as Axis]
-        }
-      },
-
-      synchronicLimbs: (v: number) => {
-        console.log('limbs:', v)
-        this.setSynchronic(v)
-      },
-
-      curve: (data: Partial<CurveConfig>) => {
-        for (const key in data) {
-          // @ts-expect-error - to fix
-          const value = data[key]
-          console.log(`curve#${key}:`, value)
-
-          if (['equation', 'threshold'].includes(key)) {
-            // @ts-expect-error - to fix
-            p.curve[key] = value
-          } else if (key === 'axes') {
-            for (const axis in value) {
-              console.log(`curve.axes#${axis}:`, value[axis])
-
-              p.curve.axes[axis as Axis] = value[axis]
-            }
-          } else if (key === 'parts') {
-            for (const part in value) {
-              console.log(`curve.parts#${part}:`, value[part])
-
-              p.curve.parts[part as CurvePartKey] = value[part]
-            }
-          }
-        }
-
-        // set a fallback
-        if (data.threshold && !data.equation) {
-          p.curve.equation = 'gaussian'
-        }
-      },
-
-      externalBodySpace: (data: SpaceConfig) => {
-        for (const key in data) {
-          // @ts-expect-error - to fix
-          p.space[key] = data[key]
-        }
-      },
-    } as const
-
-    type HandleKey = keyof typeof handlers
-
-    const out = Object.entries(output).find(([, v]) => v !== null)
-    if (!out) return
-
-    const [key, value] = out
-    console.log(`set> ${key} =`, value)
-
-    const handler = handlers[key as HandleKey]?.bind(this)
-
-    // @ts-expect-error - to fix
-    handler?.(value)
-
-    this.sync(key)
+    return false
   }
 
   sync(key: string | string[]) {

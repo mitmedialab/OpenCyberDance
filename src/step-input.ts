@@ -54,6 +54,18 @@ export const steps = {
   },
 } satisfies Record<string, Step>
 
+export const altWords = {
+  energy: ['energy'],
+  curve: ['curve', 'curves', 'curving'],
+  shifting: ['shifting', 'shift', 'shifts', 'shifted'],
+  space: ['space', 'spaces', 'spaced'],
+  axis: ['axis', 'axes', 'axises'],
+  rotations: ['rotation', 'rotations', 'rotate', 'rotating'],
+  reset: ['reset', 'resets', 'resetting'],
+  speed: ['speed'],
+  x: ['ex'],
+} satisfies Record<string, string[]>
+
 export type StepKey = keyof typeof steps
 
 export interface Choice {

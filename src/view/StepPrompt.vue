@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStore } from '@nanostores/vue'
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 
 import { choices, Choice, ChoiceKey } from '../step-input'
 
@@ -14,6 +14,7 @@ import {
   addValue,
   $selectedValues,
   $valueCompleted,
+  $showPrompt,
 } from '../store/choice.ts'
 
 import {
@@ -24,6 +25,8 @@ import {
   $understand,
 } from '../store/status.ts'
 
+import { world } from '../world'
+
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
@@ -33,9 +36,18 @@ const completed = useStore($valueCompleted)
 const status = useStore($status)
 const transcript = useStore($transcript)
 const result = useStore($result)
+const showPrompt = useStore($showPrompt)
 
 const isListening = computed(() => status.value === 'listening')
-const isOffline = computed(() => status.value === 'offline')
+const isThinking = computed(() => status.value === 'thinking')
+const isOffline = computed(() => status.value === 'disabled')
+
+watch(isOffline, (offline) => {
+  if (offline && showPrompt) {
+    console.log('woah! restarting voice.')
+    world.voice.start()
+  }
+})
 
 const selectedStepChoiceTitles = computed(() => {
   const steps = selectedChoice.value?.steps
@@ -59,8 +71,14 @@ const selectedStepChoiceTitles = computed(() => {
     class="fixed top-10 left-10 flex items-start justify-start gap-x-6 text-5 font-zed w-full"
   >
     <div
-      class="min-w-10 min-h-10 bg-gray-9"
-      :class="[{ 'bg-red-6': isListening }]"
+      class="min-w-10 min-h-10"
+      :class="[
+        {
+          'bg-gray-4': isOffline,
+          'bg-black': isListening,
+          'bg-red-6': isThinking,
+        },
+      ]"
     />
 
     <div />

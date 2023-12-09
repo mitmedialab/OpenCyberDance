@@ -116,6 +116,12 @@ export const clearMainChoice = () => {
 
 const choicesKey = Object.keys(choices)
 
+const selectChoice = (choice: ChoiceKey) => {
+  setChoice(choice)
+  ding(2)
+  return true
+}
+
 export function handleVoiceSelection(
   input: string | number,
   type?: 'choice' | 'percent' | 'any',
@@ -125,10 +131,27 @@ export function handleVoiceSelection(
 
   if (!selectedChoiceKey || !currentStep) {
     if (choicesKey.includes(input as string)) {
-      setChoice(input as ChoiceKey)
-      ding(2)
+      return selectChoice(input as ChoiceKey)
+    }
 
-      return true
+    if (/(rotation|rotations)/i.test(input as string)) {
+      return selectChoice('rotations')
+    }
+
+    if (/(space|external|body)/i.test(input as string)) {
+      return selectChoice('space')
+    }
+
+    if (/(curve|circle|circle and curve)/i.test(input as string)) {
+      return selectChoice('curve')
+    }
+
+    if (/(relations|shifting|shifting relations)/i.test(input as string)) {
+      return selectChoice('shifting')
+    }
+
+    if (/(speed|animation)/i.test(input as string)) {
+      return selectChoice('speed')
     }
   }
 
@@ -143,7 +166,7 @@ export function handleVoiceSelection(
   if (currentStep.type === 'choice') {
     if (typeof input === 'number') return false
 
-    const title = input.toLowerCase()
+    const title = input.toLowerCase().trim()
 
     const choice = currentStep.choices.find(
       (x) => x.title.toLowerCase() === title,
@@ -154,8 +177,18 @@ export function handleVoiceSelection(
       return true
     }
 
-    if (title === 'why') {
+    if (/^(why|wine)$/i.test(title)) {
       addValue('y')
+      return true
+    }
+
+    if (title === 'ex') {
+      addValue('x')
+      return true
+    }
+
+    if (/^(see|sea)$/i.test(title)) {
+      addValue('z')
       return true
     }
   }

@@ -82,7 +82,7 @@ export const choices = {
   },
   shifting: {
     title: 'shifting relations',
-    triggers: ['shifting', 'synchronic', 'sync'],
+    triggers: ['shifting', 'synchronic', 'sync', 'relations'],
     steps: [steps.shiftingParts, steps.percent],
   },
   space: {

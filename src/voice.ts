@@ -3,6 +3,7 @@ import { DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
 import {
+  $currentStep,
   $showPrompt,
   $valueCompleted,
   createGrammarFromState,
@@ -33,6 +34,9 @@ export type ListeningStatus =
 export class VoiceController {
   recognition: SpeechRecognition | null = null
   world: World
+
+  /* Mapping between id (by recognition len) and success flag */
+  successFlags: Map<number, boolean> = new Map()
 
   get transcript() {
     return $transcript.get()
@@ -70,6 +74,8 @@ export class VoiceController {
         console.log('recognition failed to abort', error)
       }
     }
+
+    this.successFlags.clear()
 
     this.createRecognition()
 
@@ -111,8 +117,8 @@ export class VoiceController {
     this.recognition = new SpeechRecognition()
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
-    this.recognition.maxAlternatives = 3
-    this.recognition.continuous = false
+    this.recognition.maxAlternatives = 5
+    this.recognition.continuous = true
 
     const targetGrammar = createGrammarFromState()
 
@@ -134,6 +140,7 @@ export class VoiceController {
     })
 
     this.recognition.addEventListener('start', () => {
+      this.successFlags.clear()
       this.updateStatus('listening')
     })
 
@@ -142,18 +149,35 @@ export class VoiceController {
     })
 
     this.recognition.addEventListener('result', async (e) => {
-      this.updateStatus('thinking')
+      const id = e.results.length
 
-      const status = await this.onVoiceResult([...e.results])
+      if (this.successFlags.get(id)) {
+        console.log(`[!] ${id} already success. (v=1)`)
+        return
+      }
+
+      this.updateStatus('thinking')
+      this.restoreStatusTimer('thinking')
+
+      // TODO: timer
+
+      const status = await this.onVoiceResult(e.results)
+
+      if (this.successFlags.get(id)) {
+        console.log(`[!] ${id} already success. (v=2)`)
+        return
+      }
 
       if (status) {
-        console.log(`> interpretation success`)
+        console.log(`> interpretation success (id: ${id})`)
+        this.successFlags.set(id, true)
+
         this.continueListening('after interpret success')
 
         return
       }
 
-      console.log(`> cannot interpret result`)
+      console.log(`> cannot interpret result (id: ${id})`)
 
       this.onConfused('after interpret failed')
     })
@@ -171,14 +195,17 @@ export class VoiceController {
   onConfused(key?: string) {
     this.updateStatus('confused')
     this.continueListening(key)
+    this.restoreStatusTimer('confused')
+  }
 
+  restoreStatusTimer(status: ListeningStatus, delay = 800) {
     setTimeout(() => {
-      if ($status.get() === 'confused') {
+      if ($status.get() === status) {
         if (this.recognition) {
           this.updateStatus('listening')
         }
       }
-    }, 800)
+    }, delay)
   }
 
   continueListening(key?: string) {
@@ -188,7 +215,7 @@ export class VoiceController {
     // if it's still not completed, then we need to continue!
     setTimeout(() => {
       this.startRecognition(key)
-    }, 100)
+    }, 10)
   }
 
   speak(text: string) {
@@ -213,68 +240,80 @@ export class VoiceController {
     })
   }
 
-  async onVoiceResult(results: SpeechRecognitionResult[]): Promise<boolean> {
-    console.log(`[results]`, results)
+  async onVoiceResult(
+    resultList: SpeechRecognitionResultList,
+  ): Promise<boolean> {
+    const step = $currentStep.get()
+    const isPercent = step && step.type === 'percent'
+
+    const resultLen = resultList.length
+    const voiceResult = resultList[resultLen - 1]
+    const isFinal = voiceResult.isFinal
 
     const params = getVoicePromptParams()
     console.log(`[params]`, params)
 
-    for (const i in results) {
-      const voiceResult = results[i]
+    const alts = [...voiceResult]
+      .filter((b) => b.confidence > 0.000001)
+      .sort((a, b) => b.confidence - a.confidence)
+      .map((alt) => alt.transcript)
 
-      const alts = [...voiceResult]
-        .filter((b) => b.confidence > 0.000001)
-        .sort((a, b) => b.confidence - a.confidence)
-        .map((alt) => alt.transcript)
+    if (alts.length === 0) return false
 
-      if (alts.length === 0) continue
+    console.log(
+      `[heard] ${alts.join(', ')} (final=${isFinal}, id=${resultLen})`,
+    )
 
-      console.log(`[heard] ${alts.join(', ')} (final=${voiceResult.isFinal})`)
+    $transcript.set(alts.join(', '))
 
-      // PASS 1 - use speech recognition grammar
-      for (const alt of alts) {
-        if (alt === 'back') {
-          prevStep()
-          return true
-        }
+    // PASS 1 - use speech recognition grammar
+    for (const alt of alts) {
+      if (alt === 'back') {
+        prevStep()
+        return true
+      }
 
-        if (['x', 'y', 'z', 'why'].includes(alt.toLowerCase())) {
-          handleVoiceSelection(alt.toLowerCase(), 'choice')
-          return true
-        }
+      if (/^(ex|why|wine|see|sea)$/i.test(alt.toLowerCase())) {
+        handleVoiceSelection(alt.toLowerCase(), 'choice')
+        return true
+      }
 
+      // do not use voice engine to detect percentage if not final
+      const skipVoiceEngineDetection = isPercent && !isFinal
+
+      if (!skipVoiceEngineDetection) {
         const primaryOk = handleVoiceSelection(alt, 'any')
         if (primaryOk) {
-          console.log(`${alt} is detected by voice engine`)
+          console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
           return true
         }
       }
+    }
 
-      // only use GPT for final results
-      if (!voiceResult.isFinal) return false
+    // only use GPT for final results
+    if (!voiceResult.isFinal) return false
 
-      // PASS 2 - use GPT
-      const alt = alts?.[0]?.trim()
-      const msg = JSON.stringify({ input: alt, ...params })
-      const aiOutput = await gpt(CORRECTION_PROMPT, msg)
-      console.log(`[ai]`, aiOutput)
+    // PASS 2 - use GPT
+    const alt = alts?.[0]?.trim()
+    const msg = JSON.stringify({ input: alt, ...params })
+    const aiOutput = await gpt(CORRECTION_PROMPT, msg)
+    console.log(`[ai]`, aiOutput)
 
-      let obj = { choice: null } as {
-        choice: string | null
-        percent: string | null
-      }
+    let obj = { choice: null } as {
+      choice: string | null
+      percent: string | null
+    }
 
-      try {
-        obj = JSON.parse(aiOutput)
-      } catch (err) {}
+    try {
+      obj = JSON.parse(aiOutput)
+    } catch (err) {}
 
-      if (obj.percent) {
-        return handleVoiceSelection(obj.percent, 'percent')
-      }
+    if (obj.percent) {
+      return handleVoiceSelection(obj.percent, 'percent')
+    }
 
-      if (obj.choice) {
-        return handleVoiceSelection(obj.choice, 'choice')
-      }
+    if (obj.choice) {
+      return handleVoiceSelection(obj.choice, 'choice')
     }
 
     return false

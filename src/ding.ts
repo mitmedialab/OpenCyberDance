@@ -8,7 +8,6 @@ const ding5 = new Howl({ src: '/sounds/khongwong_5.wav' })
 const ding6 = new Howl({ src: '/sounds/khongwong_6.wav' })
 
 export function ding(level: number) {
-  console.log(`[ding] ${level}`)
   stopAll()
 
   switch (level) {

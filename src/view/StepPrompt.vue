@@ -78,7 +78,7 @@ const numeric = (value: string) => {
       flex
       v-if="completed"
       class="cursor-pointer py-1 px-2 animate__animated fadeIn"
-      :class="[{ 'bg-red-7 text-white px-4 rounded-l': completed }]"
+      :class="[{ 'bg-red-7 text-white px-4 rounded-l pl-4': completed }]"
     >
       > executing
     </div>
@@ -153,5 +153,8 @@ const numeric = (value: string) => {
     </div>
   </div>
 
-  <div fixed bottom-4 left-4 class="text-[12px] font-zed">s: {{ status }}</div>
+  <div fixed bottom-4 left-4 class="text-[12px] font-zed text-gray-7">
+    <div v-if="status">s: {{ status }}</div>
+    <div v-if="transcript">h: {{ transcript }}</div>
+  </div>
 </template>

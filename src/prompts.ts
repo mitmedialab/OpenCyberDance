@@ -6,11 +6,14 @@ examples
 input { input: "kap mak", choices: ["a. low pass", "b. gaussian", "c. derivative", "d. cap max"] }
 output { choice: "cap max" }
 
-input { input: "location", choices: ["external body space", "axis point", "circle and curve", "rotation"]}
+input { input: "location", choices: ["external body space", "shifting relations", "axis point", "circle and curve", "rotation"]}
 output { choice: "rotation"  }
 
-input { input: "turn", choices: ["external body space", "axis point", "circle and curve", "rotation"]}
-output { choice: "rotation"  }
+input { input: "relation", choices: ["external body space", "shifting relations", "axis point", "circle and curve", "rotation"]}
+output { choice: "shifting relations"  }
+
+input { input: "relation", choices: ["external body space", "shifting", "axis point", "circle and curve", "rotation"]}
+output { choice: "shifting relations"  }
 
 Returns a JSON with the exact choice key, e.g. { "choice": "foo" } . If you are not confident to make a match, return { "choice": null }
 

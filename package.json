@@ -33,10 +33,13 @@
   "dependencies": {
     "@nanostores/vue": "^0.10.0",
     "@vitejs/plugin-vue": "^4.5.2",
+    "animate.css": "^4.1.1",
     "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "date-fns": "^2.30.0",
+    "howler": "^2.2.4",
+    "immer": "^10.0.3",
     "lil-gui": "^0.19.1",
     "nanostores": "^0.9.5",
     "three": "^0.159.0",

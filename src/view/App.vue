@@ -2,19 +2,16 @@
 import { ref, onMounted } from 'vue'
 
 import { World } from '../world'
-
-import VoiceStatus from './VoiceStatus.vue'
+import StepPrompt from './StepPrompt.vue'
 
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
-const statsContainer = ref<HTMLDivElement>()
 
 onMounted(async () => {
   const world = new World()
   await world.setup()
 
   rendererElement.value?.appendChild(world.renderer.domElement)
-  statsContainer.value?.appendChild(world.stats.dom)
 
   if (world.plotter.domElement) {
     plotterContainer.value?.appendChild(world.plotter.domElement)
@@ -28,8 +25,7 @@ onMounted(async () => {
   <div>
     <div ref="rendererElement" />
     <div ref="plotterContainer" pointer-events-none />
-    <div ref="statsContainer" />
 
-    <VoiceStatus />
+    <StepPrompt />
   </div>
 </template>

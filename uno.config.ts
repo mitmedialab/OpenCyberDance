@@ -16,7 +16,12 @@ export default defineConfig({
     presetAttributify(),
     presetIcons(),
     presetTypography(),
-    presetWebFonts(),
+    presetWebFonts({
+      provider: 'none',
+      fonts: {
+        zed: ['Zed Mono Extended'],
+      },
+    }),
     presetWind(),
   ],
   transformers: [transformerDirectives(), transformerVariantGroup()],

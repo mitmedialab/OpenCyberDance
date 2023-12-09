@@ -8,6 +8,8 @@ export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
 export const $selectedValues = atom<string[]>([])
 
+export const $showPrompt = atom(false)
+
 export const $selectedChoice = computed(
   $selectedChoiceKey,
   (selectedChoiceKey) => {
@@ -73,6 +75,7 @@ export function setChoice(choice: ChoiceKey) {
   if (choices[choice]?.steps.length === 0) {
     runCommand(choice, [])
     $selectedChoiceKey.set(null)
+    $showPrompt.set(false)
   }
 }
 
@@ -98,6 +101,7 @@ export function addValue(key: string) {
     $currentStepId.set(null)
     $selectedValues.set([])
     $selectedChoiceKey.set(null)
+    $showPrompt.set(false)
   }, 3000)
 }
 

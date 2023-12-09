@@ -2,6 +2,8 @@ import { randVariance } from './math'
 import { CurveConfig, SpaceConfig } from './overrides'
 import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
+import { CORRECTION_PROMPT } from './prompts.ts'
+import { choices } from './step-input.ts'
 import { $gptResult, $status, $transcript } from './store/status'
 import { Axis } from './transforms'
 import { World } from './world'
@@ -11,154 +13,6 @@ const SpeechRecognition =
 
 // @ts-expect-error - it's a UMD global
 const responsiveVoice = window.responsiveVoice
-
-// You can only recognize things that are in this grammar.
-const SPEECH_GRAMMAR = `
-#JSGF V1.0;
-
-grammar VoiceCommand;
-
-public <command> = (reset)
-  | (energy [<bodyPart>] to <energyValue>)
-  | (set rotation [<axis>] to <rotationValue>)
-  | (set synchronic limbs to <limbValue>)
-  | (set external body space <externalBodySpaceDetails>)
-
-<curveDetails> = (curve like <curveType>);
-
-<curveType> = (none)
-           | (lowpass)
-           | (highpass)
-           | (gaussian)
-           | (derivative)
-           | (capMin)
-           | (capMax);
-
-<externalBodySpaceDetails> = (delay <delayValue>)
-                        | (threshold <thresholdValue>)
-                        | (min window <minWindowValue>)
-                        | (window size <windowSizeValue>);
-
-<bodyPart> = (head)
-          | (body)
-          | (foot);
-
-<axis> = (x)
-      | (y)
-      | (z);
-
-<energyValue> = (one dot <decimal> | two dots <decimal>);
-
-<rotationValue> = (one dot <decimal> | two dots <decimal> | three dots <decimal>);
-
-<limbValue> = (<integer>);
-
-<decimal> = (zero | one | two | three | four | five | six | seven | eight | nine);
-
-<integer> = (zero | one | two | three | four | five | six | seven | eight | nine);
-
-<delayValue> = (<decimal> <decimal>);
-
-<thresholdValue> = (<decimal> <decimal>);
-
-<minWindowValue> = (<integer>);
-
-<windowSizeValue> = (<integer>);
-`
-
-const PROMPT = `
-  This is a system that evaluates the natural language command, and generate a JSON code with these variables,
-  according to the following TypeScript interface.
-
-  If they didn't give a command but a more general description, e.g. "drunk", you can interpret that
-  as changes in the variable. for example, drunk person might have more rotation and energy.
-
-  interface VoiceCommand {
-    // Do we understand their request? Set error = true if we don't.
-    error: boolean
-
-    // Message that the system wants to say. Pretend you're Number 60, a nice bot. Can be anything.
-    message: string
-
-    // Reset the system?
-    reset: boolean
-
-    // Changes the energy of the head, body or foot.
-    // Float of 1 to 3. Precision of 2 decimals. Default to 1.
-    // If the body part (head, body, foot) is not specified,
-    // set all fields to the given value.
-    energy: {
-      head: number,
-      body: number,
-      foot: number,
-    }
-
-    // Changes the rotation of the axes. Float of 1 to 5. Precision of 3 decimals. Default to 1.
-    // If the axis (x, y, z) is not specified, set all axes to the given value.
-    // You can also say "location" or "turn" or "rotate"
-    rotation: {
-      x: number,
-      y: number,
-
-      // They can also say "C"
-      z: number,
-    }
-
-    // Integer between -10 and 10. Default to 0.
-    // You can also say "shifting"
-    synchronicLimbs: number
-
-    externalBodySpace: {
-      // Float of 0 to 3. Precision of 2 decimals.
-      delay: number
-
-      // Float of 0 to 0.2. Precision of 3 decimals. Default to 1.
-      threshold: number
-
-      // Integer of 1 to 4.
-      minWindow: number
-
-      // Integer of 1 to 120.
-      windowSize: number
-    }
-
-    // Circle and curve.
-    curve: {
-      // Equation of the curve.
-      equation: "none" | "lowpass" | "highpass" | "gaussian" | "derivative" | "capMin" | "capMax"
-
-      // Float between 0 and 1. Precision of 2 decimals.
-      threshold: number
-
-      axes: {
-        // default to true
-        x: boolean,
-
-        y: boolean,
-        z: boolean
-      }
-
-      parts: {
-        head: boolean,
-        body: boolean,
-
-        // default to true
-        leftArm: boolean,
-
-        // default to true
-        rightArm: boolean,
-
-        // default to true
-        leftLeg: boolean,
-
-        // default to true
-        rightLeg: boolean,
-      }
-    }
-  }
-
-  If the variable is not mentioned, omit the key entirely.
-`.trim()
 
 export type ListeningStatus = 'disabled' | 'listening' | 'thinking' | 'speaking'
 
@@ -268,16 +122,16 @@ export class VoiceController {
     this.watchdog()
 
     this.recognition.addEventListener('result', (e) => {
-      const transcript = [...e.results].map((r) => r?.[0]?.transcript).join('')
-      $transcript.set(transcript)
+      this.onVoiceResult([...e.results])
 
       this.watchdog()
-      console.log('$', transcript)
     })
 
-    this.recognition.addEventListener('end', () => {
+    this.recognition.addEventListener('end', (e) => {
+      console.log('end', e)
+
       this.watchdog()
-      this.onVoiceReceived().then()
+      this.onVoiceEnd().then()
       $gptResult.set('')
     })
   }
@@ -304,12 +158,34 @@ export class VoiceController {
 
         setTimeout(() => {
           this.start()
-        }, 300)
+        }, 100)
       },
     })
   }
 
-  async onVoiceReceived() {
+  async onVoiceResult(results: SpeechRecognitionResult[]) {
+    for (const i in results) {
+      const result = results[i]
+
+      const alts = [...result]
+        .filter((b) => b.confidence > 0.4)
+        .sort((a, b) => b.confidence - a.confidence)
+        .map((alt) => alt.transcript)
+
+      console.log(`[${i}]`, alts)
+
+      for (const alt of alts) {
+        const choiceKeys = Object.keys(choices)
+        const msg = JSON.stringify({ input: alt, choices: choiceKeys })
+        console.log('[gpt input]', msg)
+
+        const result = await gpt(CORRECTION_PROMPT, msg)
+        console.log('[correction]', result)
+      }
+    }
+  }
+
+  async onVoiceEnd() {
     const text = this.transcript
     if (this.status === 'disabled') return
 
@@ -328,7 +204,7 @@ export class VoiceController {
       return
     }
 
-    const action = await gpt(PROMPT, input)
+    // const action = await gpt(PROMPT, input)
     $gptResult.set(action)
     console.log('[ai]', action)
 

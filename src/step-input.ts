@@ -17,7 +17,7 @@ export const steps = {
 
   axes: {
     type: 'choice',
-    choices: toOptions('x', 'y', 'z')
+    choices: toOptions('x', 'y', 'z'),
   },
 
   // select shifting relations part
@@ -40,7 +40,7 @@ export const steps = {
       { title: 'c. derivative', key: 'derivative' },
       { title: 'd. cap min', key: 'capMin' },
       { title: 'e. cap max', key: 'capMax' },
-    ]
+    ],
   },
 
   curveParts: {
@@ -93,7 +93,7 @@ export const choices = {
   rotations: {
     title: 'rotations',
     triggers: ['turn', 'rotation'],
-    steps: [steps.axes, steps.percent]
+    steps: [steps.axes, steps.percent],
   },
   reset: {
     title: 'reset',

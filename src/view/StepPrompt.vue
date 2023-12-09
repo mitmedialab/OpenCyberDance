@@ -54,10 +54,21 @@ const selectedStepChoiceTitles = computed(() => {
   >
     <div min-w-10 min-h-10 bg-gray-9 />
     <div />
-    <div flex v-if="completed">> executing</div>
+    <div
+      flex
+      v-if="completed"
+      class="cursor-pointer py-1 px-2 rounded"
+      :class="[{ 'bg-red-7 text-white': completed }]"
+    >
+      > executing
+    </div>
     <div flex flex-col v-if="!selectedChoiceKey">
       <div
-        :class="[{ 'bg-gray-9 text-white': selectedChoiceKey === key }]"
+        :class="[
+          {
+            'bg-gray-9 text-white': selectedChoiceKey === key,
+          },
+        ]"
         class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"
         v-for="(choice, key) in choices"
         @click="setChoice(key)"
@@ -70,14 +81,16 @@ const selectedStepChoiceTitles = computed(() => {
       flex-col
       cursor-pointer
       class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"
+      :class="[{ '!bg-gray-8 text-white': completed }]"
       v-if="selectedChoiceKey"
       @click="clearMainChoice()"
     >
       > {{ choices[selectedChoiceKey]?.title }}
     </div>
     <div
-      v-for="(choice, index) in selectedStepChoiceTitles"
+      v-for="choice in selectedStepChoiceTitles"
       class="hover:bg-gray-9 hover:text-white cursor-pointer py-1 px-2 rounded"
+      :class="[{ '!bg-gray-8 text-white': completed }]"
     >
       > {{ choice }}
     </div>

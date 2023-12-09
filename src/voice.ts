@@ -11,7 +11,7 @@ import {
   handleVoiceSelection,
   prevStep,
 } from './store/choice.ts'
-import { $status, $transcript } from './store/status'
+import { $status, $transcript, $voiceError } from './store/status'
 import { World } from './world'
 
 const SpeechRecognition =
@@ -132,6 +132,7 @@ export class VoiceController {
       // do not update error status if manually aborted by us.
       if (e.error === 'aborted') return
 
+      $voiceError.set(e)
       this.updateStatus('failed')
 
       console.warn('recognition failed:', e.error)

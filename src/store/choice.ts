@@ -146,7 +146,7 @@ export function handleVoiceSelection(
       return selectChoice('curve')
     }
 
-    if (/(relations|shifting|shifting relations)/i.test(input as string)) {
+    if (/(relation|shifting/i.test(input as string)) {
       return selectChoice('shifting')
     }
 

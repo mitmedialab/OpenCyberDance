@@ -16,7 +16,7 @@ import {
   $valueCompleted,
 } from '../store/choice.ts'
 
-import { $result, $status, $transcript } from '../store/status.ts'
+import { $result, $status, $transcript, $voiceError } from '../store/status.ts'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
@@ -27,6 +27,7 @@ const completed = useStore($valueCompleted)
 const status = useStore($status)
 const transcript = useStore($transcript)
 const result = useStore($result)
+const voiceError = useStore($voiceError)
 
 const isListening = computed(() => status.value === 'listening')
 const isThinking = computed(() => status.value === 'thinking')
@@ -156,5 +157,6 @@ const numeric = (value: string) => {
   <div fixed bottom-4 left-4 class="text-[12px] font-zed text-gray-7">
     <div v-if="status">s: {{ status }}</div>
     <div v-if="transcript">h: {{ transcript }}</div>
+    <div v-if="voiceError">e: {{ voiceError.error }}</div>
   </div>
 </template>

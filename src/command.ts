@@ -46,7 +46,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
     setTimeout(() => {
       world.updateParams({ curve: true })
-    }, 200)
+    }, 80)
 
     console.log('--- curve [updated]')
 
@@ -57,14 +57,21 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
     const [partText, percText] = args
     world.params.energy[partText as CorePartKey] = toValue(percText, 0, 3)
 
-    world.updateParams()
+    setTimeout(() => {
+      world.updateParams()
+    }, 80)
+
     return
   }
 
   if (primary === 'shifting') {
     const [partText, percText] = args
     world.params.delays[partText as DelayPartKey] = toValue(percText, 0, 3)
-    world.updateParams()
+
+    setTimeout(() => {
+      world.updateParams()
+    }, 80)
+
     return
   }
 
@@ -72,7 +79,11 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
     // delay %
     const [percText] = args
     world.params.space.delay = toValue(percText, 0, 3)
-    world.updateParams()
+
+    setTimeout(() => {
+      world.updateParams()
+    }, 80)
+
     return
   }
 
@@ -86,14 +97,20 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'rotations') {
     const [axis, perc] = args
     world.params.rotations[axis as Axis] = toValue(perc, 1, 5)
-    world.updateParams({ rotation: true })
+
+    setTimeout(() => {
+      world.updateParams({ rotation: true })
+    }, 80)
+
     return
   }
 
   if (primary === 'reset') {
-    for (const character of world.characters) {
-      character.setup().then()
-    }
+    setTimeout(() => {
+      for (const character of world.characters) {
+        character.setup().then()
+      }
+    }, 80)
 
     return
   }

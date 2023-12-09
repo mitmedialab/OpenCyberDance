@@ -142,7 +142,7 @@ const numeric = (value: string) => {
         @click="addValue('50')"
         class="animate__animated animate__fadeInUp"
       >
-        > percent (0% - 100%)
+        > 0% - 100%
       </div>
 
       <div

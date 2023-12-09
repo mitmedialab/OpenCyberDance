@@ -10,7 +10,13 @@ const toValue = (v: string, min: number, max: number) =>
 export function runCommand(primary: ChoiceKey, args: string[]) {
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
 
+  let spokenSentence = `${primary}}`
+  if (args.length > 0) {
+    spokenSentence += `${args.join(' ')}`
+  }
+
   world.voice.stop('run command done')
+  world.voice.speak(spokenSentence).then()
 
   if (primary === 'curve') {
     const [equationText, partText, percText] = args

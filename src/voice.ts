@@ -51,8 +51,12 @@ export class VoiceController {
   }
 
   // Update the status display
-  updateStatus(status: ListeningStatus) {
+  updateStatus(status: ListeningStatus, key?: string) {
     $status.set(status)
+
+    if (key) {
+      console.log(`[status] ${status} (key=${key})`)
+    }
   }
 
   setOpenAIKey(key: string) {
@@ -151,11 +155,11 @@ export class VoiceController {
 
     this.recognition.addEventListener('start', () => {
       this.successFlags.clear()
-      this.updateStatus('listening')
+      this.updateStatus('listening', 'recognizer start')
     })
 
     this.recognition.addEventListener('audiostart', () => {
-      this.updateStatus('listening')
+      this.updateStatus('listening', 'audio start')
     })
 
     this.recognition.addEventListener('result', async (e) => {
@@ -212,7 +216,7 @@ export class VoiceController {
     setTimeout(() => {
       if ($status.get() === status) {
         if (this.recognition) {
-          this.updateStatus('listening')
+          this.updateStatus('listening', 'restore status timer')
         }
       }
     }, delay)
@@ -220,33 +224,34 @@ export class VoiceController {
 
   continueListening(key?: string) {
     const completed = $valueCompleted.get()
-    if (!completed) return
+    if (completed) return
 
     // if it's still not completed, then we need to continue!
     setTimeout(() => {
-      this.startRecognition(key)
+      console.log(`[no op - continue listen] ${key}`)
     }, 10)
   }
 
-  speak(text: string) {
-    if (!responsiveVoice) {
-      console.error('ResponsiveVoice not loaded!')
-      return
-    }
+  speak(text: string): Promise<void> {
+    return new Promise((resolve) => {
+      if (!responsiveVoice) {
+        console.error('ResponsiveVoice not loaded!')
+        return
+      }
 
-    this.updateStatus('speaking')
-    console.log(`> [speaking] ${text}`)
+      this.updateStatus('speaking')
+      console.log(`> [speaking] ${text}`)
 
-    // don't speak too much.
-    const spokenText = text.slice(0, 150)
+      // don't speak too much.
+      const spokenText = text.slice(0, 150)
 
-    responsiveVoice.speak(spokenText, 'US English Male', {
-      pitch: 0.2,
-      rate: 1,
-      onend: () => {
-        this.updateStatus('disabled')
-        $transcript.set('')
-      },
+      responsiveVoice.speak(spokenText, 'US English Male', {
+        pitch: 0.2,
+        rate: 1,
+        onend: () => {
+          resolve()
+        },
+      })
     })
   }
 

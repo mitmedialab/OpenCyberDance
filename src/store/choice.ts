@@ -172,22 +172,27 @@ export function handleVoiceSelection(
       (x) => x.title.toLowerCase() === title,
     )
 
+    const choiceKeys = currentStep.choices.map((c) => c.key)
+    const hasX = choiceKeys.includes('x')
+    const hasY = choiceKeys.includes('y')
+    const hasZ = choiceKeys.includes('z')
+
     if (choice) {
       addValue(choice.key)
       return true
     }
 
-    if (/^(why|wine)$/i.test(title)) {
+    if (/^(why|wine)$/i.test(title) && hasY) {
       addValue('y')
       return true
     }
 
-    if (title === 'ex') {
+    if (title === 'ex' && hasX) {
       addValue('x')
       return true
     }
 
-    if (/^(see|sea)$/i.test(title)) {
+    if (/^(see|sea)$/i.test(title) && hasZ) {
       addValue('z')
       return true
     }

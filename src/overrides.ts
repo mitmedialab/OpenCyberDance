@@ -51,9 +51,9 @@ export class Params {
   /** External body space */
   space: SpaceConfig = {
     delay: 0,
-    threshold: 0.005,
+    threshold: 0.008,
     minWindow: 3,
-    windowSize: 30,
+    windowSize: 50,
   }
 
   curve: CurveConfig = {
@@ -68,8 +68,8 @@ export class Params {
 
     axes: {
       x: true,
-      y: false,
-      z: false,
+      y: true,
+      z: true,
     },
 
     equation: 'none',
@@ -103,7 +103,7 @@ export class Params {
     threshold: 0,
 
     parts: {
-      leftArm: false,
+      leftArm: true,
       rightArm: false,
       leftLeg: false,
       rightLeg: false,
@@ -208,9 +208,9 @@ export function applyExternalBodySpace(
     })
 
     // Check if all differences in the window are below the threshold
-    const isValley =
-      diffs.every((diff) => Math.abs(diff) <= threshold) &&
-      windowEnd - windowStart >= minWindow
+    const isUnderThreshold = diffs.every((diff) => Math.abs(diff) <= threshold)
+    const isOverWindow = windowEnd - windowStart >= minWindow
+    const isValley = isUnderThreshold && isOverWindow
 
     // Consider these regions as no-change regions
     if (isValley) valleys.push([windowStart, windowEnd])

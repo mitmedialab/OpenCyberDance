@@ -576,7 +576,7 @@ export class Character {
     this.actions.set(clip.name, action)
 
     action.time = prevAction.time
-    prevAction.crossFadeTo(action, 0.35, true)
+    prevAction.crossFadeTo(action, 3, true)
     action.play()
 
     // Uncache the action after the cross-fade is complete.

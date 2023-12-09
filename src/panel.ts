@@ -150,7 +150,7 @@ export class Panel {
     if (!this.spaceFolder) return
 
     this.spaceFolder
-      .add(this.params.space, 'delay', 0, 3, 0.001)
+      .add(this.params.space, 'delay', 0, 5, 0.001)
       .name('Delay Per Valley (s)')
       .listen()
       .onChange(this.handlers.space)
@@ -168,7 +168,7 @@ export class Panel {
       .onChange(this.handlers.space)
 
     this.spaceFolder
-      .add(this.params.space, 'windowSize', 1, 120, 1)
+      .add(this.params.space, 'windowSize', 1, 1000, 1)
       .name('Window Size')
       .listen()
       .onChange(this.handlers.space)

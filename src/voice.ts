@@ -132,6 +132,9 @@ export class VoiceController {
       // do not update error status if manually aborted by us.
       if (e.error === 'aborted') return
 
+      // do not update error status if no speech detected.
+      if (e.error === 'no-speech') return
+
       $voiceError.set(e)
       this.updateStatus('failed')
 

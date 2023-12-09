@@ -4,7 +4,12 @@ import { CorePartKey, CurvePartKey, DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
 import { choices } from './step-input.ts'
-import { getVoicePromptParams, handleVoiceSelection } from './store/choice.ts'
+import {
+  createGrammarFromState,
+  getVoicePromptParams,
+  handleVoiceSelection,
+  prevStep,
+} from './store/choice.ts'
 import { $gptResult, $status, $transcript } from './store/status'
 import { Axis } from './transforms'
 import { World } from './world'
@@ -112,13 +117,19 @@ export class VoiceController {
   }
 
   createRecognition() {
+    console.log('--- recognition generated')
+
     this.recognition = new SpeechRecognition()
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
 
-    // const grammars = new SpeechGrammarList()
-    // grammars.addFromString(SPEECH_GRAMMAR, 10)
-    // this.recognition.grammars = grammars
+    const targetGrammar = createGrammarFromState()
+
+    if (targetGrammar) {
+      const grammars = new SpeechGrammarList()
+      grammars.addFromString(targetGrammar, 10)
+      this.recognition.grammars = grammars
+    }
 
     this.recognition.addEventListener('result', (e) => {
       this.onVoiceResult([...e.results]).then()
@@ -171,8 +182,21 @@ export class VoiceController {
       for (const alt of alts) {
         console.log(`[alt]`, alt)
 
+        if (alt === 'back') {
+          prevStep()
+          break
+        }
+
+        if (['x', 'y', 'z'].includes(alt)) {
+          handleVoiceSelection(alt, 'choice')
+          break
+        }
+
         const params = getVoicePromptParams()
         console.log(`[params]`, params)
+
+        // const firstStep = handleVoiceSelection(alt, 'any')
+        // if (!firstStep) break
 
         const msg = JSON.stringify({ input: alt, ...params })
         const result = await gpt(CORRECTION_PROMPT, msg)
@@ -187,15 +211,15 @@ export class VoiceController {
           obj = JSON.parse(result)
         } catch (err) {}
 
-        if (obj.choice) {
-          console.log('[selection]', obj.choice)
-          handleVoiceSelection(obj.choice, 'choice')
-          break
-        }
-
         if (obj.percent) {
           console.log('[selection]', obj.choice)
           handleVoiceSelection(obj.percent, 'percent')
+          break
+        }
+
+        if (obj.choice) {
+          console.log('[selection]', obj.choice)
+          handleVoiceSelection(obj.choice, 'choice')
           break
         }
       }

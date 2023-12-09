@@ -112,11 +112,11 @@ export class Params {
 
   characters: CharacterOptions = {
     first: {
-      model: 'abstract',
+      model: 'kukpat',
       action: '',
     },
     second: {
-      model: 'abstract',
+      model: 'kukpat',
       action: '',
     },
   }

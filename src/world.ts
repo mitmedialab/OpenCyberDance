@@ -271,13 +271,13 @@ export class World {
   async setupCharacters() {
     await this.addCharacter({
       name: 'first',
-      model: 'abstract',
+      model: 'kukpat',
       position: [-0.8, 0, 0],
     })
 
     await this.addCharacter({
       name: 'second',
-      model: 'abstract',
+      model: 'kukpat',
       position: [0.8, 0, 0],
       freezeParams: true,
     })

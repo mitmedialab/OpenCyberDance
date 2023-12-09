@@ -254,8 +254,6 @@ export class Panel {
     this.addSpaceControl()
     this.addAxisPointControl()
 
-    this.panel.hide()
-
     // this.commandFolder.open()
     // this.rotationFolder.open()
     // this.energyFolder.open()

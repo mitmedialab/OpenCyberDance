@@ -98,11 +98,15 @@ export function addValue(key: string) {
 
   setTimeout(() => {
     console.log('resetting!')
-    $currentStepId.set(null)
-    $selectedValues.set([])
-    $selectedChoiceKey.set(null)
+    resetPrompt()
     $showPrompt.set(false)
   }, 3000)
+}
+
+export function resetPrompt() {
+  $currentStepId.set(null)
+  $selectedValues.set([])
+  $selectedChoiceKey.set(null)
 }
 
 export const clearMainChoice = () => {
@@ -113,8 +117,8 @@ const choicesKey = Object.keys(choices)
 
 export function handleVoiceSelection(
   input: string,
-  type: 'choice' | 'percent',
-) {
+  type?: 'choice' | 'percent' | 'any',
+): boolean {
   const selectedChoiceKey = $selectedChoiceKey.get()
   const currentStep = $currentStep.get()
 
@@ -124,27 +128,36 @@ export function handleVoiceSelection(
       setChoice(input as ChoiceKey)
     }
 
-    return
+    return true
+  }
+
+  if (!input) return false
+
+  if (typeof input === 'string' && input.includes('back')) {
+    prevStep()
+    return true
   }
 
   if (currentStep.type === 'choice') {
     const choice = currentStep.choices.find((x) => x.title === input)
-    if (!choice) return
+    if (!choice) return false
 
     addValue(choice.key)
-    return
+    return true
   }
 
   if (currentStep.type === 'percent') {
     const percent = parseInt(input)
 
-    if (isNaN(percent)) return
-    if (percent < 0) return
-    if (percent > 300) return
+    if (isNaN(percent)) return false
+    if (percent < 0) return false
+    if (percent > 300) return false
 
     addValue(`${percent}`)
-    return
+    return true
   }
+
+  return false
 }
 
 export function getVoicePromptParams():
@@ -167,4 +180,23 @@ export function getVoicePromptParams():
   }
 
   return { percent: true }
+}
+
+export function createGrammarFromState() {
+  const params = getVoicePromptParams()
+
+  const hasChoice = 'choices' in params
+  const grammarSupported = hasChoice
+
+  let grammar = `
+    #JSGF V1.0;
+    
+    grammar choices;
+  `
+
+  if (hasChoice) {
+    grammar += `public <choice> = ${params.choices?.join(' | ') || ''};`
+  }
+
+  return grammar
 }

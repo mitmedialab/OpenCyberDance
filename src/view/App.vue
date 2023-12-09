@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
 import { useMagicKeys } from '@vueuse/core'
 
-import { $showPrompt } from '../store/choice'
+import { $showPrompt, resetPrompt } from '../store/choice'
 
 import { world } from '../world'
 
@@ -19,8 +19,17 @@ onMounted(async () => {
 
   window.addEventListener('keydown', (event) => {
     if (event.key === ' ') {
+      resetPrompt()
       $showPrompt.set(!showPrompt.value)
       world.voice.start()
+    }
+
+    if (event.key === 'i') {
+      if (world.panel.panel._hidden) {
+        world.panel.panel.show(true)
+      } else {
+        world.panel.panel.hide()
+      }
     }
   })
 

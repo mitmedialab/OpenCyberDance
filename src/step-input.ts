@@ -16,7 +16,7 @@ const toOptions = (...options: string[]): ChoiceOption[] =>
 
 export type Step =
   | { type: 'percent'; max?: number }
-  | { type: 'choice'; choices: ChoiceOption[] }
+  | { type: 'choice'; choices: ChoiceOption[]; meta?: 'ordered' }
 
 export const steps = {
   percent: { type: 'percent' },
@@ -47,6 +47,7 @@ export const steps = {
       { title: 'cap min', key: 'capMin' },
       { title: 'cap max', key: 'capMax' },
     ],
+    meta: 'ordered',
   },
 
   curveParts: {
@@ -66,18 +67,21 @@ export const steps = {
   dances: {
     type: 'choice',
     choices: [
-      { title: '1. unset', key: 'none' },
-      { title: '2. kukpat', key: 'kukpat' },
-      { title: '3. tranimid', key: 'tranimid' },
-      { title: '4. terry', key: 'terry' },
-      { title: '5. changhung', key: 'changhung' },
-      { title: '6. yokrob', key: 'yokrob' },
-      { title: '7. yokrob ling', key: 'yokroblingImprovise' },
-      { title: '8. robot 33', key: 'robot33' },
-      { title: '9. robot 57', key: 'robot57' },
-      { title: '10. base 33', key: 'base33' },
-      { title: '11. base 57', key: 'base57' },
+      { title: '1. kukpat', key: 'kukpat' },
+      { title: '2. tranimid', key: 'tranimid' },
+      { title: '3. terry', key: 'terry' },
+      { title: '4. changhung', key: 'changhung' },
+      { title: '5. yokrob', key: 'yokrob' },
+      { title: '6. yokrob ling', key: 'yokroblingImprovise' },
+      { title: '7. robot 33', key: 'robot33' },
+      { title: '8. robot 57', key: 'robot57' },
+      { title: '8. base 33', key: 'base33' },
+      { title: '10. base 57', key: 'base57' },
+      { title: '11. base 58', key: 'base58' },
+      { title: '12. base 59', key: 'base59' },
+      // { title: '11. unset', key: 'none' },
     ],
+    meta: 'ordered',
   },
 } satisfies Record<string, Step>
 

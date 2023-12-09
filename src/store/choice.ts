@@ -152,6 +152,10 @@ export function handleVoiceSelection(
     if (/(speed|animation)/i.test(input as string)) {
       return selectChoice('speed')
     }
+
+    if (/(dance|dances|character|model)/i.test(input as string)) {
+      return selectChoice('dances')
+    }
   }
 
   if (!currentStep) return false
@@ -166,10 +170,16 @@ export function handleVoiceSelection(
     if (typeof input === 'number') return false
 
     const title = input.toLowerCase().trim()
+    const isOrdered = currentStep.meta === 'ordered'
+    console.log('is ordered?', isOrdered)
 
-    const choice = currentStep.choices.find(
-      (x) => x.title.toLowerCase() === title,
-    )
+    const choice = currentStep.choices.find((x) => {
+      if (isOrdered) {
+        return x.title.replace(/^\d+\.\s*/, '') === title
+      }
+
+      return x.title.toLowerCase() === title
+    })
 
     const choiceKeys = currentStep.choices.map((c) => c.key)
     const hasX = choiceKeys.includes('x')
@@ -177,6 +187,17 @@ export function handleVoiceSelection(
     const hasZ = choiceKeys.includes('z')
     const hasAll = choiceKeys.includes('all')
     const hasRightArm = choiceKeys.includes('rightArm')
+
+    if (isOrdered) {
+      const order = parseInt(title)
+
+      if (!isNaN(order)) {
+        const key = currentStep.choices[order - 1].key
+        addValue(key)
+
+        return true
+      }
+    }
 
     if (choice) {
       addValue(choice.key)

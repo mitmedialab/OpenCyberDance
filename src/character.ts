@@ -119,7 +119,7 @@ export class Character {
   options: CharacterOptions = {
     name: 'first',
     action: '',
-    model: 'robot',
+    model: 'kukpat',
     scale: 0.008,
     position: [0, 0, 0],
     lengthen: 0,
@@ -592,7 +592,7 @@ export class Character {
     const config = this.params.characters[this.options.name]
 
     this.options.model = config.model
-    this.options.action = null
+    this.options.action = config.action ?? null
 
     await this.setup()
   }

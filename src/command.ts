@@ -192,6 +192,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'dances') {
     const [danceName] = args
 
-    switchDance(danceName)
+    console.log('switching dance', danceName)
+    switchDance(danceName).then()
   }
 }

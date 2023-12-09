@@ -16,6 +16,11 @@ import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
 import {
+  changeAction,
+  changeCharacter,
+  getPersistCharacter,
+} from './switch-dance.ts'
+import {
   formulaRanges,
   Transform,
   TransformKey,
@@ -271,13 +276,11 @@ export class World {
   async setupCharacters() {
     await this.addCharacter({
       name: 'first',
-      model: 'kukpat',
       position: [-0.8, 0, 0],
     })
 
     await this.addCharacter({
       name: 'second',
-      model: 'kukpat',
       position: [0.8, 0, 0],
       freezeParams: true,
     })
@@ -316,22 +319,11 @@ export class World {
     this.panel.handlers.setCamera = this.setCamera.bind(this)
 
     this.panel.handlers.character = async (name: CharacterKey) => {
-      const char = this.characterByName(name)
-      if (!char) return
-
-      await char.reset()
-
-      // Sync animation timing with a peer.
-      const peer = this.characters.find((c) => c.options.name !== name)
-      if (peer?.mixer && char.mixer) char.mixer.setTime(peer.mixer.time)
+      await changeCharacter(name)
     }
 
     this.panel.handlers.action = (name: CharacterKey) => {
-      const action = this.params.characters[name].action
-      const character = this.characterByName(name)
-      if (!character || !action) return
-
-      character.playByName(action)
+      changeAction(name)
     }
 
     this.panel.handlers.voice = () => {

@@ -62,6 +62,23 @@ export const steps = {
     type: 'choice',
     choices: [...armatureParts, ...toOptions('all')],
   },
+
+  dances: {
+    type: 'choice',
+    choices: [
+      { title: '1. unset', key: 'none' },
+      { title: '2. kukpat', key: 'kukpat' },
+      { title: '3. tranimid', key: 'tranimid' },
+      { title: '4. terry', key: 'terry' },
+      { title: '5. changhung', key: 'changhung' },
+      { title: '6. yokrob', key: 'yokrob' },
+      { title: '7. yokrob ling', key: 'yokroblingImprovise' },
+      { title: '8. robot 33', key: 'robot33' },
+      { title: '9. robot 57', key: 'robot57' },
+      { title: '10. base 33', key: 'base33' },
+      { title: '11. base 57', key: 'base57' },
+    ],
+  },
 } satisfies Record<string, Step>
 
 export type StepKey = keyof typeof steps
@@ -114,6 +131,11 @@ export const choices = {
     title: 'animation speed',
     triggers: ['speed'],
     steps: [{ type: 'percent', max: 300 }],
+  },
+  dances: {
+    title: 'dances',
+    triggers: ['dances'],
+    steps: [steps.dances],
   },
 } satisfies Record<string, Choice>
 

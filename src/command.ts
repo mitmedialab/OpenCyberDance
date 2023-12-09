@@ -8,6 +8,7 @@ import {
   delayParts,
 } from './parts.ts'
 import { ChoiceKey, choices } from './step-input'
+import { switchDance } from './switch-dance.ts'
 import { Axis, TransformKey } from './transforms.ts'
 import { world } from './world'
 
@@ -186,5 +187,11 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
 
       character.mixer.timeScale = percentToValue(parseInt(percText), 0, 1, 300)
     }
+  }
+
+  if (primary === 'dances') {
+    const [danceName] = args
+
+    switchDance(danceName)
   }
 }

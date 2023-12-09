@@ -58,6 +58,9 @@ devDependencies:
   '@types/dom-speech-recognition':
     specifier: ^0.0.4
     version: 0.0.4
+  '@types/howler':
+    specifier: ^2.2.11
+    version: 2.2.11
   '@types/three':
     specifier: ^0.159.0
     version: 0.159.0
@@ -898,6 +901,10 @@ packages:
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
+    dev: true
+
+  /@types/howler@2.2.11:
+    resolution: {integrity: sha512-7aBoUL6RbSIrqKnpEgfa1wSNUBK06mn08siP2QI0zYk7MXfEJAaORc4tohamQYqCqVESoDyRWSdQn2BOKWj2Qw==}
     dev: true
 
   /@types/json-schema@7.0.15:

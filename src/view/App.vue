@@ -14,12 +14,11 @@ const showPrompt = useStore($showPrompt)
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
-function ding() {
-  const synth = new Tone.Synth().toDestination()
-  const now = Tone.now()
+import { Howl } from 'howler'
 
-  synth.triggerAttack('C4', now)
-  synth.triggerRelease(now + 1)
+function ding() {
+  const sound = new Howl({ src: '/sounds/khongwong.wav' })
+  sound.play()
 }
 
 onMounted(async () => {

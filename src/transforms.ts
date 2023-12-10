@@ -34,7 +34,9 @@ export function applyTrackTransform(
 
   // Temporarily disable transform for vector tracks.
   const isVector = track instanceof VectorKeyframeTrack
-  if (isVector) return track.values
+  if (isVector) {
+    return track.values
+  }
 
   const series: Record<string, number[]> = {}
 

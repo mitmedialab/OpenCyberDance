@@ -477,7 +477,9 @@ export class Character {
 
       // Reset the keyframe values when circle and curve formula changes.
       if (flags.curve || flags.axisPoint) {
-        track.values = original.values.slice(0)
+        if (track.name !== 'Hips.position') {
+          track.values = original.values.slice(0)
+        }
       }
 
       if (flags.axisPoint) {
@@ -529,6 +531,8 @@ export class Character {
 
       // Override curve only
       if (flags.curve && _curve.tracks.includes(index) && _curve.equation) {
+        // debugger
+
         track.values = applyTrackTransform(track, _curve.equation, {
           axis: _curve.axis,
           tracks: _curve.tracks,

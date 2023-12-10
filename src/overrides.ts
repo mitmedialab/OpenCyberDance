@@ -177,14 +177,18 @@ export function applyExternalBodySpace(
 
   const timing = tracks[0].times
 
+  console.log(tracks)
   // TODO: cache the average value for a HUGE speedup!
   const averages = [...timing].map((_, frame) => {
     const sums = tracks.map((track) => {
+      if (!(track instanceof THREE.QuaternionKeyframeTrack)) return 0
+
       const size = track.getValueSize()
 
       let sum = 0
       for (let axis = 0; axis < size; axis++) {
-        sum += Math.abs(track.values[frame * size + axis])
+        const num = Math.abs(track.values[frame * size + axis])
+        sum += !isNaN(num) ? num : 0
       }
 
       // Average of quaternion x/y/z/w values
@@ -208,7 +212,9 @@ export function applyExternalBodySpace(
     })
 
     // Check if all differences in the window are below the threshold
-    const isUnderThreshold = diffs.every((diff) => Math.abs(diff) <= threshold)
+    const isUnderThreshold = diffs.every(
+      (diff) => Math.abs(diff) <= threshold / 1000,
+    )
     const isOverWindow = windowEnd - windowStart >= minWindow
     const isValley = isUnderThreshold && isOverWindow
 
@@ -226,7 +232,7 @@ export function applyExternalBodySpace(
     if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
 
     const startFrames = valleys.map(([start]) => start)
-    const endFrames = valleys.map(([start]) => start)
+    const endFrames = valleys.map(([, end]) => end)
 
     // Current region's delay offset.
     let delayPerFrame = 0

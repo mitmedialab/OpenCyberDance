@@ -75,7 +75,7 @@ export const steps = {
       { title: '6. yokrob ling', key: 'yokroblingImprovise' },
       { title: '7. robot 33', key: 'robot33' },
       { title: '8. robot 57', key: 'robot57' },
-      { title: '8. base 33', key: 'base33' },
+      { title: '9. base 33', key: 'base33' },
       { title: '10. base 57', key: 'base57' },
       { title: '11. base 58', key: 'base58' },
       { title: '12. base 59', key: 'base59' },

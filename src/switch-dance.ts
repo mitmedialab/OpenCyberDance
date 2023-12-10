@@ -7,7 +7,10 @@ const danceKeyMap = {
   terry: { model: 'terry' },
   changhung: { model: 'changhung' },
   yokrob: { model: 'yokrob' },
-  yokroblingImprovise: { model: 'yokroblingImprovise' },
+  yokroblingImprovise: {
+    model: 'yokroblingImprovise',
+    action: 'yokroblingimprovised_ch002',
+  },
   robot33: { model: 'robot', action: 'no.33_..001' },
   robot57: { model: 'robot', action: 'no.57_.' },
   base33: { model: 'abstract', action: 'no.33_.' },

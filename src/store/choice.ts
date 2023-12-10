@@ -206,6 +206,7 @@ export function handleVoiceSelection(
 
     // auto-corrections
     if (fix('rightArm', /(light arm)/i)) return true
+    if (fix('rightLeg', /(light lake|right lake|bright lake)/i)) return true
     if (fix('gaussian', /(gauss|klaus)/i)) return true
     if (fix('all', /(all|oh)/i)) return true
     if (fix('x', /^(ex)$/i)) return true

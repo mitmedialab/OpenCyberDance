@@ -151,7 +151,7 @@ export function handleVoiceSelection(
       return selectChoice('speed')
     }
 
-    if (/(dance|dances|dancer|dancers|character|model)/i.test(input as string)) {
+    if (/(dancer|dancers|character|model)/i.test(input as string)) {
       return selectChoice('dances')
     }
   }

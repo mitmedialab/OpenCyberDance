@@ -177,7 +177,6 @@ export function applyExternalBodySpace(
 
   const timing = tracks[0].times
 
-  console.log(tracks)
   // TODO: cache the average value for a HUGE speedup!
   const averages = [...timing].map((_, frame) => {
     const sums = tracks.map((track) => {

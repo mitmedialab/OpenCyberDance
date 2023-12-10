@@ -6,10 +6,12 @@ import {
   LineBasicMaterial,
   Mesh,
   MeshStandardMaterial,
+  Quaternion,
   QuaternionKeyframeTrack,
   Scene,
   SkeletonHelper,
   SkinnedMesh,
+  Vector3,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
@@ -373,10 +375,16 @@ export class Character {
 
     if (!bone || !sphere) return
 
-    const wp = bone.getWorldPosition(sphere.position)
-    const qp = bone.getWorldQuaternion(sphere.quaternion)
+    const wp = new Vector3()
+    bone.getWorldPosition(wp)
 
-    console.log('> update sphere', sphere.name, bone.name, wp, qp)
+    const wq = new Quaternion()
+    bone.getWorldQuaternion(wq)
+
+    sphere.position.set(wp.x, wp.y, wp.z)
+    sphere.quaternion.set(wq.x, wq.y, wq.z, wq.w)
+
+    // console.log('> update sphere', sphere.name, bone.name, wp, qp)
   }
 
   updateAction() {

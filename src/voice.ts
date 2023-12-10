@@ -1,4 +1,4 @@
-import { randVariance } from './math'
+import { getMaxOccurence, randVariance } from './math'
 import { DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
@@ -275,12 +275,15 @@ export class VoiceController {
 
     if (isPercent) {
       const definitelyNumbers = alts
+        .map((s) => s.replace(/\D/g, ''))
         .filter((alt) => Number(alt))
         .filter(
           (alt) => step?.type === 'percent' && Number(alt) <= (step.max ?? 100),
         )
 
-      alts.unshift(...definitelyNumbers)
+      const max = getMaxOccurence(definitelyNumbers)
+
+      alts.unshift(max?.toString())
     }
 
     if (alts.length === 0) return false

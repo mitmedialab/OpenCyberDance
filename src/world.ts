@@ -18,7 +18,6 @@ import { Plotter } from './plotter'
 import {
   changeAction,
   changeCharacter,
-  getPersistCharacter,
 } from './switch-dance.ts'
 import {
   formulaRanges,

@@ -15,10 +15,7 @@ import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
-import {
-  changeAction,
-  changeCharacter,
-} from './switch-dance.ts'
+import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
   formulaRanges,
   Transform,
@@ -66,8 +63,8 @@ export class World {
 
   async setup() {
     // Setup background
-    this.scene.background = new THREE.Color(0xdedede)
-    this.scene.fog = new THREE.Fog(0xdedede, 10, 50)
+    this.scene.background = new THREE.Color(0x000)
+    this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
     // Setup the scenes
     this.setupLights()
@@ -134,7 +131,7 @@ export class World {
   setupPlane() {
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(100, 100),
-      new THREE.MeshPhongMaterial({ color: 0xcbcbcb, depthWrite: false }),
+      new THREE.MeshPhongMaterial({ color: 0x000, depthWrite: false }),
     )
 
     plane.rotation.x = -Math.PI / 2
@@ -147,7 +144,7 @@ export class World {
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.shadowMap.enabled = true
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-    this.renderer.toneMappingExposure = 2
+    this.renderer.toneMappingExposure = 10
   }
 
   setupCamera() {
@@ -278,11 +275,11 @@ export class World {
       position: [0, 0, 0],
     })
 
-    // await this.addCharacter({
-    //   name: 'second',
-    //   position: [0.8, 0, 0],
-    //   freezeParams: true,
-    // })
+    await this.addCharacter({
+      name: 'second',
+      position: [0.8, 0, 0],
+      freezeParams: true,
+    })
   }
 
   setupPanel() {

@@ -71,20 +71,20 @@ const numeric = (value: string, max = 300) => {
 
 <template>
   <div
-    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4"
+    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-white"
   >
     <div
-      class="flex items-start justify-start gap-x-6 text-10 font-zed animate__animated"
-      :class="{ 'bg-black text-white rounded': completed }"
+      class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
+      :class="{ 'text-white rounded': completed }"
     >
       <div
-        class="min-w-10 min-h-10 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
+        class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
         :class="[
           {
             'animate__rotateIn animate__infinite': isThinking,
             'bg-black': !isListening,
-            'bg-red-7 animate__flash animate__infinite': isListening,
-            'bg-red-5 animate__heartBeat animate__infinite': !!voiceError,
+            'bg-red-5 animate__flash animate__infinite': isListening,
+            'bg-red-4 animate__heartBeat animate__infinite': !!voiceError,
             'animate__headShake animate__infinite': isConfused,
           },
         ]"
@@ -95,7 +95,7 @@ const numeric = (value: string, max = 300) => {
         flex
         v-if="completed"
         class="cursor-pointer py-1 px-2 animate__animated fadeIn"
-        :class="[{ 'bg-red-7 text-white px-4 rounded-l pl-4 pr-4': completed }]"
+        :class="[{ 'bg-red-5 text-white px-4 rounded-l pl-4 pr-4': completed }]"
       >
         > executed
       </div>
@@ -110,7 +110,7 @@ const numeric = (value: string, max = 300) => {
                 animate__fadeInUp: !selectedChoiceKey,
               },
             ]"
-            class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
+            class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
             v-for="(choice, key) in choices"
             :key="key"
             v-show="
@@ -125,7 +125,7 @@ const numeric = (value: string, max = 300) => {
 
       <div
         v-for="choice in selectedStepChoiceTitles"
-        class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
+        class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
         :key="choice"
         v-show="choice"
         :class="[{ 'highlight-a-bit': !completed }]"
@@ -136,7 +136,7 @@ const numeric = (value: string, max = 300) => {
 
       <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
         <div
-          class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+          class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
           v-for="choice in currentStep.choices"
           @click="addValue(choice.key)"
           :key="choice.key"
@@ -145,7 +145,7 @@ const numeric = (value: string, max = 300) => {
         </div>
 
         <div
-          class="hover:bg-black hover:text-white cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+          class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
           @click="prevStep()"
         >
           &lt; back
@@ -163,7 +163,7 @@ const numeric = (value: string, max = 300) => {
         </div>
 
         <div
-          class="hover:bg-black hover:text-white cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp transition-faster"
+          class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp transition-faster"
           @click="prevStep()"
         >
           &lt; back
@@ -185,7 +185,12 @@ const numeric = (value: string, max = 300) => {
     </div>
   </div>
 
-  <div fixed bottom-4 left-4 class="text-[12px] font-zed text-gray-7 space-y-1">
+  <div
+    fixed
+    bottom-4
+    left-4
+    class="text-[12px] font-zed space-y-1 text-gray-200"
+  >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}
     </div>

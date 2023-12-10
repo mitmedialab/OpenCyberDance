@@ -74,7 +74,7 @@ const numeric = (value: string, max = 300) => {
     class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4"
   >
     <div
-      class="flex items-start justify-start gap-x-6 text-5 font-zed animate__animated"
+      class="flex items-start justify-start gap-x-6 text-10 font-zed animate__animated"
       :class="{ 'bg-black text-white rounded': completed }"
     >
       <div

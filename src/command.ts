@@ -18,7 +18,7 @@ import { world } from './world'
 const toValue = (v: string, min: number, max: number) =>
   percentToValue(parseInt(v), min, max)
 
-export function runCommand(primary: ChoiceKey, args: string[]) {
+export async function runCommand(primary: ChoiceKey, args: string[]) {
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
 
   const choice = choices[primary]
@@ -55,7 +55,7 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
   appendLog(spokenSentence)
 
   world.voice.stop('run command done')
-  world.voice.speak(spokenSentence).then()
+  await world.voice.speak(spokenSentence)
 
   if (primary === 'curve') {
     const [equationText, partText, percText] = args

@@ -67,12 +67,12 @@ export const steps = {
   dances: {
     type: 'choice',
     choices: [
-      { title: '1. kukpat', key: 'kukpat' },
+      { title: '1. tas kukpat', key: 'kukpat' },
       { title: '2. tranimid', key: 'tranimid' },
       { title: '3. terry', key: 'terry' },
       { title: '4. changhung', key: 'changhung' },
-      { title: '5. yokrob', key: 'yokrob' },
-      { title: '6. yokrob ling', key: 'yokroblingImprovise' },
+      { title: '5. padung yokrob', key: 'yokrob' },
+      { title: '6. padung yokrob monkey', key: 'yokroblingImprovise' },
       { title: '7. robot 33', key: 'robot33' },
       { title: '8. robot 57', key: 'robot57' },
       { title: '9. base 33', key: 'base33' },
@@ -131,7 +131,7 @@ export const choices = {
     steps: [],
   },
   speed: {
-    title: 'animation speed',
+    title: 'dance speed',
     triggers: ['speed'],
     steps: [{ type: 'percent', max: 300 }],
   },

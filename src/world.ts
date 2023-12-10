@@ -1,9 +1,12 @@
 import GUI, { Controller as GUIController } from 'lil-gui'
 import {
   Clock,
+  DirectionalLight,
+  HemisphereLight,
   OrthographicCamera,
   PerspectiveCamera,
   Scene,
+  SpotLight,
   WebGLRenderer,
 } from 'three'
 import * as THREE from 'three'
@@ -120,12 +123,12 @@ export class World {
   }
 
   setupLights() {
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xfefefe, 4)
-    hemiLight.position.set(0, 20, 0)
+    const hemiLight = new HemisphereLight(0xffffff, 0xfefefe, 4)
+    hemiLight.position.set(0, 10, 0)
     this.scene.add(hemiLight)
 
-    const dLight = new THREE.DirectionalLight(0xffffff, 4)
-    dLight.position.set(3, 10, 10)
+    const dLight = new DirectionalLight(0xffffff, 4)
+    dLight.position.set(0, 10, 0)
     dLight.castShadow = true
     dLight.shadow.camera.top = 2
     dLight.shadow.camera.bottom = -2
@@ -134,6 +137,19 @@ export class World {
     dLight.shadow.camera.near = 0.1
     dLight.shadow.camera.far = 40
     this.scene.add(dLight)
+
+    const spotlight = new SpotLight(0xffffff)
+    spotlight.position.set(0, 10, 0)
+    spotlight.angle = Math.PI / 4
+    spotlight.penumbra = 0.1
+    spotlight.decay = 2
+    spotlight.distance = 200
+    spotlight.castShadow = true
+    spotlight.shadow.mapSize.width = 1024
+    spotlight.shadow.mapSize.height = 1024
+    spotlight.shadow.camera.near = 10
+    spotlight.shadow.camera.far = 200
+    this.scene.add(spotlight)
   }
 
   setupPlane() {
@@ -159,6 +175,7 @@ export class World {
     const width = window.innerWidth
     const height = window.innerHeight
     const aspect = width / height
+
     const viewerFrustumSize = 0.25
     const aspectFrustum = aspect * viewerFrustumSize
 

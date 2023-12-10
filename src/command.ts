@@ -174,7 +174,9 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       world.params.rotations.y = value
       world.params.rotations.z = value
     } else {
-      world.params.rotations[axis as Axis] = value
+      for (const a of ['x', 'y', 'z']) {
+        world.params.rotations[a as Axis] = a === axis ? value : 1
+      }
     }
 
     setTimeout(() => {

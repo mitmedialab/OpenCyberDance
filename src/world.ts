@@ -276,14 +276,14 @@ export class World {
   async setupCharacters() {
     await this.addCharacter({
       name: 'first',
-      position: [-0.8, 0, 0],
+      position: [0, 0, 0],
     })
 
-    await this.addCharacter({
-      name: 'second',
-      position: [0.8, 0, 0],
-      freezeParams: true,
-    })
+    // await this.addCharacter({
+    //   name: 'second',
+    //   position: [0.8, 0, 0],
+    //   freezeParams: true,
+    // })
   }
 
   setupPanel() {

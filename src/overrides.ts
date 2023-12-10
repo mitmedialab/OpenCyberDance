@@ -202,7 +202,7 @@ export function applyExternalBodySpace(
     threshold: number,
     minWindow: number,
   ) {
-    const t = threshold / 1000
+    const t = threshold / 2000
     const valleys: [start: number, end: number][] = []
     let startIdx = 0
 
@@ -212,7 +212,7 @@ export function applyExternalBodySpace(
       if (Math.abs(diff) <= t) {
         continue
       } else {
-        if (i - startIdx > 1) {
+        if (i - startIdx > minWindow) {
           valleys.push([startIdx, i - 1])
         }
         startIdx = i

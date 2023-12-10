@@ -124,7 +124,7 @@ const numeric = (value: string) => {
 
       <div
         v-for="choice in selectedStepChoiceTitles"
-        class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp transition-faster"
+        class="hover:bg-black hover:text-white hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
         :key="choice"
         v-show="choice"
         :class="[{ 'highlight-a-bit': !completed }]"

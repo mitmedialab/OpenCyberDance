@@ -466,7 +466,7 @@ export class Character {
 
       // Lock and unlock hips position hips position.
       if (track.name === 'Hips.position') {
-        track.values = lock ? track.values.fill(0) : original.values.slice(0)
+        track.values = track.values.fill(0)
       }
 
       if (freezeParams) return

@@ -197,34 +197,43 @@ export function applyExternalBodySpace(
     return sums.reduce((a, b) => a + b, 0) / sums.length
   })
 
-  // Valleys in a graph with low change.
-  const valleys: [start: number, end: number][] = []
+  function detectValleys(
+    array: number[],
+    threshold: number,
+    minWindow: number,
+  ) {
+    const t = threshold / 1000
+    const valleys: [start: number, end: number][] = []
+    let startIdx = 0
 
-  let windowStart = 0
-  let windowEnd = windowSize - 1
+    for (let i = 1; i < array.length; i++) {
+      const diff = array[i] - array[i - 1]
 
-  while (windowEnd < averages.length) {
-    const w = averages.slice(windowStart, windowEnd + 1)
+      if (Math.abs(diff) <= t) {
+        continue
+      } else {
+        if (i - startIdx > 1) {
+          valleys.push([startIdx, i - 1])
+        }
+        startIdx = i
+      }
+    }
 
-    const diffs = w.map((v, i) => {
-      return i < windowSize - 1 ? w[i + 1] - v : 0
-    })
+    if (array.length - startIdx > minWindow) {
+      valleys.push([startIdx, array.length - 1])
+    }
 
-    // Check if all differences in the window are below the threshold
-    const isUnderThreshold = diffs.every(
-      (diff) => Math.abs(diff) <= threshold / 1000,
-    )
-    const isOverWindow = windowEnd - windowStart >= minWindow
-    const isValley = isUnderThreshold && isOverWindow
-
-    // Consider these regions as no-change regions
-    if (isValley) valleys.push([windowStart, windowEnd])
-
-    // Move the window to the next non-overlapping position
-    windowStart += windowSize
-    windowEnd += windowSize
+    return valleys
   }
 
+  // Valleys in a graph with low change.
+  const valleys: [start: number, end: number][] = detectValleys(
+    averages,
+    threshold,
+    minWindow,
+  )
+
+  // console.log(averages)
   // Every track must apply the same rotation freeze.
   tracks.forEach((track, ti) => {
     // Only apply external body space for rotations
@@ -270,6 +279,7 @@ export function applyExternalBodySpace(
     tracks[ti] = track
   })
 
+  // console.log(valleys)
   console.log(`Found ${valleys.length} valleys with low change.`)
 
   return tracks

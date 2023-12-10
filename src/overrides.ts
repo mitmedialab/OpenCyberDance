@@ -51,8 +51,8 @@ export class Params {
   /** External body space */
   space: SpaceConfig = {
     delay: 0,
-    threshold: 0.008,
-    minWindow: 3,
+    threshold: 0.2,
+    minWindow: 8,
     windowSize: 50,
   }
 
@@ -206,10 +206,11 @@ export function applyExternalBodySpace(
     const valleys: [start: number, end: number][] = []
     let startIdx = 0
 
+    console.log('threshold: ', t)
     for (let i = 1; i < array.length; i++) {
       const diff = array[i] - array[i - 1]
 
-      if (Math.abs(diff) <= t) {
+      if (Math.abs(diff) - t <= 0) {
         continue
       } else {
         if (i - startIdx > minWindow) {

@@ -137,7 +137,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'space') {
     // delay %
     const [percText] = args
-    world.params.space.delay = toValue(percText, 0, 3)
+    world.params.space.delay = toValue(percText, 0, 2)
 
     setTimeout(() => {
       world.updateParams()

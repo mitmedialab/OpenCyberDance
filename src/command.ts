@@ -36,6 +36,10 @@ export function runCommand(primary: ChoiceKey, args: string[]) {
         if (step.type === 'choice') {
           const target = step.choices.find((c) => c.key === a || c.title === a)
 
+          if (target && step.meta === 'ordered') {
+            return target.title.replace(/^\d+\.\s*/, '')
+          }
+
           if (target) {
             return target.title
           }

@@ -50,7 +50,11 @@ const selectedStepChoiceTitles = computed(() => {
     if (!step) return key
 
     if (step.type === 'choice') {
-      return step.choices.find((c) => c.key === key)?.title ?? key
+      const title = step.choices.find((c) => c.key === key)?.title
+      if (!title) return key
+      if (step.meta === 'ordered') return title.replace(/^\d+\.\s*/, '')
+
+      return title
     }
 
     return key

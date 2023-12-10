@@ -279,7 +279,6 @@ export class VoiceController {
         .filter(
           (alt) => step?.type === 'percent' && Number(alt) <= (step.max ?? 100),
         )
-        .sort((a, b) => Number(b) - Number(a))
 
       alts.unshift(...definitelyNumbers)
     }

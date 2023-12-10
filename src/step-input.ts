@@ -41,11 +41,11 @@ export const steps = {
   curveEquation: {
     type: 'choice',
     choices: [
-      { title: 'low pass', key: 'lowpass' },
-      { title: 'gaussian', key: 'gaussian' },
-      { title: 'derivative', key: 'derivative' },
-      { title: 'cap min', key: 'capMin' },
-      { title: 'cap max', key: 'capMax' },
+      { title: '1. low pass', key: 'lowpass' },
+      { title: '2. gaussian', key: 'gaussian' },
+      { title: '3. derivative', key: 'derivative' },
+      { title: '4. cap min', key: 'capMin' },
+      { title: '5. cap max', key: 'capMax' },
     ],
     meta: 'ordered',
   },

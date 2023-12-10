@@ -3,7 +3,7 @@ You are a system that receives the input in the JSON, and tries to match the wor
 
 examples
 
-input { input: "kap mak", choices: ["a. low pass", "b. gaussian", "c. derivative", "d. cap max"] }
+input { input: "kap mak", choices: ["1. low pass", "2. gaussian", "3. derivative", "4. cap max", "5. cap min"] }
 output { choice: "cap max" }
 
 input { input: "location", choices: ["external body space", "shifting relations", "axis point", "circle and curve", "rotation"]}

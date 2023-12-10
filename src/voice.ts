@@ -246,7 +246,7 @@ export class VoiceController {
       // don't speak too much.
       const spokenText = text.slice(0, 150)
 
-      responsiveVoice.speak(spokenText, 'UK English Female', {
+      responsiveVoice.speak(spokenText, 'UK English Male', {
         rate: 1,
         onend: () => {
           resolve()

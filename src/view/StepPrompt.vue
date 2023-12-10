@@ -80,11 +80,11 @@ const numeric = (value: string) => {
         class="min-w-10 min-h-10 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
         :class="[
           {
-            'animate__headShake animate__infinite': isConfused,
             'animate__rotateIn animate__infinite': isThinking,
             'bg-black': !isListening,
             'bg-red-7 animate__flash animate__infinite': isListening,
             'bg-red-5 animate__heartBeat animate__infinite': !!voiceError,
+            'animate__headShake animate__infinite': isConfused,
           },
         ]"
         v-if="!completed"
@@ -158,7 +158,7 @@ const numeric = (value: string) => {
           @click="addValue('50')"
           class="animate__animated animate__fadeInUp"
         >
-          > 0% - 100%
+          > 0% - {{ currentStep.max ?? 100 }}%
         </div>
 
         <div

@@ -131,7 +131,7 @@ export function handleVoiceSelection(
       return selectChoice(input as ChoiceKey)
     }
 
-    if (/(rotate|rotation|rotations)/i.test(input as string)) {
+    if (/(location|rotate|rotation|rotations)/i.test(input as string)) {
       return selectChoice('rotations')
     }
 

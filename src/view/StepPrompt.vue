@@ -62,7 +62,7 @@ const selectedStepChoiceTitles = computed(() => {
   })
 })
 
-const numeric = (value: string, max = 200) => {
+const numeric = (value: string, max = 300) => {
   const num = Number(value)
 
   return !isNaN(num) && num >= 0 && num <= max
@@ -130,9 +130,7 @@ const numeric = (value: string, max = 200) => {
         v-show="choice"
         :class="[{ 'highlight-a-bit': !completed }]"
       >
-        <span v-if="numeric(choice, currentStep?.max ?? 200)"
-          >> {{ choice }}%</span
-        >
+        <span v-if="numeric(choice, currentStep?.max)">> {{ choice }}%</span>
         <span v-else>> {{ choice }}</span>
       </div>
 

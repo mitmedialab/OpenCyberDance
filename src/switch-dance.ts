@@ -9,7 +9,7 @@ const danceKeyMap = {
   yokrob: { model: 'yokrob' },
   yokroblingImprovise: {
     model: 'yokroblingImprovise',
-    action: 'yokroblingimprovised_ch002',
+    action: 'yokroblingimprovised_chr002',
   },
   robot33: { model: 'robot', action: 'no.33_..001' },
   robot57: { model: 'robot', action: 'no.57_.' },

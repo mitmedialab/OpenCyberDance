@@ -48,8 +48,6 @@ export function nextStep() {
   const step = $currentStepId.get() || 0
   const next = step + 1
 
-  ding(next + 2)
-
   $currentStepId.set(next)
 }
 
@@ -117,7 +115,7 @@ const choicesKey = Object.keys(choices)
 
 const selectChoice = (choice: ChoiceKey) => {
   setChoice(choice)
-  ding(2)
+  // ding(2)
   return true
 }
 

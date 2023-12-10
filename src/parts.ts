@@ -1,5 +1,6 @@
 type PartMap = Record<string, RegExp>
 
+/// energy
 export const coreParts = {
   head: /Neck|Head/,
   foot: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,

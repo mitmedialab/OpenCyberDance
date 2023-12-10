@@ -44,7 +44,7 @@ export class Params {
   time = 0
   timescale = 1
   paused = false
-  lockPosition = false
+  lockPosition = true
   showGraph = false
   camera = 'front'
 

@@ -1,5 +1,11 @@
 import GUI, { Controller as GUIController } from 'lil-gui'
-import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import {
+  Clock,
+  OrthographicCamera,
+  PerspectiveCamera,
+  Scene,
+  WebGLRenderer,
+} from 'three'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
@@ -42,7 +48,7 @@ export class World {
   panel = new Panel(this.params)
   voice = new VoiceController(this)
   characters: Character[] = []
-  camera: PerspectiveCamera | null = null
+  camera: OrthographicCamera | null = null
   controls: OrbitControls | null = null
 
   get first() {
@@ -78,6 +84,8 @@ export class World {
     this.addResizeHandler()
     this.addSeekBarUpdater()
     this.handleCurveFormulaChange()
+
+    this.updateParams({ lockPosition: true })
 
     window.world = this
   }
@@ -148,8 +156,21 @@ export class World {
   }
 
   setupCamera() {
-    const aspect = window.innerWidth / window.innerHeight
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 1, 100)
+    const width = window.innerWidth
+    const height = window.innerHeight
+    const aspect = width / height
+    const viewerFrustumSize = 0.25
+    const aspectFrustum = aspect * viewerFrustumSize
+
+    this.camera = new OrthographicCamera(
+      -aspectFrustum,
+      aspectFrustum,
+      viewerFrustumSize,
+      -viewerFrustumSize,
+      0.0001,
+      1000,
+    )
+
     this.setCamera()
   }
 
@@ -275,11 +296,11 @@ export class World {
       position: [0, 0, 0],
     })
 
-    await this.addCharacter({
-      name: 'second',
-      position: [0.8, 0, 0],
-      freezeParams: true,
-    })
+    // await this.addCharacter({
+    //   name: 'second',
+    //   position: [0.8, 0, 0],
+    //   freezeParams: true,
+    // })
   }
 
   setupPanel() {

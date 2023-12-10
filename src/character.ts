@@ -336,6 +336,10 @@ export class Character {
     // Play the first animation
     this.updateAction()
 
+    // Lock the position.
+    // NOTE: the "lockPosition" field is not really required.
+    this.updateParams({ lockPosition: true })
+
     console.log('>>> setup completed')
   }
 
@@ -466,7 +470,7 @@ export class Character {
 
       // Lock and unlock hips position hips position.
       if (track.name === 'Hips.position') {
-        track.values = lock ? track.values.fill(0) : original.values.slice(0)
+        track.values = track.values.fill(0)
       }
 
       if (freezeParams) return

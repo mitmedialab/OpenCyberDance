@@ -336,6 +336,10 @@ export class Character {
     // Play the first animation
     this.updateAction()
 
+    // Lock the position.
+    // NOTE: the "lockPosition" field is not really required.
+    this.updateParams({ lockPosition: true })
+
     console.log('>>> setup completed')
   }
 

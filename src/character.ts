@@ -374,15 +374,16 @@ export class Character {
   updateSphereFromBone(target: TargetBoneKey) {
     const sphere = this.scene?.getObjectByName(`Sphere_${target}`) as Mesh
 
-    this.ik?.mesh.updateMatrixWorld(true)
-
     const bone = this.ik?.boneOf(target)
     if (!bone || !sphere) return
 
     const mesh = this.model?.getObjectById(this.skinnedMeshId!) as SkinnedMesh
+    if (!mesh) return
 
-    this.ik?.mesh.getWorldPosition(sphere.position)
-    this.ik?.mesh.getWorldQuaternion(sphere.quaternion)
+    mesh.updateMatrixWorld(true)
+    bone.updateMatrixWorld(true)
+    bone.getWorldPosition(sphere.position)
+    bone.getWorldQuaternion(sphere.quaternion)
   }
 
   updateAction() {

@@ -14,9 +14,10 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { KeyframeAnalyzer } from './analyze'
+import { BoneKey } from './bones.ts'
 import { dispose } from './dispose'
 import { CCDIKHelper } from './ik/ccd-ik-helper'
-import { IKManager } from './ik/ik'
+import { ControlPoint, IKManager, TargetBoneKey } from './ik/ik'
 import {
   getAcceleration,
   keyframesAt,
@@ -99,9 +100,7 @@ type Handlers = {
   animationLoaded(character: Character): void
 }
 
-type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
-
-const DEBUG_SKELETON = false
+const DEBUG_SKELETON = true
 
 export class Character {
   scene: THREE.Scene | null = null
@@ -113,8 +112,6 @@ export class Character {
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
-
-  debugSpheres: DebugSpheres = {}
 
   options: CharacterOptions = {
     name: 'first',
@@ -157,6 +154,8 @@ export class Character {
     yokrob: 'Yokrobyak3_Tas',
     yokroblingImprovise: 'yokrobling002_Tas',
   }
+
+  debugBoneSpheres: Record<TargetBoneKey, Mesh> = {}
 
   constructor(options?: Partial<CharacterOptions>) {
     // Load the persisted character and action.
@@ -287,6 +286,14 @@ export class Character {
       if (DEBUG_SKELETON) {
         const ikHelper = this.ik.ik.createHelper()
         this.scene.add(ikHelper)
+
+        const boneOf = (name: ControlPoint) =>
+          this.ik?.bones[this.ik?.targetBoneIds[name]]!
+
+        this.addBoneSphere(boneOf('leftArm'), 0xff0000)
+        this.addBoneSphere(boneOf('rightArm'), 0x00ff00)
+        this.addBoneSphere(boneOf('leftLeg'), 0xffff00)
+        this.addBoneSphere(boneOf('rightLeg'), 0x0000ff)
       }
     }
 
@@ -350,15 +357,23 @@ export class Character {
     const sphere = this.createDebugSphere(color)
     const size = 0.003
     sphere.scale.set(size, size, size)
+    sphere.name = `Sphere_${bone.name}`
 
     this.updateSphereFromBone(sphere, bone)
     this.scene?.add(sphere)
 
+    console.log('bone =', bone, 'sphere =', sphere)
+
     return sphere
   }
 
-  updateSphereFromBone(sphere?: Mesh, bone?: Bone) {
+  updateSphereFromBone(target: TargetBoneKey) {
+    const sphere = this.scene?.getObjectByName(`Sphere_${target}`) as Mesh
+    const bone = this.ik?.boneOf(target)
+
     if (!bone || !sphere) return
+
+    console.log('> update sphere')
 
     bone.getWorldPosition(sphere.position)
     bone.getWorldQuaternion(sphere.quaternion)
@@ -754,5 +769,14 @@ export class Character {
     const { series } = keyframe
 
     return { acceleration: series.map(getAcceleration) }
+  }
+
+  updateDebug() {
+    if (!DEBUG_SKELETON) return
+
+    this.updateSphereFromBone('LeftArmTarget')
+    this.updateSphereFromBone('LeftLegTarget')
+    this.updateSphereFromBone('RightArmTarget')
+    this.updateSphereFromBone('RightLegTarget')
   }
 }

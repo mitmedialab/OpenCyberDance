@@ -1,3 +1,5 @@
+import { TargetBoneKey } from './ik/ik.ts'
+
 export const boneNames = {
   Hips: 'Hips',
   RightUpLeg: 'RightUpLeg',
@@ -60,4 +62,4 @@ export const boneNames = {
   LeftHandPinky3: 'LeftHandPinky3',
 }
 
-export type BoneKey = keyof typeof boneNames
+export type BoneKey = keyof typeof boneNames | TargetBoneKey

@@ -1,7 +1,12 @@
 import { Character, CharacterKey, ModelKey } from './character'
 import { world } from './world'
 
-const danceKeyMap = {
+interface DanceConfig {
+  model: ModelKey
+  action?: string
+}
+
+const danceModelMap: Record<string, DanceConfig> = {
   kukpat: { model: 'kukpat' },
   tranimid: { model: 'tranimid' },
   terry: { model: 'terry' },
@@ -17,7 +22,7 @@ const danceKeyMap = {
   base57: { model: 'abstract57', action: 'no57_Tas' },
   base58: { model: 'abstract57', action: 'no58_Tas' },
   base59: { model: 'abstract57', action: 'no59_Tas' },
-} satisfies Record<string, { model: ModelKey; action?: string }>
+}
 
 export const storageKeys = {
   model: 'DEFAULT_MODEL',
@@ -25,8 +30,8 @@ export const storageKeys = {
 }
 
 export const persistCharacter = () => {
-  localStorage.setItem(storageKeys.model, world.first?.options.model ?? null)
-  localStorage.setItem(storageKeys.action, world.first?.options.action ?? null)
+  localStorage.setItem(storageKeys.model, world.first?.options.model ?? '')
+  localStorage.setItem(storageKeys.action, world.first?.options.action ?? '')
 }
 
 export const getPersistCharacter = () => ({
@@ -58,13 +63,13 @@ export function changeAction(name: CharacterKey) {
 }
 
 export async function switchDance(key: string) {
-  const config = danceKeyMap[key]
+  const config = danceModelMap[key]
   if (!config) return
 
   const { model, action } = config
   if (!model) return
 
-  if (!Character.sources[model]) {
+  if (!Character.sources[model as ModelKey]) {
     console.error(`model ${model} not found`)
     return
   }

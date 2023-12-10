@@ -14,6 +14,12 @@ declare global {
 export type ControlPoint = AxisPointControlParts
 export type AxisPoint = 'forehead' | 'neck' | 'body'
 
+export type TargetBoneKey =
+  | 'LeftArmTarget'
+  | 'RightArmTarget'
+  | 'LeftLegTarget'
+  | 'RightLegTarget'
+
 export type TargetBones = Record<AxisPoint, Bone>
 export type ControlBones = Record<ControlPoint, Bone>
 
@@ -187,7 +193,7 @@ export class IKManager {
     return frames
   }
 
-  private createTargetBone(point: ControlPoint, name: string) {
+  private createTargetBone(point: ControlPoint, name: TargetBoneKey) {
     const target = new Bone()
     target.visible = true
     target.name = name
@@ -299,9 +305,5 @@ export class IKManager {
 
     this.ik.set(iks)
     this.interpolating = Object.values(this.targetFrames).some((s) => s)
-  }
-
-  public getMorphedPartIds(): number[] {
-    return this.ik.iks.map((ik) => ik.effector)
   }
 }

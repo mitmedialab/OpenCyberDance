@@ -105,6 +105,7 @@ export class World {
       for (const char of this.characters) {
         char.mixer?.update(delta)
         char.ik?.update(char.mixer?.time ?? 0)
+        char.updateDebug()
       }
     }
 

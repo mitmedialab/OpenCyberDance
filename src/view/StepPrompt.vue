@@ -27,6 +27,7 @@ import {
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
+
 const selectedStepChoices = useStore($selectedValues)
 const completed = useStore($valueCompleted)
 const logs = useStore($logs)
@@ -61,10 +62,10 @@ const selectedStepChoiceTitles = computed(() => {
   })
 })
 
-const numeric = (value: string) => {
+const numeric = (value: string, max = 200) => {
   const num = Number(value)
 
-  return !isNaN(num) && num >= 0 && num <= 200
+  return !isNaN(num) && num >= 0 && num <= max
 }
 </script>
 
@@ -129,7 +130,9 @@ const numeric = (value: string) => {
         v-show="choice"
         :class="[{ 'highlight-a-bit': !completed }]"
       >
-        <span v-if="numeric(choice)">> {{ choice }}%</span>
+        <span v-if="numeric(choice, currentStep?.max ?? 200)"
+          >> {{ choice }}%</span
+        >
         <span v-else>> {{ choice }}</span>
       </div>
 

@@ -208,14 +208,16 @@ export function handleVoiceSelection(
 
     // auto-corrections
     if (fix('rightArm', /(light arm)/i)) return true
-    if (fix('gaussian', /(gauss)/i)) return true
+    if (fix('gaussian', /(gauss|klaus)/i)) return true
     if (fix('all', /(all|oh)/i)) return true
     if (fix('x', /^(ex)$/i)) return true
-    if (fix('y', /^(why|wine)$/i)) return true
+    if (fix('y', /^(why|wine|whine)$/i)) return true
     if (fix('z', /^(see|sea)$/i)) return true
   }
 
   if (currentStep.type === 'percent') {
+    console.log('[percent parse]', input)
+
     if (typeof input === 'number') {
       addValue(`${input}`)
       return true

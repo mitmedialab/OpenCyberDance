@@ -121,7 +121,7 @@ export class VoiceController {
     this.recognition = new SpeechRecognition()
     this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
-    this.recognition.maxAlternatives = 5
+    this.recognition.maxAlternatives = 8
     this.recognition.continuous = true
 
     const targetGrammar = createGrammarFromState()

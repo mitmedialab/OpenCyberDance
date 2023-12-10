@@ -114,6 +114,7 @@ export class Character {
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
+  skinnedMeshId: number | null = null
 
   options: CharacterOptions = {
     name: 'first',
@@ -277,6 +278,7 @@ export class Character {
         }
 
         skinnedMesh = o
+        this.skinnedMeshId = o.id
       }
     })
 
@@ -371,20 +373,16 @@ export class Character {
 
   updateSphereFromBone(target: TargetBoneKey) {
     const sphere = this.scene?.getObjectByName(`Sphere_${target}`) as Mesh
-    const bone = this.ik?.boneOf(target)
 
+    this.ik?.mesh.updateMatrixWorld(true)
+
+    const bone = this.ik?.boneOf(target)
     if (!bone || !sphere) return
 
-    const wp = new Vector3()
-    bone.getWorldPosition(wp)
+    const mesh = this.model?.getObjectById(this.skinnedMeshId!) as SkinnedMesh
 
-    const wq = new Quaternion()
-    bone.getWorldQuaternion(wq)
-
-    sphere.position.set(wp.x, wp.y, wp.z)
-    sphere.quaternion.set(wq.x, wq.y, wq.z, wq.w)
-
-    // console.log('> update sphere', sphere.name, bone.name, wp, qp)
+    this.ik?.mesh.getWorldPosition(sphere.position)
+    this.ik?.mesh.getWorldQuaternion(sphere.quaternion)
   }
 
   updateAction() {

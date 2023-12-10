@@ -194,10 +194,20 @@ export class IKManager {
   }
 
   private createTargetBone(point: ControlPoint, name: TargetBoneKey) {
+    this.mesh?.updateMatrixWorld(true)
+
+    const tb = this.boneOf(refAxisBones.forehead)
+
     const target = new Bone()
     target.visible = true
     target.name = name
     target.parent = this.root.parent
+
+    if (tb) {
+      tb.updateMatrixWorld(true)
+      tb.getWorldPosition(target.position)
+      tb.getWorldQuaternion(target.quaternion)
+    }
 
     this.targetBoneIds[point as ControlPoint] = this.addBone(target)
   }

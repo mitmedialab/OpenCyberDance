@@ -136,7 +136,7 @@ export const choices = {
     steps: [{ type: 'percent', max: 300 }],
   },
   dances: {
-    title: 'dances',
+    title: 'dancers',
     triggers: ['dances'],
     steps: [steps.dances],
   },

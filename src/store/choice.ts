@@ -147,11 +147,11 @@ export function handleVoiceSelection(
       return selectChoice('shifting')
     }
 
-    if (/(speed|animation)/i.test(input as string)) {
+    if (/(speed|animation|dance speed|dancer speed)/i.test(input as string)) {
       return selectChoice('speed')
     }
 
-    if (/(dance|dances|character|model)/i.test(input as string)) {
+    if (/(dance|dances|dancer|dancers|character|model)/i.test(input as string)) {
       return selectChoice('dances')
     }
   }
@@ -269,9 +269,8 @@ export function createGrammarFromState(): string | null {
   `
 
   if (hasChoice) {
-    const choiceGrammar = `public <choice> = ${
-      params.choices?.join(' | ') || ''
-    };`
+    const choiceGrammar = `public <choice> = ${params.choices?.join(' | ') || ''
+      };`
 
     grammar += choiceGrammar
     console.log('choice grammar:', choiceGrammar)

@@ -373,10 +373,10 @@ export class Character {
 
     if (!bone || !sphere) return
 
-    console.log('> update sphere')
+    const wp = bone.getWorldPosition(sphere.position)
+    const qp = bone.getWorldQuaternion(sphere.quaternion)
 
-    bone.getWorldPosition(sphere.position)
-    bone.getWorldQuaternion(sphere.quaternion)
+    console.log('> update sphere', sphere.name, bone.name, wp, qp)
   }
 
   updateAction() {

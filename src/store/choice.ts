@@ -181,12 +181,7 @@ export function handleVoiceSelection(
       return x.title.toLowerCase() === title
     })
 
-    const choiceKeys = currentStep.choices.map((c) => c.key)
-    const hasX = choiceKeys.includes('x')
-    const hasY = choiceKeys.includes('y')
-    const hasZ = choiceKeys.includes('z')
-    const hasAll = choiceKeys.includes('all')
-    const hasRightArm = choiceKeys.includes('rightArm')
+    const opts = currentStep.choices.map((c) => c.key)
 
     if (isOrdered) {
       const order = parseInt(title)
@@ -204,30 +199,20 @@ export function handleVoiceSelection(
       return true
     }
 
-    if (/(light arm)/i.test(title) && hasRightArm) {
-      addValue('rightArm')
-      return true
+    const fix = (key: string, match: RegExp): boolean => {
+      const matched = opts.includes(key) && match.test(title)
+      if (matched) addValue(key)
+
+      return matched
     }
 
-    if (/(all|oh)/i.test(title) && hasAll) {
-      addValue('all')
-      return true
-    }
-
-    if (/^(why|wine)$/i.test(title) && hasY) {
-      addValue('y')
-      return true
-    }
-
-    if (title === 'ex' && hasX) {
-      addValue('x')
-      return true
-    }
-
-    if (/^(see|sea)$/i.test(title) && hasZ) {
-      addValue('z')
-      return true
-    }
+    // auto-corrections
+    if (fix('rightArm', /(light arm)/i)) return true
+    if (fix('gaussian', /(gauss)/i)) return true
+    if (fix('all', /(all|oh)/i)) return true
+    if (fix('x', /^(ex)$/i)) return true
+    if (fix('y', /^(why|wine)$/i)) return true
+    if (fix('z', /^(see|sea)$/i)) return true
   }
 
   if (currentStep.type === 'percent') {

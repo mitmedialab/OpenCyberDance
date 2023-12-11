@@ -53,9 +53,10 @@ export const steps = {
   },
 
   // select shifting relations part
+  // ! SHIFTING RELATION SHOULD NOT INCLUDE [ALL] to prevent them being in sync
   shiftingParts: {
     type: 'choice',
-    choices: [...armatureParts, ...toOptions('all')],
+    choices: [...armatureParts],
   },
 
   // curveEquation: {

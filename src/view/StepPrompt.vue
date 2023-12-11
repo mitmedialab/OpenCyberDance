@@ -156,7 +156,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
           class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
           @click="prevStep()"
         >
-          &lt; back
+          &lt; go back
         </div>
       </div>
 
@@ -178,7 +178,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
           class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp transition-faster"
           @click="prevStep()"
         >
-          &lt; back
+          &lt; go back
         </div>
       </div>
     </div>

@@ -296,7 +296,7 @@ export class VoiceController {
 
     // PASS 1 - use speech recognition grammar
     for (const alt of alts) {
-      if (alt === 'back') {
+      if (/back|go back|previous/.test(alt)) {
         prevStep()
         return true
       }

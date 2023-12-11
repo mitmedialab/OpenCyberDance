@@ -175,13 +175,13 @@ export class World {
   }
 
   setupLights() {
-    const backLight = new DirectionalLight(0xffffff, 2)
+    const backLight = new DirectionalLight(0xffffff, 14)
     backLight.name = 'BackLight'
     backLight.position.set(0, 0.2656135779782386, -0.6114542855111087)
     // this.addDebugTransformControl(backLight)
     this.scene.add(backLight)
 
-    const frontLight = new DirectionalLight(0xffffff, 0.5)
+    const frontLight = new DirectionalLight(0xffffff, 10)
     frontLight.name = 'FrontLight'
     // frontLight.position.set(0, 1.642723902041498, 2.6697376383189537)
     // this.addDebugTransformControl(frontLight)
@@ -194,7 +194,7 @@ export class World {
     spotlight.position.set(0, -0.21285007787665805, 1.9899367846311686)
     spotlight.angle = 0.7853981633974483
     spotlight.penumbra = 0.1
-    spotlight.decay = 2
+    spotlight.decay = 0
     spotlight.distance = 100
     // this.addDebugTransformControl(spotlight)
     this.scene.add(spotlight)

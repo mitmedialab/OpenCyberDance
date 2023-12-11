@@ -119,7 +119,7 @@ export class Character {
   options: CharacterOptions = {
     name: 'first',
     action: '',
-    model: 'kukpat',
+    model: 'waiting',
     scale: 0.008,
     position: [0, 0, 0],
     lengthen: 0,
@@ -141,6 +141,8 @@ export class Character {
     changhung: 'changhung.glb',
     yokrob: 'YOKROB.glb',
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
+
+    waiting: 'subinwaiting.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
@@ -156,13 +158,15 @@ export class Character {
     changhung: 'Changhung002_chr02',
     yokrob: 'Yokrobyak3_Tas',
     yokroblingImprovise: 'yokrobling002_Tas',
+
+    waiting: 'sit002_Tas.001',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
     // Load the persisted character and action.
-    const persist = getPersistCharacter()
-    if (persist.character) this.options.model = persist.character
-    if (persist.action) this.options.action = persist.action
+    // const persist = getPersistCharacter()
+    // if (persist.character) this.options.model = 'waiting'
+    // if (persist.action) this.options.action = persist.action
 
     if (options) this.options = { ...this.options, ...options }
   }
@@ -378,6 +382,7 @@ export class Character {
     }
 
     if (!this.actions.has(config.action)) {
+      console.log(this.actions)
       console.error(`${config.model}: ${config.action} missing!`)
       return
     }

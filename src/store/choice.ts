@@ -161,6 +161,10 @@ export function handleVoiceSelection(
       return selectChoice('shifting')
     }
 
+    if (/(access point|texas point|axis|axis point)/i.test(input as string)) {
+      return selectChoice('axis')
+    }
+
     if (/(speed|animation|dance speed|dancer speed)/i.test(input as string)) {
       return selectChoice('speed')
     }

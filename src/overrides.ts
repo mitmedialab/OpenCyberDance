@@ -75,7 +75,7 @@ export class Params {
       z: true,
     },
 
-    equation: 'lowpass',
+    equation: 'capMin',
     threshold: 1,
 
     dirty: false,

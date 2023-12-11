@@ -1,5 +1,5 @@
 import { CurrentPercent } from './command.ts'
-import { DelayPartKey, EnergyPartKey } from './parts.ts'
+import { AxisPointControlParts, DelayPartKey, EnergyPartKey } from './parts.ts'
 import { $selectedValues } from './store/choice.ts'
 import { Axis } from './transforms.ts'
 
@@ -161,11 +161,22 @@ export const choices = {
       },
     ],
   },
-  // axis: {
-  //   title: 'axis point',
-  //   triggers: ['axis'],
-  //   steps: [steps.axisParts, steps.percent],
-  // },
+  axis: {
+    title: 'axis point',
+    triggers: ['axis'],
+    steps: [
+      steps.axisParts,
+
+      {
+        type: 'percent',
+        current() {
+          const values = $selectedValues.get()
+
+          return CurrentPercent.axis(values[0] as AxisPointControlParts)
+        },
+      },
+    ],
+  },
   rotations: {
     title: 'rotations',
     triggers: ['turn', 'rotation'],

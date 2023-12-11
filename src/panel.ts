@@ -3,7 +3,7 @@ import GUI from 'lil-gui'
 import { CAMERA_PRESETS } from './camera'
 import { Character, CharacterKey } from './character'
 import { Params } from './overrides'
-import { axisPointControlParts, CorePartKey, DelayPartKey } from './parts'
+import { axisPointControlParts, DelayPartKey, EnergyPartKey } from './parts'
 import { transformers } from './transforms'
 
 interface Handlers {
@@ -66,7 +66,7 @@ export class Panel {
     this.params = params
   }
 
-  addEnergy(...parts: CorePartKey[]) {
+  addEnergy(...parts: EnergyPartKey[]) {
     for (const part of parts) {
       this.energyFolder
         ?.add(this.params.energy, part, 0, 3, 0.001)
@@ -190,7 +190,7 @@ export class Panel {
     this.characterFolder = panel.addFolder('Characters')
 
     this.addRotations()
-    this.addEnergy('head', 'body', 'foot')
+    this.addEnergy('upper', 'lower')
     this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
 
     this.commandFolder

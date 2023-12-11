@@ -32,7 +32,7 @@ import {
 } from './overrides'
 import {
   AxisPointControlParts,
-  CorePartKey,
+  EnergyPartKey,
   CurvePartKey,
   curveParts,
   trackNameToPart,
@@ -519,7 +519,7 @@ export class Character {
         // Override delays
         overrideDelay(track, this.params.delays)
 
-        const energy = this.params.energy[part as CorePartKey]
+        const energy = this.params.energy[part as EnergyPartKey]
         overrideEnergy(track, energy)
       }
 

@@ -218,6 +218,8 @@ export function handleVoiceSelection(
     }
 
     // auto-corrections
+    if (fix('upper body', /^(up|upper)/i)) return true
+    if (fix('lower body', /^(low|lower)/i)) return true
     if (fix('rightArm', /(light arm)/i)) return true
     if (fix('rightLeg', /(light lake|right lake|bright lake)/i)) return true
     if (fix('gaussian', /(gauss|klaus)/i)) return true

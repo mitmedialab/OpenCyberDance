@@ -2,7 +2,7 @@
 import { useStore } from '@nanostores/vue'
 import { computed, watch } from 'vue'
 
-import { choices } from '../step-input'
+import { choices, Step } from '../step-input'
 
 import {
   $selectedChoice,
@@ -66,6 +66,12 @@ const numeric = (value: string, max = 300) => {
   const num = Number(value)
 
   return !isNaN(num) && num >= 0 && num <= max
+}
+
+const showPerc = (value: number): string => {
+  if (isNaN(value)) return '0%'
+
+  return value.toFixed(0)
 }
 </script>
 
@@ -159,7 +165,8 @@ const numeric = (value: string, max = 300) => {
           @click="addValue('50')"
           class="animate__animated animate__fadeInUp"
         >
-          > 0% - {{ currentStep.max ?? 100 }}%
+          > {{ showPerc(currentStep.current()) }}% -> ? (0% -
+          {{ currentStep.max ?? 100 }}%)
         </div>
 
         <div

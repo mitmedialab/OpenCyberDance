@@ -1,3 +1,8 @@
+import { CurrentPercent } from './command.ts'
+import { DelayPartKey, EnergyPartKey } from './parts.ts'
+import { $selectedValues } from './store/choice.ts'
+import { Axis } from './transforms.ts'
+
 const armatureParts = [
   { title: 'left arm', key: 'leftArm' },
   { title: 'right arm', key: 'rightArm' },
@@ -14,9 +19,19 @@ export interface ChoiceOption {
 const toOptions = (...options: string[]): ChoiceOption[] =>
   options.map((option) => ({ title: option, key: option }))
 
-export type Step =
-  | { type: 'percent'; max?: number }
-  | { type: 'choice'; choices: ChoiceOption[]; meta?: 'ordered' }
+export interface PercentStep {
+  type: 'percent'
+  max?: number
+  current?: () => number
+}
+
+export interface ChoiceStep {
+  type: 'choice'
+  choices: ChoiceOption[]
+  meta?: 'ordered'
+}
+
+export type Step = PercentStep | ChoiceStep
 
 export const steps = {
   percent: { type: 'percent' },
@@ -29,7 +44,12 @@ export const steps = {
   // select shifting relations part
   energyParts: {
     type: 'choice',
-    choices: toOptions('head', 'body', 'foot', 'all', 'reset'),
+    choices: [
+      { title: 'upper body', key: 'upper' },
+      { title: 'lower body', key: 'lower' },
+      { title: 'all', key: 'all' },
+      { title: 'reset', key: 'reset' },
+    ],
   },
 
   // select shifting relations part
@@ -87,33 +107,58 @@ export const steps = {
 
 export type StepKey = keyof typeof steps
 
-export interface Choice {
-  title: string
-  triggers: string[]
-  steps: Step[]
-  hidden?: boolean
-}
-
 export const choices = {
   energy: {
     title: 'energy',
     triggers: ['energy'],
-    steps: [steps.energyParts, steps.percent],
+    steps: [
+      steps.energyParts,
+      {
+        type: 'percent',
+        current() {
+          const values = $selectedValues.get()
+          console.log('curr', values[0])
+
+          return CurrentPercent.energy(values[0] as EnergyPartKey)
+        },
+      },
+    ],
   },
   curve: {
     title: 'circle and curve',
     triggers: ['circle'],
-    steps: [steps.curveParts, steps.percent],
+    steps: [
+      steps.curveParts,
+      {
+        type: 'percent',
+        current: () => CurrentPercent.curve(),
+      },
+    ],
   },
   shifting: {
     title: 'shifting relations',
     triggers: ['shifting', 'synchronic', 'sync', 'relations'],
-    steps: [steps.shiftingParts, steps.percent],
+    steps: [
+      steps.shiftingParts,
+      {
+        type: 'percent',
+        current() {
+          const values = $selectedValues.get()
+
+          return CurrentPercent.shifting(values[0] as DelayPartKey)
+        },
+      },
+    ],
   },
   space: {
     title: 'external body space',
     triggers: ['space'],
-    steps: [steps.percent],
+    steps: [
+      {
+        type: 'percent',
+        current: () => CurrentPercent.space(),
+      },
+    ],
   },
   // axis: {
   //   title: 'axis point',
@@ -123,7 +168,19 @@ export const choices = {
   rotations: {
     title: 'rotations',
     triggers: ['turn', 'rotation'],
-    steps: [steps.axes, steps.percent],
+    steps: [
+      steps.axes,
+      {
+        type: 'percent',
+        current() {
+          const values = $selectedValues.get()
+
+          if (values[0] === 'all' || values[0] === 'reset') return 0
+
+          return CurrentPercent.rotations(values[0] as Axis)
+        },
+      },
+    ],
   },
   reset: {
     title: 'reset',
@@ -133,7 +190,13 @@ export const choices = {
   speed: {
     title: 'dance speed',
     triggers: ['speed'],
-    steps: [{ type: 'percent', max: 300 }],
+    steps: [
+      {
+        type: 'percent',
+        max: 300,
+        current: () => CurrentPercent.speed(),
+      },
+    ],
   },
   dances: {
     title: 'dancers',
@@ -142,4 +205,13 @@ export const choices = {
   },
 } satisfies Record<string, Choice>
 
-export type ChoiceKey = keyof typeof choices
+type Choices = typeof choices
+
+export interface Choice {
+  title: string
+  triggers: string[]
+  steps: Step[]
+  hidden?: boolean
+}
+
+export type ChoiceKey = keyof Choices

@@ -1,10 +1,11 @@
 type PartMap = Record<string, RegExp>
 
 /// energy
-export const coreParts = {
-  head: /Neck|Head/,
-  foot: /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
-  body: /Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
+export const energyParts = {
+  lower:
+    /Hips|RightUpLeg|RightLeg|RightFoot|LeftUpLeg|LeftLeg|LeftFoot|RightInHand/,
+  upper:
+    /Head|Neck|Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
 } satisfies PartMap
 
 export const delayParts = {
@@ -32,13 +33,13 @@ export const axisPointControlParts = {
   rightLeg: /RightUpLeg|RightLeg|RightFoot/,
 } satisfies PartMap
 
-export type CorePartKey = keyof typeof coreParts
+export type EnergyPartKey = keyof typeof energyParts
 export type DelayPartKey = keyof typeof delayParts
 export type CurvePartKey = keyof typeof curveParts
 export type AxisPointControlParts = keyof typeof axisPointControlParts
 
-export const isCorePart = (part: CorePartKey, name: string): boolean =>
-  coreParts[part].test(name)
+export const isEnergyPart = (part: EnergyPartKey, name: string): boolean =>
+  energyParts[part].test(name)
 
 export const isDelayPart = (part: DelayPartKey, name: string): boolean =>
   delayParts[part]?.test(name)
@@ -50,8 +51,8 @@ export const isAxisPointControlPart = (
 
 export function trackNameToPart(name: string, type: 'core' | 'delay' | 'axis') {
   if (type === 'core') {
-    for (const part in coreParts) {
-      if (isCorePart(part as CorePartKey, name)) return part
+    for (const part in energyParts) {
+      if (isEnergyPart(part as EnergyPartKey, name)) return part
     }
   }
 

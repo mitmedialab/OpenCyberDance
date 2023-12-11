@@ -4,9 +4,9 @@ import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 import { ModelKey } from './character'
 import {
   AxisPointControlParts,
-  CorePartKey,
   CurvePartKey,
   DelayPartKey,
+  EnergyPartKey,
   trackNameToPart,
 } from './parts'
 import { TransformKey } from './transforms'
@@ -87,10 +87,9 @@ export class Params {
     z: 1,
   }
 
-  energy: Record<CorePartKey, number> = {
-    head: 1,
-    body: 1,
-    foot: 1,
+  energy: Record<EnergyPartKey, number> = {
+    upper: 1,
+    lower: 1,
   }
 
   delays: Record<DelayPartKey, number> = {

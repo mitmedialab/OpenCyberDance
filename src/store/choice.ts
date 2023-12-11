@@ -227,6 +227,7 @@ export function handleVoiceSelection(
     if (fix('x', /^(ex)$/i)) return true
     if (fix('y', /^(why|wine|whine)$/i)) return true
     if (fix('z', /^(see|sea)$/i)) return true
+    if (fix('yokroblingImprovise', /^(monkey|rob monkey)$/i)) return true
   }
 
   if (currentStep.type === 'percent') {

@@ -201,7 +201,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
     fixed
     bottom-4
     left-4
-    class="text-[12px] font-zed space-y-1 text-gray-200"
+    class="text-[12px] font-zed space-y-1 text-gray-500"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}

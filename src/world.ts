@@ -8,7 +8,6 @@ import {
 import {
   Clock,
   DirectionalLight,
-  HemisphereLight,
   Object3D,
   OrthographicCamera,
   Scene,

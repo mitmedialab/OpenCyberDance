@@ -253,7 +253,7 @@ export function handleVoiceSelection(
       if (fixNum('1', /^(one)$/i)) return true
       if (fixNum('2', /^(two)$/i)) return true
       if (fixNum('3', /^(three)$/i)) return true
-      if (fixNum('4', /^(four)$/i)) return true
+      if (fixNum('4', /^(four|for)$/i)) return true
       if (fixNum('5', /^(five)$/i)) return true
       if (fixNum('6', /^(six)$/i)) return true
       if (fixNum('7', /^(seven)$/i)) return true

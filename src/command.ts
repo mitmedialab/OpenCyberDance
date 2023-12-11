@@ -268,7 +268,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     for (const character of world.characters) {
       if (!character.mixer) continue
 
-      character.mixer.timeScale = FromPercent.playbackSpeed(percText)
+      character.mixer.timeScale = FromPercent.speed(percText)
     }
   }
 

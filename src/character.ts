@@ -38,7 +38,6 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
-import { getPersistCharacter } from './switch-dance.ts'
 import {
   applyTrackTransform,
   Axis,

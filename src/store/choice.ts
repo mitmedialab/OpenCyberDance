@@ -240,7 +240,30 @@ export function handleVoiceSelection(
 
     const percent = parseInt(input)
 
-    if (isNaN(percent)) return false
+    const fixNum = (num: string, match: RegExp): boolean => {
+      if (match.test(input)) {
+        addValue(num)
+        return true
+      }
+
+      return false
+    }
+
+    if (isNaN(percent)) {
+      if (fixNum('1', /^(one)$/i)) return true
+      if (fixNum('2', /^(two)$/i)) return true
+      if (fixNum('3', /^(three)$/i)) return true
+      if (fixNum('4', /^(four)$/i)) return true
+      if (fixNum('5', /^(five)$/i)) return true
+      if (fixNum('6', /^(six)$/i)) return true
+      if (fixNum('7', /^(seven)$/i)) return true
+      if (fixNum('8', /^(eight)$/i)) return true
+      if (fixNum('9', /^(nine)$/i)) return true
+      if (fixNum('0', /^(zero)$/i)) return true
+
+      return false
+    }
+
     if (percent < 0) return false
     if (percent > Math.max(currentStep.max ?? 100, 100)) return false
 

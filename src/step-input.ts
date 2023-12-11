@@ -47,7 +47,6 @@ export const steps = {
     choices: [
       { title: 'upper body', key: 'upper' },
       { title: 'lower body', key: 'lower' },
-      { title: 'all', key: 'all' },
       { title: 'reset', key: 'reset' },
     ],
   },

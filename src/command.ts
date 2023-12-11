@@ -24,7 +24,7 @@ const rangeConfig: Record<
   ChoiceKey,
   [min: number, max: number, maxPerc?: number]
 > = {
-  energy: [0, 3, 300],
+  energy: [0, 1, 300],
   curve: [1, 1500],
   shifting: [0, 100],
   space: [0, 2],

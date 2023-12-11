@@ -58,30 +58,32 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   await world.voice.speak(spokenSentence)
 
   if (primary === 'curve') {
-    const [equationText, partText, percText] = args
-    const equation = equationText as TransformKey
+    const [partText, percText] = args
 
-    world.params.curve.equation = equation
+    // Always Low Pass
+    world.params.curve.threshold = toValue(percText, 1, 1500)
+
+    // const equation = equationText as TransformKey
+    // world.params.curve.equation = equation
 
     for (const part in curveParts) {
       world.params.curve.parts[part as CurvePartKey] =
         partText === 'all' ? true : partText === part
     }
 
-    switch (equation) {
-      case 'derivative':
-        // always use first-order derivative
-        world.params.curve.threshold = 1
-        break
-      case 'lowpass':
-        world.params.curve.threshold = toValue(percText, 1, 1500)
-        break
-      case 'gaussian':
-      case 'capMin':
-      case 'capMax':
-        world.params.curve.threshold = toValue(percText, -2, 3)
-        break
-    }
+    // switch (equation) {
+    //   case 'derivative':
+    //     // always use first-order derivative
+    //     world.params.curve.threshold = 1
+    //     break
+    //   case 'lowpass':
+    //     break
+    //   case 'gaussian':
+    //   case 'capMin':
+    //   case 'capMax':
+    //     world.params.curve.threshold = toValue(percText, -2, 3)
+    //     break
+    // }
 
     setTimeout(() => {
       world.updateParams({ curve: true })
@@ -173,7 +175,12 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       world.params.rotations.x = value
       world.params.rotations.y = value
       world.params.rotations.z = value
-    } else {
+    } else if (axis === 'reset') {
+      world.params.rotations.x = 1
+      world.params.rotations.y = 1
+      world.params.rotations.z = 1
+    }
+    {
       for (const a of ['x', 'y', 'z']) {
         world.params.rotations[a as Axis] = a === axis ? value : 1
       }

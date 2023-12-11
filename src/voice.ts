@@ -307,19 +307,24 @@ export class VoiceController {
       }
 
       // do not use voice engine to detect percentage if not final
-      const skipVoiceEngineDetection = isPercent && !isFinal
+      if (isPercent && !isFinal) {
+        console.log('[vh:skip] percent not final', alts)
+        return false
+      }
 
-      if (!skipVoiceEngineDetection) {
-        const primaryOk = handleVoiceSelection(alt, 'any')
-        if (primaryOk) {
-          console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
-          return true
-        }
+      const primaryOk = handleVoiceSelection(alt, 'any')
+
+      if (primaryOk) {
+        console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
+        return true
       }
     }
 
     // only use GPT for final results
-    if (!voiceResult.isFinal) return false
+    if (!voiceResult.isFinal) {
+      console.log(`[vc:skip:gpt] input not final`, alts)
+      return false
+    }
 
     // PASS 2 - use GPT
     const alt = alts?.[0]?.trim()

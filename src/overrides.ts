@@ -19,7 +19,10 @@ export interface CurveConfig {
   dirty: boolean
 }
 
-type CharacterOptions = Record<string, { model: ModelKey; action: string }>
+type CharacterOptions = Record<
+  string,
+  { model: ModelKey; action: string | null }
+>
 
 export interface SpaceConfig {
   /** Slow down the movement for the entire valley for X seconds. */
@@ -72,7 +75,7 @@ export class Params {
       z: true,
     },
 
-    equation: 'none',
+    equation: 'lowpass',
     threshold: 1,
 
     dirty: false,

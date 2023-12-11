@@ -82,7 +82,7 @@ const numeric = (value: string, max = 300) => {
         :class="[
           {
             'animate__rotateIn animate__infinite': isThinking,
-            'bg-black': !isListening,
+            'bg-white': !isListening,
             'bg-red-5 animate__flash animate__infinite': isListening,
             'bg-red-4 animate__heartBeat animate__infinite': !!voiceError,
             'animate__headShake animate__infinite': isConfused,

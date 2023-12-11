@@ -33,13 +33,20 @@ export const $currentStep = computed(
 )
 
 export const $valueCompleted = computed(
-  [$currentStepId, $selectedChoice],
-  (step, selectedChoice) => isValueCompleted(step, selectedChoice),
+  [$currentStepId, $selectedChoice, $selectedValues],
+  (step, selectedChoice, values) =>
+    isValueCompleted(step, selectedChoice, values),
 )
 
-export function isValueCompleted(step: number | null, choice: Choice | null) {
+export function isValueCompleted(
+  step: number | null,
+  choice: Choice | null,
+  values?: string[],
+) {
   if (step === null || !choice) return false
   if (choice.steps.length === 0) return true
+
+  if (values?.includes('reset')) return true
 
   return step - 1 === choice.steps.length - 1
 }
@@ -54,12 +61,10 @@ export function nextStep() {
 export function prevStep() {
   const currentStep = $currentStep.get()
   const step = $currentStepId.get() || 0
-  console.log('prev step', { currentStep, step })
 
   clearStepChoice()
 
   if (!currentStep || step === 0) {
-    console.log('resetting main choice', { currentStep, step })
     $currentStepId.set(0)
     clearMainChoice()
     return
@@ -93,6 +98,13 @@ export function addValue(key: string) {
   console.log(`> added value: ${key}`)
 
   $selectedValues.set([...$selectedValues.get(), key])
+
+  // for reset, we should not ask for percentage.
+  if (key === 'reset') {
+    runCommand($selectedChoiceKey.get()!, $selectedValues.get())
+    return
+  }
+
   nextStep()
 
   const completed = $valueCompleted.get()
@@ -131,7 +143,9 @@ export function handleVoiceSelection(
       return selectChoice(input as ChoiceKey)
     }
 
-    if (/(location|rotate|rotation|rotations)/i.test(input as string)) {
+    if (
+      /(location|rotate|rotation|rotations|quotation)/i.test(input as string)
+    ) {
       return selectChoice('rotations')
     }
 
@@ -169,7 +183,6 @@ export function handleVoiceSelection(
 
     const title = input.toLowerCase().trim()
     const isOrdered = currentStep.meta === 'ordered'
-    console.log('is ordered?', isOrdered)
 
     const choice = currentStep.choices.find((x) => {
       if (isOrdered) {
@@ -269,8 +282,9 @@ export function createGrammarFromState(): string | null {
   `
 
   if (hasChoice) {
-    const choiceGrammar = `public <choice> = ${params.choices?.join(' | ') || ''
-      };`
+    const choiceGrammar = `public <choice> = ${
+      params.choices?.join(' | ') || ''
+    };`
 
     grammar += choiceGrammar
     console.log('choice grammar:', choiceGrammar)

@@ -44,6 +44,7 @@
     "immer": "^10.0.3",
     "lil-gui": "^0.19.1",
     "nanostores": "^0.9.5",
+    "postprocessing": "^6.33.4",
     "three": "^0.159.0",
     "tone": "^14.7.77",
     "vue": "^3.3.10",

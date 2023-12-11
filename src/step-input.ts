@@ -23,7 +23,7 @@ export const steps = {
 
   axes: {
     type: 'choice',
-    choices: toOptions('x', 'y', 'z', 'all'),
+    choices: toOptions('x', 'y', 'z', 'all', 'reset'),
   },
 
   // select shifting relations part
@@ -38,17 +38,17 @@ export const steps = {
     choices: [...armatureParts, ...toOptions('all')],
   },
 
-  curveEquation: {
-    type: 'choice',
-    choices: [
-      { title: '1. low pass', key: 'lowpass' },
-      { title: '2. gaussian', key: 'gaussian' },
-      { title: '3. derivative', key: 'derivative' },
-      { title: '4. cap min', key: 'capMin' },
-      { title: '5. cap max', key: 'capMax' },
-    ],
-    meta: 'ordered',
-  },
+  // curveEquation: {
+  //   type: 'choice',
+  //   choices: [
+  //     { title: '1. low pass', key: 'lowpass' },
+  //     { title: '2. gaussian', key: 'gaussian' },
+  //     { title: '3. derivative', key: 'derivative' },
+  //     { title: '4. cap min', key: 'capMin' },
+  //     { title: '5. cap max', key: 'capMax' },
+  //   ],
+  //   meta: 'ordered',
+  // },
 
   curveParts: {
     type: 'choice',
@@ -103,7 +103,7 @@ export const choices = {
   curve: {
     title: 'circle and curve',
     triggers: ['circle'],
-    steps: [steps.curveEquation, steps.curveParts, steps.percent],
+    steps: [steps.curveParts, steps.percent],
   },
   shifting: {
     title: 'shifting relations',

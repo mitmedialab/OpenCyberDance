@@ -1,7 +1,9 @@
 import { Character, CharacterKey, ModelKey } from './character'
 import { world } from './world'
 
-const danceKeyMap = {
+export type DanceConfig = { model: ModelKey; action?: string }
+
+const danceKeyMap: Record<string, DanceConfig> = {
   kukpat: { model: 'kukpat' },
   tranimid: { model: 'tranimid' },
   terry: { model: 'terry' },
@@ -17,7 +19,7 @@ const danceKeyMap = {
   base57: { model: 'abstract57', action: 'no57_Tas' },
   base58: { model: 'abstract57', action: 'no58_Tas' },
   base59: { model: 'abstract57', action: 'no59_Tas' },
-} satisfies Record<string, { model: ModelKey; action?: string }>
+}
 
 export const storageKeys = {
   model: 'DEFAULT_MODEL',
@@ -69,9 +71,9 @@ export async function switchDance(key: string) {
     return
   }
 
-  const names: CharacterKey[] = ['first', 'second']
+  for (const character of world.characters) {
+    const name = character.options.name
 
-  for (const name of names) {
     world.params.characters[name].model = model
     world.params.characters[name].action = action ?? null
 

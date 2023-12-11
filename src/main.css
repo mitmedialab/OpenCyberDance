@@ -18,18 +18,18 @@ body {
 
 @keyframes highlight {
   0% {
-    color: black;
+    color: white;
     background-color: transparent;
   }
 
   15%,
   90% {
-    color: white;
-    background-color: #000;
+    color: black;
+    background-color: white;
   }
 
   98% {
-    color: black;
+    color: white;
     background-color: transparent;
   }
 }

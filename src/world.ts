@@ -1,5 +1,11 @@
 import GUI, { Controller as GUIController } from 'lil-gui'
 import {
+  BloomEffect,
+  EffectComposer,
+  EffectPass,
+  RenderPass,
+} from 'postprocessing'
+import {
   Clock,
   DirectionalLight,
   HemisphereLight,
@@ -45,7 +51,15 @@ declare global {
 export class World {
   clock = new Clock()
   scene = new Scene()
-  renderer = new WebGLRenderer({ antialias: true })
+
+  renderer = new WebGLRenderer({
+    powerPreference: 'high-performance',
+    antialias: true,
+    // antialias: false,
+    // stencil: false,
+    // depth: false,
+  })
+
   stats = new Stats()
   plotter = new Plotter(this)
   params = new Params()
@@ -54,6 +68,8 @@ export class World {
   characters: Character[] = []
   camera: OrthographicCamera | null = null
   controls: OrbitControls | null = null
+
+  composer: EffectComposer | null = null
 
   get first() {
     return this.characterByName('first')
@@ -84,6 +100,7 @@ export class World {
     this.setupControls()
     this.setupPanel()
     await this.setupCharacters()
+    // this.setupComposer()
 
     this.addResizeHandler()
     this.addSeekBarUpdater()
@@ -92,6 +109,12 @@ export class World {
     this.updateParams({ lockPosition: true })
 
     window.world = this
+  }
+
+  setupComposer() {
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(new RenderPass(this.scene, this.camera!))
+    this.composer.addPass(new EffectPass(this.camera!, new BloomEffect()))
   }
 
   // Update the time in the seek bar
@@ -120,6 +143,7 @@ export class World {
 
     if (this.camera) {
       this.renderer.render(this.scene, this.camera)
+      // this.composer.render()
     }
   }
 
@@ -152,37 +176,28 @@ export class World {
   }
 
   setupLights() {
-    const dLight = new DirectionalLight(0xffffff, 14)
+    const backLight = new DirectionalLight(0xffffff, 14)
+    backLight.name = 'BackLight'
+    backLight.position.set(0, 0.2656135779782386, -0.6114542855111087)
+    // this.addDebugTransformControl(backLight)
+    this.scene.add(backLight)
 
-    dLight.position.set(0, 10, 0)
-    dLight.castShadow = true
-    dLight.shadow.camera.top = 2
-    dLight.shadow.camera.bottom = -2
-    dLight.shadow.camera.left = -2
-    dLight.shadow.camera.right = 2
-    dLight.shadow.camera.near = 0.1
-    dLight.shadow.camera.far = 40
-    // this.addDebugTransformControl(dLight)
-    this.scene.add(dLight)
+    const frontLight = new DirectionalLight(0xffffff, 0.5)
+    frontLight.name = 'FrontLight'
+    frontLight.position.set(0, 1.642723902041498, 2.6697376383189537)
+    // this.addDebugTransformControl(frontLight)
+    this.scene.add(frontLight)
 
     const spotlight = new SpotLight(0xffffff)
-    spotlight.position.set(0, -0.6185666997665231, -1.8431040221194905)
-    spotlight.angle = Math.PI / 4
+    spotlight.name = 'FeetSpotLight'
+    // spotlight.position.set(0, -0.3010949937431652, 1.094794209438712)
+    spotlight.position.set(0, -0.646030735901475, 1.0085196631323525)
+    spotlight.angle = 0.7853981633974483
     spotlight.penumbra = 0.1
     spotlight.decay = 2
     spotlight.distance = 200
-    spotlight.castShadow = true
-    spotlight.shadow.mapSize.width = 1024
-    spotlight.shadow.mapSize.height = 1024
-    spotlight.shadow.camera.near = 10
-    spotlight.shadow.camera.far = 200
-    this.addDebugTransformControl(spotlight)
+    // this.addDebugTransformControl(spotlight)
     this.scene.add(spotlight)
-
-    // const hemiLight = new HemisphereLight(0xffffff, 0xfefefe, 4)
-    // hemiLight.position.set(0, 10, 0)
-    // this.addDebugTransformControl(hemiLight)
-    // this.scene.add(hemiLight)
   }
 
   setupPlane() {
@@ -221,8 +236,9 @@ export class World {
 
   setupCamera() {
     const { left, right, top, bottom } = this.getCameraFrustum()
-    this.camera = new OrthographicCamera(left, right, top, bottom, 0.001, 1000)
-    this.setCamera()
+    this.camera = new OrthographicCamera(left, right, top, bottom, 0.01, 2000)
+
+    this.setCamera('front')
   }
 
   setupControls() {
@@ -352,11 +368,11 @@ export class World {
       position: [0, 0, 0],
     })
 
-    await this.addCharacter({
-      name: 'second',
-      position: [0.8, 0, 0],
-      freezeParams: true,
-    })
+    // await this.addCharacter({
+    //   name: 'second',
+    //   position: [0.8, 0, 0],
+    //   freezeParams: true,
+    // })
   }
 
   setupPanel() {
@@ -434,11 +450,15 @@ export class World {
   }
 
   setCamera(presetKey: CameraPresetKey = 'front') {
+    if (!this.camera) return
+
     const preset = CAMERA_PRESETS[presetKey]
     if (!preset) return
 
-    this.camera?.rotation.set(...preset.rotation)
-    this.camera?.position.set(...preset.position)
+    this.camera.zoom = 0.38
+    this.camera.rotation.set(...preset.rotation)
+    this.camera.position.set(...preset.position)
+    this.camera.updateProjectionMatrix()
 
     if (this.controls) this.controls.update()
   }

@@ -160,12 +160,15 @@ export function overrideRotation(
 export function overrideDelay(
   track: KeyframeTrack,
   config: Record<string, number>,
+  currentTime: number,
 ) {
   const part = trackNameToPart(track.name, 'delay')
   if (!part) return
 
-  const offset = config[part] ?? 0
-  if (offset > 0) track.shift(offset)
+  const param = config[part] ?? 0
+  const offset = (-currentTime / 100) * param
+
+  if (offset < 0) track.shift(offset)
 }
 
 export function applyExternalBodySpace(

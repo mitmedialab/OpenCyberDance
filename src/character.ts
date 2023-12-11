@@ -32,9 +32,9 @@ import {
 } from './overrides'
 import {
   AxisPointControlParts,
-  EnergyPartKey,
   CurvePartKey,
   curveParts,
+  EnergyPartKey,
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
@@ -514,10 +514,10 @@ export class Character {
 
         // Override energy.
         const part = trackNameToPart(track.name, 'core')
-        if (!part) return
+        if (!part || !this.mixer) return
 
         // Override delays
-        overrideDelay(track, this.params.delays)
+        overrideDelay(track, this.params.delays, this.mixer.time)
 
         const energy = this.params.energy[part as EnergyPartKey]
         overrideEnergy(track, energy)

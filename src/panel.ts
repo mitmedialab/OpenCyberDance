@@ -78,7 +78,7 @@ export class Panel {
   addDelay(...parts: DelayPartKey[]) {
     for (const part of parts) {
       this.delayFolder
-        ?.add(this.params.delays, part, -10, 10, 0.01)
+        ?.add(this.params.delays, part, 0, 100, 0.01)
         .listen()
         .onChange(this.handlers.delay)
     }

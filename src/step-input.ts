@@ -115,6 +115,7 @@ export const choices = {
       steps.energyParts,
       {
         type: 'percent',
+        max: 300,
         current() {
           const values = $selectedValues.get()
           console.log('curr', values[0])

@@ -68,11 +68,13 @@ const numeric = (value: string, max = 300) => {
   return !isNaN(num) && num >= 0 && num <= max
 }
 
-const showPerc = (value: number): string => {
-  if (isNaN(value)) return '0%'
+const showPerc = (value: number): string | null => {
+  if (isNaN(value)) return null
 
   return value.toFixed(0)
 }
+
+const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 </script>
 
 <template>
@@ -165,8 +167,11 @@ const showPerc = (value: number): string => {
           @click="addValue('50')"
           class="animate__animated animate__fadeInUp"
         >
-          > {{ showPerc(currentStep.current()) }}% -> ? (0% -
-          {{ currentStep.max ?? 100 }}%)
+          <span
+            >>
+            <span v-if="currentPerc != null">{{ currentPerc }}% -> ?</span> (0%
+            - {{ currentStep.max ?? 100 }}%)</span
+          >
         </div>
 
         <div

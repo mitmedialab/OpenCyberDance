@@ -486,24 +486,28 @@ export class Character {
         const { parts } = this.params.axisPoint
         const part = trackNameToPart(track.name, 'axis')
 
+        // FREEZE PART!!!!!!!
         if (part) {
           const enabled = parts[part as AxisPointControlParts]
 
           if (enabled) {
-            const time = this.mixer?.time ?? 1
-            const len = track.times.length - 1
-            const frame = Math.round((time / track.times[len]) * len)
-            const data = track.values.slice(frame * 4, frame * 4 + 4)
+            track.values = track.values.fill(5)
+            // const time = this.mixer?.time ?? 1
+            // const len = track.times.length - 1
+            // const frame = Math.round((time / track.times[len]) * len)
+            // const data = track.values.slice(frame * 4, frame * 4 + 4)
 
-            // Modify the entire keyframe values to this moment in time.
-            for (let i = 0; i < track.values.length; i += 4) {
-              let j = 0
+            // // Modify the entire keyframe values to this moment in time.
+            // for (let i = 0; i < track.values.length; i += 4) {
+            //   const j = 0
 
-              track.values[i] = data[j++]
-              track.values[i + 1] = data[j++]
-              track.values[i + 2] = data[j++]
-              track.values[i + 3] = data[j++]
-            }
+            //   track.values[i] = 0
+            //   track.values[i + 1] = 0
+            //   track.values[i + 2] = 0
+            //   track.values[i + 3] = 0
+            // }
+
+            // debugger
           }
         }
       }

@@ -42,6 +42,12 @@ const refAxisBones: Record<AxisPoint, BoneKey> = {
 
 const sixtyDegreesInRadians = (60 * Math.PI) / 180
 
+const maxNegVec = new Vector3(-360, -360, -360)
+const maxPosVec = new Vector3(360, 360, 360)
+
+const minNegVec = new Vector3(-0.1, -0.1, -0.1)
+const minPosVec = new Vector3(0.1, 0.1, 0.1)
+
 const zeroVec = new Vector3(0, 0, 0)
 
 // Assuming you have a bone or joint object with rotationMin and rotationMax properties
@@ -161,25 +167,25 @@ export class IKManager {
       leftArm: [
         {
           index: this.idOf('LeftForeArm'),
-          rotationMin: zeroVec,
-          rotationMax: zeroVec,
+          // rotationMin: minNegVec,
+          // rotationMax: minPosVec,
           // rotationMin: partConstraints.elbowRotationMin,
           // rotationMax: partConstraints.elbowRotationMax,
         },
         {
           index: this.idOf('LeftArm'),
-          rotationMin: zeroVec,
-          rotationMax: zeroVec,
+          // rotationMin: zeroVec,
+          // rotationMax: zeroVec,
           // rotationMin: partConstraints.wristRotationMin,
           // rotationMax: partConstraints.wristRotationMax,
         },
-        {
-          index: this.idOf('LeftShoulder'),
-          rotationMin: zeroVec,
-          rotationMax: zeroVec,
-          // rotationMax: partConstraints.shoulderRotationMax,
-          // rotationMin: partConstraints.shoulderRotationMin,
-        },
+        // {
+        //   index: this.idOf('LeftShoulder'),
+        //   rotationMin: zeroVec,
+        //   rotationMax: zeroVec,
+        //   // rotationMax: partConstraints.shoulderRotationMax,
+        //   // rotationMin: partConstraints.shoulderRotationMin,
+        // },
         // { index: this.idOf('Spine2') },
       ],
 
@@ -189,11 +195,11 @@ export class IKManager {
         //   rotationMin: boneConstraints.rotationMin,
         //   rotationMax: boneConstraints.rotationMax,
         // },
-        {
-          index: this.idOf('RightArm'),
-          rotationMin: boneConstraints.rotationMin,
-          rotationMax: boneConstraints.rotationMax,
-        },
+        // {
+        //   index: this.idOf('RightArm'),
+        //   rotationMin: boneConstraints.rotationMin,
+        //   rotationMax: boneConstraints.rotationMax,
+        // },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
@@ -255,6 +261,7 @@ export class IKManager {
 
     // Determine the original axis points: forehead, neck, body.
     const refTargetBoneId = refAxisBones[target]
+
     const refTargetBone = this.boneOf(refTargetBoneId)!
 
     // Local position and rotation for the target bone
@@ -281,9 +288,11 @@ export class IKManager {
 
   private createTargetBone(point: ControlPoint, name: string) {
     const target = new Bone()
+
+    target.position.set(0, 50, 0)
     target.visible = true
     target.name = name
-    target.parent = this.boneOf('LeftHand')!.parent
+    target.parent = this.root
 
     this.targetBoneIds[point as ControlPoint] = this.addBone(target)
   }
@@ -345,14 +354,17 @@ export class IKManager {
         const bone = this.mesh.skeleton.bones[targetBoneId]
 
         // Copy the keyframe's position and rotation to the target bone.
-        keyframe.position.copy(bone.position)
-        keyframe.rotation.copy(bone.quaternion)
+        // bone.position.copy(keyframe.position)
+        // bone.quaternion.copy(keyframe.rotation)
 
         this.frameCounters[control]!++
+
+        // console.log(this.frameCounters[control])
 
         // TODO: decide how to handle the end of the interpolation
         if (this.frameCounters[control]! >= keyframes.length) {
           // this.frameCounters[control] = keyframes.length - 1
+          // debugger
 
           // re-compute?
           this.frameCounters[control] = 0

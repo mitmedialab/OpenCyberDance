@@ -127,12 +127,7 @@ export class Params {
   reset() {
     const defaults = new Params()
 
-    this.time = defaults.time
     this.timescale = defaults.timescale
-    this.paused = defaults.paused
-    this.lockPosition = defaults.lockPosition
-    this.showGraph = defaults.showGraph
-    this.camera = defaults.camera
     this.space.delay = defaults.space.delay
     this.space.threshold = defaults.space.threshold
     this.curve.axes.x = defaults.curve.axes.x

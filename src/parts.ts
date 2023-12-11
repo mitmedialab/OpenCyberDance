@@ -19,7 +19,7 @@ export const delayParts = {
 
 export const curveParts = {
   head: /Head|Neck/,
-  body: /Hips|Spine/,
+  body: /Head|Neck|Hips|Spine/,
   leftArm: /LeftShoulder|LeftArm|LeftForeArm/,
   rightArm: /RightShoulder|RightArm|RightForeArm/,
   leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,

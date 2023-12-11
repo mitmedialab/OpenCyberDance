@@ -72,11 +72,7 @@ export const steps = {
 
   curveParts: {
     type: 'choice',
-    choices: [
-      ...toOptions('head', 'body'),
-      ...armatureParts,
-      ...toOptions('all'),
-    ],
+    choices: [...toOptions('body'), ...armatureParts, ...toOptions('all')],
   },
 
   axisParts: {

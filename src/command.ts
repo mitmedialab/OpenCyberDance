@@ -25,7 +25,7 @@ const rangeConfig: Record<
   [min: number, max: number, maxPerc?: number]
 > = {
   energy: [0, 1, 300],
-  curve: [1, 1500],
+  curve: [-2, 3],
   shifting: [0, 100],
   space: [0, 2],
   rotations: [1, 3.7],
@@ -123,11 +123,16 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'curve') {
     const [partText, percText] = args
 
+    const _percent = parseInt(percText)
+
+    // Normal = 100%
+    const isNormal = _percent === 100
+
     // Always Low Pass
     world.params.curve.threshold = FromPercent.curve(percText)
 
     // const equation = equationText as TransformKey
-    // world.params.curve.equation = equation
+    world.params.curve.equation = isNormal ? 'none' : 'capMin'
 
     for (const part in curveParts) {
       world.params.curve.parts[part as CurvePartKey] =

@@ -114,7 +114,6 @@ export const choices = {
         max: 300,
         current() {
           const values = $selectedValues.get()
-          console.log('curr', values[0])
 
           return CurrentPercent.energy(values[0] as EnergyPartKey)
         },

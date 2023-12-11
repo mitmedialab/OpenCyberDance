@@ -247,8 +247,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       world.params.rotations.x = 1
       world.params.rotations.y = 1
       world.params.rotations.z = 1
-    }
-    {
+    } else {
       for (const a of ['x', 'y', 'z']) {
         world.params.rotations[a as Axis] = a === axis ? value : 1
       }

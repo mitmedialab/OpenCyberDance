@@ -87,23 +87,41 @@ export class IKManager {
    **/
   private createTargetBones() {
     this.createTargetBone('leftArm', 'LeftArmTarget')
-    this.createTargetBone('leftLeg', 'LeftLegTarget')
     this.createTargetBone('rightArm', 'RightArmTarget')
-    this.createTargetBone('rightLeg', 'RightLegTarget')
+
+    // DISABLE FOR NOW. Axis Point for legs is usually on the ground.
+    // this.createTargetBone('leftLeg', 'LeftLegTarget')
+    // this.createTargetBone('rightLeg', 'RightLegTarget')
   }
 
   get linksByControl(): Record<ControlPoint, IKLink[]> {
     return {
       leftArm: [
-        { index: this.idOf('LeftForeArm') },
-        { index: this.idOf('LeftArm') },
+        {
+          index: this.idOf('LeftForeArm'),
+          rotationMin: new Vector3(1.2, -1.8, -0.4),
+          rotationMax: new Vector3(1.7, -1.1, 0.3),
+        },
+        {
+          index: this.idOf('LeftArm'),
+          rotationMin: new Vector3(1.2, -1.8, -0.4),
+          rotationMax: new Vector3(1.7, -1.1, 0.3),
+        },
         // { index: this.idOf('LeftShoulder') },
         // { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
-        { index: this.idOf('RightForeArm') },
-        { index: this.idOf('RightArm') },
+        {
+          index: this.idOf('RightForeArm'),
+          rotationMin: new Vector3(1.2, -1.8, -0.4),
+          rotationMax: new Vector3(1.7, -1.1, 0.3),
+        },
+        {
+          index: this.idOf('RightArm'),
+          rotationMin: new Vector3(1.2, -1.8, -0.4),
+          rotationMax: new Vector3(1.7, -1.1, 0.3),
+        },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
@@ -193,7 +211,7 @@ export class IKManager {
     const target = new Bone()
     target.visible = true
     target.name = name
-    target.parent = this.root.parent
+    target.parent = this.boneOf('LeftHand')!.parent
 
     this.targetBoneIds[point as ControlPoint] = this.addBone(target)
   }

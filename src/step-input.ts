@@ -77,7 +77,13 @@ export const steps = {
 
   axisParts: {
     type: 'choice',
-    choices: [...armatureParts, ...toOptions('all')],
+    choices: [
+      { title: 'left arm', key: 'leftArm' },
+      { title: 'right arm', key: 'rightArm' },
+      // { title: 'left leg', key: 'leftLeg' },
+      // { title: 'right leg', key: 'rightLeg' },
+      { title: 'all', key: 'all' },
+    ],
   },
 
   dances: {
@@ -165,11 +171,7 @@ export const choices = {
 
       {
         type: 'percent',
-        current() {
-          const values = $selectedValues.get()
-
-          return CurrentPercent.axis(values[0] as AxisPointControlParts)
-        },
+        current: () => CurrentPercent.axis(),
       },
     ],
   },

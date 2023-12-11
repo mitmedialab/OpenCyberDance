@@ -105,7 +105,7 @@ export class Params {
     threshold: 0,
 
     parts: {
-      leftArm: true,
+      leftArm: false,
       rightArm: false,
       leftLeg: false,
       rightLeg: false,

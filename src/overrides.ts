@@ -202,12 +202,32 @@ export function applyExternalBodySpace(
     return sums.reduce((a, b) => a + b, 0) / sums.length
   })
 
+  function cappedNormalize(arr: number[], threshold: number) {
+    const maxBelowThreshold = Math.max(
+      ...arr.filter((value) => value <= threshold),
+    )
+
+    const arrCapped = arr.map((value) =>
+      value > threshold ? maxBelowThreshold : value,
+    )
+
+    const minVal = Math.min(...arrCapped)
+    const maxVal = Math.max(...arrCapped)
+
+    const normalizedArr = arrCapped.map(
+      (value) => (value - minVal) / (maxVal - minVal),
+    )
+
+    return normalizedArr
+  }
+
   function detectValleys(
     array: number[],
     threshold: number,
     minWindow: number,
   ) {
-    const t = threshold / 2000
+    const t = threshold / 100
+
     const valleys: [start: number, end: number][] = []
     let startIdx = 0
 
@@ -232,11 +252,35 @@ export function applyExternalBodySpace(
     return valleys
   }
 
+  function padValley(original: [start: number, end: number][], x: number) {
+    const result: [start: number, end: number][] = []
+    let currentIntervalStart = 0
+
+    for (const [start, end] of original) {
+      // Add valleys at intervals x
+      while (currentIntervalStart + x < start) {
+        result.push([currentIntervalStart + x, currentIntervalStart + x + 2])
+        currentIntervalStart += x + 5
+      }
+
+      // Add the original valley
+      result.push([start, end])
+      currentIntervalStart = end
+    }
+
+    // Add any remaining valleys at the end
+    while (currentIntervalStart + x < original[original.length - 1][1]) {
+      result.push([currentIntervalStart, currentIntervalStart + x])
+      currentIntervalStart += x
+    }
+
+    return result
+  }
+
   // Valleys in a graph with low change.
-  const valleys: [start: number, end: number][] = detectValleys(
-    averages,
-    threshold,
-    minWindow,
+  const valleys: [start: number, end: number][] = padValley(
+    detectValleys(cappedNormalize(averages, 0.05), threshold, minWindow),
+    Math.floor(100 * (1 - threshold)),
   )
 
   // console.log(averages)

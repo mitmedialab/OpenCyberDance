@@ -208,6 +208,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     // delay %
     const [percText] = args
     world.params.space.delay = FromPercent.space(percText)
+    world.params.space.threshold = FromPercent.shifting(percText) / 100
 
     setTimeout(() => {
       world.updateParams()

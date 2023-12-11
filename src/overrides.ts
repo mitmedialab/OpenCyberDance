@@ -133,6 +133,12 @@ export class Params {
     this.curve.axes.x = defaults.curve.axes.x
     this.curve.axes.y = defaults.curve.axes.y
     this.curve.axes.z = defaults.curve.axes.z
+    this.curve.parts.body = defaults.curve.parts.body
+    this.curve.parts.head = defaults.curve.parts.head
+    this.curve.parts.leftArm = defaults.curve.parts.leftArm
+    this.curve.parts.leftLeg = defaults.curve.parts.leftLeg
+    this.curve.parts.rightArm = defaults.curve.parts.rightArm
+    this.curve.parts.rightLeg = defaults.curve.parts.rightLeg
     this.curve.equation = defaults.curve.equation
     this.curve.threshold = defaults.curve.threshold
     this.curve.dirty = defaults.curve.dirty

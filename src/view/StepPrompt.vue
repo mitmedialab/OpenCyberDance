@@ -83,7 +83,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
   >
     <div
       class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
-      :class="{ 'bg-gray-200 text-black rounded': completed }"
+      :class="{ 'text-white rounded': completed }"
     >
       <div
         class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"

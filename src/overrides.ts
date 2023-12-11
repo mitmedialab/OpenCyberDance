@@ -114,13 +114,31 @@ export class Params {
 
   characters: CharacterOptions = {
     first: {
-      model: 'kukpat',
+      model: 'waiting',
       action: '',
     },
     second: {
-      model: 'kukpat',
+      model: 'waiting',
       action: '',
     },
+  }
+
+  // cursed
+  reset() {
+    const defaults = new Params()
+
+    this.time = defaults.time
+    this.timescale = defaults.timescale
+    this.paused = defaults.paused
+    this.lockPosition = defaults.lockPosition
+    this.showGraph = defaults.showGraph
+    this.camera = defaults.camera
+    this.space = defaults.space
+    this.curve = defaults.curve
+    this.rotations = defaults.rotations
+    this.energy = defaults.energy
+    this.delays = defaults.delays
+    this.axisPoint = defaults.axisPoint
   }
 }
 

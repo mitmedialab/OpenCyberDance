@@ -95,6 +95,7 @@ export const steps = {
       { title: '10. base 57', key: 'base57' },
       { title: '11. base 58', key: 'base58' },
       { title: '12. base 59', key: 'base59' },
+      // { title: '13. waiting', key: 'waiting' },
       // { title: '11. unset', key: 'none' },
     ],
     meta: 'ordered',

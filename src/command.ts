@@ -260,16 +260,6 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     return
   }
 
-  if (primary === 'reset') {
-    setTimeout(() => {
-      for (const character of world.characters) {
-        character.setup().then()
-      }
-    }, 80)
-
-    return
-  }
-
   // animation speed
   if (primary === 'speed') {
     const [percText] = args
@@ -286,5 +276,15 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
 
     console.log('switching dance', danceName)
     switchDance(danceName).then()
+  }
+
+  if (primary === 'reset') {
+    setTimeout(() => {
+      for (const character of world.characters) {
+        character.setup().then()
+      }
+    }, 80)
+
+    return
   }
 }

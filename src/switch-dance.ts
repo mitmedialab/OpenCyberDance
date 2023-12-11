@@ -74,9 +74,9 @@ export async function switchDance(key: string) {
   for (const character of world.characters) {
     const name = character.options.name
 
-    world.params.characters[name].model = model
-    world.params.characters[name].action = action ?? null
+    await changeCharacter(name)
 
-    changeCharacter(name).then()
+    // world.params.characters[name].model = model
+    // world.params.characters[name].action = action ?? null
   }
 }

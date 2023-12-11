@@ -76,7 +76,7 @@ export class Params {
     },
 
     equation: 'capMin',
-    threshold: 1,
+    threshold: -2,
 
     dirty: false,
   }

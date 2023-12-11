@@ -153,7 +153,7 @@ export function handleVoiceSelection(
       return selectChoice('space')
     }
 
-    if (/(curve|circle|circle and curve)/i.test(input as string)) {
+    if (/(curve|curse|circle|circle and curve)/i.test(input as string)) {
       return selectChoice('curve')
     }
 

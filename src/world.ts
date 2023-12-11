@@ -197,7 +197,7 @@ export class World {
     spotlight.penumbra = 0.1
     spotlight.decay = 2
     spotlight.distance = 100
-    this.addDebugTransformControl(spotlight)
+    // this.addDebugTransformControl(spotlight)
     this.scene.add(spotlight)
   }
 

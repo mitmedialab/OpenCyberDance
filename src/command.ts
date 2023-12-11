@@ -49,7 +49,9 @@ export const v2p = (key: string, value: number): number => {
 }
 
 export const FromPercent: FromPercentMap = {
-  curve: (input: string) => p2v('curve', input),
+  curve: (input: string) =>
+    p2v('curve', Math.abs(100 - parseInt(input)).toString()),
+
   energy: (input: string) => p2v('energy', input),
   shifting: (input: string) => p2v('shifting', input),
   speed: (input: string) => p2v('speed', input),

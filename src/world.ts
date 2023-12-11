@@ -455,7 +455,7 @@ export class World {
     const preset = CAMERA_PRESETS[presetKey]
     if (!preset) return
 
-    this.camera.zoom = 0.38
+    this.camera.zoom = 0.45
     this.camera.rotation.set(...preset.rotation)
     this.camera.position.set(...preset.position)
     this.camera.updateProjectionMatrix()

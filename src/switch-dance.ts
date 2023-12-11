@@ -69,8 +69,7 @@ export async function switchDance(key: string) {
     return
   }
 
-  const names: CharacterKey[] = ['first']
-  // , 'second'
+  const names: CharacterKey[] = ['first', 'second']
 
   for (const name of names) {
     world.params.characters[name].model = model

@@ -167,7 +167,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'rotations') {
     const [axis, perc] = args
 
-    const value = toValue(perc, 1, 5)
+    const value = toValue(perc, 1, 3.5)
 
     if (axis === 'all') {
       world.params.rotations.x = value

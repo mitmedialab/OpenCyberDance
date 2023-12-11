@@ -3,14 +3,15 @@ import {
   Clock,
   DirectionalLight,
   HemisphereLight,
+  Object3D,
   OrthographicCamera,
-  PerspectiveCamera,
   Scene,
   SpotLight,
   WebGLRenderer,
 } from 'three'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import Stats from 'three/examples/jsm/libs/stats.module'
 
 import { CAMERA_PRESETS, CameraPresetKey } from './camera'
@@ -76,10 +77,10 @@ export class World {
     this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
     // Setup the scenes
+    this.setupCamera()
     this.setupLights()
     this.setupPlane()
     this.setupRenderer()
-    this.setupCamera()
     this.setupControls()
     this.setupPanel()
     await this.setupCharacters()
@@ -122,12 +123,37 @@ export class World {
     }
   }
 
-  setupLights() {
-    const hemiLight = new HemisphereLight(0xffffff, 0xfefefe, 4)
-    hemiLight.position.set(0, 10, 0)
-    this.scene.add(hemiLight)
+  addDebugTransformControl(object: Object3D) {
+    const transformControls = new TransformControls(
+      this.camera!,
+      this.renderer.domElement,
+    )
 
-    const dLight = new DirectionalLight(0xffffff, 4)
+    transformControls.size = 0.75
+    transformControls.showX = false
+    transformControls.space = 'world'
+
+    transformControls.addEventListener('mouseDown', () => {
+      if (!this.controls) return
+
+      this.controls.enabled = false
+    })
+
+    transformControls.addEventListener('mouseUp', () => {
+      if (!this.controls) return
+
+      this.controls.enabled = true
+    })
+
+    transformControls.attach(object)
+    this.scene.add(transformControls)
+
+    return transformControls
+  }
+
+  setupLights() {
+    const dLight = new DirectionalLight(0xffffff, 14)
+
     dLight.position.set(0, 10, 0)
     dLight.castShadow = true
     dLight.shadow.camera.top = 2
@@ -136,10 +162,11 @@ export class World {
     dLight.shadow.camera.right = 2
     dLight.shadow.camera.near = 0.1
     dLight.shadow.camera.far = 40
+    // this.addDebugTransformControl(dLight)
     this.scene.add(dLight)
 
     const spotlight = new SpotLight(0xffffff)
-    spotlight.position.set(0, 10, 0)
+    spotlight.position.set(0, -0.6185666997665231, -1.8431040221194905)
     spotlight.angle = Math.PI / 4
     spotlight.penumbra = 0.1
     spotlight.decay = 2
@@ -149,18 +176,23 @@ export class World {
     spotlight.shadow.mapSize.height = 1024
     spotlight.shadow.camera.near = 10
     spotlight.shadow.camera.far = 200
+    this.addDebugTransformControl(spotlight)
     this.scene.add(spotlight)
+
+    // const hemiLight = new HemisphereLight(0xffffff, 0xfefefe, 4)
+    // hemiLight.position.set(0, 10, 0)
+    // this.addDebugTransformControl(hemiLight)
+    // this.scene.add(hemiLight)
   }
 
   setupPlane() {
-    const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(100, 100),
-      new THREE.MeshPhongMaterial({ color: 0x000, depthWrite: false }),
-    )
-
-    plane.rotation.x = -Math.PI / 2
-    plane.receiveShadow = true
-    this.scene.add(plane)
+    // const plane = new THREE.Mesh(
+    //   new THREE.PlaneGeometry(1000, 1000),
+    //   new THREE.MeshPhongMaterial({ color: 0xfff, depthWrite: false }),
+    // )
+    // plane.rotation.x = -Math.PI / 2
+    // plane.receiveShadow = true
+    // this.scene.add(plane)
   }
 
   setupRenderer() {
@@ -171,23 +203,25 @@ export class World {
     this.renderer.toneMappingExposure = 10
   }
 
-  setupCamera() {
+  getCameraFrustum() {
     const width = window.innerWidth
     const height = window.innerHeight
     const aspect = width / height
 
-    const viewerFrustumSize = 0.25
+    const viewerFrustumSize = 0.35
     const aspectFrustum = aspect * viewerFrustumSize
 
-    this.camera = new OrthographicCamera(
-      -aspectFrustum,
-      aspectFrustum,
-      viewerFrustumSize,
-      -viewerFrustumSize,
-      0.0001,
-      1000,
-    )
+    const left = -aspectFrustum
+    const right = aspectFrustum
+    const top = viewerFrustumSize
+    const bottom = -viewerFrustumSize
 
+    return { left, right, top, bottom }
+  }
+
+  setupCamera() {
+    const { left, right, top, bottom } = this.getCameraFrustum()
+    this.camera = new OrthographicCamera(left, right, top, bottom, 0.001, 1000)
     this.setCamera()
   }
 
@@ -197,7 +231,7 @@ export class World {
     const controls = new OrbitControls(this.camera, this.renderer.domElement)
     controls.enablePan = true
     controls.enableZoom = true
-    controls.target.set(0, 1, 0)
+    controls.target.set(0, 0, 0)
     controls.update()
     this.controls = controls
   }
@@ -206,7 +240,12 @@ export class World {
     window.addEventListener('resize', () => {
       if (!this.camera) return
 
-      this.camera.aspect = window.innerWidth / window.innerHeight
+      const { left, right, top, bottom } = this.getCameraFrustum()
+      this.camera.left = left
+      this.camera.right = right
+      this.camera.top = top
+      this.camera.bottom = bottom
+
       this.camera.updateProjectionMatrix()
 
       this.renderer.setSize(window.innerWidth, window.innerHeight)
@@ -313,11 +352,11 @@ export class World {
       position: [0, 0, 0],
     })
 
-    // await this.addCharacter({
-    //   name: 'second',
-    //   position: [0.8, 0, 0],
-    //   freezeParams: true,
-    // })
+    await this.addCharacter({
+      name: 'second',
+      position: [0.8, 0, 0],
+      freezeParams: true,
+    })
   }
 
   setupPanel() {

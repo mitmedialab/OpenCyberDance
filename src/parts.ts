@@ -29,8 +29,8 @@ export const curveParts = {
 export const axisPointControlParts = {
   leftArm: /LeftShoulder|LeftArm|LeftForeArm/,
   rightArm: /RightShoulder|RightArm|RightForeArm/,
-  leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
-  rightLeg: /RightUpLeg|RightLeg|RightFoot/,
+  // leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
+  // rightLeg: /RightUpLeg|RightLeg|RightFoot/,
 } satisfies PartMap
 
 export type EnergyPartKey = keyof typeof energyParts

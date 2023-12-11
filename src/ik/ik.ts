@@ -1,4 +1,5 @@
 import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
+import { MathUtils } from 'three/src/math/MathUtils'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
@@ -29,8 +30,8 @@ interface InterpolatedKeyframe {
 const effectorBones: Record<ControlPoint, BoneKey> = {
   leftArm: 'LeftHand',
   rightArm: 'RightHand',
-  leftLeg: 'LeftFoot',
-  rightLeg: 'RightFoot',
+  // leftLeg: 'LeftFoot',
+  // rightLeg: 'RightFoot',
 }
 
 const refAxisBones: Record<AxisPoint, BoneKey> = {
@@ -38,6 +39,67 @@ const refAxisBones: Record<AxisPoint, BoneKey> = {
   neck: 'Neck',
   body: 'Spine1',
 }
+
+const sixtyDegreesInRadians = (60 * Math.PI) / 180
+
+const zeroVec = new Vector3(0, 0, 0)
+
+// Assuming you have a bone or joint object with rotationMin and rotationMax properties
+const boneConstraints = {
+  rotationMin: new Vector3(
+    -sixtyDegreesInRadians,
+    -sixtyDegreesInRadians,
+    -sixtyDegreesInRadians,
+  ),
+
+  rotationMax: new Vector3(
+    sixtyDegreesInRadians,
+    sixtyDegreesInRadians,
+    sixtyDegreesInRadians,
+  ),
+}
+
+const partConstraints = {
+  shoulderRotationMin: new Vector3(
+    MathUtils.degToRad(-45), // Pitch backward
+    MathUtils.degToRad(-90), // Yaw downward
+    MathUtils.degToRad(-60), // Roll inward
+  ),
+
+  shoulderRotationMax: new Vector3(
+    MathUtils.degToRad(180), // Pitch forward and up
+    MathUtils.degToRad(90), // Yaw upward
+    MathUtils.degToRad(60), // Roll outward
+  ),
+
+  elbowRotationMin: new Vector3(
+    0, // No rotation around x-axis
+    0, // No rotation around y-axis
+    MathUtils.degToRad(0), // Elbow fully extended
+  ),
+
+  elbowRotationMax: new Vector3(
+    0, // No rotation around x-axis
+    0, // No rotation around y-axis
+    MathUtils.degToRad(150), // Elbow fully flexed
+  ),
+
+  wristRotationMin: new Vector3(
+    MathUtils.degToRad(-80), // Flexion
+    MathUtils.degToRad(-20), // Radial Deviation
+    0, // Typically, no rotation around the z-axis
+  ),
+
+  wristRotationMax: new Vector3(
+    MathUtils.degToRad(70), // Extension
+    MathUtils.degToRad(30), // Ulnar Deviation
+    0, // Typically, no rotation around the z-axis
+  ),
+}
+
+const INTERPOLATE_STEPS = 100
+
+const TARGET_AXIS: AxisPoint = 'forehead'
 
 export class IKManager {
   ik: CCDIKSolver
@@ -51,15 +113,15 @@ export class IKManager {
   frameCounters: Record<ControlPoint, number | null> = {
     leftArm: null,
     rightArm: null,
-    leftLeg: null,
-    rightLeg: null,
+    // leftLeg: null,
+    // rightLeg: null,
   }
 
   targetFrames: Record<ControlPoint, InterpolatedKeyframe[] | null> = {
     leftArm: null,
     rightArm: null,
-    leftLeg: null,
-    rightLeg: null,
+    // leftLeg: null,
+    // rightLeg: null,
   }
 
   // The target bones are not part of the original skeleton.
@@ -67,8 +129,8 @@ export class IKManager {
   targetBoneIds: Record<ControlPoint, number> = {
     leftArm: -1,
     rightArm: -1,
-    leftLeg: -1,
-    rightLeg: -1,
+    // leftLeg: -1,
+    // rightLeg: -1,
   }
 
   constructor(mesh: SkinnedMesh) {
@@ -99,44 +161,54 @@ export class IKManager {
       leftArm: [
         {
           index: this.idOf('LeftForeArm'),
-          rotationMin: new Vector3(1.2, -1.8, -0.4),
-          rotationMax: new Vector3(1.7, -1.1, 0.3),
+          rotationMin: zeroVec,
+          rotationMax: zeroVec,
+          // rotationMin: partConstraints.elbowRotationMin,
+          // rotationMax: partConstraints.elbowRotationMax,
         },
         {
           index: this.idOf('LeftArm'),
-          rotationMin: new Vector3(1.2, -1.8, -0.4),
-          rotationMax: new Vector3(1.7, -1.1, 0.3),
+          rotationMin: zeroVec,
+          rotationMax: zeroVec,
+          // rotationMin: partConstraints.wristRotationMin,
+          // rotationMax: partConstraints.wristRotationMax,
         },
-        // { index: this.idOf('LeftShoulder') },
+        {
+          index: this.idOf('LeftShoulder'),
+          rotationMin: zeroVec,
+          rotationMax: zeroVec,
+          // rotationMax: partConstraints.shoulderRotationMax,
+          // rotationMin: partConstraints.shoulderRotationMin,
+        },
         // { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
-        {
-          index: this.idOf('RightForeArm'),
-          rotationMin: new Vector3(1.2, -1.8, -0.4),
-          rotationMax: new Vector3(1.7, -1.1, 0.3),
-        },
+        // {
+        //   index: this.idOf('RightForeArm'),
+        //   rotationMin: boneConstraints.rotationMin,
+        //   rotationMax: boneConstraints.rotationMax,
+        // },
         {
           index: this.idOf('RightArm'),
-          rotationMin: new Vector3(1.2, -1.8, -0.4),
-          rotationMax: new Vector3(1.7, -1.1, 0.3),
+          rotationMin: boneConstraints.rotationMin,
+          rotationMax: boneConstraints.rotationMax,
         },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
 
-      leftLeg: [
-        { index: this.idOf('LeftLeg') },
-        { index: this.idOf('LeftUpLeg') },
-        // { index: this.idOf('Hips') },
-      ],
+      // leftLeg: [
+      //   { index: this.idOf('LeftLeg') },
+      //   { index: this.idOf('LeftUpLeg') },
+      //   // { index: this.idOf('Hips') },
+      // ],
 
-      rightLeg: [
-        { index: this.idOf('RightLeg') },
-        { index: this.idOf('RightUpLeg') },
-        // { index: this.idOf('Hips') },
-      ],
+      // rightLeg: [
+      //   { index: this.idOf('RightLeg') },
+      //   { index: this.idOf('RightUpLeg') },
+      //   // { index: this.idOf('Hips') },
+      // ],
     }
   }
 
@@ -145,7 +217,7 @@ export class IKManager {
     const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
-    return { target, effector, links, iteration: 3 }
+    return { target, effector, links, iteration: 50 }
   }
 
   get skeleton() {
@@ -171,7 +243,7 @@ export class IKManager {
   getInterpolatedTargets(
     control: ControlPoint,
     target: AxisPoint,
-    steps = 10,
+    steps = INTERPOLATE_STEPS,
   ): InterpolatedKeyframe[] {
     const frames: InterpolatedKeyframe[] = []
 
@@ -280,7 +352,15 @@ export class IKManager {
 
         // TODO: decide how to handle the end of the interpolation
         if (this.frameCounters[control]! >= keyframes.length) {
-          this.frameCounters[control] = keyframes.length - 1
+          // this.frameCounters[control] = keyframes.length - 1
+
+          // re-compute?
+          this.frameCounters[control] = 0
+
+          this.targetFrames[control] = this.getInterpolatedTargets(
+            control,
+            TARGET_AXIS,
+          )
         }
       }
 
@@ -297,7 +377,7 @@ export class IKManager {
     const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
-    const target: AxisPoint = 'forehead'
+    const target: AxisPoint = TARGET_AXIS
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts

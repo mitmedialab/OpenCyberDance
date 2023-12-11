@@ -105,7 +105,7 @@ const partConstraints = {
 
 const INTERPOLATE_STEPS = 100
 
-const TARGET_AXIS: AxisPoint = 'forehead'
+const TARGET_AXIS: AxisPoint = 'body'
 
 export class IKManager {
   ik: CCDIKSolver
@@ -288,8 +288,8 @@ export class IKManager {
 
   private createTargetBone(point: ControlPoint, name: string) {
     const target = new Bone()
+    target.position.set(50, 50, 50)
 
-    target.position.set(0, 50, 0)
     target.visible = true
     target.name = name
     target.parent = this.root
@@ -354,8 +354,8 @@ export class IKManager {
         const bone = this.mesh.skeleton.bones[targetBoneId]
 
         // Copy the keyframe's position and rotation to the target bone.
-        // bone.position.copy(keyframe.position)
-        // bone.quaternion.copy(keyframe.rotation)
+        bone.position.copy(keyframe.position)
+        bone.quaternion.copy(keyframe.rotation)
 
         this.frameCounters[control]!++
 
@@ -369,10 +369,10 @@ export class IKManager {
           // re-compute?
           this.frameCounters[control] = 0
 
-          this.targetFrames[control] = this.getInterpolatedTargets(
-            control,
-            TARGET_AXIS,
-          )
+          // this.targetFrames[control] = this.getInterpolatedTargets(
+          //   control,
+          //   TARGET_AXIS,
+          // )
         }
       }
 
@@ -403,7 +403,7 @@ export class IKManager {
       // ? should we run the same frames over and over, or freeze?
       // ? what happens after the morph ends?
       this.frameCounters[part] = 0
-      this.targetFrames[part] = this.getInterpolatedTargets(part, target)
+      // this.targetFrames[part] = this.getInterpolatedTargets(part, target)
 
       // Setup IK configuration
       const ik = this.getIKConfig(part)

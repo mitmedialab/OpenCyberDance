@@ -495,14 +495,14 @@ export class Character {
           const enabled = parts[part as AxisPointControlParts]
 
           if (enabled) {
-            track.values = track.values.fill(0.01)
+            track.values = track.values.fill(0.001)
 
             // const time = this.mixer?.time ?? 1
             // const len = track.times.length - 1
             // const frame = Math.round((time / track.times[len]) * len)
             // const data = track.values.slice(frame * 4, frame * 4 + 4)
 
-            // Modify the entire keyframe values to this moment in time.
+            // // Modify the entire keyframe values to this moment in time.
             // for (let i = 0; i < track.values.length; i += 4) {
             //   let j = 0
 

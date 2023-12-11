@@ -220,7 +220,8 @@ export class IKManager {
 
   getIKConfig(controlPoint: ControlPoint): IK {
     const effector = this.idOf(effectorBones[controlPoint])
-    const target = this.targetBoneIds[controlPoint]
+    const target = this.idOf('Spine2')!
+    // const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
     return { target, effector, links, iteration: 50 }

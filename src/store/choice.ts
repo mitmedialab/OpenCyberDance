@@ -1,8 +1,8 @@
 import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
+import { wordsToNumbers } from 'words-to-numbers'
 
 import { runCommand } from '../command'
-import { ding } from '../ding'
 import { Choice, ChoiceKey, choices } from '../step-input'
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
@@ -238,7 +238,14 @@ export function handleVoiceSelection(
       return true
     }
 
-    const percent = parseInt(input)
+    let percent = parseInt(input)
+
+    if (isNaN(percent)) {
+      const maybeWordNumber = wordsToNumbers(input)
+      if (typeof maybeWordNumber === 'number') {
+        percent = maybeWordNumber
+      }
+    }
 
     if (isNaN(percent)) return false
     if (percent < 0) return false

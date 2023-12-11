@@ -49,6 +49,7 @@
     "tone": "^14.7.77",
     "vue": "^3.3.10",
     "vue-flip-toolkit": "^1.6.0",
-    "vue-overdrive": "^1.2.0"
+    "vue-overdrive": "^1.2.0",
+    "words-to-numbers": "^1.5.1"
   }
 }

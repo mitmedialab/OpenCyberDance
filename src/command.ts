@@ -64,7 +64,12 @@ export const FromPercent: FromPercentMap = {
 
 export const CurrentPercent = {
   energy: (part: EnergyPartKey) => v2p('energy', world.params.energy[part]),
-  curve: () => v2p('curve', world.params.curve.threshold),
+  curve: () => {
+    const c = v2p('curve', world.params.curve.threshold)
+    if (isNaN(c)) return 0
+
+    return Math.abs(100 - c)
+  },
   shifting: (part: DelayPartKey) => v2p('shifting', world.params.delays[part]),
   speed: () => v2p('speed', world.params.timescale),
   space: () => v2p('space', world.params.space.delay),

@@ -259,8 +259,8 @@ export function applyExternalBodySpace(
     for (const [start, end] of original) {
       // Add valleys at intervals x
       while (currentIntervalStart + x < start) {
-        result.push([currentIntervalStart + x, currentIntervalStart + x + 2])
-        currentIntervalStart += x + 5
+        result.push([currentIntervalStart + x, currentIntervalStart + x + 3])
+        currentIntervalStart += x + 3
       }
 
       // Add the original valley

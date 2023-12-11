@@ -123,7 +123,7 @@ export class Params {
     },
   }
 
-  // cursed
+  // ! HACK: temporary reactivity hack. TO REMOVE!
   reset() {
     const defaults = new Params()
 
@@ -133,12 +133,30 @@ export class Params {
     this.lockPosition = defaults.lockPosition
     this.showGraph = defaults.showGraph
     this.camera = defaults.camera
-    this.space = defaults.space
-    this.curve = defaults.curve
-    this.rotations = defaults.rotations
-    this.energy = defaults.energy
-    this.delays = defaults.delays
-    this.axisPoint = defaults.axisPoint
+    this.space.delay = defaults.space.delay
+    this.space.threshold = defaults.space.threshold
+    this.curve.axes.x = defaults.curve.axes.x
+    this.curve.axes.y = defaults.curve.axes.y
+    this.curve.axes.z = defaults.curve.axes.z
+    this.curve.equation = defaults.curve.equation
+    this.curve.threshold = defaults.curve.threshold
+    this.curve.dirty = defaults.curve.dirty
+    this.rotations.x = defaults.rotations.x
+    this.rotations.y = defaults.rotations.y
+    this.rotations.z = defaults.rotations.z
+    this.energy.lower = defaults.energy.lower
+    this.energy.upper = defaults.energy.upper
+    this.delays.body = defaults.delays.body
+    this.delays.head = defaults.delays.head
+    this.delays.leftArm = defaults.delays.leftArm
+    this.delays.leftLeg = defaults.delays.leftLeg
+    this.delays.rightArm = defaults.delays.rightArm
+    this.delays.rightLeg = defaults.delays.rightLeg
+    this.axisPoint.parts.leftArm = defaults.axisPoint.parts.leftArm
+    this.axisPoint.parts.rightArm = defaults.axisPoint.parts.rightArm
+    this.axisPoint.parts.leftLeg = defaults.axisPoint.parts.leftLeg
+    this.axisPoint.parts.rightLeg = defaults.axisPoint.parts.rightLeg
+    this.axisPoint.threshold = defaults.axisPoint.threshold
   }
 }
 

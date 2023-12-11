@@ -59,7 +59,7 @@ export function changeAction(name: CharacterKey) {
   persistCharacter()
 }
 
-export async function switchDance(key: string) {
+export async function switchDancers(key: string) {
   const config = danceKeyMap[key]
   if (!config) return
 
@@ -74,9 +74,12 @@ export async function switchDance(key: string) {
   for (const character of world.characters) {
     const name = character.options.name
 
-    await changeCharacter(name)
+    character.options.model = model
+    world.params.characters[name].model = model
 
-    // world.params.characters[name].model = model
-    // world.params.characters[name].action = action ?? null
+    character.options.action = action ?? null
+    world.params.characters[name].action = action ?? null
+
+    await changeCharacter(name)
   }
 }

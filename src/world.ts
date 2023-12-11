@@ -183,7 +183,7 @@ export class World {
 
     const frontLight = new DirectionalLight(0xffffff, 10)
     frontLight.name = 'FrontLight'
-    frontLight.position.set(0, 1.642723902041498, 2.6697376383189537)
+    // frontLight.position.set(0, 1.642723902041498, 2.6697376383189537)
     // this.addDebugTransformControl(frontLight)
     this.scene.add(frontLight)
 

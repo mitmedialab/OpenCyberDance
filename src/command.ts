@@ -11,7 +11,7 @@ import {
 } from './parts.ts'
 import { ChoiceKey, choices, Step } from './step-input'
 import { appendLog } from './store/status.ts'
-import { switchDance } from './switch-dance.ts'
+import { switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
 import { world } from './world'
 
@@ -249,7 +249,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       world.params.rotations.z = 1
     } else {
       for (const a of ['x', 'y', 'z']) {
-        world.params.rotations[a as Axis] = a === axis ? value : 1
+        world.params.rotations[a as Axis] = a === axis.trim() ? value : 1
       }
     }
 
@@ -275,10 +275,15 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     const [danceName] = args
 
     console.log('switching dance', danceName)
-    switchDance(danceName).then()
+
+    world.params.reset()
+
+    switchDancers(danceName).then()
   }
 
   if (primary === 'reset') {
+    world.params.reset()
+
     setTimeout(() => {
       for (const character of world.characters) {
         character.setup().then()

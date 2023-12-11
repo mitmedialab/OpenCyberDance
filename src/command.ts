@@ -122,11 +122,16 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'curve') {
     const [partText, percText] = args
 
+    const _percent = parseInt(percText)
+
+    // Normal = 100%
+    const isNormal = _percent === 100
+
     // Always Low Pass
     world.params.curve.threshold = FromPercent.curve(percText)
 
     // const equation = equationText as TransformKey
-    // world.params.curve.equation = equation
+    world.params.curve.equation = isNormal ? 'none' : 'capMin'
 
     for (const part in curveParts) {
       world.params.curve.parts[part as CurvePartKey] =

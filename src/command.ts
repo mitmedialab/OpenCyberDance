@@ -28,7 +28,7 @@ const rangeConfig: Record<
   curve: [1, 1500],
   shifting: [0, 100],
   space: [0, 2],
-  rotations: [1, 3.5],
+  rotations: [1, 4],
   speed: [0, 1, 300],
 
   // no op

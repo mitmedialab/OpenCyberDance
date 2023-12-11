@@ -107,8 +107,8 @@ export class Params {
     parts: {
       leftArm: false,
       rightArm: false,
-      leftLeg: false,
-      rightLeg: false,
+      // leftLeg: false,
+      // rightLeg: false,
     },
   }
 

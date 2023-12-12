@@ -55,7 +55,11 @@ export const steps = {
   // ! SHIFTING RELATION SHOULD NOT INCLUDE [ALL] to prevent them being in sync
   shiftingParts: {
     type: 'choice',
-    choices: [...armatureParts],
+    choices: [
+      { title: 'left limbs', key: 'left' },
+      { title: 'right limbs', key: 'right' },
+      { title: 'body', key: 'body' },
+    ],
   },
 
   // curveEquation: {
@@ -132,6 +136,7 @@ export const choices = {
       },
     ],
   },
+
   shifting: {
     title: 'shifting relations',
     triggers: ['shifting', 'synchronic', 'sync', 'relations'],

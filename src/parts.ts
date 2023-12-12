@@ -8,13 +8,12 @@ export const energyParts = {
     /Head|Neck|Spine|RightShoulder|RightArm|RightForeArm|RightHand|LeftShoulder|LeftArm|LeftForeArm|LeftHand/,
 } satisfies PartMap
 
+// shifting relations
 export const delayParts = {
-  head: /Head|Neck/,
-  body: /Hips|Spine/,
-  leftArm: /LeftShoulder|LeftArm|LeftForeArm|LeftHand|LeftInHand/,
-  rightArm: /RightShoulder|RightArm|RightForeArm|RightHand|RightInHand/,
-  leftLeg: /LeftUpLeg|LeftLeg|LeftFoot/,
-  rightLeg: /RightUpLeg|RightLeg|RightFoot/,
+  left: /LeftUpLeg|LeftLeg|LeftFoot|LeftShoulder|LeftArm|LeftForeArm|LeftHand|LeftInHand/,
+  right:
+    /RightUpLeg|RightLeg|RightFoot|RightShoulder|RightArm|RightForeArm|RightHand|RightInHand/,
+  body: /Head|Neck|Hips|Spine/,
 } satisfies PartMap
 
 export const curveParts = {

@@ -191,7 +191,7 @@ export class Panel {
 
     this.addRotations()
     this.addEnergy('upper', 'lower')
-    this.addDelay('leftArm', 'rightArm', 'leftLeg', 'rightLeg')
+    this.addDelay('left', 'right', 'body')
 
     this.commandFolder
       .add({ reset: this.reset.bind(this) }, 'reset')

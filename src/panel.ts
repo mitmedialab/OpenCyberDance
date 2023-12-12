@@ -275,6 +275,28 @@ export class Panel {
         .listen()
         .onChange(this.handlers.axisPoint)
     }
+
+    // TODO: delete debug
+    for (const axis of ['x', 'y', 'z']) {
+      this.axisPointFolder
+        ?.add(this.params.axisPoint.debug, axis, -360, 360, 1)
+        .listen()
+        .onChange(this.handlers.axisPoint)
+    }
+
+    for (const axis of ['x', 'y', 'z', 'w']) {
+      this.axisPointFolder
+        ?.add(this.params.axisPoint.debug2, axis, -3, 3, 0.0001)
+        .listen()
+        .onChange(this.handlers.axisPoint)
+    }
+
+    for (const axis of ['x', 'y', 'z']) {
+      this.axisPointFolder
+        ?.add(this.params.axisPoint.debug3, axis, -360, 360, 1)
+        .listen()
+        .onChange(this.handlers.axisPoint)
+    }
   }
 
   updateKey() {

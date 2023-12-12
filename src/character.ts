@@ -487,7 +487,7 @@ export class Character {
       }
 
       if (flags.axisPoint) {
-        const { parts } = this.params.axisPoint
+        const { parts, debug2 } = this.params.axisPoint
         const part = trackNameToPart(track.name, 'axis')
 
         // FREEZE PART!!!!!!!
@@ -495,26 +495,32 @@ export class Character {
           const enabled = parts[part as AxisPointControlParts]
 
           if (enabled) {
-            // track.values = track.values.fill()
-
             const time = this.mixer?.time ?? 1
             const len = track.times.length - 1
             const frame = Math.round((time / track.times[len]) * len)
-            // const data = track.values.slice(frame * 4, frame * 4 + 4)
 
-            const data = [0, -0.5, 0, 0]
-
-            // Modify the entire keyframe values to this moment in time.
-            for (let i = 0; i < track.values.length; i += 4) {
-              let j = 0
-
-              track.values[i] = data[j++]
-              track.values[i + 1] = data[j++]
-              track.values[i + 2] = data[j++]
-              track.values[i + 3] = data[j++]
-            }
-
-            // debugger
+            // const data = []
+            //
+            // for (let i = 0; i < 4; i++) {
+            //   const f = original.values[frame + i]
+            //   // console.log(`f(i = ${i}, frame = ${frame}) = ${f}`)
+            //
+            //   // data.push(f * debug2.x)
+            // }
+            //
+            // console.log(`df len = ${data.length}, debug2 = ${debug2.x}`, data)
+            //
+            // // console.log('--- axis point: rotation fill ok ---')
+            //
+            // // Modify the entire keyframe values to this moment in time.
+            // for (let i = 0; i < original.values.length; i += 4) {
+            //   let j = 0
+            //
+            //   track.values[i] = data[j++]
+            //   track.values[i + 1] = data[j++]
+            //   track.values[i + 2] = data[j++]
+            //   track.values[i + 3] = data[j++]
+            // }
           }
         }
       }

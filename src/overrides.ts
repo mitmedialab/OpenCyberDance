@@ -41,6 +41,11 @@ export interface SpaceConfig {
 export interface AxisPointConfig {
   threshold: number
   parts: Record<AxisPointControlParts, boolean>
+
+  // TODO: delete this!
+  debug: { x: number; y: number; z: number }
+  debug2: { x: number; y: number; z: number; w: number }
+  debug3: { x: number; y: number; z: number }
 }
 
 export class Params {
@@ -106,6 +111,25 @@ export class Params {
       rightArm: false,
       // leftLeg: false,
       // rightLeg: false,
+    },
+
+    debug: {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+
+    debug2: {
+      x: 0,
+      y: 0,
+      z: 0,
+      w: 0,
+    },
+
+    debug3: {
+      x: 0,
+      y: 0,
+      z: 0,
     },
   }
 

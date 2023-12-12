@@ -4,6 +4,7 @@ import { degToRad, MathUtils } from 'three/src/math/MathUtils'
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
 import { AxisPointControlParts } from '../parts'
+import { world } from '../world.ts'
 import { CCDIKSolver, IK, IKLink } from './ccd-ik'
 
 declare global {
@@ -163,6 +164,9 @@ export class IKManager {
   }
 
   get linksByControl(): Record<ControlPoint, IKLink[]> {
+    const debug = world.params.axisPoint.debug
+    const debug3 = world.params.axisPoint.debug3
+
     return {
       leftArm: [
         {
@@ -170,7 +174,11 @@ export class IKManager {
           // rotationMin: minNegVec,
           // rotationMax: minPosVec,
           rotationMin: new Vector3(0, 0, 0),
-          rotationMax: new Vector3(0, 0, degToRad(150)),
+          rotationMax: new Vector3(
+            degToRad(debug.x),
+            degToRad(debug.y),
+            degToRad(debug.z),
+          ),
           // rotationMax: partConstraints.elbowRotationMax,
         },
         {
@@ -179,7 +187,11 @@ export class IKManager {
           // rotationMax: zeroVec,
           // rotationMin: partConstraints.elbowRotationMin,
           // rotationMax: partConstraints.elbowRotationMax,
-          rotationMin: partConstraints.wristRotationMin,
+          rotationMin: new Vector3(
+            degToRad(debug3.x),
+            degToRad(debug3.y),
+            degToRad(debug3.z),
+          ),
           rotationMax: partConstraints.wristRotationMax,
         },
         // {
@@ -418,6 +430,8 @@ export class IKManager {
       // Setup IK configuration
       const ik = this.getIKConfig(part)
       iks.push(ik)
+
+      console.log('--- ik config ---')
     }
 
     // debugger

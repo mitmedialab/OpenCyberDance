@@ -1,14 +1,23 @@
 <template>
-  <div flex fixed bottom-4 right-4 gap-x-2 class="group">
+  <div flex fixed bottom-4 right-4 gap-x-2 font-zed text-3 class="group">
+    <div
+      px-1
+      py-1
+      text-gray-700
+      hover:text-gray-400
+      cursor-pointer
+      @click="toggleFullscreen"
+    >
+      F
+    </div>
+
     <div v-for="track in tracks">
       <div
         style="user-select: none"
-        font-zed
         cursor-pointer
         px-1
         py-1
         bg-transparent
-        text-3
         hover:text-gray-300
         :class="[
           {
@@ -44,6 +53,14 @@ const invalid = ref(false)
 const playing = useStore($musicPlaying)
 
 const tracks = [1, 2, 3]
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen()
+  }
+}
 
 watch(volume, () => {
   const v = parseFloat(volume.value)

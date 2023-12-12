@@ -27,7 +27,7 @@ onMounted(async () => {
       const completed = $valueCompleted.get()
 
       if (completed) {
-        ding(1)
+        ding()
         resetPrompt()
 
         return
@@ -37,7 +37,7 @@ onMounted(async () => {
       $showPrompt.set(next)
 
       if (next) {
-        ding(1)
+        ding()
       } else {
         world.voice.stop()
       }

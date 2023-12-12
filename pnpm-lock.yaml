@@ -11,6 +11,9 @@ dependencies:
   '@vitejs/plugin-vue':
     specifier: ^4.5.2
     version: 4.5.2(vite@5.0.5)(vue@3.3.10)
+  '@vueform/slider':
+    specifier: ^2.1.9
+    version: 2.1.9
   '@vueuse/core':
     specifier: ^10.7.0
     version: 10.7.0(vue@3.3.10)
@@ -1389,6 +1392,10 @@ packages:
 
   /@vue/shared@3.3.10:
     resolution: {integrity: sha512-2y3Y2J1a3RhFa0WisHvACJR2ncvWiVHcP8t0Inxo+NKz+8RKO4ZV8eZgCxRgQoA6ITfV12L4E6POOL9HOU5nqw==}
+    dev: false
+
+  /@vueform/slider@2.1.9:
+    resolution: {integrity: sha512-xEgcLc4e5TcfTlHsS+TzQTXQKh/U2Q0noXzrhAxYjX/XHZW46oyNywh9PQemOc9UYK5MSwrB73lkFR9SSS4Wfg==}
     dev: false
 
   /@vueuse/core@10.7.0(vue@3.3.10):

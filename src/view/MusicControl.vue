@@ -9,11 +9,11 @@
         py-1
         bg-transparent
         text-3
-        hover:text-gray-500
+        hover:text-gray-300
         :class="[
           {
             'text-gray-700': playing !== track,
-            'text-gray-500': playing === track,
+            'text-gray-400': playing === track,
           },
         ]"
         @click="toggleMusic(track)"
@@ -21,15 +21,38 @@
         T{{ track }}
       </div>
     </div>
+
+    <div flex font-zed text-gray-700>
+      <input
+        v-model="volume"
+        class="w-[25px] bg-transparent outline-none font-zed appearance-none border-none text-gray-700 focus:text-gray-300 hover:text-gray-400"
+        :class="[{ 'text-red-300': invalid }]"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
 
-import { $musicPlaying, toggleMusic } from '../music'
+import { $musicPlaying, toggleMusic, setVolume } from '../music'
+
+const volume = ref('1.0')
+const invalid = ref(false)
 
 const playing = useStore($musicPlaying)
 
 const tracks = [1, 2, 3]
+
+watch(volume, () => {
+  const v = parseFloat(volume.value)
+  if (isNaN(v) || v < 0 || v > 1) {
+    invalid.value = true
+    return
+  }
+
+  invalid.value = false
+  setVolume(v)
+})
 </script>

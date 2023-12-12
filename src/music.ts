@@ -55,10 +55,12 @@ export function playMusic(program: number) {
 }
 
 export function toggleMusic(program: number) {
-  if ($musicPlaying.get() !== null) {
-    stopMusic()
-  } else {
+  const current = $musicPlaying.get()
+
+  if (current === null || current !== program) {
     playMusic(program)
+  } else {
+    stopMusic()
   }
 }
 

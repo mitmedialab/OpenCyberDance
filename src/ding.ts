@@ -3,19 +3,19 @@ import { Howl } from 'howler'
 const ding1 = new Howl({
   src: '/sounds/khongwong_1.wav',
   preload: true,
-  volume: 0.7,
+  volume: 0.9,
 })
 
 const ding2 = new Howl({
   src: '/sounds/khongwong_2.wav',
   preload: true,
-  volume: 0.7,
+  volume: 0.9,
 })
 
 const ding3 = new Howl({
   src: '/sounds/khongwong_3.wav',
   preload: true,
-  volume: 0.7,
+  volume: 0.9,
 })
 
 const ding4 = new Howl({ src: '/sounds/khongwong_4.wav' })

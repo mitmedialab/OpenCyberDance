@@ -1,4 +1,4 @@
-import { percentToValue } from './math.ts'
+import { percentToValue, unease } from './math.ts'
 import {
   AxisPointControlParts,
   axisPointControlParts,
@@ -44,6 +44,11 @@ const p2v = (key: string, input: string): number => {
 
 export const v2p = (key: string, value: number): number => {
   const [min, max] = rangeConfig[key as ChoiceKey]
+
+  if (key in ['energy', 'shifting', 'space', 'speed']) {
+    console.log(toPercent(unease(value, min, max), min, max), key)
+    return toPercent(unease(value, min, max), min, max)
+  }
 
   return toPercent(value, min, max)
 }

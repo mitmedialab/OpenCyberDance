@@ -20,6 +20,37 @@ export function randVariance(variance: number) {
   return Math.random() * (maxRange - minRange) + minRange
 }
 
+export function easeIn(value: number, min: number, max: number) {
+  console.log('ease', value, min, max)
+  const normalizedValue = (value - min) / (max - min)
+  return normalizedValue ** 1.5
+}
+
+export function easeOut(value: number, min: number, max: number) {
+  const normalizedValue = (value - min) / (max - min)
+  const eased = 1 - (1 - normalizedValue) ** 1.5
+  return min + eased * (max - min)
+}
+
+export function uneaseIn(value: number, min: number, max: number) {
+  const normalizedValue = Math.pow(value, 2 / 3)
+  return min + normalizedValue * (max - min)
+}
+
+export function uneaseOut(value: number, min: number, max: number) {
+  const normalizedValue = (value - min) / (max - min)
+  const uneased = 1 - Math.pow(1 - normalizedValue, 2 / 3)
+  return min + uneased * (max - min)
+}
+
+export function unease(value: number, min: number, max: number) {
+  if (value > max) {
+    return uneaseOut(value, max, 3)
+  } else {
+    return uneaseIn(value, min, max)
+  }
+}
+
 export function percentToValue(
   percent: number,
   min: number,
@@ -30,7 +61,17 @@ export function percentToValue(
   const perc = Math.min(maxPercent, Math.max(0, percent))
 
   // Map the percentage to the range [min, max]
-  return min + (perc / 100) * (max - min)
+  const rng = min + (perc / 100) * (max - min)
+  let eased = rng
+
+  // Transform some inputs
+  if (maxPercent > 100) {
+    eased = rng <= 1 ? easeIn(rng, min, 1) : easeOut(rng, 1, maxPercent / 100)
+  } else if (min === 0) {
+    eased = easeIn(rng, min, max)
+  }
+
+  return eased
 }
 
 export function getMaxOccurence(arr: string[]) {

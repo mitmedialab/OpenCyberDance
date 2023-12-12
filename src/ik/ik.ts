@@ -220,7 +220,7 @@ export class IKManager {
 
   getIKConfig(controlPoint: ControlPoint): IK {
     const effector = this.idOf(effectorBones[controlPoint])
-    const target = this.idOf('Spine2')!
+    const target = this.idOf('LeftFoot')!
     // const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
@@ -355,8 +355,8 @@ export class IKManager {
         const bone = this.mesh.skeleton.bones[targetBoneId]
 
         // Copy the keyframe's position and rotation to the target bone.
-        bone.position.copy(keyframe.position)
-        bone.quaternion.copy(keyframe.rotation)
+        // bone.position.copy(keyframe.position)
+        // bone.quaternion.copy(keyframe.rotation)
 
         this.frameCounters[control]!++
 
@@ -379,6 +379,8 @@ export class IKManager {
 
       // Update all IK bones
       this.ik.update()
+
+      console.log('-- ik update')
     }
   }
 
@@ -390,7 +392,6 @@ export class IKManager {
     const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
-    const target: AxisPoint = TARGET_AXIS
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts

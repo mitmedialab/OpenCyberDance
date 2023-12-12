@@ -27,8 +27,8 @@ export const storageKeys = {
 }
 
 export const persistCharacter = () => {
-  localStorage.setItem(storageKeys.model, world.first?.options.model ?? null)
-  localStorage.setItem(storageKeys.action, world.first?.options.action ?? null)
+  localStorage.setItem(storageKeys.model, world.first?.options.model ?? '')
+  localStorage.setItem(storageKeys.action, world.first?.options.action ?? '')
 }
 
 export const getPersistCharacter = () => ({

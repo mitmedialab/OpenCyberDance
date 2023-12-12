@@ -134,7 +134,9 @@ export class World {
 
       for (const char of this.characters) {
         char.mixer?.update(delta)
-        char.ik?.update(char.mixer?.time ?? 0)
+
+        // char.mixer?.time ?? 0
+        char.ik?.update()
       }
     }
 
@@ -432,7 +434,7 @@ export class World {
       paused ? this.clock.stop() : this.clock.start()
     }
 
-    this.panel.handlers.prompt = (input: string) => {}
+    this.panel.handlers.prompt = () => {}
 
     this.panel.createPanel()
   }

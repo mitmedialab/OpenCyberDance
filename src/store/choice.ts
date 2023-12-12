@@ -2,8 +2,7 @@ import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command'
-import { ding } from '../ding'
-import { Choice, ChoiceKey, choices } from '../step-input'
+import { Choice, ChoiceKey, choices, Step } from '../step-input'
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -131,12 +130,9 @@ const selectChoice = (choice: ChoiceKey) => {
   return true
 }
 
-export function handleVoiceSelection(
-  input: string | number,
-  type?: 'choice' | 'percent' | 'any',
-): boolean {
+export function handleVoiceSelection(input: string | number): boolean {
   const selectedChoiceKey = $selectedChoiceKey.get()
-  const currentStep = $currentStep.get()
+  const currentStep = $currentStep.get() as Step
 
   if (!selectedChoiceKey || !currentStep) {
     if (choicesKey.includes(input as string)) {

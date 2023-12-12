@@ -145,11 +145,8 @@ export class Params {
     this.energy.lower = defaults.energy.lower
     this.energy.upper = defaults.energy.upper
     this.delays.body = defaults.delays.body
-    this.delays.head = defaults.delays.head
-    this.delays.leftArm = defaults.delays.leftArm
-    this.delays.leftLeg = defaults.delays.leftLeg
-    this.delays.rightArm = defaults.delays.rightArm
-    this.delays.rightLeg = defaults.delays.rightLeg
+    this.delays.left = defaults.delays.left
+    this.delays.right = defaults.delays.right
     this.axisPoint.parts.leftArm = defaults.axisPoint.parts.leftArm
     this.axisPoint.parts.rightArm = defaults.axisPoint.parts.rightArm
     this.axisPoint.parts.leftLeg = defaults.axisPoint.parts.leftLeg
@@ -209,7 +206,7 @@ export function applyExternalBodySpace(
   tracks: KeyframeTrack[],
   options: typeof Params.prototype.space,
 ): THREE.KeyframeTrack[] {
-  const { delay, threshold, minWindow, windowSize } = options ?? {}
+  const { delay, threshold, minWindow } = options ?? {}
 
   // Do not compute anything if the delay is zero.
   if (delay === 0) return tracks

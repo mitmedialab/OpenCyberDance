@@ -38,7 +38,6 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
-import { getPersistCharacter } from './switch-dance.ts'
 import {
   applyTrackTransform,
   Axis,
@@ -163,11 +162,6 @@ export class Character {
   }
 
   constructor(options?: Partial<CharacterOptions>) {
-    // Load the persisted character and action.
-    // const persist = getPersistCharacter()
-    // if (persist.character) this.options.model = 'waiting'
-    // if (persist.action) this.options.action = persist.action
-
     if (options) this.options = { ...this.options, ...options }
   }
 

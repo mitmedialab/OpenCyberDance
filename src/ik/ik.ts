@@ -229,7 +229,7 @@ export class IKManager {
     return true
   }
 
-  update(time: number) {
+  update() {
     this.waitFrames++
 
     if (this.waitFrames < this.maxWaitFrames) return

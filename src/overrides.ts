@@ -93,12 +93,9 @@ export class Params {
   }
 
   delays: Record<DelayPartKey, number> = {
-    head: 0,
+    left: 0,
+    right: 0,
     body: 0,
-    leftArm: 0,
-    rightArm: 0,
-    leftLeg: 0,
-    rightLeg: 0,
   }
 
   axisPoint: AxisPointConfig = {

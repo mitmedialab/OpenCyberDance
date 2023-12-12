@@ -36,12 +36,24 @@ export const music3 = new Howl({
   onend: () => $musicPlaying.set(null),
 })
 
+const tracks = [music1, music2, music3]
+
 export function stopMusic() {
-  music1.stop()
-  music2.stop()
-  music3.stop()
+  const WAIT = 500
+  const current = $musicPlaying.get()
+
+  if (current) {
+    const track = tracks[current]
+    if (track) track.fade(track.volume(), 0, WAIT)
+  }
 
   $musicPlaying.set(null)
+
+  setTimeout(() => {
+    music1.stop()
+    music2.stop()
+    music3.stop()
+  }, WAIT)
 }
 
 export function playMusic(program: number) {

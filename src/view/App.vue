@@ -8,6 +8,7 @@ import { world } from '../world'
 
 import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
+import MusicControl from './MusicControl.vue'
 
 const showPrompt = useStore($showPrompt)
 
@@ -67,5 +68,7 @@ onMounted(async () => {
     <div ref="plotterContainer" pointer-events-none />
 
     <StepPrompt v-if="showPrompt" />
+
+    <MusicControl />
   </div>
 </template>

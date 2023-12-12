@@ -6,13 +6,7 @@ const ding1 = new Howl({
   volume: 1,
 })
 
-// const ding2 = new Howl({ src: '/sounds/khongwong_2.wav' })
-// const ding3 = new Howl({ src: '/sounds/khongwong_3.wav' })
-// const ding4 = new Howl({ src: '/sounds/khongwong_4.wav' })
-// const ding5 = new Howl({ src: '/sounds/khongwong_5.wav' })
-// const ding6 = new Howl({ src: '/sounds/khongwong_6.wav' })
-
-export function ding(level: number) {
+export function ding() {
   stopAll()
   ding1.play()
 }

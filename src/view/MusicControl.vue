@@ -12,8 +12,8 @@
         hover:text-gray-500
         :class="[
           {
-            'group-hover:text-gray-700': playing !== track,
-            'group-hover:text-gray-500': playing === track,
+            'text-gray-700': playing !== track,
+            'text-gray-500': playing === track,
           },
         ]"
         @click="toggleMusic(track)"

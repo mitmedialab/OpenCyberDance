@@ -1,5 +1,5 @@
 import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
-import { MathUtils } from 'three/src/math/MathUtils'
+import { degToRad, MathUtils } from 'three/src/math/MathUtils'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
@@ -169,15 +169,18 @@ export class IKManager {
           index: this.idOf('LeftForeArm'),
           // rotationMin: minNegVec,
           // rotationMax: minPosVec,
-          // rotationMin: partConstraints.elbowRotationMin,
+          rotationMin: new Vector3(0, 0, 0),
+          rotationMax: new Vector3(0, 0, degToRad(150)),
           // rotationMax: partConstraints.elbowRotationMax,
         },
         {
           index: this.idOf('LeftArm'),
           // rotationMin: zeroVec,
           // rotationMax: zeroVec,
-          // rotationMin: partConstraints.wristRotationMin,
-          // rotationMax: partConstraints.wristRotationMax,
+          // rotationMin: partConstraints.elbowRotationMin,
+          // rotationMax: partConstraints.elbowRotationMax,
+          rotationMin: partConstraints.wristRotationMin,
+          rotationMax: partConstraints.wristRotationMax,
         },
         // {
         //   index: this.idOf('LeftShoulder'),
@@ -220,11 +223,13 @@ export class IKManager {
 
   getIKConfig(controlPoint: ControlPoint): IK {
     const effector = this.idOf(effectorBones[controlPoint])
-    const target = this.idOf('LeftFoot')!
+    const target = this.idOf('Head')!
     // const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
-    return { target, effector, links, iteration: 50 }
+    // debugger
+
+    return { target, effector, links, iteration: 1 }
   }
 
   get skeleton() {
@@ -334,6 +339,12 @@ export class IKManager {
   update(time: number) {
     this.waitFrames++
 
+    // console.log('--- ok ---')
+
+    // TODO: DEBUG - move this down!!!
+    // Update all IK bones
+    this.ik.update()
+
     if (this.waitFrames < this.maxWaitFrames) return
     this.waitFrames = 0
 
@@ -377,9 +388,6 @@ export class IKManager {
         }
       }
 
-      // Update all IK bones
-      this.ik.update()
-
       console.log('-- ik update')
     }
   }
@@ -411,6 +419,8 @@ export class IKManager {
       const ik = this.getIKConfig(part)
       iks.push(ik)
     }
+
+    // debugger
 
     this.ik.set(iks)
     this.interpolating = Object.values(this.targetFrames).some((s) => s)

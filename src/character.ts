@@ -100,7 +100,7 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
-const DEBUG_SKELETON = false
+const DEBUG_SKELETON = true
 
 export class Character {
   scene: THREE.Scene | null = null
@@ -491,26 +491,28 @@ export class Character {
         const part = trackNameToPart(track.name, 'axis')
 
         // FREEZE PART!!!!!!!
-        if (part) {
+        if (part && track instanceof QuaternionKeyframeTrack) {
           const enabled = parts[part as AxisPointControlParts]
 
           if (enabled) {
-            track.values = track.values.fill(0.001)
+            // track.values = track.values.fill()
 
-            // const time = this.mixer?.time ?? 1
-            // const len = track.times.length - 1
-            // const frame = Math.round((time / track.times[len]) * len)
+            const time = this.mixer?.time ?? 1
+            const len = track.times.length - 1
+            const frame = Math.round((time / track.times[len]) * len)
             // const data = track.values.slice(frame * 4, frame * 4 + 4)
 
-            // // Modify the entire keyframe values to this moment in time.
-            // for (let i = 0; i < track.values.length; i += 4) {
-            //   let j = 0
+            const data = [0, -0.5, 0, 0]
 
-            //   track.values[i] = data[j++]
-            //   track.values[i + 1] = data[j++]
-            //   track.values[i + 2] = data[j++]
-            //   track.values[i + 3] = data[j++]
-            // }
+            // Modify the entire keyframe values to this moment in time.
+            for (let i = 0; i < track.values.length; i += 4) {
+              let j = 0
+
+              track.values[i] = data[j++]
+              track.values[i + 1] = data[j++]
+              track.values[i + 2] = data[j++]
+              track.values[i + 3] = data[j++]
+            }
 
             // debugger
           }

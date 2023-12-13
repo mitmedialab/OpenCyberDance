@@ -156,8 +156,8 @@ export class Character {
     // animation track names for solo dances
     terry: 'terry_chr02',
     changhung: 'Changhung002_chr02',
-    yokrob: 'Yokrobyak3_Tas',
-    yokroblingImprovise: 'yokrobling002_Tas',
+    yokrob: 'yokrobling_Tas',
+    yokroblingImprovise: 'yokroblingimprovised_chr02.001',
 
     waiting: 'sit002_Tas.001',
   }

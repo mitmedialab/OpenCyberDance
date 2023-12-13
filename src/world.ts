@@ -145,7 +145,7 @@ export class World {
 
         if (char.mixer && modelResetLimit) {
           if (char.mixer.time > modelResetLimit) {
-            char.mixer.time = 1
+            char.mixer.setTime(0)
 
             console.log(`forced reset ${modelKey} to 1`)
           }

@@ -364,7 +364,7 @@ export class Character {
     if (!this.mixer) return
 
     console.log('-- we have looped')
-    this.mixer.time = 0
+    this.mixer.setTime(0)
   }
 
   createDebugSphere(color = 0xff0000) {

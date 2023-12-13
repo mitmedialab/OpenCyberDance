@@ -217,7 +217,11 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 
     <div v-if="transcript">h: {{ transcript }}</div>
 
-    <div v-if="time" class="text-gray-600">
+    <div
+      v-if="time"
+      class="text-gray-600"
+      :class="[{ 'text-gray-300': isAnimationFinished }]"
+    >
       t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }}
     </div>
 

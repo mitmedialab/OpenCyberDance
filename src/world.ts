@@ -30,6 +30,7 @@ import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
+import { $time } from './store/status.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
   formulaRanges,
@@ -134,8 +135,9 @@ export class World {
 
       for (const char of this.characters) {
         char.mixer?.update(delta)
+        char.ik?.update()
 
-        char.ik?.update(char.mixer?.time ?? 0)
+        $time.set(char.mixer?.time ?? 0)
       }
     }
 
@@ -433,7 +435,7 @@ export class World {
       paused ? this.clock.stop() : this.clock.start()
     }
 
-    this.panel.handlers.prompt = (input: string) => {}
+    this.panel.handlers.prompt = () => {}
 
     this.panel.createPanel()
   }

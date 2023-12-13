@@ -2,6 +2,7 @@ import { getMaxOccurence, randVariance } from './math'
 import { DelayPartKey } from './parts'
 import { gpt } from './prompt'
 import { CORRECTION_PROMPT } from './prompts.ts'
+import { Step } from './step-input.ts'
 import {
   $currentStep,
   $showPrompt,
@@ -258,7 +259,7 @@ export class VoiceController {
   async onVoiceResult(
     resultList: SpeechRecognitionResultList,
   ): Promise<boolean> {
-    const step = $currentStep.get()
+    const step = $currentStep.get() as Step
     const isPercent = step && step.type === 'percent'
 
     const resultLen = resultList.length
@@ -302,7 +303,7 @@ export class VoiceController {
       }
 
       if (/^(ex|why|wine|see|sea)$/i.test(alt.toLowerCase())) {
-        handleVoiceSelection(alt.toLowerCase(), 'choice')
+        handleVoiceSelection(alt.toLowerCase())
         return true
       }
 
@@ -312,7 +313,7 @@ export class VoiceController {
         return false
       }
 
-      const primaryOk = handleVoiceSelection(alt, 'any')
+      const primaryOk = handleVoiceSelection(alt)
 
       if (primaryOk) {
         console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
@@ -342,11 +343,11 @@ export class VoiceController {
     } catch (err) {}
 
     if (obj.percent) {
-      return handleVoiceSelection(obj.percent, 'percent')
+      return handleVoiceSelection(obj.percent)
     }
 
     if (obj.choice) {
-      return handleVoiceSelection(obj.choice, 'choice')
+      return handleVoiceSelection(obj.choice)
     }
 
     return false

@@ -11,7 +11,7 @@
       F
     </div>
 
-    <div v-for="track in tracks">
+    <!-- <div v-for="track in tracks">
       <div
         style="user-select: none"
         cursor-pointer
@@ -37,7 +37,7 @@
         class="w-[25px] bg-transparent outline-none font-zed appearance-none border-none text-gray-700 focus:text-gray-300 hover:text-gray-400"
         :class="[{ 'text-red-300': invalid }]"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 

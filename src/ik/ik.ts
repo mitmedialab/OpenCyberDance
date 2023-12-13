@@ -348,7 +348,7 @@ export class IKManager {
     return true
   }
 
-  update(time: number) {
+  update() {
     this.waitFrames++
 
     // console.log('--- ok ---')

@@ -38,6 +38,7 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
+import { $duration } from './store/status'
 import {
   applyTrackTransform,
   Axis,
@@ -121,7 +122,7 @@ export class Character {
     model: 'waiting',
     scale: 0.008,
     position: [0, 0, 0],
-    lengthen: 0,
+    lengthen: 2,
     freezeParams: false,
     analyze: false,
   }
@@ -162,11 +163,6 @@ export class Character {
   }
 
   constructor(options?: Partial<CharacterOptions>) {
-    // Load the persisted character and action.
-    // const persist = getPersistCharacter()
-    // if (persist.character) this.options.model = 'waiting'
-    // if (persist.action) this.options.action = persist.action
-
     if (options) this.options = { ...this.options, ...options }
   }
 
@@ -394,6 +390,8 @@ export class Character {
 
   processClip(clip: AnimationClip) {
     const { lengthen, freezeParams } = this.options
+
+    $duration.set(clip.duration)
 
     // Make keyframes track longer for track-level looping.
     if (lengthen > 0) {

@@ -1,7 +1,5 @@
 import { percentToValue } from './math.ts'
 import {
-  AxisPointControlParts,
-  axisPointControlParts,
   CurvePartKey,
   curveParts,
   DelayPartKey,
@@ -218,22 +216,22 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 
   // Axis Point
-  if (primary === 'axis') {
-    const [partText, percText] = args
+  // if (primary === 'axis') {
+  //   const [partText, percText] = args
 
-    for (const part in axisPointControlParts) {
-      world.params.axisPoint.parts[part as AxisPointControlParts] =
-        partText === 'all' ? true : partText === part
-    }
+  //   for (const part in axisPointControlParts) {
+  //     world.params.axisPoint.parts[part as AxisPointControlParts] =
+  //       partText === 'all' ? true : partText === part
+  //   }
 
-    world.params.axisPoint.threshold = FromPercent.axis(percText)
+  //   world.params.axisPoint.threshold = FromPercent.axis(percText)
 
-    setTimeout(() => {
-      world.updateParams({ axisPoint: true })
-    }, 80)
+  //   setTimeout(() => {
+  //     world.updateParams({ axisPoint: true })
+  //   }, 80)
 
-    return
-  }
+  //   return
+  // }
 
   if (primary === 'rotations') {
     const [axis, perc] = args

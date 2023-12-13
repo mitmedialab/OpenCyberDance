@@ -96,7 +96,6 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
         class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
         :class="[
           {
-            'bg-gray-400': isAnimationFinished && !isListening,
             'animate__rotateIn animate__infinite': isThinking,
             'bg-white': !isListening,
             'bg-red-5 animate__flash animate__infinite': isListening,

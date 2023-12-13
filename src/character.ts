@@ -184,6 +184,8 @@ export class Character {
   clear() {
     if (!this.scene || !this.model) return
 
+    this.mixer?.removeEventListener('loop', this.onLoopEnd.bind(this))
+
     this.scene.traverse((o) => {
       if (o instanceof CCDIKHelper) o.dispose()
       if (o instanceof SkeletonHelper) o.dispose()
@@ -325,12 +327,7 @@ export class Character {
     this.mixer = new THREE.AnimationMixer(this.model)
     this.mixer.timeScale = this.params.timescale
 
-    this.mixer.addEventListener('loop', (e) => {
-      if (!this.mixer) return
-
-      console.log('-- we have looped.')
-      this.mixer.time = 0
-    })
+    this.mixer.addEventListener('loop', this.onLoopEnd.bind(this))
 
     const clips: AnimationClip[] = gltfModel.animations
 
@@ -356,6 +353,13 @@ export class Character {
     console.log('>>> setup completed')
   }
 
+  onLoopEnd = () => {
+    if (!this.mixer) return
+
+    console.log('-- we have looped')
+    this.mixer.time = 0
+  }
+
   createDebugSphere(color = 0xff0000) {
     const geometry = new THREE.SphereGeometry(15, 32, 16)
     const material = new THREE.MeshBasicMaterial({ color })
@@ -364,7 +368,6 @@ export class Character {
   }
 
   addBoneSphere(bone: Bone, color = 0xff0000) {
-    const sphere = this.createDebugSphere(color)
     const size = 0.003
     sphere.scale.set(size, size, size)
 
@@ -412,6 +415,8 @@ export class Character {
       for (let i = 0; i < lengthen; i++) {
         lengthenKeyframeTracks(clip.tracks)
       }
+
+      console.log(`-- keyframe track lengthened by ${lengthen} times`)
     }
 
     // Cache original keyframe tracks for modification

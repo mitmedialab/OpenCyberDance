@@ -135,7 +135,7 @@ export class World {
 
       for (const char of this.characters) {
         char.mixer?.update(delta)
-        char.ik?.update()
+        // char.ik?.update()
 
         $time.set(char.mixer?.time ?? 0)
       }

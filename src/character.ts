@@ -325,6 +325,13 @@ export class Character {
     this.mixer = new THREE.AnimationMixer(this.model)
     this.mixer.timeScale = this.params.timescale
 
+    this.mixer.addEventListener('loop', (e) => {
+      if (!this.mixer) return
+
+      console.log('-- we have looped.')
+      this.mixer.time = 0
+    })
+
     const clips: AnimationClip[] = gltfModel.animations
 
     for (const clip of clips) {

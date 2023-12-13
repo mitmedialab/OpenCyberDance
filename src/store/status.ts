@@ -8,6 +8,9 @@ export const $gptResult = atom('')
 export const $voiceError = atom<SpeechRecognitionErrorEvent | null>(null)
 export const $logs = atom<string[]>([])
 
+export const $time = atom(0)
+export const $duration = atom(0)
+
 export function appendLog(data: string) {
   const logs = $logs.get()
 

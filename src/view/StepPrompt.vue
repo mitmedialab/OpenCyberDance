@@ -22,6 +22,8 @@ import {
   $transcript,
   $voiceError,
   $logs,
+  $time,
+  $duration,
 } from '../store/status.ts'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
@@ -37,10 +39,15 @@ const transcript = useStore($transcript)
 const result = useStore($result)
 const voiceError = useStore($voiceError)
 
+const time = useStore($time)
+const duration = useStore($duration)
+
 const isListening = computed(() => status.value === 'listening')
 const isThinking = computed(() => status.value === 'thinking')
 const isOffline = computed(() => status.value === 'disabled')
 const isConfused = computed(() => status.value === 'confused')
+
+const isAnimationFinished = computed(() => time.value >= duration.value)
 
 const selectedStepChoiceTitles = computed(() => {
   const steps = selectedChoice.value?.steps
@@ -89,6 +96,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
         class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
         :class="[
           {
+            'bg-gray-400': isAnimationFinished && !isListening,
             'animate__rotateIn animate__infinite': isThinking,
             'bg-white': !isListening,
             'bg-red-5 animate__flash animate__infinite': isListening,
@@ -208,6 +216,10 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
     </div>
 
     <div v-if="transcript">h: {{ transcript }}</div>
+
+    <div v-if="time" class="text-gray-600">
+      t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }}
+    </div>
 
     <div v-if="voiceError" class="text-red-5">
       ve: {{ voiceError.error }} {{ voiceError.message }}

@@ -38,6 +38,7 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
+import { $duration } from './store/status'
 import {
   applyTrackTransform,
   Axis,
@@ -389,6 +390,8 @@ export class Character {
 
   processClip(clip: AnimationClip) {
     const { lengthen, freezeParams } = this.options
+
+    $duration.set(clip.duration)
 
     // Make keyframes track longer for track-level looping.
     if (lengthen > 0) {

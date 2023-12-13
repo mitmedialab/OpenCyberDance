@@ -204,6 +204,13 @@ export class Character {
     return [...this.actions.values()]
   }
 
+  get currentAction(): AnimationAction | null {
+    const { action } = this.options
+    if (!action) return null
+
+    return this.actions.get(action) ?? null
+  }
+
   play(action: AnimationAction) {
     if (!action) return
 

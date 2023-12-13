@@ -80,6 +80,13 @@ const p = {
 export type ModelKey = keyof typeof Character.sources
 export type CharacterKey = keyof typeof Params.prototype.characters
 
+export const resetLimits: Partial<Record<ModelKey, number>> = {
+  terry: 160,
+  changhung: 300,
+  yokrob: 202,
+  yokroblingImprovise: 220,
+}
+
 export interface CharacterOptions {
   name: CharacterKey
   action: string | null

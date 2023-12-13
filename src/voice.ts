@@ -238,6 +238,7 @@ export class VoiceController {
     return new Promise((resolve) => {
       if (!responsiveVoice) {
         console.error('ResponsiveVoice not loaded!')
+        resolve()
         return
       }
 

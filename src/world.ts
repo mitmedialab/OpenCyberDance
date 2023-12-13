@@ -24,6 +24,7 @@ import {
   Character,
   CharacterKey,
   CharacterOptions,
+  resetLimits,
   UpdateParamFlags,
 } from './character'
 import { Params } from './overrides'
@@ -138,6 +139,17 @@ export class World {
         // char.ik?.update()
 
         $time.set(char.mixer?.time ?? 0)
+
+        const modelKey = char.options.model
+        const modelResetLimit = resetLimits[modelKey]
+
+        if (char.mixer && modelResetLimit) {
+          if (char.mixer.time > modelResetLimit) {
+            char.mixer.time = 0
+
+            console.log(`forced reset ${modelKey} to 0`)
+          }
+        }
       }
     }
 

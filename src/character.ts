@@ -122,7 +122,7 @@ export class Character {
     model: 'waiting',
     scale: 0.008,
     position: [0, 0, 0],
-    lengthen: 1,
+    lengthen: 2,
     freezeParams: false,
     analyze: false,
   }

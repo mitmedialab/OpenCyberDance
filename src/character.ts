@@ -150,6 +150,11 @@ export class Character {
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
 
     waiting: 'subinwaiting.glb',
+
+    // scene 3's pichet-s
+    pichetGen: 'PichetGen.glb',
+    pichetMaster: 'PichetMaster.glb',
+    pichetGenBlack: 'PichetGenBlack.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {

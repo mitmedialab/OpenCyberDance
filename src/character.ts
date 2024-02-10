@@ -39,7 +39,7 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
-import { $duration } from './store/status'
+import { $duration, $time } from './store/status'
 import {
   applyTrackTransform,
   Axis,
@@ -122,6 +122,8 @@ export class Character {
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
 
+  frameCounter = 0
+
   debugSpheres: DebugSpheres = {}
 
   options: CharacterOptions = {
@@ -190,6 +192,10 @@ export class Character {
     return this.actions.get(action)?.getClip() ?? null
   }
 
+  get isPrimary() {
+    return this.options.name === 'first'
+  }
+
   handlers: Handlers = {
     animationLoaded: () => {},
   }
@@ -198,10 +204,10 @@ export class Character {
     this.model?.position.set(x, y, z)
   }
 
-  clear() {
-    if (!this.scene || !this.model) return
+  teardown() {
+    if (!this.scene || !this.model || !this.mixer) return
 
-    this.mixer?.removeEventListener('loop', this.onLoopEnd.bind(this))
+    this.mixer.removeEventListener('loop', this.onLoopEnd.bind(this))
 
     this.scene.traverse((o) => {
       if (o instanceof CCDIKHelper) o.dispose()
@@ -269,7 +275,7 @@ export class Character {
     if (params) this.params = params
 
     // Ensure that there is no stale data
-    this.clear()
+    this.teardown()
 
     if (config.model === 'none') return
 
@@ -359,6 +365,7 @@ export class Character {
 
     // Signal that the animation has been loaded.
     this.handlers.animationLoaded?.(this)
+    this.frameCounter = 0
 
     // Play the first animation
     this.updateAction()
@@ -373,8 +380,10 @@ export class Character {
   onLoopEnd = () => {
     if (!this.mixer) return
 
-    console.log('-- we have looped')
+    this.frameCounter = 0
     this.mixer.setTime(0)
+
+    console.info('--- we have looped ---')
   }
 
   createDebugSphere(color = 0xff0000) {
@@ -426,9 +435,7 @@ export class Character {
     const { lengthen, freezeParams } = this.options
 
     // Use the primary character's keyframe duration to update seek bar
-    if (this.options.name === 'first') {
-      $duration.set(clip.duration)
-    }
+    if (this.isPrimary) $duration.set(clip.duration)
 
     // Make keyframes track longer for track-level looping.
     if (lengthen > 0) {
@@ -804,5 +811,39 @@ export class Character {
     const { series } = keyframe
 
     return { acceleration: series.map(getAcceleration) }
+  }
+
+  /** Tick the animation rendering */
+  tickRender(delta: number) {
+    if (!this.mixer) return
+
+    // account for FPS ~ should use real frames?
+    // derive from FPS?
+    this.frameCounter++
+
+    const rf = Math.round(this.frameCounter / 60)
+
+    // prettier-ignore
+    console.log(`rf: ${rf}, fc: ${this.frameCounter}, t: ${this.mixer.time.toFixed(2)}`)
+
+    this.mixer.update(delta)
+
+    if (this.isPrimary) {
+      $time.set(this.mixer.time ?? 0)
+    }
+
+    // TODO: inverse kinematics tick
+
+    // TODO: bring back model reset logic with less compute
+    // const modelKey = char.options.model
+    // const modelResetLimit = resetLimits[modelKey]
+
+    // if (char.mixer && modelResetLimit) {
+    //   if (char.mixer.time > modelResetLimit) {
+    //     char.mixer.setTime(0)
+
+    //     console.log(`forced reset ${modelKey} to 1`)
+    //   }
+    // }
   }
 }

@@ -24,7 +24,6 @@ import {
   Character,
   CharacterKey,
   CharacterOptions,
-  resetLimits,
   UpdateParamFlags,
 } from './character'
 import { dispose } from './dispose.ts'
@@ -33,7 +32,6 @@ import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
 import { $currentScene } from './store/scene.ts'
-import { $time } from './store/status.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
   formulaRanges,
@@ -156,28 +154,15 @@ export class World {
   render() {
     requestAnimationFrame(this.render.bind(this))
 
-    // scene 3 logic - frame ticking
-
     // Update animation mixers for each character
     if (!this.params.paused) {
       const delta = this.clock.getDelta()
 
       for (const char of this.characters) {
-        char.mixer?.update(delta)
-        // char.ik?.update()
+        if (!char.mixer) continue
 
-        $time.set(char.mixer?.time ?? 0)
-
-        const modelKey = char.options.model
-        const modelResetLimit = resetLimits[modelKey]
-
-        if (char.mixer && modelResetLimit) {
-          if (char.mixer.time > modelResetLimit) {
-            char.mixer.setTime(0)
-
-            console.log(`forced reset ${modelKey} to 1`)
-          }
-        }
+        // tick the animation time
+        char.tickRender(delta)
       }
     }
 
@@ -185,7 +170,6 @@ export class World {
 
     if (this.camera) {
       this.renderer.render(this.scene, this.camera)
-      // this.composer.render()
     }
   }
 
@@ -427,16 +411,16 @@ export class World {
           position: [0, 0, 0],
           freezeParams: true,
           model: 'pichetMaster',
-          action: '',
         }),
 
         this.addCharacter({
           name: 'second',
           position: [0, 0, 0],
-          model: 'pichetGenBlack',
-          action: '',
+          model: 'pichetGen',
         }),
       ])
+
+      this.characters.map((character) => character.mixer?.setTime(0))
 
       return
     }
@@ -533,6 +517,14 @@ export class World {
   teardown() {
     // Clear the seek bar timer
     clearInterval(this.timers.seekBar)
+
+    // Teardown all characters
+    for (const character of this.characters) {
+      character.teardown()
+    }
+
+    // Delete existing characters
+    this.characters = []
 
     this.scene.clear()
     dispose(this.scene)

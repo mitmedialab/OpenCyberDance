@@ -27,10 +27,12 @@ import {
   resetLimits,
   UpdateParamFlags,
 } from './character'
+import { dispose } from './dispose.ts'
 import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
+import { $currentScene } from './store/scene.ts'
 import { $time } from './store/status.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
@@ -72,6 +74,8 @@ export class World {
 
   composer: EffectComposer | null = null
 
+  timers = { seekBar: 0 }
+
   get first() {
     return this.characterByName('first')
   }
@@ -88,10 +92,33 @@ export class World {
     this.updatePlotterOnPause()
   }
 
+  setBackground(mode: 'white' | 'black') {
+    const body = document.querySelector('body')
+    if (!body) return
+
+    if (mode === 'white') {
+      body.style.background = '#fff'
+      this.scene.background = new THREE.Color(0xffffffff)
+      this.scene.fog = new THREE.Fog(0x111, 10, 50)
+
+      return
+    }
+
+    if (mode === 'black') {
+      body.style.background = '#000'
+      this.scene.background = new THREE.Color(0x00000000)
+      this.scene.fog = new THREE.Fog(0x111, 10, 50)
+
+      return
+    }
+  }
+
   async setup() {
+    const isEnding = $currentScene.get() === 'ENDING'
+    console.log(`setup> ending? ${isEnding}`)
+
     // Setup background
-    this.scene.background = new THREE.Color(0x000)
-    this.scene.fog = new THREE.Fog(0x111, 10, 50)
+    this.setBackground(isEnding ? 'white' : 'black')
 
     // Setup the scenes
     this.setupCamera()
@@ -101,13 +128,12 @@ export class World {
     this.setupControls()
     this.setupPanel()
     await this.setupCharacters()
-    // this.setupComposer()
 
     this.addResizeHandler()
     this.addSeekBarUpdater()
     this.handleCurveFormulaChange()
 
-    this.updateParams({ lockPosition: true })
+    this.updateParams()
 
     window.world = this
   }
@@ -120,7 +146,7 @@ export class World {
 
   // Update the time in the seek bar
   addSeekBarUpdater() {
-    setInterval(() => {
+    this.timers.seekBar = setInterval(() => {
       if (this.params.paused || !this.first) return
 
       this.params.time = Math.round((this.first?.mixer?.time ?? 1) * 100) / 100
@@ -129,6 +155,8 @@ export class World {
 
   render() {
     requestAnimationFrame(this.render.bind(this))
+
+    // scene 3 logic - frame ticking
 
     // Update animation mixers for each character
     if (!this.params.paused) {
@@ -378,16 +406,40 @@ export class World {
   }
 
   async setupCharacters() {
-    await this.addCharacter({
-      name: 'first',
-      position: [0, 0, 0],
-    })
+    const scene = $currentScene.get()
 
-    // await this.addCharacter({
-    //   name: 'second',
-    //   position: [0.8, 0, 0],
-    //   freezeParams: true,
-    // })
+    // Character in waiting mode
+    if (scene === 'BLACK') {
+      await this.addCharacter({
+        name: 'first',
+        position: [0, 0, 0],
+        model: 'waiting',
+      })
+
+      return
+    }
+
+    // Add two characters
+    if (scene === 'ENDING') {
+      await Promise.all([
+        this.addCharacter({
+          name: 'first',
+          position: [0, 0, 0],
+          freezeParams: true,
+          model: 'pichetMaster',
+          action: '',
+        }),
+
+        this.addCharacter({
+          name: 'second',
+          position: [0, 0, 0],
+          model: 'pichetGenBlack',
+          action: '',
+        }),
+      ])
+
+      return
+    }
   }
 
   setupPanel() {
@@ -396,8 +448,8 @@ export class World {
     this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
     this.panel.handlers.space = debounce(() => this.updateParams(), 500)
 
-    this.panel.handlers.lockPosition = (lock: boolean) => {
-      this.updateParams({ lockPosition: lock })
+    this.panel.handlers.lockPosition = () => {
+      this.updateParams()
     }
 
     this.panel.handlers.curve = debounce(() => {
@@ -476,6 +528,14 @@ export class World {
     this.camera.updateProjectionMatrix()
 
     if (this.controls) this.controls.update()
+  }
+
+  teardown() {
+    // Clear the seek bar timer
+    clearInterval(this.timers.seekBar)
+
+    this.scene.clear()
+    dispose(this.scene)
   }
 }
 

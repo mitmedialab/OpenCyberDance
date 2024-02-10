@@ -46,7 +46,7 @@ export async function changeCharacter(name: CharacterKey) {
   const peer = world.characters.find((c) => c.options.name !== name)
   if (peer?.mixer && char.mixer) char.mixer.setTime(peer.mixer.time)
 
-  persistCharacter()
+  // persistCharacter()
 }
 
 export function changeAction(name: CharacterKey) {

@@ -25,6 +25,7 @@ import {
 import { trackToEuler } from './math'
 import {
   applyExternalBodySpace,
+  applyHipsPositionLock,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
@@ -172,6 +173,10 @@ export class Character {
     yokroblingImprovise: 'yokroblingimprovised_chr02.001',
 
     waiting: 'sit002_Tas.001',
+
+    pichetGen: 'PIchetGen',
+    pichetMaster: 'Pichet003_chr02.001',
+    pichetGenBlack: 'Pichet003_chr02.001|Pichet003_chr02|Pichet003_chr02.001',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
@@ -360,7 +365,7 @@ export class Character {
 
     // Lock the position.
     // NOTE: the "lockPosition" field is not really required.
-    this.updateParams({ lockPosition: true })
+    this.updateParams()
 
     console.log('>>> setup completed')
   }
@@ -379,15 +384,15 @@ export class Character {
     return new THREE.Mesh(geometry, material)
   }
 
-  addBoneSphere(bone: Bone, color = 0xff0000) {
-    const size = 0.003
-    sphere.scale.set(size, size, size)
+  // addBoneSphere(bone: Bone, color = 0xff0000) {
+  //   const size = 0.003
+  //   sphere.scale.set(size, size, size)
 
-    this.updateSphereFromBone(sphere, bone)
-    this.scene?.add(sphere)
+  //   this.updateSphereFromBone(sphere, bone)
+  //   this.scene?.add(sphere)
 
-    return sphere
-  }
+  //   return sphere
+  // }
 
   updateSphereFromBone(sphere?: Mesh, bone?: Bone) {
     if (!bone || !sphere) return
@@ -420,7 +425,10 @@ export class Character {
   processClip(clip: AnimationClip) {
     const { lengthen, freezeParams } = this.options
 
-    $duration.set(clip.duration)
+    // Use the primary character's keyframe duration to update seek bar
+    if (this.options.name === 'first') {
+      $duration.set(clip.duration)
+    }
 
     // Make keyframes track longer for track-level looping.
     if (lengthen > 0) {
@@ -469,13 +477,15 @@ export class Character {
    * Update animation parameters.
    */
   updateParams(flags: UpdateParamFlags = { timing: true }) {
-    const { lockPosition: lock } = flags
-
-    const { freezeParams } = this.options
-    if (freezeParams && lock === undefined) return
-
     const clip = this.currentClip
     if (!clip || !this.params) return
+
+    const { freezeParams } = this.options
+
+    if (freezeParams) {
+      applyHipsPositionLock(this.params, clip)
+      return
+    }
 
     const _curve: {
       equation: Transform
@@ -502,15 +512,14 @@ export class Character {
       if (!original || !this.params) return
 
       // Lock and unlock hips position hips position.
-      if (track.name === 'Hips.position') {
-        track.values = track.values.fill(0)
-      }
+      applyHipsPositionLock(this.params, clip)
 
       if (freezeParams) return
 
       // Reset the keyframe values when circle and curve formula changes.
       if (flags.curve || flags.axisPoint) {
-        if (track.name !== 'Hips.position') {
+        if (this.params.lockPosition && track.name !== 'Hips.position') {
+          // Apply the existing keyframe values to all tracks.
           track.values = original.values.slice(0)
         }
       }

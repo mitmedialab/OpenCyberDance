@@ -17,11 +17,3 @@ Returns a JSON with the exact choice key, e.g. { "choice": "foo" } . If you are 
 If the input is { input: "fifty", "percent": true }, match the user's input to a float between 0.0 and 200.0, and return it as a number, e.g. { "percent": 50 } . If you are not confident to make a match, return { "percent": null }
 
 `.trim()
-
-export const SPEECH_GRAMMAR = `
-  #JSGF V1.0;
-  
-  grammar colors;
-  
-  public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;
-`

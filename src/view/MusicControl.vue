@@ -3,13 +3,15 @@
     <div
       px-1
       py-1
-      text-gray-700
+      text-gray-600
       hover:text-gray-400
       cursor-pointer
       @click="toggleFullscreen"
     >
-      F
+      FS
     </div>
+
+    <SceneChanger />
 
     <!-- <div v-for="track in tracks">
       <div
@@ -46,6 +48,8 @@ import { ref, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
 
 import { $musicPlaying, toggleMusic, setVolume } from '../music'
+
+import SceneChanger from './SceneChanger.vue'
 
 const volume = ref('1.0')
 const invalid = ref(false)

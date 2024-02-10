@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useStore } from '@nanostores/vue'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 
-import { choices, Step } from '../step-input'
+import { choices } from '../step-input'
 
 import {
   $selectedChoice,

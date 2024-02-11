@@ -9,6 +9,7 @@ import { world } from '../world'
 import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
 import MusicControl from './MusicControl.vue'
+import { CopyMaterial } from 'postprocessing'
 
 const showPrompt = useStore($showPrompt)
 
@@ -49,6 +50,19 @@ onMounted(async () => {
       } else {
         world.panel.panel.hide()
       }
+    }
+
+    if (event.key === 'k') {
+      const cam = world.camera
+      if (!cam) return
+
+      const output = JSON.stringify({
+        position: cam.position.toArray(),
+        rotation: cam.rotation.toArray(),
+        zoom: cam.zoom,
+      })
+
+      navigator.clipboard.writeText(output)
     }
   })
 

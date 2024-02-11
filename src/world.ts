@@ -53,6 +53,8 @@ export class World {
   clock = new Clock()
   scene = new Scene()
 
+  accumulatedTime = 0
+
   renderer = new WebGLRenderer({
     powerPreference: 'high-performance',
     antialias: true,
@@ -96,6 +98,7 @@ export class World {
 
     if (mode === 'white') {
       body.style.background = '#fff'
+      document.documentElement.classList.remove('dark')
       this.scene.background = new THREE.Color(0xffffffff)
       this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
@@ -104,6 +107,7 @@ export class World {
 
     if (mode === 'black') {
       body.style.background = '#000'
+      document.documentElement.classList.add('dark')
       this.scene.background = new THREE.Color(0x00000000)
       this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
@@ -120,7 +124,7 @@ export class World {
 
     // Setup the scenes
     this.setupCamera()
-    this.setCamera(isEnding ? 'ending' : 'front')
+    this.setCamera(isEnding ? 'endingStart' : 'front')
 
     this.setupLights()
     this.setupPlane()
@@ -136,7 +140,20 @@ export class World {
 
     this.updateParams()
 
+    // TODO: sync playback with exported speed (24fps)
+    // if (isEnding) this.adjustPlaybackSpeed(1)
+
     window.world = this
+  }
+
+  adjustPlaybackSpeed(speed: number) {
+    this.params.timescale = speed
+
+    for (const character of this.characters) {
+      if (!character.mixer) continue
+
+      character.mixer.timeScale = speed
+    }
   }
 
   setupComposer() {
@@ -151,8 +168,6 @@ export class World {
       if (this.params.paused || !this.first) return
 
       this.params.time = Math.round((this.first?.mixer?.time ?? 1) * 100) / 100
-
-      // console.log(`sb: ${this.first.options.model}, t = ${this.params.time}`)
     }, 1000)
   }
 
@@ -428,7 +443,12 @@ export class World {
         }),
       ])
 
-      this.characters.map((character) => character.mixer?.setTime(0))
+      this.characters.map((character) => {
+        if (!character.mixer) return
+
+        character.mixer.timeScale = 1
+        character.mixer.setTime(0)
+      })
 
       return
     }

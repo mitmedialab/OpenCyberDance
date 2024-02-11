@@ -202,15 +202,15 @@ export class Panel {
       .name('Reset')
       .listen()
 
-    this.commandFolder
-      .add({ voice: this.triggerVoice.bind(this) }, 'voice')
-      .name('Voice')
-      .listen()
+    // this.commandFolder
+    //   .add({ voice: this.triggerVoice.bind(this) }, 'voice')
+    //   .name('Voice')
+    //   .listen()
 
-    this.commandFolder
-      .add({ setKey: this.triggerPrompt.bind(this) }, 'setKey')
-      .name('Prompt')
-      .listen()
+    // this.commandFolder
+    //   .add({ setKey: this.triggerPrompt.bind(this) }, 'setKey')
+    //   .name('Prompt')
+    //   .listen()
 
     this.playbackFolder
       .add(this.params, 'timescale', 0, 5, 0.01)

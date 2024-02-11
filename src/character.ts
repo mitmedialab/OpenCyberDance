@@ -91,7 +91,8 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
 }
 
 // Ending scene's shadow visible time
-const SHADOW_VISIBLE_TIME = 84.5
+// const SHADOW_VISIBLE_TIME = 84.5
+const SHADOW_VISIBLE_TIME = 0
 
 export interface CharacterOptions {
   name: CharacterKey

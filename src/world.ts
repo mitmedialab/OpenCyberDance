@@ -424,7 +424,7 @@ export class World {
         this.addCharacter({
           name: 'second',
           position: [0, 0, 0],
-          model: 'pichetGen',
+          model: 'pichetGenBlack',
         }),
       ])
 

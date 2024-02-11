@@ -89,6 +89,9 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
   yokroblingImprovise: 220,
 }
 
+// Ending scene's shadow visible time
+const SHADOW_VISIBLE_TIME = 84.5
+
 export interface CharacterOptions {
   name: CharacterKey
   action: string | null
@@ -110,6 +113,10 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
+type AnimationFlags = {
+  shadowVisible: boolean
+}
+
 const DEBUG_SKELETON = false
 
 export class Character {
@@ -122,6 +129,10 @@ export class Character {
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
+
+  flags: AnimationFlags = {
+    shadowVisible: false,
+  }
 
   frameCounter = 0
 
@@ -302,6 +313,13 @@ export class Character {
     gltfModel.scene.traverse((o) => {
       if (o instanceof SkinnedMesh) {
         o.castShadow = true
+
+        // if scene two, then make it invisible
+        const isEnding = $currentScene.get() === 'ENDING'
+
+        if (isEnding && this.options.name === 'second') {
+          o.visible = false
+        }
 
         if (o.material instanceof MeshStandardMaterial) {
           o.material.wireframe = false
@@ -814,6 +832,18 @@ export class Character {
     return { acceleration: series.map(getAcceleration) }
   }
 
+  setVisible(visible: boolean) {
+    this.flags.shadowVisible = visible
+
+    if (!this.model) return
+
+    this.model.traverse((o) => {
+      if (o instanceof SkinnedMesh) {
+        o.visible = visible
+      }
+    })
+  }
+
   /** Tick the animation rendering */
   tickRender(delta: number) {
     if (!this.mixer) return
@@ -832,15 +862,23 @@ export class Character {
 
     // TODO: inverse kinematics tick
 
-    // TODO: scene 3 logic
-    // const rf = Math.round(this.frameCounter / 60)
+    // scene 3 -
+    if (this.flags.shadowVisible && this.mixer.time <= SHADOW_VISIBLE_TIME) {
+      this.setVisible(false)
+    }
 
-    // prettier-ignore
-    // console.log(`rf: ${rf}, fc: ${this.frameCounter}, t: ${this.mixer.time.toFixed(2)}`)
+    // scene 3 -
+    if (!this.flags.shadowVisible) {
+      const isEnding = $currentScene.get() === 'ENDING'
 
-    const isEnding = $currentScene.get() === 'ENDING'
-    if (isEnding) {
-      // hide at frame
+      const shouldActivate =
+        isEnding &&
+        this.options.name === 'second' &&
+        this.mixer.time > SHADOW_VISIBLE_TIME
+
+      if (shouldActivate) {
+        this.setVisible(true)
+      }
     }
   }
 }

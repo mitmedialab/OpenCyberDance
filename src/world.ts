@@ -120,6 +120,8 @@ export class World {
 
     // Setup the scenes
     this.setupCamera()
+    this.setCamera(isEnding ? 'ending' : 'front')
+
     this.setupLights()
     this.setupPlane()
     this.setupRenderer()
@@ -130,6 +132,7 @@ export class World {
     this.addResizeHandler()
     this.addSeekBarUpdater()
     this.handleCurveFormulaChange()
+    this.handleAnimationChange(this.first!)
 
     this.updateParams()
 
@@ -148,6 +151,8 @@ export class World {
       if (this.params.paused || !this.first) return
 
       this.params.time = Math.round((this.first?.mixer?.time ?? 1) * 100) / 100
+
+      // console.log(`sb: ${this.first.options.model}, t = ${this.params.time}`)
     }, 1000)
   }
 
@@ -264,8 +269,6 @@ export class World {
   setupCamera() {
     const { left, right, top, bottom } = this.getCameraFrustum()
     this.camera = new OrthographicCamera(left, right, top, bottom, 0.01, 2000)
-
-    this.setCamera('front')
   }
 
   setupControls() {
@@ -352,7 +355,17 @@ export class World {
       if (!currentAction || !seek) return
 
       const { duration } = currentAction.getClip()
-      if (duration) seek.max(Math.round(duration * 100) / 100)
+
+      if (duration) {
+        const seekDuration = Math.round(duration * 100) / 100
+        seek.max(seekDuration)
+        seek.updateDisplay()
+
+        console.log(`seek duration set to ${seekDuration}`)
+
+        // @ts-expect-error - foo bar baz
+        window.seek = seek
+      }
     }
   }
 
@@ -506,7 +519,7 @@ export class World {
     const preset = CAMERA_PRESETS[presetKey]
     if (!preset) return
 
-    this.camera.zoom = 0.45
+    this.camera.zoom = preset.zoom
     this.camera.rotation.set(...preset.rotation)
     this.camera.position.set(...preset.position)
     this.camera.updateProjectionMatrix()

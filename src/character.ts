@@ -39,6 +39,7 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
+import { $currentScene } from './store/scene'
 import { $duration, $time } from './store/status'
 import {
   applyTrackTransform,
@@ -420,7 +421,7 @@ export class Character {
     }
 
     if (!this.actions.has(config.action)) {
-      console.log(this.actions)
+      console.log('all actions:', this.actions)
       console.error(`${config.model}: ${config.action} missing!`)
       return
     }
@@ -434,7 +435,7 @@ export class Character {
   processClip(clip: AnimationClip) {
     const { lengthen, freezeParams } = this.options
 
-    // Use the primary character's keyframe duration to update seek bar
+    // Update the global duration store
     if (this.isPrimary) $duration.set(clip.duration)
 
     // Make keyframes track longer for track-level looping.
@@ -820,30 +821,26 @@ export class Character {
     // account for FPS ~ should use real frames?
     // derive from FPS?
     this.frameCounter++
-
-    const rf = Math.round(this.frameCounter / 60)
-
-    // prettier-ignore
-    console.log(`rf: ${rf}, fc: ${this.frameCounter}, t: ${this.mixer.time.toFixed(2)}`)
-
     this.mixer.update(delta)
 
-    if (this.isPrimary) {
-      $time.set(this.mixer.time ?? 0)
-    }
+    // Reset the model time if it exceeds the playback
+    const resetLimit = resetLimits[this.options.model]
+    if (resetLimit && this.mixer.time > resetLimit) this.mixer.setTime(0)
+
+    // Update the global animation time
+    if (this.isPrimary) $time.set(this.mixer.time ?? 0)
 
     // TODO: inverse kinematics tick
 
-    // TODO: bring back model reset logic with less compute
-    // const modelKey = char.options.model
-    // const modelResetLimit = resetLimits[modelKey]
+    // TODO: scene 3 logic
+    // const rf = Math.round(this.frameCounter / 60)
 
-    // if (char.mixer && modelResetLimit) {
-    //   if (char.mixer.time > modelResetLimit) {
-    //     char.mixer.setTime(0)
+    // prettier-ignore
+    // console.log(`rf: ${rf}, fc: ${this.frameCounter}, t: ${this.mixer.time.toFixed(2)}`)
 
-    //     console.log(`forced reset ${modelKey} to 1`)
-    //   }
-    // }
+    const isEnding = $currentScene.get() === 'ENDING'
+    if (isEnding) {
+      // hide at frame
+    }
   }
 }

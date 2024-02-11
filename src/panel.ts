@@ -27,6 +27,8 @@ interface Handlers {
 }
 
 export class Panel {
+  initialized = false
+
   params: Params
   panel = new GUI({ width: 310 })
 
@@ -175,6 +177,8 @@ export class Panel {
   }
 
   createPanel() {
+    if (this.initialized) return
+
     this.panel.hide()
 
     const panel = this.panel
@@ -259,6 +263,8 @@ export class Panel {
     // this.energyFolder.open()
     // this.delayFolder.open()
     // this.characterFolder.open()
+
+    this.initialized = true
   }
 
   addAxisPointControl() {
@@ -315,5 +321,7 @@ export class Panel {
   reset() {
     this.panel.reset()
     this.handlers.reset()
+
+    console.log(`>>> panel::reset`)
   }
 }

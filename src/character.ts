@@ -5,6 +5,7 @@ import {
   Bone,
   LineBasicMaterial,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
@@ -319,6 +320,8 @@ export class Character {
 
         if (isEnding && this.options.name === 'second') {
           o.visible = false
+
+          o.material = new MeshBasicMaterial({ color: 0x00000000 })
         }
 
         if (o.material instanceof MeshStandardMaterial) {

@@ -360,11 +360,6 @@ export class World {
         const seekDuration = Math.round(duration * 100) / 100
         seek.max(seekDuration)
         seek.updateDisplay()
-
-        console.log(`seek duration set to ${seekDuration}`)
-
-        // @ts-expect-error - foo bar baz
-        window.seek = seek
       }
     }
   }

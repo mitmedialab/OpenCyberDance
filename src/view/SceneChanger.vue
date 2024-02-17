@@ -5,7 +5,7 @@
       :class="[
         {
           'text-green-500 hover:text-green-600': isEnding,
-          'text-gray-600 hover:text-gray-400': !isEnding,
+          'text-gray-200 hover:text-green-300': !isEnding,
         },
       ]"
       @click="toggleEnding"

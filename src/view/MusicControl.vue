@@ -3,8 +3,8 @@
     <div
       px-1
       py-1
-      text-gray-600
-      hover:text-gray-400
+      text-gray-200
+      hover:text-green-300
       cursor-pointer
       @click="toggleFullscreen"
     >

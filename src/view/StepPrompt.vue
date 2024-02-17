@@ -86,7 +86,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 
 <template>
   <div
-    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-white"
+    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-gray-900 dark:text-white"
   >
     <div
       class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
@@ -97,7 +97,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
         :class="[
           {
             'animate__rotateIn animate__infinite': isThinking,
-            'bg-white': !isListening,
+            'bg-gray-800 dark:bg-white': !isListening && !voiceError,
             'bg-red-5 animate__flash animate__infinite': isListening,
             'bg-red-4 animate__heartBeat animate__infinite': !!voiceError,
             'animate__headShake animate__infinite': isConfused,
@@ -120,12 +120,13 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
           <div
             :class="[
               {
-                'highlight-a-bit': selectedChoiceKey == key,
+                'highlight-a-bit-inverted dark:highlight-a-bit':
+                  selectedChoiceKey == key,
                 'go-away': selectedChoiceKey && selectedChoiceKey != key,
                 animate__fadeInUp: !selectedChoiceKey,
               },
             ]"
-            class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
+            class="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
             v-for="(choice, key) in choices"
             :key="key"
             v-show="

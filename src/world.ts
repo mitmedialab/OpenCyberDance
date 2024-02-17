@@ -31,6 +31,7 @@ import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
+import { updateDebugLogCamera } from './store/debug'
 import { $currentScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
@@ -124,12 +125,13 @@ export class World {
 
     // Setup the scenes
     this.setupCamera()
-    this.setCamera(isEnding ? 'endingStart' : 'front')
+    await this.setCamera(isEnding ? 'endingTwo' : 'front')
+
+    this.setupControls()
 
     this.setupLights()
     this.setupPlane()
     this.setupRenderer()
-    this.setupControls()
     this.setupPanel()
     await this.setupCharacters()
 
@@ -283,17 +285,27 @@ export class World {
 
   setupCamera() {
     const { left, right, top, bottom } = this.getCameraFrustum()
+
     this.camera = new OrthographicCamera(left, right, top, bottom, 0.01, 2000)
+    console.log(`>>> new camera is created`)
   }
 
   setupControls() {
     if (!this.camera) return
+
+    // Dispose existing controls
+    if (this.controls) this.controls.dispose()
 
     const controls = new OrbitControls(this.camera, this.renderer.domElement)
     controls.enablePan = true
     controls.enableZoom = true
     controls.target.set(0, 0, 0)
     controls.update()
+
+    controls.addEventListener('change', () => {
+      updateDebugLogCamera(this.camera!)
+    })
+
     this.controls = controls
   }
 
@@ -318,9 +330,9 @@ export class World {
   }
 
   updateParams(flags?: UpdateParamFlags) {
-    const b = profile('updateParams', 10)
+    const p = profile('updateParams', 10)
 
-    b(() => {
+    p(() => {
       if (flags?.curve) this.handleCurveFormulaChange()
 
       for (const character of this.characters) {
@@ -332,6 +344,14 @@ export class World {
   async addCharacter(config: Partial<CharacterOptions>) {
     const character = new Character(config)
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
+
+    character.handlers.toggleCameraPreset = (preset) => {
+      this.setCamera(preset)
+    }
+
+    character.handlers.updateLockPosParams = (lock) => {
+      this.params.lockPosition = lock
+    }
 
     await character.setup(this.scene, this.params)
     this.characters.push(character)
@@ -528,18 +548,28 @@ export class World {
     return this.first?.query(...query) ?? []
   }
 
-  setCamera(presetKey: CameraPresetKey = 'front') {
-    if (!this.camera) return
+  setCamera(presetKey: CameraPresetKey = 'front'): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.camera) return
 
-    const preset = CAMERA_PRESETS[presetKey]
-    if (!preset) return
+      const preset = CAMERA_PRESETS[presetKey]
+      if (!preset) return
 
-    this.camera.zoom = preset.zoom
-    this.camera.rotation.set(...preset.rotation)
-    this.camera.position.set(...preset.position)
-    this.camera.updateProjectionMatrix()
+      this.camera.zoom = preset.zoom
+      this.camera.position.set(...preset.position)
+      this.camera.updateProjectionMatrix()
 
-    if (this.controls) this.controls.update()
+      setTimeout(() => {
+        if (!this.camera) return resolve()
+
+        this.camera.rotation.set(...preset.rotation)
+        this.camera.updateProjectionMatrix()
+
+        updateDebugLogCamera(this.camera)
+
+        resolve()
+      }, 0)
+    })
   }
 
   teardown() {

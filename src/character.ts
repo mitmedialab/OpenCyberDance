@@ -15,6 +15,7 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { KeyframeAnalyzer } from './analyze'
+import { CameraPresetKey } from './camera'
 import { dispose } from './dispose'
 import { CCDIKHelper } from './ik/ccd-ik-helper'
 import { IKManager } from './ik/ik'
@@ -91,8 +92,7 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
 }
 
 // Ending scene's shadow visible time
-// const SHADOW_VISIBLE_TIME = 84.5
-const SHADOW_VISIBLE_TIME = 0
+const SHADOW_VISIBLE_TIME = 84.5
 
 export interface CharacterOptions {
   name: CharacterKey
@@ -111,6 +111,8 @@ export interface CharacterOptions {
 
 type Handlers = {
   animationLoaded(character: Character): void
+  toggleCameraPreset(preset: CameraPresetKey): void
+  updateLockPosParams(lock: boolean): void
 }
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
@@ -169,9 +171,8 @@ export class Character {
     waiting: 'subinwaiting.glb',
 
     // scene 3's pichet-s
-    pichetGen: 'PichetGen.glb',
-    pichetMaster: 'PichetMaster.glb',
-    pichetGenBlack: 'PichetGenBlack.glb',
+    pichetMaster: 'Mastertiming1.glb',
+    pichetGenBlack: 'BLACKgentiming1.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
@@ -190,9 +191,10 @@ export class Character {
 
     waiting: 'sit002_Tas.001',
 
-    pichetGen: 'PIchetGen',
     pichetMaster: 'Pichet003_chr02.001',
-    pichetGenBlack: 'Pichet003_chr02.001|Pichet003_chr02|Pichet003_chr02.001',
+
+    pichetGenBlack:
+      'Pichet003_chr02.001|Pichet003_chr02|Pichet003_chr02.001_Pic',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
@@ -212,6 +214,8 @@ export class Character {
 
   handlers: Handlers = {
     animationLoaded: () => {},
+    toggleCameraPreset: () => {},
+    updateLockPosParams: () => {},
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -283,121 +287,132 @@ export class Character {
   }
 
   async setup(scene?: Scene, params?: Params) {
-    const config = this.options
+    try {
+      const config = this.options
 
-    if (scene) this.scene = scene
-    if (params) this.params = params
+      if (scene) this.scene = scene
+      if (params) this.params = params
 
-    // Ensure that there is no stale data
-    this.teardown()
+      // Ensure that there is no stale data
+      this.teardown()
 
-    if (config.model === 'none') return
+      if (config.model === 'none') return
 
-    // Get the model url based on the character model
-    const url = `/models/${Character.sources[config.model]}`
-    if (url === 'none' || !url) return
+      // Get the model url based on the character model
+      const url = `/models/${Character.sources[config.model]}`
+      if (url === 'none' || !url) return
 
-    const gltfModel = await loader.loadAsync(url)
+      const gltfModel = await loader.loadAsync(url)
 
-    // Set the default actions.
-    if (!config.action) {
-      config.action = Character.defaultActions[config.model]
-
+      // Set the default actions.
       if (!config.action) {
-        console.error(`invalid default action for ${config.model}`)
-      }
-    }
+        config.action = Character.defaultActions[config.model]
 
-    if (!this.scene || !this.params) return
+        if (!config.action) {
+          console.error(`invalid default action for ${config.model}`)
 
-    let skinnedMesh: SkinnedMesh | null = {} as unknown as SkinnedMesh
-
-    gltfModel.scene.traverse((o) => {
-      if (o instanceof SkinnedMesh) {
-        o.castShadow = true
-
-        // if scene two, then make it invisible
-        const isEnding = $currentScene.get() === 'ENDING'
-
-        if (isEnding && this.options.name === 'second') {
-          o.visible = false
-
-          o.material = new MeshBasicMaterial({ color: 0x00000000 })
+          console.log(
+            'defaults:',
+            gltfModel.animations.map((a) => a.name).join(', '),
+          )
         }
-
-        if (o.material instanceof MeshStandardMaterial) {
-          o.material.wireframe = false
-        }
-
-        skinnedMesh = o
       }
-    })
 
-    if (!skinnedMesh) return
+      if (!this.scene || !this.params) return
 
-    if (!this.options.freezeParams) {
-      this.ik = new IKManager(skinnedMesh)
+      let skinnedMesh: SkinnedMesh | null = {} as unknown as SkinnedMesh
+
+      gltfModel.scene.traverse((o) => {
+        if (o instanceof SkinnedMesh) {
+          o.castShadow = true
+
+          // if scene two, then make it invisible
+          const isEnding = $currentScene.get() === 'ENDING'
+
+          if (isEnding && this.options.name === 'second') {
+            o.visible = false
+
+            o.material = new MeshBasicMaterial({ color: 0x00000000 })
+          }
+
+          if (o.material instanceof MeshStandardMaterial) {
+            o.material.wireframe = false
+          }
+
+          skinnedMesh = o
+        }
+      })
+
+      if (!skinnedMesh) return
+
+      if (!this.options.freezeParams) {
+        this.ik = new IKManager(skinnedMesh)
+
+        if (DEBUG_SKELETON) {
+          const ikHelper = this.ik.ik.createHelper()
+          this.scene.add(ikHelper)
+        }
+      }
+
+      this.model = gltfModel.scene
+      this.scene.add(this.model)
+
+      // Adjust character scale
+      const scale = config.scale
+      this.model.scale.set(scale, scale, scale)
+
+      const [x, y, z] = config.position
+      this.model.position.set(x, y, z)
 
       if (DEBUG_SKELETON) {
-        const ikHelper = this.ik.ik.createHelper()
-        this.scene.add(ikHelper)
-      }
-    }
+        const rootBone = skinnedMesh.skeleton.bones?.[0]?.parent
 
-    this.model = gltfModel.scene
-    this.scene.add(this.model)
+        if (!rootBone) {
+          console.error('root bone not found in skeleton')
+          return
+        }
 
-    // Adjust character scale
-    const scale = config.scale
-    this.model.scale.set(scale, scale, scale)
+        this.skeletonHelper = new SkeletonHelper(rootBone!)
 
-    const [x, y, z] = config.position
-    this.model.position.set(x, y, z)
-
-    if (DEBUG_SKELETON) {
-      const rootBone = skinnedMesh.skeleton.bones?.[0]?.parent
-
-      if (!rootBone) {
-        console.error('root bone not found in skeleton')
-        return
+        const skeletonMaterial = this.skeletonHelper
+          .material as LineBasicMaterial
+        skeletonMaterial.linewidth = 10
+        this.scene.add(this.skeletonHelper)
       }
 
-      this.skeletonHelper = new SkeletonHelper(rootBone!)
+      // Create individual animation mixer
+      this.mixer = new THREE.AnimationMixer(this.model)
+      this.mixer.timeScale = this.params.timescale
 
-      const skeletonMaterial = this.skeletonHelper.material as LineBasicMaterial
-      skeletonMaterial.linewidth = 10
-      this.scene.add(this.skeletonHelper)
+      this.mixer.addEventListener('loop', this.onLoopEnd.bind(this))
+
+      const clips: AnimationClip[] = gltfModel.animations
+
+      for (const clip of clips) {
+        // Process the individual animation clips.
+        this.processClip(clip)
+
+        // Register the animation clip as character actions.
+        const action = this.mixer.clipAction(clip)
+        this.actions.set(clip.name, action)
+      }
+
+      // Signal that the animation has been loaded.
+      this.handlers.animationLoaded?.(this)
+      this.frameCounter = 0
+
+      // Play the first animation
+      this.updateAction()
+
+      // Lock the position by updating parameter once
+      this.updateParams()
+
+      console.log('>>> setup completed')
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('character setup failed.', error)
+      }
     }
-
-    // Create individual animation mixer
-    this.mixer = new THREE.AnimationMixer(this.model)
-    this.mixer.timeScale = this.params.timescale
-
-    this.mixer.addEventListener('loop', this.onLoopEnd.bind(this))
-
-    const clips: AnimationClip[] = gltfModel.animations
-
-    for (const clip of clips) {
-      // Process the individual animation clips.
-      this.processClip(clip)
-
-      // Register the animation clip as character actions.
-      const action = this.mixer.clipAction(clip)
-      this.actions.set(clip.name, action)
-    }
-
-    // Signal that the animation has been loaded.
-    this.handlers.animationLoaded?.(this)
-    this.frameCounter = 0
-
-    // Play the first animation
-    this.updateAction()
-
-    // Lock the position.
-    // NOTE: the "lockPosition" field is not really required.
-    this.updateParams()
-
-    console.log('>>> setup completed')
   }
 
   onLoopEnd = () => {
@@ -415,16 +430,6 @@ export class Character {
 
     return new THREE.Mesh(geometry, material)
   }
-
-  // addBoneSphere(bone: Bone, color = 0xff0000) {
-  //   const size = 0.003
-  //   sphere.scale.set(size, size, size)
-
-  //   this.updateSphereFromBone(sphere, bone)
-  //   this.scene?.add(sphere)
-
-  //   return sphere
-  // }
 
   updateSphereFromBone(sphere?: Mesh, bone?: Bone) {
     if (!bone || !sphere) return
@@ -503,6 +508,30 @@ export class Character {
     return sources[index]
   }
 
+  lockHipsPosition(clip: AnimationClip) {
+    if (!this.params) return
+
+    /**
+     * At which position do we lock the hips position?
+     * Should be (0, 0, 0) by default.
+     *
+     * For scene 3, we lock primary at left, secondary at right
+     */
+    let lockAtPos: [number, number, number] = [0, 0, 0]
+
+    const isEnding = $currentScene.get() === 'ENDING'
+
+    // TODO: update flag to "two character" camera focus
+    const twoCharacter = this.flags.shadowVisible
+
+    // For ending scenes, set the character off to LEFT and RIGHT
+    if (isEnding && twoCharacter) {
+      lockAtPos = this.isPrimary ? [20, 20, 20] : [0, -50, 0]
+    }
+
+    applyHipsPositionLock(this.params, clip, lockAtPos)
+  }
+
   /**
    * Update animation parameters.
    */
@@ -513,7 +542,7 @@ export class Character {
     const { freezeParams } = this.options
 
     if (freezeParams) {
-      applyHipsPositionLock(this.params, clip)
+      this.lockHipsPosition(clip)
       return
     }
 
@@ -542,7 +571,7 @@ export class Character {
       if (!original || !this.params) return
 
       // Lock and unlock hips position hips position.
-      applyHipsPositionLock(this.params, clip)
+      this.lockHipsPosition(clip)
 
       if (freezeParams) return
 
@@ -837,15 +866,18 @@ export class Character {
   }
 
   setVisible(visible: boolean) {
-    this.flags.shadowVisible = visible
-
     if (!this.model) return
+    if (this.isPrimary) return
 
+    // Make model visible
     this.model.traverse((o) => {
       if (o instanceof SkinnedMesh) {
         o.visible = visible
       }
     })
+
+    // Update camera preset
+    this.handlers.toggleCameraPreset?.(visible ? 'endingTwo' : 'endingStart')
   }
 
   /** Tick the animation rendering */
@@ -868,19 +900,29 @@ export class Character {
 
     // scene 3 -
     if (this.flags.shadowVisible && this.mixer.time <= SHADOW_VISIBLE_TIME) {
+      this.flags.shadowVisible = false
       this.setVisible(false)
     }
 
     // scene 3 -
     if (!this.flags.shadowVisible) {
+      const time = this.mixer.time
       const isEnding = $currentScene.get() === 'ENDING'
+      const isSecondary = this.options.name === 'second'
 
-      const shouldActivate =
-        isEnding &&
-        this.options.name === 'second' &&
-        this.mixer.time > SHADOW_VISIBLE_TIME
+      // turns both characters
+      if (isEnding && time > SHADOW_VISIBLE_TIME - 10) {
+        this.flags.shadowVisible = true
 
-      if (shouldActivate) {
+        this.handlers.updateLockPosParams(true)
+        this.updateParams()
+      }
+
+      // turn the secondary (shadow) character visible
+      const shouldMakeVisible =
+        isEnding && isSecondary && time > SHADOW_VISIBLE_TIME
+
+      if (shouldMakeVisible) {
         this.setVisible(true)
       }
     }

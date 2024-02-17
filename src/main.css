@@ -34,8 +34,30 @@ body {
   }
 }
 
+@keyframes highlight-invert {
+  0% {
+    color: black;
+    background-color: transparent;
+  }
+
+  15%,
+  90% {
+    color: white;
+    background-color: black;
+  }
+
+  98% {
+    color: black;
+    background-color: transparent;
+  }
+}
+
 .highlight-a-bit {
   animation: highlight 0.9s ease;
+}
+
+.highlight-a-bit-inverted {
+  animation: highlight-inverted 0.9s ease;
 }
 
 .transition-faster {

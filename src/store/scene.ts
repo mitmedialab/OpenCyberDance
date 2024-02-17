@@ -23,6 +23,7 @@ onNotify($currentScene, async () => {
   // Large characters dancing
   if (mode === 'BLACK') {
     world.params.lockPosition = true
+
     world.teardown()
     await world.setup()
   }

@@ -15,16 +15,17 @@ onNotify($currentScene, async () => {
   if (mode === 'ENDING') {
     // Disable position lock as we need characters to walk
     world.params.lockPosition = false
-
-    world.teardown()
-    await world.setup()
   }
 
   // Large characters dancing
   if (mode === 'BLACK') {
     world.params.lockPosition = true
-
-    world.teardown()
-    await world.setup()
   }
+
+  // Fade out the current scene...
+  await world.fadeOut()
+  await world.setup()
+  await world.fadeIn()
+
+  console.log(`> next scene loaded`)
 })

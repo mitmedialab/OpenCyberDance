@@ -41,7 +41,7 @@ import {
   TransformOptions,
 } from './transforms'
 import { Matcher } from './types'
-import { debounce } from './utils'
+import { debounce, delay } from './utils'
 import { VoiceController } from './voice'
 
 declare global {
@@ -59,6 +59,7 @@ export class World {
   renderer = new WebGLRenderer({
     powerPreference: 'high-performance',
     antialias: true,
+    alpha: true,
     // antialias: false,
     // stencil: false,
     // depth: false,
@@ -97,37 +98,42 @@ export class World {
     const body = document.querySelector('body')
     if (!body) return
 
+    console.log('bd scene:', this.scene)
+
     if (mode === 'white') {
-      body.style.background = '#fff'
       document.documentElement.classList.remove('dark')
-      this.scene.background = new THREE.Color(0xffffffff)
       this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
       return
     }
 
     if (mode === 'black') {
-      body.style.background = '#000'
       document.documentElement.classList.add('dark')
-      this.scene.background = new THREE.Color(0x00000000)
       this.scene.fog = new THREE.Fog(0x111, 10, 50)
 
       return
     }
   }
 
+  get isEnding() {
+    return $currentScene.get() === 'ENDING'
+  }
+
+  syncBackground() {
+    this.setBackground(this.isEnding ? 'white' : 'black')
+  }
+
   async setup() {
-    const isEnding = $currentScene.get() === 'ENDING'
+    const isEnding = this.isEnding
     console.log(`setup> ending? ${isEnding}`)
 
-    // Setup background
-    this.setBackground(isEnding ? 'white' : 'black')
+    this.syncBackground()
 
     // Setup the scenes
     this.setupCamera()
     await this.setCamera(isEnding ? 'endingTwo' : 'front')
 
-    this.setupControls()
+    // this.setupControls()
 
     this.setupLights()
     this.setupPlane()
@@ -260,6 +266,7 @@ export class World {
   }
 
   setupRenderer() {
+    this.renderer.setClearColor(0x000000, 0)
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.shadowMap.enabled = true
@@ -548,28 +555,24 @@ export class World {
     return this.first?.query(...query) ?? []
   }
 
-  setCamera(presetKey: CameraPresetKey = 'front'): Promise<void> {
-    return new Promise((resolve) => {
-      if (!this.camera) return
+  async setCamera(presetKey: CameraPresetKey = 'front') {
+    if (!this.camera) return
 
-      const preset = CAMERA_PRESETS[presetKey]
-      if (!preset) return
+    const preset = CAMERA_PRESETS[presetKey]
+    if (!preset) return
 
-      this.camera.zoom = preset.zoom
-      this.camera.position.set(...preset.position)
-      this.camera.updateProjectionMatrix()
+    this.camera.zoom = preset.zoom
+    this.camera.position.set(...preset.position)
+    this.camera.updateProjectionMatrix()
 
-      setTimeout(() => {
-        if (!this.camera) return resolve()
+    await delay(0)
 
-        this.camera.rotation.set(...preset.rotation)
-        this.camera.updateProjectionMatrix()
+    if (!this.camera) return
 
-        updateDebugLogCamera(this.camera)
+    this.camera.rotation.set(...preset.rotation)
+    this.camera.updateProjectionMatrix()
 
-        resolve()
-      }, 0)
-    })
+    updateDebugLogCamera(this.camera)
   }
 
   teardown() {
@@ -586,6 +589,32 @@ export class World {
 
     this.scene.clear()
     dispose(this.scene)
+  }
+
+  async fadeOut() {
+    const app = document.querySelector('#app')
+    if (!app) return
+
+    // fade out scene
+    app.classList.remove('fade-in')
+    app.classList.add('fade-out')
+
+    // wait until scene is almost faded out, similar to --screen-fade-time
+    await delay(500)
+
+    // tear down the scene ~ this takes only 1ms
+    this.teardown()
+  }
+
+  async fadeIn() {
+    const app = document.querySelector('#app')
+    if (!app) return
+
+    // set the proper background now
+    this.syncBackground()
+
+    app.classList.remove('fade-out')
+    app.classList.add('fade-in')
   }
 }
 

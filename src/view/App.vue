@@ -78,7 +78,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="app-container">
     <div ref="rendererElement" />
     <div ref="plotterContainer" pointer-events-none />
 

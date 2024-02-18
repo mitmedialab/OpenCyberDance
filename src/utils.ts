@@ -11,3 +11,6 @@ export function debounce(fn: Fn, wait: number): Fn {
     timer = setTimeout(() => fn.apply(this, args), wait)
   }
 }
+
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms))

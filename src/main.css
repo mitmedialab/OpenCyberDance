@@ -1,3 +1,11 @@
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --default-bg: #000000;
+  --scene-fade-time: 0.5s;
+  --bg-color-fade-time: 0.8s;
+}
+
 @font-face {
   font-family: 'Zed Mono Extended';
   src: url('/fonts/zed-mono-extended.ttf');
@@ -14,7 +22,47 @@
 
 body {
   margin: 0;
-  background: #111;
+  transition: background-color var(--bg-color-fade-time) ease-in-out;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fade-in var(--scene-fade-time) ease-in forwards;
+}
+
+.fade-out {
+  animation: fade-out var(--scene-fade-time) ease-out forwards;
+}
+
+html {
+  background-color: var(--default-bg);
+}
+
+html.dark body {
+  background-color: var(--black);
+}
+
+html:not(.dark) body {
+  background-color: var(--white);
 }
 
 @keyframes rotate {
@@ -32,36 +80,36 @@ body {
 
 @keyframes highlight {
   0% {
-    color: white;
+    color: var(--white);
     background-color: transparent;
   }
 
   15%,
   90% {
-    color: black;
-    background-color: white;
+    color: var(--black);
+    background-color: var(--white);
   }
 
   98% {
-    color: white;
+    color: var(--white);
     background-color: transparent;
   }
 }
 
 @keyframes highlight-invert {
   0% {
-    color: black;
+    color: var(--black);
     background-color: transparent;
   }
 
   15%,
   90% {
-    color: white;
-    background-color: black;
+    color: var(--white);
+    background-color: var(--black);
   }
 
   98% {
-    color: black;
+    color: var(--black);
     background-color: transparent;
   }
 }

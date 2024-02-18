@@ -212,6 +212,10 @@ export class Character {
     return this.options.name === 'first'
   }
 
+  get isSecondary() {
+    return this.options.name === 'second'
+  }
+
   handlers: Handlers = {
     animationLoaded: () => {},
     toggleCameraPreset: () => {},
@@ -326,10 +330,13 @@ export class Character {
         if (o instanceof SkinnedMesh) {
           o.castShadow = true
 
+          // disables frustum culling as it clips the character
+          o.frustumCulled = false
+
           // if scene two, then make it invisible
           const isEnding = $currentScene.get() === 'ENDING'
 
-          if (isEnding && this.options.name === 'second') {
+          if (isEnding && this.isSecondary) {
             o.visible = false
 
             o.material = new MeshBasicMaterial({ color: 0x00000000 })
@@ -511,25 +518,7 @@ export class Character {
   lockHipsPosition(clip: AnimationClip) {
     if (!this.params) return
 
-    /**
-     * At which position do we lock the hips position?
-     * Should be (0, 0, 0) by default.
-     *
-     * For scene 3, we lock primary at left, secondary at right
-     */
-    let lockAtPos: [number, number, number] = [0, 0, 0]
-
-    const isEnding = $currentScene.get() === 'ENDING'
-
-    // TODO: update flag to "two character" camera focus
-    const twoCharacter = this.flags.shadowVisible
-
-    // For ending scenes, set the character off to LEFT and RIGHT
-    if (isEnding && twoCharacter) {
-      lockAtPos = this.isPrimary ? [20, 20, 20] : [0, -50, 0]
-    }
-
-    applyHipsPositionLock(this.params, clip, lockAtPos)
+    applyHipsPositionLock(this.params, clip, [0, 0, 0])
   }
 
   /**
@@ -865,19 +854,25 @@ export class Character {
     return { acceleration: series.map(getAcceleration) }
   }
 
-  setVisible(visible: boolean) {
+  setSecondaryVisibility(visible: boolean) {
+    // only applies to the secondary character (i.e. the shadow character)
+    if (!this.isSecondary) return
     if (!this.model) return
-    if (this.isPrimary) return
 
-    // Make model visible
+    // Make secondary model visible
     this.model.traverse((o) => {
       if (o instanceof SkinnedMesh) {
+        o.frustumCulled = false
         o.visible = visible
       }
     })
 
     // Update camera preset
-    this.handlers.toggleCameraPreset?.(visible ? 'endingTwo' : 'endingStart')
+    // TODO: dynamically determine the camera preset
+    const preset: CameraPresetKey = 'endingTwo'
+    // visible ? 'endingTwo' : 'endingStart'
+
+    this.handlers.toggleCameraPreset?.(preset)
   }
 
   /** Tick the animation rendering */
@@ -901,18 +896,25 @@ export class Character {
     // scene 3 -
     if (this.flags.shadowVisible && this.mixer.time <= SHADOW_VISIBLE_TIME) {
       this.flags.shadowVisible = false
-      this.setVisible(false)
+      this.setSecondaryVisibility(false)
     }
 
     // scene 3 -
     if (!this.flags.shadowVisible) {
       const time = this.mixer.time
       const isEnding = $currentScene.get() === 'ENDING'
-      const isSecondary = this.options.name === 'second'
 
       // turns both characters
       if (isEnding && time > SHADOW_VISIBLE_TIME - 10) {
         this.flags.shadowVisible = true
+
+        if (this.isPrimary) {
+          this.setPosition(-1, 0, 0)
+        }
+
+        if (this.isSecondary) {
+          this.setPosition(1, 0, 0)
+        }
 
         this.handlers.updateLockPosParams(true)
         this.updateParams()
@@ -920,10 +922,10 @@ export class Character {
 
       // turn the secondary (shadow) character visible
       const shouldMakeVisible =
-        isEnding && isSecondary && time > SHADOW_VISIBLE_TIME
+        isEnding && this.isSecondary && time > SHADOW_VISIBLE_TIME
 
       if (shouldMakeVisible) {
-        this.setVisible(true)
+        this.setSecondaryVisibility(true)
       }
     }
   }

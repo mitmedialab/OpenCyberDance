@@ -375,6 +375,7 @@ export function applyHipsPositionLock(
 
   clip.tracks.forEach((track) => {
     if (track.name !== 'Hips.position') return
+    if (!(track instanceof THREE.VectorKeyframeTrack)) return
 
     const [x, y, z] = position
 

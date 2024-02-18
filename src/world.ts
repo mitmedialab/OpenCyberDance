@@ -44,6 +44,12 @@ import { Matcher } from './types'
 import { debounce, delay } from './utils'
 import { VoiceController } from './voice'
 
+const CAMERA_NEAR = 0.1
+const CAMERA_FAR = 2000
+
+// close to 0.0 = near, close to 1.0 = exactly centered
+const CAMERA_FRUSTUM_SIZE = 0.7
+
 declare global {
   interface Window {
     world: World
@@ -274,18 +280,15 @@ export class World {
     this.renderer.toneMappingExposure = 10
   }
 
-  getCameraFrustum() {
+  getCameraFrustum(frustumSize = CAMERA_FRUSTUM_SIZE) {
     const width = window.innerWidth
     const height = window.innerHeight
-    const aspect = width / height
+    const aspectRatio = width / height
 
-    const viewerFrustumSize = 0.35
-    const aspectFrustum = aspect * viewerFrustumSize
-
-    const left = -aspectFrustum
-    const right = aspectFrustum
-    const top = viewerFrustumSize
-    const bottom = -viewerFrustumSize
+    const left = (-frustumSize * aspectRatio) / 2
+    const right = (frustumSize * aspectRatio) / 2
+    const top = frustumSize / 2
+    const bottom = -frustumSize / 2
 
     return { left, right, top, bottom }
   }
@@ -293,7 +296,15 @@ export class World {
   setupCamera() {
     const { left, right, top, bottom } = this.getCameraFrustum()
 
-    this.camera = new OrthographicCamera(left, right, top, bottom, 0.01, 2000)
+    this.camera = new OrthographicCamera(
+      left,
+      right,
+      top,
+      bottom,
+      CAMERA_NEAR,
+      CAMERA_FAR,
+    )
+
     console.log(`>>> new camera is created`)
   }
 

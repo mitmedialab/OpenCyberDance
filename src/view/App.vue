@@ -53,6 +53,10 @@ onMounted(async () => {
       }
     }
 
+    if (event.key === 'c') {
+      world.setupControls()
+    }
+
     if (event.key === 'k') {
       const cam = world.camera
       if (!cam) return
@@ -84,7 +88,7 @@ onMounted(async () => {
 
     <StepPrompt v-if="showPrompt" />
 
-    <!-- <DebugLogger /> -->
+    <DebugLogger />
 
     <MusicControl />
   </div>

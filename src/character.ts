@@ -517,31 +517,24 @@ export class Character {
 
   /**
    * Sync with lockPosition parameter with the keyframe values.
+   *
+   * If the position is passed in, we override the entire keyframe with the given (x, y, z) values.
    */
-  syncPositionLock(clip: AnimationClip) {
+  syncPositionLock(clip: AnimationClip, position?: [number, number, number]) {
     if (!this.params || !this.params.lockPosition) return
 
     for (const track of clip.tracks) {
       if (track.name !== 'Hips.position') continue
 
-      track.values.fill(0)
-      break
-    }
-  }
-
-  /**
-   * !! HACK: override position animation keyframes
-   */
-  overridePosition(clip: AnimationClip, values: [number, number, number]) {
-    if (!this.params || !this.params.lockPosition) return
-
-    for (const track of clip.tracks) {
-      if (track.name !== 'Hips.position') continue
+      if (!position) {
+        track.values.fill(0)
+        break
+      }
 
       for (let i = 0; i < track.values.length; i += 3) {
-        track.values[i] = values[0]
-        track.values[i + 1] = values[1]
-        track.values[i + 2] = values[2]
+        track.values[i] = position[0]
+        track.values[i + 1] = position[1]
+        track.values[i + 2] = position[2]
       }
 
       break
@@ -988,7 +981,7 @@ export class Character {
       this.params.lockPosition = true
 
       const clip = this.currentClip!
-      this.syncPositionLock(clip)
+      this.syncPositionLock(clip, [x, 0, 0])
       this.fadeIntoModifiedAction(clip)
     }
 

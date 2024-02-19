@@ -975,7 +975,6 @@ export class Character {
       if (this.isPrimary) this.handlers.setCameraAngle('endingSideBySide')
 
       const x = this.isPrimary ? -1 : 1
-      this.setPosition(x, 0, 0)
 
       if (!this.params) return
       this.params.lockPosition = true
@@ -983,6 +982,8 @@ export class Character {
       const clip = this.currentClip!
       this.syncPositionLock(clip, [x, 0, 0])
       this.fadeIntoModifiedAction(clip)
+
+      this.setPosition(x, 0, 0)
     }
 
     if (nowDancing) return

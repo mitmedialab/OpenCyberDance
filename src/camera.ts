@@ -48,6 +48,17 @@ export const CAMERA_PRESETS = {
     ],
     zoom: 0.2985391940800849,
   },
+
+  endingExit: {
+    position: [-2.0572483113783746, 1.1872217654456538, 2.912430677304365],
+    rotation: [
+      0.03778659082437482,
+      0.06280852348033587,
+      -0.002372884874237966,
+      'XYZ',
+    ],
+    zoom: 0.2310039374757782,
+  },
 } satisfies Record<string, CameraPreset>
 
 export type CameraPresetKey = keyof typeof CAMERA_PRESETS

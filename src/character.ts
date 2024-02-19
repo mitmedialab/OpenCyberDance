@@ -93,8 +93,8 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
 // Ending scene's keyframes
 export const EndingKeyframes = {
   SHADOW_APPEAR: 99,
-  SHADOW_STILL: 110,
-  SHADOW_EXITING: 410,
+  SHADOW_STILL: 105,
+  SHADOW_EXITING: 400,
 }
 
 export interface CharacterOptions {
@@ -115,7 +115,7 @@ export interface CharacterOptions {
 type Handlers = {
   animationLoaded(character: Character): void
   setCameraAngle(preset: CameraPresetKey): void
-  updateLockPosParams(lock: boolean): void
+  setPositionLock(lock: boolean): void
 }
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
@@ -224,7 +224,7 @@ export class Character {
   handlers: Handlers = {
     animationLoaded: () => {},
     setCameraAngle: () => {},
-    updateLockPosParams: () => {},
+    setPositionLock: () => {},
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -416,9 +416,6 @@ export class Character {
       // Play the first animation
       this.updateAction()
 
-      // ? Lock the position by updating parameter once
-      // this.updateParams()
-
       console.log('>>> setup completed')
     } catch (error) {
       if (error instanceof Error) {
@@ -524,13 +521,10 @@ export class Character {
    * Sync with lockPosition parameter with the keyframe values.
    */
   syncPositionLock(clip: AnimationClip) {
-    if (!this.params) return
+    if (!this.params || !this.params.lockPosition) return
 
-    if (this.params.lockPosition) {
-      clip.tracks.forEach((track) => {
-        if (track.name !== 'Hips.position') return
-        track.values.fill(0)
-      })
+    for (const track of clip.tracks) {
+      if (track.name === 'Hips.position') track.values.fill(0)
     }
   }
 
@@ -556,6 +550,7 @@ export class Character {
     const { freezeParams } = this.options
 
     if (freezeParams) {
+      // erase the positioning data - even for frozen characters
       this.syncPositionLock(clip)
 
       return
@@ -688,7 +683,7 @@ export class Character {
       .map(([k]) => k) as Axis[]
   }
 
-  fadeIntoModifiedAction(clip: THREE.AnimationClip) {
+  fadeIntoModifiedAction(clip: THREE.AnimationClip, duration = 3, warp = true) {
     if (!this.mixer) return
 
     const prevAction = this.actions.get(clip.name)
@@ -698,7 +693,7 @@ export class Character {
     this.actions.set(clip.name, action)
 
     action.time = prevAction.time
-    prevAction.crossFadeTo(action, 3, true)
+    prevAction.crossFadeTo(action, duration, warp)
     action.play()
 
     // Uncache the action after the cross-fade is complete.
@@ -935,6 +930,7 @@ export class Character {
 
     if (nowHidden) return
 
+    // STATE 2: the shadow appears on stage.
     const nowAppear = time < EndingKeyframes.SHADOW_STILL
 
     if (state !== 'appear' && nowAppear) {
@@ -947,36 +943,43 @@ export class Character {
 
     if (nowAppear) return
 
+    // STATE 3: the shadow is ready to dance. camera is set to side-by-side
     const nowDancing = time < EndingKeyframes.SHADOW_EXITING
 
     if (state !== 'still' && nowDancing) {
       console.log('transition to: STILL')
-      this.flags.shadowState = 'stilDANCINGl'
+      this.flags.shadowState = 'still'
 
       if (this.isPrimary) {
-        // this.setPosition(-1, 0, 0)
-        // this.handlers.updateLockPosParams(true)
-        // this.handlers.setCameraAngle('endingSideBySide')
+        // master character stands at the left side
+        this.setPosition(-1, 0, 0)
+
+        // lock the hips for both characters
+        this.handlers.setPositionLock(true)
+        this.handlers.setCameraAngle('endingSideBySide')
       }
 
-      if (this.isSecondary) {
-        // this.setPosition(1, 0, 0)
-      }
+      // shadow character stands at the right side
+      if (this.isSecondary) this.setPosition(1, 0, 0)
     }
 
     if (nowDancing) return
 
+    // STATE 4: both characters are exiting the stage.
     if (state !== 'exiting') {
       console.log('transition to: EXITING')
       this.flags.shadowState = 'exiting'
 
-      // restore the positioning data of both character
-      // this.restoreHipsPosition(this.currentClip!)
       // this.setPosition(0, 0, 0)
+      this.handlers.setCameraAngle('endingExit')
+
+      // ! HACK: restore the body position keyframes of both character
+      const clip = this.currentClip!
+      this.restoreHipsPosition(clip)
+      this.fadeIntoModifiedAction(clip, 0, false)
 
       if (this.isPrimary) {
-        // this.handlers.updateLockPosParams(false)
-        // this.handlers.setCameraAngle('endingStart')
+        this.handlers.setPositionLock(false)
       }
     }
   }

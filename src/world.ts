@@ -129,8 +129,8 @@ export class World {
 
   async setup() {
     const isEnding = this.isEnding
-    console.log(`setup> ending? ${isEnding}`)
 
+    // Ensure background color is in sync
     this.syncBackground()
 
     // Setup the scenes
@@ -362,7 +362,7 @@ export class World {
       this.setCamera(preset)
     }
 
-    character.handlers.updateLockPosParams = (lock) => {
+    character.handlers.setPositionLock = (lock) => {
       this.params.lockPosition = lock
       this.updateParams()
     }

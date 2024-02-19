@@ -315,7 +315,7 @@ export function createGrammarFromState(): string | null {
     };`
 
     grammar += choiceGrammar
-    console.log('choice grammar:', choiceGrammar)
+    // console.log('choice grammar:', choiceGrammar)
 
     return grammar
   }

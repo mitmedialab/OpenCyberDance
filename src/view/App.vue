@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, callWithAsyncErrorHandling } from 'vue'
 import { useStore } from '@nanostores/vue'
 
 import { $showPrompt, $valueCompleted, resetPrompt } from '../store/choice'
@@ -10,8 +10,8 @@ import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
 import MusicControl from './MusicControl.vue'
 
-import DebugLogger from './DebugLogger.vue'
 import { EndingKeyframes } from '../character'
+import { $currentScene } from '../store/scene'
 
 const showPrompt = useStore($showPrompt)
 
@@ -71,9 +71,15 @@ onMounted(async () => {
       navigator.clipboard.writeText(output)
     }
 
-    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_APPEAR - 5)
-    if (event.key === 'b') world.setTime(180)
-    if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 5)
+    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_APPEAR - 1)
+    if (event.key === 'b') world.setTime(182)
+    if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 1)
+
+    if (event.key === 'e') {
+      if (world.isEnding) return $currentScene.set('BLACK')
+
+      $currentScene.set('ENDING')
+    }
   })
 
   rendererElement.value?.appendChild(world.renderer.domElement)
@@ -92,8 +98,6 @@ onMounted(async () => {
     <div ref="plotterContainer" pointer-events-none />
 
     <StepPrompt v-if="showPrompt" />
-
-    <!-- <DebugLogger /> -->
 
     <MusicControl />
   </div>

@@ -104,8 +104,6 @@ export class World {
     const body = document.querySelector('body')
     if (!body) return
 
-    console.log('bd scene:', this.scene)
-
     if (mode === 'white') {
       document.documentElement.classList.remove('dark')
       this.scene.fog = new THREE.Fog(0x111, 10, 50)
@@ -138,8 +136,6 @@ export class World {
     // Setup the scenes
     this.setupCamera()
     await this.setCamera(isEnding ? 'endingStart' : 'front')
-
-    // this.setupControls()
 
     this.setupLights()
     this.setupPlane()
@@ -363,12 +359,13 @@ export class World {
     const character = new Character(config)
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
 
-    character.handlers.toggleCameraPreset = (preset) => {
+    character.handlers.setCameraAngle = (preset) => {
       this.setCamera(preset)
     }
 
     character.handlers.updateLockPosParams = (lock) => {
       this.params.lockPosition = lock
+      this.updateParams()
     }
 
     await character.setup(this.scene, this.params)
@@ -626,6 +623,14 @@ export class World {
 
     app.classList.remove('fade-out')
     app.classList.add('fade-in')
+  }
+
+  setTime(time: number) {
+    this.characters.forEach((char) => {
+      if (!char || !char.mixer) return
+
+      char.mixer.setTime(time)
+    })
   }
 }
 

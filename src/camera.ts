@@ -38,7 +38,7 @@ export const CAMERA_PRESETS = {
     zoom: 0.24316203944819315,
   },
 
-  endingTwo: {
+  endingSideBySide: {
     position: [1.0410581170566617, 0.6004299258516296, 4.2369931367349025],
     rotation: [
       -0.04853859521884976,

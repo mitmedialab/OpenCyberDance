@@ -91,8 +91,12 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
   yokroblingImprovise: 220,
 }
 
-// Ending scene's shadow visible time
-const SHADOW_VISIBLE_TIME = 84.5
+// Ending scene's keyframes
+export const EndingKeyframes = {
+  SHADOW_MORPHING: 84.5,
+  SHADOW_DANCING: 90,
+  SHADOW_EXITING: 320,
+}
 
 export interface CharacterOptions {
   name: CharacterKey
@@ -111,14 +115,17 @@ export interface CharacterOptions {
 
 type Handlers = {
   animationLoaded(character: Character): void
-  toggleCameraPreset(preset: CameraPresetKey): void
+  setCameraAngle(preset: CameraPresetKey): void
   updateLockPosParams(lock: boolean): void
 }
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
+type ShadowCharacterState = 'hidden' | 'morphing' | 'dancing' | 'exiting'
+
 type AnimationFlags = {
-  shadowVisible: boolean
+  /** State of the shadow character */
+  shadowState: ShadowCharacterState
 }
 
 const DEBUG_SKELETON = false
@@ -135,7 +142,7 @@ export class Character {
   ik: IKManager | null = null
 
   flags: AnimationFlags = {
-    shadowVisible: false,
+    shadowState: 'hidden',
   }
 
   frameCounter = 0
@@ -218,7 +225,7 @@ export class Character {
 
   handlers: Handlers = {
     animationLoaded: () => {},
-    toggleCameraPreset: () => {},
+    setCameraAngle: () => {},
     updateLockPosParams: () => {},
   }
 
@@ -517,8 +524,21 @@ export class Character {
 
   lockHipsPosition(clip: AnimationClip) {
     if (!this.params) return
+    // if (!this.params.lockPosition) return this.restoreHipsPosition(clip)
 
     applyHipsPositionLock(this.params, clip, [0, 0, 0])
+  }
+
+  restoreHipsPosition(clip: AnimationClip) {
+    const sources = this.original.get(clip.name)
+    if (!sources) return
+
+    clip.tracks.forEach((track, index) => {
+      if (track.name !== 'Hips.position') return
+
+      track.values = sources[index].values
+      console.log(`--- hips position restored for "${this.options.name}"`)
+    })
   }
 
   /**
@@ -532,6 +552,7 @@ export class Character {
 
     if (freezeParams) {
       this.lockHipsPosition(clip)
+
       return
     }
 
@@ -854,25 +875,6 @@ export class Character {
     return { acceleration: series.map(getAcceleration) }
   }
 
-  setSecondaryVisibility(visible: boolean) {
-    // only applies to the secondary character (i.e. the shadow character)
-    if (!this.isSecondary) return
-    if (!this.model) return
-
-    // Make secondary model visible
-    this.model.traverse((o) => {
-      if (o instanceof SkinnedMesh) {
-        o.frustumCulled = false
-        o.visible = visible
-      }
-    })
-
-    // Update camera preset
-    const preset: CameraPresetKey = visible ? 'endingTwo' : 'endingStart'
-
-    this.handlers.toggleCameraPreset?.(preset)
-  }
-
   /** Tick the animation rendering */
   tickRender(delta: number) {
     if (!this.mixer) return
@@ -889,42 +891,100 @@ export class Character {
     // Update the global animation time
     if (this.isPrimary) $time.set(this.mixer.time ?? 0)
 
-    // TODO: inverse kinematics tick
+    this.tickAxisPoint()
 
-    // scene 3 -
-    if (this.flags.shadowVisible && this.mixer.time <= SHADOW_VISIBLE_TIME) {
-      this.flags.shadowVisible = false
-      this.setSecondaryVisibility(false)
+    this.tickEndingSceneShadowCharacter()
+  }
+
+  /**
+   * Tick the axis point update using Inverse Kinematics.
+   *
+   * WARNING: this is super expensive as it is called every frame.
+   */
+  tickAxisPoint() {
+    // TODO: inverse kinematics tick
+  }
+
+  /**
+   * Tick the ending scene's second "shadow" character.
+   *
+   * !! WARNING: this is super expensive as it is called every frame. !!
+   */
+  tickEndingSceneShadowCharacter() {
+    if ($currentScene.get() !== 'ENDING') return
+    if (!this.mixer) return
+
+    const time = this.mixer.time
+    const state = this.flags.shadowState
+
+    const nowHidden = time < EndingKeyframes.SHADOW_MORPHING
+    const nowMorphing = time < EndingKeyframes.SHADOW_DANCING
+    const nowDancing = time < EndingKeyframes.SHADOW_EXITING
+
+    // hide the second shadow character if it should not yet be visible
+    // ! this logic is only triggered when **seeking manually**
+    if (state !== 'hidden' && nowHidden) {
+      console.log('transition to: HIDDEN')
+      this.flags.shadowState = 'hidden'
+
+      this.handlers.setCameraAngle?.('endingStart')
+      this.setShadowCharacterVisible(false)
+
+      return
     }
 
-    // scene 3 -
-    if (!this.flags.shadowVisible) {
-      const time = this.mixer.time
-      const isEnding = $currentScene.get() === 'ENDING'
+    // do not trigger if we haven't start morphing yet
+    if (nowHidden) return
 
-      // turns both characters
-      if (isEnding && time > SHADOW_VISIBLE_TIME - 10) {
-        this.flags.shadowVisible = true
+    if (state !== 'morphing' && nowMorphing) {
+      console.log('transition to: MORPHING')
+      this.flags.shadowState = 'morphing'
 
-        if (this.isPrimary) {
-          this.setPosition(-1, 0, 0)
-        }
+      this.setShadowCharacterVisible(true)
+      return
+    }
 
-        if (this.isSecondary) {
-          this.setPosition(1, 0, 0)
-        }
+    // do not trigger if we haven't started dancing yet
+    if (nowMorphing) return
+
+    if (state !== 'dancing' && nowDancing) {
+      console.log('transition to: DANCING')
+      this.flags.shadowState = 'dancing'
+
+      if (this.isPrimary) {
+        this.setPosition(-1, 0, 0)
 
         this.handlers.updateLockPosParams(true)
-        this.updateParams()
+        this.handlers.setCameraAngle('endingSideBySide')
       }
 
-      // turn the secondary (shadow) character visible
-      const shouldMakeVisible =
-        isEnding && this.isSecondary && time > SHADOW_VISIBLE_TIME
-
-      if (shouldMakeVisible) {
-        this.setSecondaryVisibility(true)
+      if (this.isSecondary) {
+        this.setPosition(1, 0, 0)
       }
     }
+
+    // do not trigger if we haven't started exiting yet
+    if (nowDancing) return
+
+    if (state !== 'exiting') {
+      console.log('transition to: EXITING')
+      this.flags.shadowState = 'exiting'
+
+      if (this.isPrimary) {
+        this.handlers.updateLockPosParams(false)
+        this.handlers.setCameraAngle('endingStart')
+      }
+    }
+  }
+
+  setShadowCharacterVisible(visible: boolean) {
+    // only applies to the secondary character (i.e. the shadow character)
+    if (!this.isSecondary) return
+    if (!this.model) return
+
+    // Make secondary model visible
+    this.model.traverse((o) => {
+      if (o instanceof SkinnedMesh) o.visible = visible
+    })
   }
 }

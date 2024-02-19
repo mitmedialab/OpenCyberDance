@@ -11,6 +11,7 @@ import { ding } from '../ding.ts'
 import MusicControl from './MusicControl.vue'
 
 import DebugLogger from './DebugLogger.vue'
+import { EndingKeyframes } from '../character'
 
 const showPrompt = useStore($showPrompt)
 
@@ -69,6 +70,10 @@ onMounted(async () => {
 
       navigator.clipboard.writeText(output)
     }
+
+    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_MORPHING - 10)
+    if (event.key === 'b') world.setTime(180)
+    if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 5)
   })
 
   rendererElement.value?.appendChild(world.renderer.domElement)

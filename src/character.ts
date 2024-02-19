@@ -980,9 +980,8 @@ export class Character {
 
       const clip = this.currentClip!
       this.syncPositionLock(clip, [x, 0, 0])
-      this.fadeIntoModifiedAction(clip)
-
       this.setPosition(x, 0, 0)
+      this.fadeIntoModifiedAction(clip, 1, true)
     }
 
     if (nowDancing) return

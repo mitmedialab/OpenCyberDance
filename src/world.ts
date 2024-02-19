@@ -32,7 +32,7 @@ import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
 import { updateDebugLogCamera } from './store/debug'
-import { $currentScene } from './store/scene.ts'
+import { $currentScene, SceneMode } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
   formulaRanges,
@@ -137,7 +137,7 @@ export class World {
 
     // Setup the scenes
     this.setupCamera()
-    await this.setCamera(isEnding ? 'endingTwo' : 'front')
+    await this.setCamera(isEnding ? 'endingStart' : 'front')
 
     // this.setupControls()
 

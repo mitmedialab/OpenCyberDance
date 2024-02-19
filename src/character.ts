@@ -868,9 +868,7 @@ export class Character {
     })
 
     // Update camera preset
-    // TODO: dynamically determine the camera preset
-    const preset: CameraPresetKey = 'endingTwo'
-    // visible ? 'endingTwo' : 'endingStart'
+    const preset: CameraPresetKey = visible ? 'endingTwo' : 'endingStart'
 
     this.handlers.toggleCameraPreset?.(preset)
   }

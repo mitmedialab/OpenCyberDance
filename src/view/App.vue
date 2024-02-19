@@ -88,7 +88,7 @@ onMounted(async () => {
 
     <StepPrompt v-if="showPrompt" />
 
-    <DebugLogger />
+    <!-- <DebugLogger /> -->
 
     <MusicControl />
   </div>

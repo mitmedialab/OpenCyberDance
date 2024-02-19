@@ -555,7 +555,6 @@ export class Character {
       if (track.name !== 'Hips.position') return
 
       track.values = sources[index].values
-      console.log(`--- hips position restored for ${this.options.name}`)
     })
 
     this.cutToClip(clip)

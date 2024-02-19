@@ -27,7 +27,6 @@ import {
 import { trackToEuler } from './math'
 import {
   applyExternalBodySpace,
-  applyHipsPositionLock,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
@@ -93,9 +92,9 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
 
 // Ending scene's keyframes
 export const EndingKeyframes = {
-  SHADOW_MORPHING: 84.5,
-  SHADOW_DANCING: 90,
-  SHADOW_EXITING: 320,
+  SHADOW_APPEAR: 99,
+  SHADOW_STILL: 110,
+  SHADOW_EXITING: 410,
 }
 
 export interface CharacterOptions {
@@ -121,7 +120,7 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
-type ShadowCharacterState = 'hidden' | 'morphing' | 'dancing' | 'exiting'
+type ShadowCharacterState = 'hidden' | 'appear' | 'still' | 'exiting'
 
 type AnimationFlags = {
   /** State of the shadow character */
@@ -177,9 +176,9 @@ export class Character {
 
     waiting: 'subinwaiting.glb',
 
-    // scene 3's pichet-s
-    pichetMaster: 'Mastertiming1.glb',
-    pichetGenBlack: 'BLACKgentiming1.glb',
+    // Pichet dancers in ending scene.
+    pichetMaster: 'Master.glb',
+    pichetGenBlack: 'Gen.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
@@ -198,10 +197,9 @@ export class Character {
 
     waiting: 'sit002_Tas.001',
 
-    pichetMaster: 'Pichet003_chr02.001',
+    pichetMaster: 'Master',
 
-    pichetGenBlack:
-      'Pichet003_chr02.001|Pichet003_chr02|Pichet003_chr02.001_Pic',
+    pichetGenBlack: 'Action|Action|Action_Action_Action',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
@@ -418,8 +416,8 @@ export class Character {
       // Play the first animation
       this.updateAction()
 
-      // Lock the position by updating parameter once
-      this.updateParams()
+      // ? Lock the position by updating parameter once
+      // this.updateParams()
 
       console.log('>>> setup completed')
     } catch (error) {
@@ -522,11 +520,18 @@ export class Character {
     return sources[index]
   }
 
-  lockHipsPosition(clip: AnimationClip) {
+  /**
+   * Sync with lockPosition parameter with the keyframe values.
+   */
+  syncPositionLock(clip: AnimationClip) {
     if (!this.params) return
-    // if (!this.params.lockPosition) return this.restoreHipsPosition(clip)
 
-    applyHipsPositionLock(this.params, clip, [0, 0, 0])
+    if (this.params.lockPosition) {
+      clip.tracks.forEach((track) => {
+        if (track.name !== 'Hips.position') return
+        track.values.fill(0)
+      })
+    }
   }
 
   restoreHipsPosition(clip: AnimationClip) {
@@ -537,7 +542,7 @@ export class Character {
       if (track.name !== 'Hips.position') return
 
       track.values = sources[index].values
-      console.log(`--- hips position restored for "${this.options.name}"`)
+      console.log(`--- hips position restored for ${this.options.name}`)
     })
   }
 
@@ -551,7 +556,7 @@ export class Character {
     const { freezeParams } = this.options
 
     if (freezeParams) {
-      this.lockHipsPosition(clip)
+      this.syncPositionLock(clip)
 
       return
     }
@@ -575,13 +580,13 @@ export class Character {
       _curve.tracks = this.query(...this.curveConfig.tracks)
     }
 
+    // Lock and unlock hips position.
+    this.syncPositionLock(clip)
+
     clip.tracks.forEach((track, index) => {
       // Reset the keyframe times.
       const original = this.originalOf(index)
       if (!original || !this.params) return
-
-      // Lock and unlock hips position hips position.
-      this.lockHipsPosition(clip)
 
       if (freezeParams) return
 
@@ -681,8 +686,6 @@ export class Character {
     const axis = Object.entries(c.axes)
       .filter(([, v]) => v === true)
       .map(([k]) => k) as Axis[]
-
-    return { tracks, axis }
   }
 
   fadeIntoModifiedAction(clip: THREE.AnimationClip) {
@@ -916,10 +919,7 @@ export class Character {
 
     const time = this.mixer.time
     const state = this.flags.shadowState
-
-    const nowHidden = time < EndingKeyframes.SHADOW_MORPHING
-    const nowMorphing = time < EndingKeyframes.SHADOW_DANCING
-    const nowDancing = time < EndingKeyframes.SHADOW_EXITING
+    const nowHidden = time < EndingKeyframes.SHADOW_APPEAR
 
     // hide the second shadow character if it should not yet be visible
     // ! this logic is only triggered when **seeking manually**
@@ -933,46 +933,50 @@ export class Character {
       return
     }
 
-    // do not trigger if we haven't start morphing yet
     if (nowHidden) return
 
-    if (state !== 'morphing' && nowMorphing) {
+    const nowAppear = time < EndingKeyframes.SHADOW_STILL
+
+    if (state !== 'appear' && nowAppear) {
       console.log('transition to: MORPHING')
-      this.flags.shadowState = 'morphing'
+      this.flags.shadowState = 'appear'
 
       this.setShadowCharacterVisible(true)
       return
     }
 
-    // do not trigger if we haven't started dancing yet
-    if (nowMorphing) return
+    if (nowAppear) return
 
-    if (state !== 'dancing' && nowDancing) {
-      console.log('transition to: DANCING')
-      this.flags.shadowState = 'dancing'
+    const nowDancing = time < EndingKeyframes.SHADOW_EXITING
+
+    if (state !== 'still' && nowDancing) {
+      console.log('transition to: STILL')
+      this.flags.shadowState = 'stilDANCINGl'
 
       if (this.isPrimary) {
-        this.setPosition(-1, 0, 0)
-
-        this.handlers.updateLockPosParams(true)
-        this.handlers.setCameraAngle('endingSideBySide')
+        // this.setPosition(-1, 0, 0)
+        // this.handlers.updateLockPosParams(true)
+        // this.handlers.setCameraAngle('endingSideBySide')
       }
 
       if (this.isSecondary) {
-        this.setPosition(1, 0, 0)
+        // this.setPosition(1, 0, 0)
       }
     }
 
-    // do not trigger if we haven't started exiting yet
     if (nowDancing) return
 
     if (state !== 'exiting') {
       console.log('transition to: EXITING')
       this.flags.shadowState = 'exiting'
 
+      // restore the positioning data of both character
+      // this.restoreHipsPosition(this.currentClip!)
+      // this.setPosition(0, 0, 0)
+
       if (this.isPrimary) {
-        this.handlers.updateLockPosParams(false)
-        this.handlers.setCameraAngle('endingStart')
+        // this.handlers.updateLockPosParams(false)
+        // this.handlers.setCameraAngle('endingStart')
       }
     }
   }

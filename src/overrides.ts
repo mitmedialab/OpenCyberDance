@@ -365,24 +365,3 @@ export function applyExternalBodySpace(
 
   return tracks
 }
-
-export function applyHipsPositionLock(
-  params: Params,
-  clip: THREE.AnimationClip,
-  position: [number, number, number] = [0, 0, 0],
-) {
-  if (!params.lockPosition) return
-
-  clip.tracks.forEach((track) => {
-    if (track.name !== 'Hips.position') return
-    if (!(track instanceof THREE.VectorKeyframeTrack)) return
-
-    const [x, y, z] = position
-
-    for (let i = 0; i < track.values.length; i += 3) {
-      track.values[i] = x
-      track.values[i + 1] = y
-      track.values[i + 2] = z
-    }
-  })
-}

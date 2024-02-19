@@ -148,9 +148,10 @@ export class World {
     this.handleCurveFormulaChange()
     this.handleAnimationChange(this.first!)
 
+    // Sync every character's parameters.
     this.updateParams()
 
-    // TODO: sync playback with exported speed (24fps)
+    // ? do we slow down the playback speed?
     // if (isEnding) this.adjustPlaybackSpeed(1)
 
     window.world = this
@@ -300,8 +301,6 @@ export class World {
       CAMERA_NEAR,
       CAMERA_FAR,
     )
-
-    console.log(`>>> new camera is created`)
   }
 
   setupControls() {
@@ -495,9 +494,7 @@ export class World {
     this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
     this.panel.handlers.space = debounce(() => this.updateParams(), 500)
 
-    this.panel.handlers.lockPosition = () => {
-      this.updateParams()
-    }
+    this.panel.handlers.lockPosition = () => this.updateParams()
 
     this.panel.handlers.curve = debounce(() => {
       this.updateParams({ curve: true })
@@ -564,8 +561,6 @@ export class World {
   }
 
   async setCamera(presetKey: CameraPresetKey = 'front') {
-    if (!this.camera) return
-
     const preset = CAMERA_PRESETS[presetKey]
     if (!preset) return
 

@@ -71,7 +71,7 @@ onMounted(async () => {
       navigator.clipboard.writeText(output)
     }
 
-    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_MORPHING - 10)
+    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_APPEAR - 5)
     if (event.key === 'b') world.setTime(180)
     if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 5)
   })

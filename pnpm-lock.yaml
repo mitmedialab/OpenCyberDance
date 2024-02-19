@@ -8,6 +8,9 @@ dependencies:
   '@nanostores/vue':
     specifier: ^0.10.0
     version: 0.10.0(@nanostores/logger@0.2.4)(@vue/devtools-api@6.5.1)(nanostores@0.9.5)(vue@3.3.10)
+  '@tweenjs/tween.js':
+    specifier: ^23.1.1
+    version: 23.1.1
   '@vitejs/plugin-vue':
     specifier: ^4.5.2
     version: 4.5.2(vite@5.0.5)(vue@3.3.10)
@@ -906,6 +909,10 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@tweenjs/tween.js@23.1.1:
+    resolution: {integrity: sha512-ZpboH7pCPPeyBWKf8c7TJswtCEQObFo3bOBYalm99NzZarATALYCo5OhbCa/n4RQyJyHfhkdx+hNrdL5ByFYDw==}
+    dev: false
 
   /@types/dom-speech-recognition@0.0.4:
     resolution: {integrity: sha512-zf2GwV/G6TdaLwpLDcGTIkHnXf8JEf/viMux+khqKQKDa8/8BAUtXXZS563GnvJ4Fg0PBLGAaFf2GekEVSZ6GQ==}

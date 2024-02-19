@@ -46,6 +46,7 @@ export async function changeCharacter(name: CharacterKey) {
   const peer = world.characters.find((c) => c.options.name !== name)
   if (peer?.mixer && char.mixer) char.mixer.setTime(peer.mixer.time)
 
+  // !! IMPORTANT: positioning lock will not apply if we did not update the parameter.
   char.updateParams()
 
   // persistCharacter()

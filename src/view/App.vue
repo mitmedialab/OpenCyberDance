@@ -80,6 +80,14 @@ onMounted(async () => {
 
       $currentScene.set('ENDING')
     }
+
+    if (event.key === 'f') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen()
+      }
+    }
   })
 
   rendererElement.value?.appendChild(world.renderer.domElement)

@@ -54,9 +54,8 @@ import SceneChanger from './SceneChanger.vue'
 const volume = ref('1.0')
 const invalid = ref(false)
 
-const playing = useStore($musicPlaying)
-
-const tracks = [1, 2, 3]
+// const playing = useStore($musicPlaying)
+// const tracks = [1, 2, 3]
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) {

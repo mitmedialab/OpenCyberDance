@@ -970,17 +970,25 @@ export class Character {
       console.log('transition to: EXITING')
       this.flags.shadowState = 'exiting'
 
-      // this.setPosition(0, 0, 0)
+      this.setPosition(0, 0, 0)
       this.handlers.setCameraAngle('endingExit')
 
       // ! HACK: restore the body position keyframes of both character
       const clip = this.currentClip!
       this.restoreHipsPosition(clip)
-      this.fadeIntoModifiedAction(clip, 0, false)
 
-      if (this.isPrimary) {
-        this.handlers.setPositionLock(false)
-      }
+      const prevAction = this.actions.get(clip.name)!
+      const action = this.mixer.clipAction(clip.clone())
+      this.actions.set(clip.name, action)
+
+      action.time = prevAction.time
+      prevAction.stop()
+      action.play()
+
+      // Uncache the action after the cross-fade is complete.
+      setTimeout(() => {
+        this.mixer!.uncacheAction(prevAction.getClip())
+      }, 4000)
     }
   }
 

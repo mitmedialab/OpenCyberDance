@@ -357,15 +357,7 @@ export class World {
   async addCharacter(config: Partial<CharacterOptions>) {
     const character = new Character(config)
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
-
-    character.handlers.setCameraAngle = (preset) => {
-      this.setCamera(preset)
-    }
-
-    character.handlers.setPositionLock = (lock) => {
-      this.params.lockPosition = lock
-      this.updateParams()
-    }
+    character.handlers.setCameraAngle = this.setCamera.bind(this)
 
     await character.setup(this.scene, this.params)
     this.characters.push(character)

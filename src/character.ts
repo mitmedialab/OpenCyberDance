@@ -115,7 +115,6 @@ export interface CharacterOptions {
 type Handlers = {
   animationLoaded(character: Character): void
   setCameraAngle(preset: CameraPresetKey): void
-  setPositionLock(lock: boolean): void
 }
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
@@ -224,7 +223,6 @@ export class Character {
   handlers: Handlers = {
     animationLoaded: () => {},
     setCameraAngle: () => {},
-    setPositionLock: () => {},
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -524,11 +522,39 @@ export class Character {
     if (!this.params || !this.params.lockPosition) return
 
     for (const track of clip.tracks) {
-      if (track.name === 'Hips.position') track.values.fill(0)
+      if (track.name !== 'Hips.position') continue
+
+      track.values.fill(0)
+      break
     }
   }
 
-  restoreHipsPosition(clip: AnimationClip) {
+  /**
+   * !! HACK: override position animation keyframes
+   */
+  overridePosition(clip: AnimationClip, values: [number, number, number]) {
+    if (!this.params || !this.params.lockPosition) return
+
+    for (const track of clip.tracks) {
+      if (track.name !== 'Hips.position') continue
+
+      for (let i = 0; i < track.values.length; i += 3) {
+        track.values[i] = values[0]
+        track.values[i + 1] = values[1]
+        track.values[i + 2] = values[2]
+      }
+
+      break
+    }
+  }
+
+  /**
+   * !! HACK: revert hips position to the original keyframe values.
+   */
+  forceRestoreHipsPosition() {
+    const clip = this.currentClip
+    if (!clip) return
+
     const sources = this.original.get(clip.name)
     if (!sources) return
 
@@ -538,6 +564,8 @@ export class Character {
       track.values = sources[index].values
       console.log(`--- hips position restored for ${this.options.name}`)
     })
+
+    this.cutToClip(clip)
   }
 
   /**
@@ -922,8 +950,9 @@ export class Character {
       console.log('transition to: HIDDEN')
       this.flags.shadowState = 'hidden'
 
-      this.handlers.setCameraAngle?.('endingStart')
+      this.handlers.setCameraAngle('endingStart')
       this.setShadowCharacterVisible(false)
+      this.forceRestoreHipsPosition()
 
       return
     }
@@ -950,17 +979,17 @@ export class Character {
       console.log('transition to: STILL')
       this.flags.shadowState = 'still'
 
-      if (this.isPrimary) {
-        // master character stands at the left side
-        this.setPosition(-1, 0, 0)
+      if (this.isPrimary) this.handlers.setCameraAngle('endingSideBySide')
 
-        // lock the hips for both characters
-        this.handlers.setPositionLock(true)
-        this.handlers.setCameraAngle('endingSideBySide')
-      }
+      const x = this.isPrimary ? -1 : 1
+      this.setPosition(x, 0, 0)
 
-      // shadow character stands at the right side
-      if (this.isSecondary) this.setPosition(1, 0, 0)
+      if (!this.params) return
+      this.params.lockPosition = true
+
+      const clip = this.currentClip!
+      this.syncPositionLock(clip)
+      this.fadeIntoModifiedAction(clip)
     }
 
     if (nowDancing) return
@@ -973,22 +1002,7 @@ export class Character {
       this.setPosition(0, 0, 0)
       this.handlers.setCameraAngle('endingExit')
 
-      // ! HACK: restore the body position keyframes of both character
-      const clip = this.currentClip!
-      this.restoreHipsPosition(clip)
-
-      const prevAction = this.actions.get(clip.name)!
-      const action = this.mixer.clipAction(clip.clone())
-      this.actions.set(clip.name, action)
-
-      action.time = prevAction.time
-      prevAction.stop()
-      action.play()
-
-      // Uncache the action after the cross-fade is complete.
-      setTimeout(() => {
-        this.mixer!.uncacheAction(prevAction.getClip())
-      }, 4000)
+      this.forceRestoreHipsPosition()
     }
   }
 
@@ -1001,5 +1015,22 @@ export class Character {
     this.model.traverse((o) => {
       if (o instanceof SkinnedMesh) o.visible = visible
     })
+  }
+
+  // !! HACK: immediately cut to this clip, without cross-fading.
+  cutToClip(clip: AnimationClip, offset = 0) {
+    if (!this.mixer) return
+
+    const prevAction = this.actions.get(clip.name)!
+    const action = this.mixer.clipAction(clip.clone())
+    this.actions.set(clip.name, action)
+
+    action.time = prevAction.time + offset
+    prevAction.stop()
+    action.play()
+
+    setTimeout(() => {
+      this.mixer!.uncacheAction(prevAction.getClip())
+    }, 4000)
   }
 }

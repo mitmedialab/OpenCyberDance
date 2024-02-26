@@ -83,6 +83,8 @@ const p = {
 export type ModelKey = keyof typeof Character.sources
 export type CharacterKey = keyof typeof Params.prototype.characters
 
+const NTH_FRAME_TICK = 58
+
 export const resetLimits: Partial<Record<ModelKey, number>> = {
   terry: 160,
   changhung: 300,
@@ -896,21 +898,27 @@ export class Character {
   tickRender(delta: number) {
     if (!this.mixer) return
 
-    // account for FPS ~ should use real frames?
-    // derive from FPS?
     this.frameCounter++
     this.mixer.update(delta)
 
-    // Reset the model time if it exceeds the playback
-    const resetLimit = resetLimits[this.options.model]
-    if (resetLimit && this.mixer.time > resetLimit) this.mixer.setTime(0)
+    // Tick business logic every nth frames
+    if (this.frameCounter % NTH_FRAME_TICK === 0) {
+      // Reset the model time if it exceeds the playback
+      const resetLimit = resetLimits[this.options.model]
 
-    // Update the global animation time
-    if (this.isPrimary) $time.set(this.mixer.time ?? 0)
+      if (resetLimit && this.mixer.time > resetLimit) {
+        this.mixer.setTime(0)
+      }
 
-    this.tickAxisPoint()
+      // Tick animation logic
+      this.tickAxisPoint()
+      this.tickEndingSceneShadowCharacter()
 
-    this.tickEndingSceneShadowCharacter()
+      // Update the global animation time
+      if (this.isPrimary) {
+        $time.set(this.mixer.time ?? 0)
+      }
+    }
   }
 
   /**
@@ -1021,7 +1029,9 @@ export class Character {
     action.play()
 
     setTimeout(() => {
-      this.mixer!.uncacheAction(prevAction.getClip())
+      if (!this.mixer) return
+
+      this.mixer.uncacheAction(prevAction.getClip())
     }, 4000)
   }
 }

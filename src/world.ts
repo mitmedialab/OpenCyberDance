@@ -32,7 +32,7 @@ import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
 import { updateDebugLogCamera } from './store/debug'
-import { $currentScene, SceneMode } from './store/scene.ts'
+import { $currentScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
   formulaRanges,
@@ -554,7 +554,7 @@ export class World {
 
   async setCamera(presetKey: CameraPresetKey = 'front') {
     const preset = CAMERA_PRESETS[presetKey]
-    if (!preset) return
+    if (!preset || !this.camera) return
 
     this.camera.zoom = preset.zoom
     this.camera.position.set(...preset.position)

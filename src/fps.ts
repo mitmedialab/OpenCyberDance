@@ -30,11 +30,9 @@ export class FpsCounter {
     this.frames++
 
     if (delta >= 1000) {
-      this.fps = frames
+      this.fps = 0
       this.frames = 0
       this.lastTime = now
     }
   }
 }
-
-export const fpsCounter = new FpsCounter()

@@ -701,6 +701,8 @@ export class Character {
     const axis = Object.entries(c.axes)
       .filter(([, v]) => v === true)
       .map(([k]) => k) as Axis[]
+
+    return { tracks, axis }
   }
 
   fadeIntoModifiedAction(clip: THREE.AnimationClip, duration = 3, warp = true) {

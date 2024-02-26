@@ -12,7 +12,6 @@ import { ChoiceKey, choices, Step } from './step-input'
 import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
-import { delay } from './utils.ts'
 import { world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>

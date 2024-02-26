@@ -596,9 +596,6 @@ export class World {
 
     // wait until scene is almost faded out, similar to --screen-fade-time
     await delay(500)
-
-    // tear down the scene ~ this takes only 1ms
-    this.teardown()
   }
 
   async fadeIn() {

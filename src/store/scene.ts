@@ -22,9 +22,16 @@ onNotify($currentScene, async () => {
     world.params.lockPosition = true
   }
 
-  // Fade out the current scene...
+  // Fade out the current scene.
   await world.fadeOut()
+
+  // Tear down the scene ~ this takes only 1ms.
+  world.teardown()
+
+  // Setup the next scene.
   await world.setup()
+
+  // Fade in the next scene.
   await world.fadeIn()
 
   console.log(`> next scene loaded`)

@@ -4,7 +4,7 @@
     rel="preload"
     as="fetch"
     crossorigin="anonymous"
-    :href="`/${source}`"
+    :href="`/models/${source}`"
   />
 </template>
 

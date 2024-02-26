@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { ref, onMounted, callWithAsyncErrorHandling } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
 
 import { $showPrompt, $valueCompleted, resetPrompt } from '../store/choice'
 
 import { world } from '../world'
 
+import Preloader from './Preloader.vue'
 import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
 import MusicControl from './MusicControl.vue'
@@ -104,6 +105,8 @@ onMounted(async () => {
   <div class="app-container">
     <div ref="rendererElement" />
     <div ref="plotterContainer" pointer-events-none />
+
+    <Preloader />
 
     <StepPrompt v-if="showPrompt" />
 

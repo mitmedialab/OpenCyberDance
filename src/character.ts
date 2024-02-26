@@ -161,32 +161,31 @@ export class Character {
   /** Character model source URLs */
   static sources = {
     none: '',
-    robot: 'Robot3357test.glb',
-    abstract: '3357modelidel.glb',
-    abstract57: '575859_tas.glb',
-    kukpat: 'Kukpat.glb',
-    tranimid: 'tranimid.glb',
 
-    // awesome solo dances
+    waiting: 'subinwaiting.glb',
+    kukpat: 'Kukpat.glb',
     terry: 'terry.glb',
     changhung: 'changhung.glb',
     yokrob: 'YOKROB.glb',
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
 
-    waiting: 'subinwaiting.glb',
-
     // Pichet dancers in ending scene.
     pichetMaster: 'Master.glb',
     pichetGenBlack: 'Gen.glb',
+
+    // robot: 'Robot3357test.glb',
+    // abstract: '3357modelidel.glb',
+    // abstract57: '575859_tas.glb',
+    // tranimid: 'tranimid.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
     none: '',
-    abstract: 'no.33_.',
-    robot: 'no.33_..001',
-    abstract57: 'no57_Tas',
+    // abstract: 'no.33_.',
+    // robot: 'no.33_..001',
+    // abstract57: 'no57_Tas',
     kukpat: 'kukpat_Tas',
-    tranimid: 'tranimid_Tas',
+    // tranimid: 'tranimid_Tas',
 
     // animation track names for solo dances
     terry: 'terry_chr02',

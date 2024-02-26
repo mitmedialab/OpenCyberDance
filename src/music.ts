@@ -11,7 +11,7 @@ const DEFAULT_VOLUME = $musicVolume.get()
 
 export const music1 = new Howl({
   src: '/sounds/Program1_6mins.m4a',
-  preload: true,
+  preload: false,
   loop: false,
   volume: DEFAULT_VOLUME,
   onend: () => $musicPlaying.set(null),
@@ -19,7 +19,7 @@ export const music1 = new Howl({
 
 export const music2 = new Howl({
   src: '/sounds/Program2_6mins.m4a',
-  preload: true,
+  preload: false,
   loop: false,
   volume: DEFAULT_VOLUME,
   onend: () => $musicPlaying.set(null),
@@ -27,7 +27,7 @@ export const music2 = new Howl({
 
 export const music3 = new Howl({
   src: '/sounds/Program3_11mins.m4a',
-  preload: true,
+  preload: false,
   loop: false,
   volume: DEFAULT_VOLUME,
   onend: () => $musicPlaying.set(null),

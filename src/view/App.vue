@@ -2,7 +2,13 @@
 import { ref, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
 
-import { $showPrompt, $valueCompleted, resetPrompt } from '../store/choice'
+import {
+  $showPrompt,
+  $valueCompleted,
+  extendPromptTimeout,
+  clearPromptTimeout,
+  resetPrompt,
+} from '../store/choice'
 
 import { world } from '../world'
 
@@ -19,11 +25,7 @@ const showPrompt = useStore($showPrompt)
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
-const PROMPT_TIMEOUT = 1000 * 20
-
 onMounted(async () => {
-  let timer = 0
-
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
@@ -41,26 +43,15 @@ onMounted(async () => {
         return
       }
 
-      if (willVisible) {
-        timer = setTimeout(() => {
-          $showPrompt.set(false)
-          console.log('hide now')
-          clearTimeout(timer)
-        }, PROMPT_TIMEOUT)
-
-        console.log('shown')
-      } else {
-        clearTimeout(timer)
-        console.log('hidden')
-      }
-
       resetPrompt()
       $showPrompt.set(willVisible)
 
       if (willVisible) {
         ding()
+        extendPromptTimeout()
       } else {
         world.voice.stop()
+        clearPromptTimeout()
       }
     }
 

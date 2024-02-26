@@ -426,8 +426,6 @@ export class Character {
 
     this.frameCounter = 0
     this.mixer.setTime(0)
-
-    console.info('--- we have looped ---')
   }
 
   createDebugSphere(color = 0xff0000) {

@@ -3,12 +3,16 @@ import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command'
 import { Choice, ChoiceKey, choices, Step } from '../step-input'
+import { world } from '../world'
+
+const PROMPT_TIMEOUT = 1000 * 20
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
 export const $selectedValues = atom<string[]>([])
 
 export const $showPrompt = atom(false)
+export const $promptTimer = atom<number | null>(null)
 
 export const $selectedChoice = computed(
   $selectedChoiceKey,
@@ -55,6 +59,8 @@ export function nextStep() {
   const next = step + 1
 
   $currentStepId.set(next)
+
+  extendPromptTimeout()
 }
 
 export function prevStep() {
@@ -70,6 +76,8 @@ export function prevStep() {
   }
 
   $currentStepId.set(Math.max(step - 1, 0))
+
+  extendPromptTimeout()
 }
 
 export function setChoice(choice: ChoiceKey) {
@@ -83,6 +91,8 @@ export function setChoice(choice: ChoiceKey) {
     $selectedChoiceKey.set(null)
     $showPrompt.set(false)
   }
+
+  extendPromptTimeout()
 }
 
 export function clearStepChoice() {
@@ -131,6 +141,8 @@ const selectChoice = (choice: ChoiceKey) => {
 }
 
 export function handleVoiceSelection(input: string | number): boolean {
+  extendPromptTimeout()
+
   const selectedChoiceKey = $selectedChoiceKey.get()
   const currentStep = $currentStep.get() as Step
 
@@ -321,4 +333,26 @@ export function createGrammarFromState(): string | null {
   }
 
   return null
+}
+
+export function extendPromptTimeout() {
+  // clear existing timer
+  clearPromptTimeout()
+
+  const nextTimer = setTimeout(() => {
+    $showPrompt.set(false)
+    world.voice.stop()
+    clearPromptTimeout()
+  }, PROMPT_TIMEOUT)
+
+  $promptTimer.set(nextTimer)
+}
+
+export function clearPromptTimeout() {
+  const timer = $promptTimer.get()
+  if (timer) clearTimeout(timer)
+
+  $promptTimer.set(null)
+
+  return timer
 }

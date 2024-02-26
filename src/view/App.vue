@@ -22,7 +22,7 @@ onMounted(async () => {
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
-    if (event.key === ' ') {
+    if (event.key === ' ' || event.key === 'PageDown') {
       const next = !showPrompt.value
 
       world.voice.enableVoice('prompt activate')

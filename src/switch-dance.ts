@@ -5,7 +5,6 @@ export type DanceConfig = { model: ModelKey; action?: string }
 
 const danceKeyMap: Record<string, DanceConfig> = {
   kukpat: { model: 'kukpat' },
-  tranimid: { model: 'tranimid' },
   terry: { model: 'terry' },
   changhung: { model: 'changhung' },
   yokrob: { model: 'yokrob' },
@@ -13,12 +12,14 @@ const danceKeyMap: Record<string, DanceConfig> = {
     model: 'yokroblingImprovise',
     action: 'yokroblingimprovised_chr02.001',
   },
-  robot33: { model: 'robot', action: 'no.33_..001' },
-  robot57: { model: 'robot', action: 'no.57_.' },
-  base33: { model: 'abstract', action: 'no.33_.' },
-  base57: { model: 'abstract57', action: 'no57_Tas' },
-  base58: { model: 'abstract57', action: 'no58_Tas' },
-  base59: { model: 'abstract57', action: 'no59_Tas' },
+
+  // tranimid: { model: 'tranimid' },
+  // robot33: { model: 'robot', action: 'no.33_..001' },
+  // robot57: { model: 'robot', action: 'no.57_.' },
+  // base33: { model: 'abstract', action: 'no.33_.' },
+  // base57: { model: 'abstract57', action: 'no57_Tas' },
+  // base58: { model: 'abstract57', action: 'no58_Tas' },
+  // base59: { model: 'abstract57', action: 'no59_Tas' },
 }
 
 export const storageKeys = {

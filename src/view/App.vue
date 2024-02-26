@@ -19,12 +19,16 @@ const showPrompt = useStore($showPrompt)
 const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
+const PROMPT_TIMEOUT = 1000 * 20
+
 onMounted(async () => {
+  let timer = 0
+
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
-      const next = !showPrompt.value
+      const willVisible = !showPrompt.value
 
       world.voice.enableVoice('prompt activate')
 
@@ -37,10 +41,23 @@ onMounted(async () => {
         return
       }
 
-      resetPrompt()
-      $showPrompt.set(next)
+      if (willVisible) {
+        timer = setTimeout(() => {
+          $showPrompt.set(false)
+          console.log('hide now')
+          clearTimeout(timer)
+        }, PROMPT_TIMEOUT)
 
-      if (next) {
+        console.log('shown')
+      } else {
+        clearTimeout(timer)
+        console.log('hidden')
+      }
+
+      resetPrompt()
+      $showPrompt.set(willVisible)
+
+      if (willVisible) {
         ding()
       } else {
         world.voice.stop()

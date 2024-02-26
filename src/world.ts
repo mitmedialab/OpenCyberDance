@@ -60,6 +60,8 @@ export class World {
   clock = new Clock()
   scene = new Scene()
 
+  ready = false
+
   accumulatedTime = 0
 
   renderer = new WebGLRenderer({
@@ -128,6 +130,8 @@ export class World {
   }
 
   async setup() {
+    if (this.ready) return
+
     const isEnding = this.isEnding
 
     // Ensure background color is in sync
@@ -155,6 +159,7 @@ export class World {
     // if (isEnding) this.adjustPlaybackSpeed(1)
 
     window.world = this
+    this.ready = true
   }
 
   adjustPlaybackSpeed(speed: number) {
@@ -584,6 +589,8 @@ export class World {
 
     this.scene.clear()
     dispose(this.scene)
+
+    this.ready = false
   }
 
   async fadeOut() {
@@ -615,6 +622,20 @@ export class World {
 
       char.mixer.setTime(time)
     })
+  }
+
+  async resetWithFade() {
+    // Fade out the current scene.
+    await world.fadeOut()
+
+    // Tear down the scene ~ this takes only 1ms.
+    world.teardown()
+
+    // Setup the next scene.
+    await world.setup()
+
+    // Fade in the next scene.
+    await world.fadeIn()
   }
 }
 

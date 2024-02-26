@@ -1,3 +1,4 @@
+import { ModelKey } from './character.ts'
 import { percentToValue } from './math.ts'
 import {
   CurvePartKey,
@@ -9,8 +10,9 @@ import {
 } from './parts.ts'
 import { ChoiceKey, choices, Step } from './step-input'
 import { appendLog } from './store/status.ts'
-import { switchDancers } from './switch-dance.ts'
+import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
+import { delay } from './utils.ts'
 import { world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>
@@ -275,18 +277,42 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     console.log('switching dance', danceName)
 
     world.params.reset()
+    await switchDancers(danceName)
 
-    switchDancers(danceName).then()
+    return
   }
 
   if (primary === 'reset') {
+    await world.fadeOut()
+
+    // store the currently active animation
+    const current: Record<string, { model: ModelKey; action: string }> = {}
+
+    for (const char of world.characters) {
+      current[char.options.name] = {
+        model: char.options.model,
+        action: char.options.action!,
+      }
+    }
+
+    // reset all parameters
     world.params.reset()
 
-    setTimeout(() => {
-      for (const character of world.characters) {
-        character.setup().then()
-      }
-    }, 80)
+    // apply current animations to the new characters
+    for (const char of world.characters) {
+      const name = char.options.name
+      const { model, action } = current[name]
+
+      char.options.model = model
+      world.params.characters[name].model = model
+
+      char.options.action = action ?? null
+      world.params.characters[name].action = action ?? null
+
+      await changeCharacter(name)
+    }
+
+    await world.fadeIn()
 
     return
   }

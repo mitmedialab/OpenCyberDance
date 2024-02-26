@@ -57,6 +57,7 @@ export async function changeCharacter(name: CharacterKey) {
 
   // Teardown and reset the character.
   char.teardown()
+
   await char.reset()
 
   // !!! IMPORTANT: positioning lock will not apply if we did not update the parameter once!

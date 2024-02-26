@@ -90,7 +90,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
   >
     <div
       class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
-      :class="{ 'text-white rounded': completed }"
+      :class="{ 'text-black dark:text-white rounded': completed }"
     >
       <div
         class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
@@ -110,7 +110,11 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
         flex
         v-if="completed"
         class="cursor-pointer py-1 px-2 animate__animated fadeIn"
-        :class="[{ 'bg-red-5 text-white px-4 rounded-l pl-4 pr-4': completed }]"
+        :class="[
+          {
+            'bg-red-5 text-white px-4 rounded-l pl-4 pr-4': completed,
+          },
+        ]"
       >
         > executed
       </div>

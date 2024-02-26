@@ -24,6 +24,7 @@ import {
   Character,
   CharacterKey,
   CharacterOptions,
+  gltfLoader,
   UpdateParamFlags,
 } from './character'
 import { dispose } from './dispose.ts'
@@ -636,6 +637,22 @@ export class World {
 
     // Fade in the next scene.
     await world.fadeIn()
+  }
+
+  async preload() {
+    const start = performance.now()
+
+    const sources = Object.values(Character.sources).filter(
+      (x) => x && x.endsWith('.glb'),
+    )
+
+    await Promise.all(
+      sources.map((source) => {
+        gltfLoader.loadAsync(`/models/${source}`)
+      }),
+    )
+
+    console.log(`-- GLTF preload took ${performance.now() - start}ms`)
   }
 }
 

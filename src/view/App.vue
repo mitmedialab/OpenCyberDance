@@ -12,10 +12,9 @@ import {
 
 import { world } from '../world'
 
-import Preloader from './Preloader.vue'
 import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
-import MusicControl from './MusicControl.vue'
+import StageControl from './StageControl.vue'
 
 import { EndingKeyframes } from '../character'
 import { $currentScene } from '../store/scene'
@@ -26,18 +25,18 @@ const rendererElement = ref<HTMLDivElement>()
 const plotterContainer = ref<HTMLDivElement>()
 
 onMounted(async () => {
+  await world.preload()
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
       const willVisible = !showPrompt.value
 
-      world.voice.enableVoice('prompt activate')
-
       const completed = $valueCompleted.get()
 
       if (completed) {
         ding()
+        world.voice.enableVoice('prompt activate')
         resetPrompt()
 
         return
@@ -48,6 +47,7 @@ onMounted(async () => {
 
       if (willVisible) {
         ding()
+        world.voice.enableVoice('prompt activate')
         extendPromptTimeout()
       } else {
         world.voice.stop()
@@ -114,10 +114,7 @@ onMounted(async () => {
     <div ref="rendererElement" />
     <div ref="plotterContainer" pointer-events-none />
 
-    <Preloader />
-
     <StepPrompt v-if="showPrompt" />
-
-    <MusicControl />
+    <StageControl />
   </div>
 </template>

@@ -73,7 +73,7 @@ export interface UpdateParamFlags {
   axisPoint?: boolean
 }
 
-const loader = new GLTFLoader()
+export const gltfLoader = new GLTFLoader()
 
 // Attach a profiler
 const p = {
@@ -308,7 +308,7 @@ export class Character {
       const url = `/models/${Character.sources[config.model]}`
       if (url === 'none' || !url) return
 
-      const gltfModel = await loader.loadAsync(url)
+      const gltfModel = await gltfLoader.loadAsync(url)
 
       // Set the default actions.
       if (!config.action) {

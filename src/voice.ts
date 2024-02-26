@@ -56,7 +56,7 @@ export class VoiceController {
     $status.set(status)
 
     if (key) {
-      console.log(`[status] ${status} (key=${key})`)
+      console.debug(`[status] ${status} (key=${key})`)
     }
   }
 
@@ -67,7 +67,7 @@ export class VoiceController {
   }
 
   enableVoice(key?: string) {
-    console.log(`[enable voice] ${key}`)
+    console.debug(`[enable voice] ${key}`)
     this.startRecognition('start method')
   }
 
@@ -76,7 +76,7 @@ export class VoiceController {
       this.recognition?.abort()
     } catch (error) {
       if (error instanceof Error) {
-        console.log('recognition failed to abort', error)
+        console.debug('recognition failed to abort', error)
       }
     }
 
@@ -90,11 +90,11 @@ export class VoiceController {
       this.recognition.start()
     } catch (error) {
       if (error instanceof Error) {
-        console.log('recognition failed to start', error)
+        console.debug('recognition failed to start', error)
       }
     }
 
-    console.log(`[recognition started] ${key}`)
+    console.debug(`[recognition started] ${key}`)
   }
 
   stop(key?: string) {
@@ -106,7 +106,7 @@ export class VoiceController {
 
     this.recognition = null
 
-    console.log(`[recognition stopped] ${key}`)
+    console.debug(`[recognition stopped] ${key}`)
   }
 
   toggle() {
@@ -167,7 +167,7 @@ export class VoiceController {
       const id = e.results.length
 
       if (this.successFlags.get(id)) {
-        console.log(`[!] ${id} already success. (v=1)`)
+        console.debug(`[!] ${id} already success. (v=1)`)
         return
       }
 
@@ -179,18 +179,18 @@ export class VoiceController {
       const status = await this.onVoiceResult(e.results)
 
       if (this.successFlags.get(id)) {
-        console.log(`[!] ${id} already success. (v=2)`)
+        console.debug(`[!] ${id} already success. (v=2)`)
         return
       }
 
       if (status) {
-        console.log(`> interpretation success (id: ${id})`)
+        console.debug(`> interpretation success (id: ${id})`)
         this.successFlags.set(id, true)
 
         return
       }
 
-      console.log(`> cannot interpret result (id: ${id})`)
+      console.debug(`> cannot interpret result (id: ${id})`)
 
       this.onConfused()
     })
@@ -243,7 +243,7 @@ export class VoiceController {
       }
 
       this.updateStatus('speaking')
-      console.log(`> [speaking] ${text}`)
+      console.debug(`> [speaking] ${text}`)
 
       // don't speak too much.
       const spokenText = text.slice(0, 150)
@@ -268,7 +268,6 @@ export class VoiceController {
     const isFinal = voiceResult.isFinal
 
     const params = getVoicePromptParams()
-    console.log(`[params]`, params)
 
     const alts = [...voiceResult]
       .filter((b) => b.confidence > 0.000001)
@@ -290,7 +289,7 @@ export class VoiceController {
 
     if (alts.length === 0) return false
 
-    console.log(
+    console.debug(
       `[heard] ${alts.join(', ')} (final=${isFinal}, id=${resultLen})`,
     )
 
@@ -310,21 +309,21 @@ export class VoiceController {
 
       // do not use voice engine to detect percentage if not final
       if (isPercent && !isFinal) {
-        console.log('[vh:skip] percent not final', alts)
+        console.debug('[vh:skip] percent not final', alts)
         return false
       }
 
       const primaryOk = handleVoiceSelection(alt)
 
       if (primaryOk) {
-        console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
+        console.debug(`${alt} is detected by voice engine; final=${isFinal}.`)
         return true
       }
     }
 
     // only use GPT for final results
     if (!voiceResult.isFinal) {
-      console.log(`[vc:skip:gpt] input not final`, alts)
+      console.debug(`[vc:skip:gpt] input not final`, alts)
       return false
     }
 
@@ -332,7 +331,7 @@ export class VoiceController {
     const alt = alts?.[0]?.trim()
     const msg = JSON.stringify({ input: alt, ...params })
     const aiOutput = await gpt(CORRECTION_PROMPT, msg)
-    console.log(`[ai]`, aiOutput)
+    console.debug(`[ai]`, aiOutput)
 
     let obj = { choice: null } as {
       choice: string | null
@@ -366,7 +365,7 @@ export class VoiceController {
 
   setSynchronic(v: number) {
     const p = this.world.params
-    console.log('synchronic:', v)
+    console.debug('synchronic:', v)
 
     for (const key in p.delays) {
       // variance must be between 0 and 10

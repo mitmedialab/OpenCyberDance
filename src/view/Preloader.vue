@@ -11,5 +11,7 @@
 <script lang="ts" setup>
 import { Character } from '../character'
 
-const sources = Object.values(Character.sources)
+const sources = Object.values(Character.sources).filter(
+  (x) => x && x.endsWith('.glb'),
+)
 </script>

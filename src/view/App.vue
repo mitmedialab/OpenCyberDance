@@ -30,6 +30,12 @@ onMounted(async () => {
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
+      if (world.isEnding && world.flags.waitingEndingStart) {
+        world.fadeInSceneContent()
+        world.flags.waitingEndingStart = false
+        return
+      }
+
       const willVisible = !showPrompt.value
 
       const completed = $valueCompleted.get()
@@ -86,6 +92,12 @@ onMounted(async () => {
     if (event.key === 'm') world.setTime(world.first?.mixer?.time! + 0.01)
 
     if (event.key === 'e') {
+      if (world.isEnding && world.flags.waitingEndingStart) {
+        world.fadeInSceneContent()
+        world.flags.waitingEndingStart = false
+        return
+      }
+
       if (world.isEnding) return $currentScene.set('BLACK')
 
       $currentScene.set('ENDING')

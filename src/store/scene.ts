@@ -15,14 +15,20 @@ onNotify($currentScene, async () => {
   if (mode === 'ENDING') {
     // Disable position lock as we need characters to walk
     world.params.lockPosition = false
+    await world.fadeInBlankScene()
+
+    world.flags.waitingEndingStart = true
   }
 
   // Large characters dancing
   if (mode === 'BLACK') {
     world.params.lockPosition = true
-  }
+    await world.fadeInBlankScene()
+    await world.fadeInSceneContent()
 
-  await world.resetWithFade()
+    // reset flags for ending scene...
+    world.flags.waitingEndingStart = false
+  }
 
   console.log(`> next scene loaded`)
 })

@@ -31,6 +31,26 @@ export const $currentStep = computed(
     const steps = selectedChoice.steps
     if (steps.length === 0) return null
 
+    console.log(`current step is ${currentStepId}:`, steps[currentStepId])
+
+    // !!! HACK: exclude "number 60" from list if not yet in ending scene !!!
+    if (currentStepId === 0) {
+      const step = steps[currentStepId]
+
+      if (step.type !== 'choice') {
+        throw new Error('invariant - dancers must be a choice')
+      }
+
+      const choices = world.flags.waitingEndingStart
+        ? step.choices.filter((x) => x.key === 'number60')
+        : step.choices.filter((x) => x.key !== 'number60')
+
+      return {
+        ...step,
+        choices,
+      }
+    }
+
     return steps[currentStepId]
   },
 )
@@ -237,8 +257,9 @@ export function handleVoiceSelection(input: string | number): boolean {
     if (fix('x', /^(ex)$/i)) return true
     if (fix('y', /^(why|wine|whine)$/i)) return true
     if (fix('z', /^(see|sea)$/i)) return true
-    if (fix('kukpat', /^(tusk|task|tas)/i)) return true
+    if (fix('kukpat', /^(tus|tusk|task|tas)/i)) return true
     if (fix('yokroblingImprovise', /^(monkey|rob monkey)$/i)) return true
+    if (fix('number60', /^(number|six|sixty|number sixty)/i)) return true
   }
 
   if (currentStep.type === 'percent') {

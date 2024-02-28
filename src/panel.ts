@@ -183,15 +183,15 @@ export class Panel {
 
     const panel = this.panel
 
-    this.playbackFolder = panel.addFolder('Playback Settings')
-    this.commandFolder = panel.addFolder('Commands')
+    this.playbackFolder = panel.addFolder('Playback')
+    this.axisPointFolder = panel.addFolder('Axis Point')
     this.rotationFolder = panel.addFolder('All Rotations')
     this.energyFolder = panel.addFolder('Energy')
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
     this.curveFolder = panel.addFolder('Circle and Curve')
     this.spaceFolder = panel.addFolder('External Body Space')
-    this.axisPointFolder = panel.addFolder('Axis Point')
     this.characterFolder = panel.addFolder('Characters')
+    this.commandFolder = panel.addFolder('Commands')
 
     this.addRotations()
     this.addEnergy('upper', 'lower')

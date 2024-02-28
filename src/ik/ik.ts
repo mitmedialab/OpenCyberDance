@@ -1,13 +1,21 @@
-import { Bone, Quaternion, SkinnedMesh, Vector3 } from 'three'
+import {
+  Bone,
+  KeyframeTrack,
+  Quaternion,
+  QuaternionKeyframeTrack,
+  SkinnedMesh,
+  Vector3,
+  VectorKeyframeTrack,
+} from 'three'
 
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
-import { AxisPointControlParts } from '../parts'
+import { AxisPointControlParts, trackNameToPart } from '../parts'
 import { CCDIKSolver, IK, IKLink } from './ccd-ik'
 
 declare global {
   interface Window {
-    ikManager: IKManager
+    axisPointManager: AxisPointManager
   }
 }
 
@@ -39,12 +47,16 @@ const refAxisBones: Record<AxisPoint, BoneKey> = {
   body: 'Spine1',
 }
 
-export class IKManager {
+export class AxisPointManager {
   ik: CCDIKSolver
   mesh: SkinnedMesh
 
+  /**
+   * ? How long to wait before updating the IK solver.
+   */
+  public maxWaitFrames = 2
+
   waitFrames = 0
-  maxWaitFrames = 10
 
   private interpolating = false
 
@@ -78,7 +90,8 @@ export class IKManager {
 
     this.ik = new CCDIKSolver(this.mesh, [])
 
-    window.ikManager = this
+    // ! for debugging
+    window.axisPointManager = this
   }
 
   /**
@@ -96,14 +109,14 @@ export class IKManager {
     return {
       leftArm: [
         { index: this.idOf('LeftForeArm') },
-        { index: this.idOf('LeftArm') },
+        // { index: this.idOf('LeftArm') },
         // { index: this.idOf('LeftShoulder') },
         // { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
         { index: this.idOf('RightForeArm') },
-        { index: this.idOf('RightArm') },
+        // { index: this.idOf('RightArm') },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
@@ -229,54 +242,67 @@ export class IKManager {
     return true
   }
 
-  update() {
-    this.waitFrames++
+  tick() {
+    // this.interpolateTargetBone()
+  }
 
+  /**
+   * Apply the pre-computed position and rotation keyframes of target bones.
+   */
+  interpolateTargetBone() {
+    // Do not update the interpolation keyframes if we are NOT interpolating
+    if (!this.interpolating) return
+
+    // update the wait counter to avoid updating the IK too often
+    this.waitFrames++
     if (this.waitFrames < this.maxWaitFrames) return
     this.waitFrames = 0
 
-    // Update the interpolation keyframes.
-    if (this.interpolating) {
-      for (const _control in this.targetFrames) {
-        const control = _control as ControlPoint
+    console.log(`ik: updating ik to match interpolated targets`)
 
-        const frameId = this.frameCounters[control]
-        if (frameId === null) continue
+    for (const _control in this.targetFrames) {
+      const control = _control as ControlPoint
 
-        const keyframes = this.targetFrames[control]
-        if (keyframes === null) continue
+      const frameId = this.frameCounters[control]
+      if (frameId === null) continue
 
-        const keyframe = keyframes[frameId]
-        if (!keyframe) continue
+      const keyframes = this.targetFrames[control]
+      if (keyframes === null) continue
 
-        const targetBoneId = this.targetBoneIds[control]
-        const bone = this.mesh.skeleton.bones[targetBoneId]
+      const keyframe = keyframes[frameId]
+      if (!keyframe) continue
 
-        bone.position.copy(keyframe.position)
-        bone.quaternion.copy(keyframe.rotation)
+      const { step } = keyframe
 
-        this.frameCounters[control]!++
+      const targetBoneId = this.targetBoneIds[control]
+      const bone = this.mesh.skeleton.bones[targetBoneId]
 
-        // TODO: decide how to handle the end of the interpolation
-        if (this.frameCounters[control]! >= keyframes.length) {
-          this.frameCounters[control] = keyframes.length - 1
-        }
+      bone.position.copy(keyframe.position)
+      bone.quaternion.copy(keyframe.rotation)
+
+      this.frameCounters[control]!++
+
+      console.log(`ik: bone ${bone.name} at step ${step}`)
+
+      // TODO: decide how to handle the end of the interpolation
+      if (this.frameCounters[control]! >= keyframes.length) {
+        this.frameCounters[control] = keyframes.length - 1
       }
-
-      // Update all IK bones
-      this.ik.update()
     }
+
+    // Update all IK bones
+    this.ik.update()
   }
 
   clear() {
     this.ik.set([])
   }
 
-  setPartMorph(config: AxisPointConfig) {
-    const iks: IK[] = []
+  applyAxisPointConfig(config: AxisPointConfig) {
+    // const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
-    const target: AxisPoint = 'forehead'
+    // const target: AxisPoint = 'forehead'
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts
@@ -289,19 +315,84 @@ export class IKManager {
       // Define interpolated keyframes to move the target bone around.
       // ? should we run the same frames over and over, or freeze?
       // ? what happens after the morph ends?
-      this.frameCounters[part] = 0
-      this.targetFrames[part] = this.getInterpolatedTargets(part, target)
+      // this.frameCounters[part] = 0
+
+      // const keyframes = this.getInterpolatedTargets(part, target)
+      // this.targetFrames[part] = keyframes
 
       // Setup IK configuration
-      const ik = this.getIKConfig(part)
-      iks.push(ik)
+      // const ik = this.getIKConfig(part)
+      // iks.push(ik)
+
+      // console.log(`ik: part configured for ${part}`, { ik, keyframes })
     }
 
-    this.ik.set(iks)
-    this.interpolating = Object.values(this.targetFrames).some((s) => s)
+    // this.ik.set(iks)
+    // this.interpolating = Object.values(this.targetFrames).some((s) => s)
   }
 
   public getMorphedPartIds(): number[] {
     return this.ik.iks.map((ik) => ik.effector)
+  }
+
+  /**
+   * Freezes the animation track at a specific point in time.
+   * This effectively disables the current animation from playing.
+   *
+   * This is so we can let the IK solver interpolate the movement,
+   * without interference from current animation.
+   */
+  public freezeTrack(track: KeyframeTrack, config: AxisPointConfig, time = 1) {
+    const { parts } = config
+
+    const part = trackNameToPart(track.name, 'axis')
+    if (!part) return
+
+    const enabled = parts[part as AxisPointControlParts]
+    if (!enabled) return
+
+    console.log(`ik: froze ${track.name} at ${part} axis point`)
+
+    if (track instanceof QuaternionKeyframeTrack) {
+      const size = track.getValueSize()
+      if (size !== 4) throw new Error('invalid quaternion track')
+
+      const len = track.times.length - 1
+      const frame = Math.round((time / track.times[len]) * len)
+      const data = track.values.slice(frame * size, frame * size + size)
+
+      const [x, y, z, w] = data
+      if (data.length !== 4) throw new Error('invalid data length')
+
+      // Modify the entire keyframe values to this moment in time.
+      for (let i = 0; i < track.values.length; i += size) {
+        track.values[i] = x
+        track.values[i + 1] = y
+        track.values[i + 2] = z
+        track.values[i + 3] = w
+      }
+    }
+
+    if (
+      track instanceof VectorKeyframeTrack &&
+      track.name.includes('position')
+    ) {
+      const size = track.getValueSize()
+      if (size !== 3) throw new Error('invalid position track')
+
+      const len = track.times.length - 1
+      const frame = Math.round((time / track.times[len]) * len)
+      const data = track.values.slice(frame * size, frame * size + size)
+
+      const [x, y, z] = data
+      if (data.length !== 3) throw new Error('invalid data length')
+
+      // Modify the entire keyframe values to this moment in time.
+      for (let i = 0; i < track.values.length; i += size) {
+        track.values[i] = x
+        track.values[i + 1] = y
+        track.values[i + 2] = z
+      }
+    }
   }
 }

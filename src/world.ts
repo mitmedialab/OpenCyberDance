@@ -461,7 +461,7 @@ export class World {
       await this.addCharacter({
         name: 'first',
         position: [0, 0, 0],
-        model: 'waiting',
+        model: 'terry',
       })
 
       return

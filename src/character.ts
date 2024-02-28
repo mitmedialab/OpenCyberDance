@@ -18,7 +18,7 @@ import { KeyframeAnalyzer } from './analyze'
 import { CameraPresetKey } from './camera'
 import { dispose } from './dispose'
 import { CCDIKHelper } from './ik/ccd-ik-helper'
-import { IKManager } from './ik/ik'
+import { AxisPointManager } from './ik/ik'
 import {
   getAcceleration,
   keyframesAt,
@@ -141,7 +141,7 @@ export class Character {
   actions: Map<string, AnimationAction> = new Map()
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
-  ik: IKManager | null = null
+  axisPoint: AxisPointManager | null = null
 
   flags: AnimationFlags = {
     shadowState: 'hidden',
@@ -360,10 +360,10 @@ export class Character {
       if (!skinnedMesh) return
 
       if (!this.options.freezeParams) {
-        this.ik = new IKManager(skinnedMesh)
+        this.axisPoint = new AxisPointManager(skinnedMesh)
 
         if (DEBUG_SKELETON) {
-          const ikHelper = this.ik.ik.createHelper()
+          const ikHelper = this.axisPoint.ik.createHelper()
           this.scene.add(ikHelper)
         }
       }
@@ -617,32 +617,12 @@ export class Character {
         }
       }
 
-      if (flags.axisPoint) {
-        const { parts } = this.params.axisPoint
-        const part = trackNameToPart(track.name, 'axis')
-
-        if (part) {
-          const enabled = parts[part as AxisPointControlParts]
-
-          if (enabled) {
-            console.log(`! axis point: ${part} enabled`)
-
-            const time = this.mixer.time ?? 1
-            const len = track.times.length - 1
-            const frame = Math.round((time / track.times[len]) * len)
-            const data = track.values.slice(frame * 4, frame * 4 + 4)
-
-            // Modify the entire keyframe values to this moment in time.
-            for (let i = 0; i < track.values.length; i += 4) {
-              let j = 0
-
-              track.values[i] = data[j++]
-              track.values[i + 1] = data[j++]
-              track.values[i + 2] = data[j++]
-              track.values[i + 3] = data[j++]
-            }
-          }
-        }
+      if (flags.axisPoint && this.axisPoint) {
+        this.axisPoint.freezeTrack(
+          track,
+          this.params.axisPoint,
+          this.mixer.time,
+        )
       }
 
       if (flags.timing) {
@@ -661,7 +641,6 @@ export class Character {
       }
 
       // Override rotation only
-      // TODO: support individual body parts' rotation!
       if (flags.rotation) {
         overrideRotation(track, this.params.rotations, original.eulers)
       }
@@ -680,8 +659,8 @@ export class Character {
       clip.tracks[index] = track
     })
 
-    if (flags.axisPoint && this.ik) {
-      this.ik.setPartMorph(this.params.axisPoint)
+    if (flags.axisPoint && this.axisPoint) {
+      this.axisPoint.applyAxisPointConfig(this.params.axisPoint)
     }
 
     // External body space is always applied for timing changes.
@@ -931,21 +910,18 @@ export class Character {
   /**
    * Tick the axis point update using Inverse Kinematics.
    *
-   * WARNING: this is super expensive as it is called every frame.
+   * !! WARNING: this is super expensive as it is called every second !!
    */
   tickAxisPoint() {
-    if (!this.ik) return
+    if (!this.axisPoint) return
 
-    // TODO: inverse kinematics tick
-    console.log('~~~ ticking axis point ~~~')
-
-    this.ik.update()
+    this.axisPoint.tick()
   }
 
   /**
    * Tick the ending scene's second "shadow" character.
    *
-   * !! WARNING: this is super expensive as it is called every frame. !!
+   * !! WARNING: this is super expensive as it is called every second !!
    */
   async tickEndingSceneShadowCharacter() {
     if (!this.mixer) return

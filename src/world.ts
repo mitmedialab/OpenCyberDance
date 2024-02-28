@@ -87,6 +87,10 @@ export class World {
 
   timers = { seekBar: 0 }
 
+  flags = {
+    waitingEndingStart: false,
+  }
+
   get first() {
     return this.characterByName('first')
   }
@@ -630,17 +634,25 @@ export class World {
     })
   }
 
-  async resetWithFade() {
+  async fadeInBlankScene() {
     // Fade out the current scene.
     await world.fadeOut()
 
     // Tear down the scene ~ this takes only 1ms.
     world.teardown()
 
+    // Fade in the blank scene.
+    await world.fadeIn()
+  }
+
+  async fadeInSceneContent() {
+    // Fade out the current scene.
+    await world.fadeOut()
+
     // Setup the next scene.
     await world.setup()
 
-    // Fade in the next scene.
+    // Fade in the blank scene.
     await world.fadeIn()
   }
 

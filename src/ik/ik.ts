@@ -109,14 +109,14 @@ export class AxisPointManager {
     return {
       leftArm: [
         { index: this.idOf('LeftForeArm') },
-        // { index: this.idOf('LeftArm') },
+        { index: this.idOf('LeftArm') },
         // { index: this.idOf('LeftShoulder') },
         // { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
         { index: this.idOf('RightForeArm') },
-        // { index: this.idOf('RightArm') },
+        { index: this.idOf('RightArm') },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
@@ -140,7 +140,7 @@ export class AxisPointManager {
     const target = this.targetBoneIds[controlPoint]
     const links = this.linksByControl[controlPoint] ?? []
 
-    return { target, effector, links, iteration: 3 }
+    return { target, effector, links, iteration: 10 }
   }
 
   get skeleton() {
@@ -243,13 +243,15 @@ export class AxisPointManager {
   }
 
   tick() {
-    // this.interpolateTargetBone()
+    // this.syncTargetBonePosition()
   }
 
   /**
    * Apply the pre-computed position and rotation keyframes of target bones.
+   *
+   * This will interpolate the target bone's position until it reaches the desired axis point.
    */
-  interpolateTargetBone() {
+  syncTargetBonePosition() {
     // Do not update the interpolation keyframes if we are NOT interpolating
     if (!this.interpolating) return
 
@@ -273,16 +275,12 @@ export class AxisPointManager {
       if (!keyframe) continue
 
       const { step } = keyframe
+      console.log(`ik: ${control} target at step ${step}`)
 
-      const targetBoneId = this.targetBoneIds[control]
-      const bone = this.mesh.skeleton.bones[targetBoneId]
+      this.setTargetBonePlacement(control, keyframe.position, keyframe.rotation)
 
-      bone.position.copy(keyframe.position)
-      bone.quaternion.copy(keyframe.rotation)
-
+      // Update the frame counter for keyframes interpolation.
       this.frameCounters[control]!++
-
-      console.log(`ik: bone ${bone.name} at step ${step}`)
 
       // TODO: decide how to handle the end of the interpolation
       if (this.frameCounters[control]! >= keyframes.length) {
@@ -294,15 +292,27 @@ export class AxisPointManager {
     this.ik.update()
   }
 
+  setTargetBonePlacement(
+    control: ControlPoint,
+    position: Vector3,
+    rotation: Quaternion,
+  ) {
+    const targetBoneId = this.targetBoneIds[control]
+    const bone = this.mesh.skeleton.bones[targetBoneId]
+
+    bone.position.copy(position)
+    bone.quaternion.copy(rotation)
+  }
+
   clear() {
     this.ik.set([])
   }
 
   applyAxisPointConfig(config: AxisPointConfig) {
-    // const iks: IK[] = []
+    const iks: IK[] = []
 
     // TODO: we must compute the closest target bone to the part
-    // const target: AxisPoint = 'forehead'
+    const target: AxisPoint = 'forehead'
 
     for (const _part in config.parts) {
       const part = _part as AxisPointControlParts
@@ -315,20 +325,20 @@ export class AxisPointManager {
       // Define interpolated keyframes to move the target bone around.
       // ? should we run the same frames over and over, or freeze?
       // ? what happens after the morph ends?
-      // this.frameCounters[part] = 0
+      this.frameCounters[part] = 0
 
-      // const keyframes = this.getInterpolatedTargets(part, target)
-      // this.targetFrames[part] = keyframes
+      const keyframes = this.getInterpolatedTargets(part, target, 5)
+      this.targetFrames[part] = keyframes
 
       // Setup IK configuration
-      // const ik = this.getIKConfig(part)
-      // iks.push(ik)
+      const ik = this.getIKConfig(part)
+      iks.push(ik)
 
-      // console.log(`ik: part configured for ${part}`, { ik, keyframes })
+      console.log(`ik: part configured for ${part}`, { ik, keyframes })
     }
 
-    // this.ik.set(iks)
-    // this.interpolating = Object.values(this.targetFrames).some((s) => s)
+    this.ik.set(iks)
+    this.interpolating = Object.values(this.targetFrames).some((s) => s)
   }
 
   public getMorphedPartIds(): number[] {
@@ -351,8 +361,9 @@ export class AxisPointManager {
     const enabled = parts[part as AxisPointControlParts]
     if (!enabled) return
 
-    console.log(`ik: froze ${track.name} at ${part} axis point`)
+    // console.debug(`ik: froze ${track.name} at ${part} axis point`)
 
+    // Freeze the rotation keyframes
     if (track instanceof QuaternionKeyframeTrack) {
       const size = track.getValueSize()
       if (size !== 4) throw new Error('invalid quaternion track')
@@ -373,6 +384,7 @@ export class AxisPointManager {
       }
     }
 
+    // Freeze the position keyframes
     if (
       track instanceof VectorKeyframeTrack &&
       track.name.includes('position')
@@ -394,5 +406,20 @@ export class AxisPointManager {
         track.values[i + 2] = z
       }
     }
+  }
+
+  debugApply(
+    control: ControlPoint,
+    position: [number, number, number],
+    rotation: [number, number, number, number],
+  ) {
+    this.setTargetBonePlacement(
+      control,
+      new Vector3(...position),
+      new Quaternion(...rotation),
+    )
+
+    this.ik.set([this.getIKConfig(control)])
+    this.ik.update()
   }
 }

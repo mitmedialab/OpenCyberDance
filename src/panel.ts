@@ -43,6 +43,7 @@ export class Panel {
   commandFolder: GUI | null = null
   characterFolder: GUI | null = null
   axisPointFolder: GUI | null = null
+  debugAPFolder: GUI | null = null
 
   handlers: Handlers = {
     energy: () => {},
@@ -185,6 +186,7 @@ export class Panel {
 
     this.playbackFolder = panel.addFolder('Playback')
     this.axisPointFolder = panel.addFolder('Axis Point')
+    this.debugAPFolder = panel.addFolder('Debug - Axis Point')
     this.rotationFolder = panel.addFolder('All Rotations')
     this.energyFolder = panel.addFolder('Energy')
     this.delayFolder = panel.addFolder('Shifting / Synchronic')
@@ -257,6 +259,7 @@ export class Panel {
     this.addCurveControl()
     this.addSpaceControl()
     this.addAxisPointControl()
+    this.addDebugAxisPointControl()
 
     // this.commandFolder.open()
     // this.rotationFolder.open()
@@ -265,6 +268,18 @@ export class Panel {
     // this.characterFolder.open()
 
     this.initialized = true
+  }
+
+  // Add px, py, pz, rx, ry, rz, rw controls
+  addDebugAxisPointControl() {
+    if (!this.debugAPFolder) return
+
+    this.debugAPFolder
+      .add(this.params.axisPoint.parts, part)
+      .listen()
+      .onChange(() => {
+        console.log('~')
+      })
   }
 
   addAxisPointControl() {

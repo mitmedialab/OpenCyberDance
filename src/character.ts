@@ -601,6 +601,8 @@ export class Character {
     this.syncPositionLock(clip)
 
     clip.tracks.forEach((track, index) => {
+      if (!this.mixer) return
+
       // Reset the keyframe times.
       const original = this.originalOf(index)
       if (!original || !this.params) return
@@ -623,7 +625,9 @@ export class Character {
           const enabled = parts[part as AxisPointControlParts]
 
           if (enabled) {
-            const time = this.mixer?.time ?? 1
+            console.log(`! axis point: ${part} enabled`)
+
+            const time = this.mixer.time ?? 1
             const len = track.times.length - 1
             const frame = Math.round((time / track.times[len]) * len)
             const data = track.values.slice(frame * 4, frame * 4 + 4)
@@ -930,7 +934,12 @@ export class Character {
    * WARNING: this is super expensive as it is called every frame.
    */
   tickAxisPoint() {
+    if (!this.ik) return
+
     // TODO: inverse kinematics tick
+    console.log('~~~ ticking axis point ~~~')
+
+    this.ik.update()
   }
 
   /**
@@ -939,8 +948,8 @@ export class Character {
    * !! WARNING: this is super expensive as it is called every frame. !!
    */
   async tickEndingSceneShadowCharacter() {
-    if ($currentScene.get() !== 'ENDING') return
     if (!this.mixer) return
+    if ($currentScene.get() !== 'ENDING') return
 
     const time = this.mixer.time
     const state = this.flags.shadowState

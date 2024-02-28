@@ -83,6 +83,7 @@ onMounted(async () => {
     if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_APPEAR - 1)
     if (event.key === 'b') world.setTime(182)
     if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 1)
+    if (event.key === 'm') world.setTime(world.first?.mixer?.time! + 0.01)
 
     if (event.key === 'e') {
       if (world.isEnding) return $currentScene.set('BLACK')

@@ -51,6 +51,7 @@ import {
   TransformOptions,
 } from './transforms'
 import { Matcher } from './types'
+import { delay } from './utils'
 
 export interface AnimationSource {
   eulers: THREE.Euler[]
@@ -117,6 +118,7 @@ export interface CharacterOptions {
 type Handlers = {
   animationLoaded(character: Character): void
   setCameraAngle(preset: CameraPresetKey): void
+  fade(mode: 'in' | 'out'): Promise<void>
 }
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
@@ -224,6 +226,7 @@ export class Character {
   handlers: Handlers = {
     animationLoaded: () => {},
     setCameraAngle: () => {},
+    fade: async () => {},
   }
 
   setPosition(x = 0, y = 0, z = 0) {
@@ -935,7 +938,7 @@ export class Character {
    *
    * !! WARNING: this is super expensive as it is called every frame. !!
    */
-  tickEndingSceneShadowCharacter() {
+  async tickEndingSceneShadowCharacter() {
     if ($currentScene.get() !== 'ENDING') return
     if (!this.mixer) return
 
@@ -978,17 +981,31 @@ export class Character {
       console.log('transition to: STILL')
       this.flags.shadowState = 'still'
 
-      if (this.isPrimary) this.handlers.setCameraAngle('endingSideBySide')
-
-      const x = this.isPrimary ? -1 : 1
-
       if (!this.params) return
+
+      await this.startFade()
+
+      // ? update the "lock position" parameter
       this.params.lockPosition = true
 
+      const x = this.isPrimary ? -1 : 1
       const clip = this.currentClip!
-      this.syncPositionLock(clip, [x, 0, 0])
+
+      // ? update the keyframes value to lock the position
+      this.syncPositionLock(clip, [0, 0, 0])
+
+      // ? update the model position
       this.setPosition(x, 0, 0)
-      this.fadeIntoModifiedAction(clip, 1, true)
+
+      const prevAction = this.actions.get(clip.name)
+      if (!prevAction) return
+
+      // ? sync the camera angle
+      if (this.isPrimary) this.handlers.setCameraAngle('endingSideBySide')
+
+      await delay(30)
+
+      await this.endFade()
     }
 
     if (nowDancing) return
@@ -998,11 +1015,28 @@ export class Character {
       console.log('transition to: EXITING')
       this.flags.shadowState = 'exiting'
 
+      await this.startFade()
+
       this.setPosition(0, 0, 0)
       this.handlers.setCameraAngle('endingExit')
 
       this.forceRestoreHipsPosition()
+
+      await this.endFade()
     }
+  }
+
+  async startFade() {
+    if (this.isPrimary) {
+      await this.handlers.fade('out')
+    } else {
+      // ? compensate for the fade-out delay
+      await delay(500)
+    }
+  }
+
+  async endFade() {
+    if (this.isPrimary) this.handlers.fade('in').then()
   }
 
   setShadowCharacterVisible(visible: boolean) {

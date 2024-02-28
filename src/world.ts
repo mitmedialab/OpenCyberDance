@@ -365,6 +365,11 @@ export class World {
     character.handlers.animationLoaded = this.handleAnimationChange.bind(this)
     character.handlers.setCameraAngle = this.setCamera.bind(this)
 
+    character.handlers.fade = async (mode) => {
+      if (mode === 'in') await world.fadeIn()
+      if (mode === 'out') await world.fadeOut()
+    }
+
     await character.setup(this.scene, this.params)
     this.characters.push(character)
   }
@@ -606,7 +611,7 @@ export class World {
     await delay(500)
   }
 
-  async fadeIn() {
+  fadeIn() {
     const app = document.querySelector('#app')
     if (!app) return
 

@@ -92,12 +92,6 @@ onMounted(async () => {
     if (event.key === 'm') world.setTime(world.first?.mixer?.time! + 0.01)
 
     if (event.key === 'e') {
-      if (world.isEnding && world.flags.waitingEndingStart) {
-        world.fadeInSceneContent()
-        world.flags.waitingEndingStart = false
-        return
-      }
-
       if (world.isEnding) return $currentScene.set('BLACK')
 
       $currentScene.set('ENDING')

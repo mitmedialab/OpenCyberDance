@@ -38,6 +38,16 @@ export interface SpaceConfig {
   windowSize: number
 }
 
+export type DebugAP = {
+  px: number
+  py: number
+  pz: number
+  rx: number
+  ry: number
+  rz: number
+  rw: number
+}
+
 export interface AxisPointConfig {
   threshold: number
   parts: Record<AxisPointControlParts, boolean>
@@ -119,6 +129,8 @@ export class Params {
       action: '',
     },
   }
+
+  debugAP: DebugAP = { px: 0, py: 0, pz: 0, rx: 0, ry: 0, rz: 0, rw: 0 }
 
   // ! HACK: temporary reactivity hack. TO REMOVE!
   reset() {

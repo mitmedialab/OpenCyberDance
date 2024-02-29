@@ -419,6 +419,8 @@ export class AxisPointManager {
       new Quaternion(...rotation),
     )
 
+    console.log(`ik apply:`, control, position, rotation)
+
     this.ik.set([this.getIKConfig(control)])
     this.ik.update()
   }

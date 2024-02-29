@@ -2,9 +2,11 @@ import GUI from 'lil-gui'
 
 import { CAMERA_PRESETS } from './camera'
 import { Character, CharacterKey } from './character'
-import { Params } from './overrides'
+import { ControlPoint } from './ik/ik'
+import { DebugAP, Params } from './overrides'
 import { axisPointControlParts, DelayPartKey, EnergyPartKey } from './parts'
 import { transformers } from './transforms'
+import { world } from './world'
 
 interface Handlers {
   energy(): void
@@ -274,12 +276,28 @@ export class Panel {
   addDebugAxisPointControl() {
     if (!this.debugAPFolder) return
 
-    this.debugAPFolder
-      .add(this.params.axisPoint.parts, part)
-      .listen()
-      .onChange(() => {
-        console.log('~')
-      })
+    const keys: (keyof DebugAP)[] = ['px', 'py', 'pz', 'rx', 'ry', 'rz', 'rw']
+
+    for (const key of keys) {
+      this.debugAPFolder
+        .add(this.params.debugAP, key, -10, 10, 0.0001)
+        .listen()
+        .onChange(() => {
+          const { px, py, pz, rx, ry, rz, rw } = this.params.debugAP
+
+          for (const [key, value] of Object.entries(
+            this.params.axisPoint.parts,
+          )) {
+            if (!value) continue
+
+            world.first?.axisPoint?.debugApply(
+              key as ControlPoint,
+              [px, py, pz],
+              [rx, ry, rz, rw],
+            )
+          }
+        })
+    }
   }
 
   addAxisPointControl() {

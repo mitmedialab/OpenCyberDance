@@ -15,6 +15,7 @@ import { world } from '../world'
 import StepPrompt from './StepPrompt.vue'
 import { ding } from '../ding.ts'
 import StageControl from './StageControl.vue'
+import DebugLogger from './DebugLogger.vue'
 
 import { EndingKeyframes } from '../character'
 import { $currentScene } from '../store/scene'
@@ -92,12 +93,6 @@ onMounted(async () => {
     if (event.key === 'm') world.setTime(world.first?.mixer?.time! + 0.01)
 
     if (event.key === 'e') {
-      if (world.isEnding && world.flags.waitingEndingStart) {
-        world.fadeInSceneContent()
-        world.flags.waitingEndingStart = false
-        return
-      }
-
       if (world.isEnding) return $currentScene.set('BLACK')
 
       $currentScene.set('ENDING')
@@ -129,5 +124,6 @@ onMounted(async () => {
 
     <StepPrompt v-if="showPrompt" />
     <StageControl />
+    <DebugLogger />
   </div>
 </template>

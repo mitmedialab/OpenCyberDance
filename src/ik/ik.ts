@@ -409,19 +409,22 @@ export class AxisPointManager {
   }
 
   debugApply(
-    control: ControlPoint,
+    controls: ControlPoint[],
     position: [number, number, number],
     rotation: [number, number, number, number],
   ) {
-    this.setTargetBonePlacement(
-      control,
-      new Vector3(...position),
-      new Quaternion(...rotation),
-    )
+    for (const control of controls) {
+      this.setTargetBonePlacement(
+        control,
+        new Vector3(...position),
+        new Quaternion(...rotation),
+      )
+    }
 
-    console.log(`ik apply:`, control, position, rotation)
+    const iks = controls.map((control) => this.getIKConfig(control))
+    console.log(`iks length: ${iks.length}`)
 
-    this.ik.set([this.getIKConfig(control)])
+    this.ik.set(iks)
     this.ik.update()
   }
 }

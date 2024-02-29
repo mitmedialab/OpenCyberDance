@@ -3,7 +3,7 @@
     fixed
     font-mono
     top-4
-    right-4
+    left-4
     text-white
     whitespace-pre
     bg-gray-900

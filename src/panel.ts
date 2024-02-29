@@ -5,6 +5,7 @@ import { Character, CharacterKey } from './character'
 import { ControlPoint } from './ik/ik'
 import { DebugAP, Params } from './overrides'
 import { axisPointControlParts, DelayPartKey, EnergyPartKey } from './parts'
+import { $debugLog } from './store/debug'
 import { transformers } from './transforms'
 import { world } from './world'
 
@@ -285,17 +286,17 @@ export class Panel {
         .onChange(() => {
           const { px, py, pz, rx, ry, rz, rw } = this.params.debugAP
 
-          for (const [key, value] of Object.entries(
-            this.params.axisPoint.parts,
-          )) {
-            if (!value) continue
+          const parts = Object.entries(this.params.axisPoint.parts)
+            .filter(([, enabled]) => enabled)
+            .map(([part]) => part)
 
-            world.first?.axisPoint?.debugApply(
-              key as ControlPoint,
-              [px, py, pz],
-              [rx, ry, rz, rw],
-            )
-          }
+          world.first?.axisPoint?.debugApply(
+            parts as ControlPoint[],
+            [px, py, pz],
+            [rx, ry, rz, rw],
+          )
+
+          $debugLog.set({ px, py, pz, rx, ry, rz, rw })
         })
     }
   }

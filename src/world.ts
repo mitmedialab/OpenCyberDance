@@ -32,7 +32,6 @@ import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
-import { updateDebugLogCamera } from './store/debug'
 import { $currentScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import {
@@ -325,10 +324,6 @@ export class World {
     controls.target.set(0, 0, 0)
     controls.update()
 
-    controls.addEventListener('change', () => {
-      updateDebugLogCamera(this.camera!)
-    })
-
     this.controls = controls
   }
 
@@ -581,8 +576,6 @@ export class World {
 
     this.camera.rotation.set(...preset.rotation)
     this.camera.updateProjectionMatrix()
-
-    updateDebugLogCamera(this.camera)
   }
 
   teardown() {

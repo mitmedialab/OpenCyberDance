@@ -271,12 +271,24 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 
   if (primary === 'dances') {
-    const [danceName] = args
+    const [dancerName] = args
 
-    console.log('switching dance', danceName)
+    console.log('switching dancer to', dancerName)
 
     world.params.reset()
-    await switchDancers(danceName)
+
+    // special logic for NO. 60 - ending scene
+    if (/six|sixty|number sixty|number60/.test(dancerName)) {
+      // we must be at the "empty white blank scene" before NO.60 can be called
+      if (!world.flags.waitingEndingStart) return
+
+      world.fadeInSceneContent()
+      world.flags.waitingEndingStart = false
+
+      return
+    }
+
+    await switchDancers(dancerName)
 
     return
   }

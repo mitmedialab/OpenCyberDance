@@ -30,11 +30,11 @@ onMounted(async () => {
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
-      if (world.isEnding && world.flags.waitingEndingStart) {
-        world.fadeInSceneContent()
-        world.flags.waitingEndingStart = false
-        return
-      }
+      // if (world.isEnding && world.flags.waitingEndingStart) {
+      //   world.fadeInSceneContent()
+      //   world.flags.waitingEndingStart = false
+      //   return
+      // }
 
       const willVisible = !showPrompt.value
 

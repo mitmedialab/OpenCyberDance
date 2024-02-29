@@ -25,6 +25,7 @@ import {
   $time,
   $duration,
 } from '../store/status.ts'
+import { world } from '../world'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)

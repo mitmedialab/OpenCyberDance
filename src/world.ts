@@ -28,6 +28,7 @@ import {
   UpdateParamFlags,
 } from './character'
 import { dispose } from './dispose.ts'
+import { IPCManager } from './ipc.ts'
 import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
@@ -82,6 +83,7 @@ export class World {
   characters: Character[] = []
   camera: OrthographicCamera | null = null
   controls: OrbitControls | null = null
+  ipc: IPCManager = new IPCManager(this)
 
   composer: EffectComposer | null = null
 

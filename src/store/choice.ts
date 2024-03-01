@@ -34,7 +34,7 @@ export const $currentStep = computed(
     console.log(`current step is ${currentStepId}:`, steps[currentStepId])
 
     // !!! HACK: exclude "number 60" from list if not yet in ending scene !!!
-    if (currentStepId === 0) {
+    if (selectedChoice.title === 'dancers' && currentStepId === 0) {
       const step = steps[currentStepId]
 
       if (step.type !== 'choice') {

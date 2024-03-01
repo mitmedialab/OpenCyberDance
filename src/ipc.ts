@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid'
 
+import { $ipcMode } from './store/ipc'
 import { World } from './world'
 
 // random unique identifier representing the current browser window
@@ -14,9 +15,11 @@ const IPC_STATE_PREFIX = 'DANCE_IPC:'
 
 const ipcKey = (key: string) => IPC_STATE_PREFIX + key
 
-type IPCWindow = {
+export type IPCMode = 'leader' | 'follower'
+
+export type IPCWindow = {
   id: string
-  mode: 'leader' | 'follower'
+  mode: IPCMode
 }
 
 export class IPCManager {
@@ -80,6 +83,7 @@ export class IPCManager {
 
     this.set('windows', windows)
     this.send({ type: 'connect', id: WINDOW_ID })
+    this.syncLeaderStatus()
   }
 
   unregisterWindow() {
@@ -102,6 +106,16 @@ export class IPCManager {
 
     this.set('windows', windows)
     this.send({ type: 'close', id: WINDOW_ID })
+  }
+
+  syncLeaderStatus() {
+    const windows = this.windows()
+    if (!windows) return
+
+    const mode = windows.find((w) => w.id === WINDOW_ID)?.mode
+    if (!mode) return
+
+    $ipcMode.set(mode)
   }
 
   set<T>(key: string, value: T) {
@@ -129,6 +143,11 @@ export class IPCManager {
 
   handleState(key: string, value: string | null) {
     console.log(`IPC state:`, key, value)
+
+    // if the windows list changes, sync the leader status
+    if (key === 'windows') {
+      this.syncLeaderStatus()
+    }
   }
 
   handleWindowClose() {

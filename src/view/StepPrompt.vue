@@ -26,6 +26,7 @@ import {
   $duration,
 } from '../store/status.ts'
 import { world } from '../world'
+import { $ipcMode } from '../store/ipc'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
@@ -47,6 +48,8 @@ const isListening = computed(() => status.value === 'listening')
 const isThinking = computed(() => status.value === 'thinking')
 const isOffline = computed(() => status.value === 'disabled')
 const isConfused = computed(() => status.value === 'confused')
+
+const ipcMode = useStore($ipcMode)
 
 const isAnimationFinished = computed(() => time.value >= duration.value)
 
@@ -232,6 +235,14 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 
     <div v-if="voiceError" class="text-red-5">
       ve: {{ voiceError.error }} {{ voiceError.message }}
+    </div>
+
+    <div
+      v-if="ipcMode"
+      class="text-gray-600"
+      :class="[{ 'text-yellow-200': ipcMode === 'follower' }]"
+    >
+      im: {{ ipcMode }}
     </div>
   </div>
 </template>

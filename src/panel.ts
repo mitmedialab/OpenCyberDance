@@ -281,7 +281,7 @@ export class Panel {
 
     for (const key of keys) {
       this.debugAPFolder
-        .add(this.params.debugAP, key, -10, 10, 0.0001)
+        .add(this.params.debugAP, key, -100, 100, 0.0001)
         .listen()
         .onChange(() => {
           const { px, py, pz, rx, ry, rz, rw } = this.params.debugAP

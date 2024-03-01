@@ -11,6 +11,7 @@ import {
 import { BoneKey } from '../bones'
 import { AxisPointConfig } from '../overrides'
 import { AxisPointControlParts, trackNameToPart } from '../parts'
+import { delay } from '../utils'
 import { CCDIKSolver, IK, IKLink } from './ccd-ik'
 
 declare global {
@@ -110,13 +111,13 @@ export class AxisPointManager {
       leftArm: [
         { index: this.idOf('LeftForeArm') },
         { index: this.idOf('LeftArm') },
-        // { index: this.idOf('LeftShoulder') },
-        // { index: this.idOf('Spine2') },
+        { index: this.idOf('LeftShoulder') },
+        { index: this.idOf('Spine2') },
       ],
 
       rightArm: [
         { index: this.idOf('RightForeArm') },
-        { index: this.idOf('RightArm') },
+        // { index: this.idOf('RightArm') },
         // { index: this.idOf('RightShoulder') },
         // { index: this.idOf('Spine2') },
       ],
@@ -422,9 +423,17 @@ export class AxisPointManager {
     }
 
     const iks = controls.map((control) => this.getIKConfig(control))
-    console.log(`iks length: ${iks.length}`)
-
     this.ik.set(iks)
     this.ik.update()
+  }
+
+  async debugRandomApply(parts: ControlPoint[], steps = 1000, delayMs = 100) {
+    const r = () => Math.random() * 100
+
+    for (let i = 0; i < steps; i++) {
+      this.debugApply(parts, [r(), r(), r()], [r(), r(), r(), r()])
+
+      await delay(delayMs)
+    }
   }
 }

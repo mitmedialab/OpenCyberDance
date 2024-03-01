@@ -130,18 +130,21 @@ type AnimationFlags = {
   shadowState: ShadowCharacterState
 }
 
-const DEBUG_SKELETON = false
+const DEBUG_SKELETON = true
 
 export class Character {
   scene: THREE.Scene | null = null
   mixer: THREE.AnimationMixer | null = null
-  skeletonHelper: THREE.SkeletonHelper | null = null
+
   model: THREE.Group | null = null
   original: Map<string, AnimationSource[]> = new Map()
   actions: Map<string, AnimationAction> = new Map()
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   axisPoint: AxisPointManager | null = null
+
+  /** Visualizes skeleton as lines */
+  skeletonHelper: THREE.SkeletonHelper | null = null
 
   flags: AnimationFlags = {
     shadowState: 'hidden',
@@ -390,6 +393,7 @@ export class Character {
 
         const skeletonMaterial = this.skeletonHelper
           .material as LineBasicMaterial
+
         skeletonMaterial.linewidth = 10
         this.scene.add(this.skeletonHelper)
       }

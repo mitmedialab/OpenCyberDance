@@ -6,13 +6,18 @@ import { World } from './world'
 const WINDOW_ID = nanoid()
 
 export type IPCMessage =
-  | { type: 'connect'; windowId: string }
-  | { type: 'close'; windowId: string }
+  | { type: 'connect'; id: string }
+  | { type: 'close'; id: string }
 
 const IPC_CHANNEL_KEY = 'DANCE_IPC'
 const IPC_STATE_PREFIX = 'DANCE_IPC:'
 
 const ipcKey = (key: string) => IPC_STATE_PREFIX + key
+
+type IPCWindow = {
+  id: string
+  mode: 'leader' | 'follower'
+}
 
 export class IPCManager {
   world: World
@@ -21,6 +26,10 @@ export class IPCManager {
   constructor(world: World) {
     this.world = world
     this.setup()
+  }
+
+  get id() {
+    return WINDOW_ID
   }
 
   /**
@@ -41,11 +50,8 @@ export class IPCManager {
       console.log(`bc message error:`, e.data)
     })
 
-    this.send({ type: 'connect', windowId: WINDOW_ID })
-
     addEventListener('beforeunload', () => {
-      this.send({ type: 'close', windowId: WINDOW_ID })
-      this.channel?.close()
+      this.handleWindowClose()
     })
 
     addEventListener('storage', (e) => {
@@ -55,6 +61,47 @@ export class IPCManager {
         this.handleState(e.key.replace(IPC_STATE_PREFIX, ''), e.newValue)
       }
     })
+
+    this.registerWindow()
+  }
+
+  windows() {
+    return this.get<IPCWindow[]>('windows')
+  }
+
+  registerWindow() {
+    let windows = this.windows()
+    if (!windows) windows = []
+
+    const hasLeader = windows.some((w) => w.mode === 'leader')
+    const mode = hasLeader ? 'follower' : 'leader'
+
+    windows.push({ mode, id: WINDOW_ID })
+
+    this.set('windows', windows)
+    this.send({ type: 'connect', id: WINDOW_ID })
+  }
+
+  unregisterWindow() {
+    let windows = this.windows()
+    if (!windows) windows = []
+
+    // is the current window the leader?
+    const isLeader = windows.find((w) => w.id === WINDOW_ID)?.mode === 'leader'
+
+    // exclude current window
+    windows = windows.filter((w) => w.id !== WINDOW_ID)
+
+    // does the current windows have a leader?
+    const hasNextLeader = windows.some((w) => w.mode === 'leader')
+
+    // if the leader window is closed, promote the next window to leader
+    if (isLeader && !hasNextLeader && windows.length > 0) {
+      windows[0].mode = 'leader'
+    }
+
+    this.set('windows', windows)
+    this.send({ type: 'close', id: WINDOW_ID })
   }
 
   set<T>(key: string, value: T) {
@@ -65,7 +112,11 @@ export class IPCManager {
     const item = localStorage.getItem(ipcKey(key))
     if (!item) return null
 
-    return JSON.parse(item)
+    try {
+      return JSON.parse(item)
+    } catch (e) {
+      return null
+    }
   }
 
   send(message: IPCMessage) {
@@ -78,5 +129,11 @@ export class IPCManager {
 
   handleState(key: string, value: string | null) {
     console.log(`IPC state:`, key, value)
+  }
+
+  handleWindowClose() {
+    this.unregisterWindow()
+
+    this.channel?.close()
   }
 }

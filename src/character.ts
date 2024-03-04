@@ -12,7 +12,6 @@ import {
   SkeletonHelper,
   SkinnedMesh,
 } from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { KeyframeAnalyzer } from './analyze'
 import { CameraPresetKey } from './camera'
@@ -40,6 +39,7 @@ import {
   trackNameToPart,
 } from './parts'
 import { profile } from './perf'
+import { preloader } from './preloader'
 import { $currentScene } from './store/scene'
 import { $duration, $time } from './store/status'
 import {
@@ -73,8 +73,6 @@ export interface UpdateParamFlags {
   rotation?: boolean
   axisPoint?: boolean
 }
-
-export const gltfLoader = new GLTFLoader()
 
 // Attach a profiler
 const p = {
@@ -310,10 +308,11 @@ export class Character {
       if (config.model === 'none') return
 
       // Get the model url based on the character model
-      const url = `/models/${Character.sources[config.model]}`
-      if (url === 'none' || !url) return
+      const source = Character.sources[config.model]
+      if (source === 'none' || !source) return
 
-      const gltfModel = await gltfLoader.loadAsync(url)
+      const gltfModel = preloader.get(source)
+      if (!gltfModel) return
 
       // Set the default actions.
       if (!config.action) {

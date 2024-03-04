@@ -32,6 +32,7 @@ import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
 import { Plotter } from './plotter'
+import { preloader } from './preloader.ts'
 import { updateDebugLogCamera } from './store/debug'
 import { $currentScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
@@ -657,19 +658,7 @@ export class World {
   }
 
   async preload() {
-    const start = performance.now()
-
-    const sources = Object.values(Character.sources).filter(
-      (x) => x && x.endsWith('.glb'),
-    )
-
-    await Promise.all(
-      sources.map((source) => {
-        gltfLoader.loadAsync(`/models/${source}`)
-      }),
-    )
-
-    console.log(`-- GLTF preload took ${performance.now() - start}ms`)
+    await preloader.setup()
   }
 }
 

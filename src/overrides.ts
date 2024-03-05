@@ -318,8 +318,15 @@ export function applyExternalBodySpace(
 
   // Every track must apply the same rotation freeze.
   tracks.forEach((track, ti) => {
-    // Only apply external body space for rotations
-    if (!(track instanceof QuaternionKeyframeTrack)) return
+    // apply it to rotations and hips position
+    // ! character will float in the air if hips position is not adjusted
+    if (
+      !(
+        track instanceof QuaternionKeyframeTrack ||
+        track.name === 'Hips.position'
+      )
+    )
+      return
 
     const startFrames = valleys.map(([start]) => start)
     const endFrames = valleys.map(([, end]) => end)

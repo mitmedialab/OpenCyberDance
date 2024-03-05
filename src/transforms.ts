@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { KeyframeTrack, Quaternion, VectorKeyframeTrack } from 'three'
+import { KeyframeTrack, Quaternion, QuaternionKeyframeTrack } from 'three'
 
 export type Axis = 'x' | 'y' | 'z'
 export type QAxis = Axis | 'w'
@@ -32,11 +32,7 @@ export function applyTrackTransform(
 ): Float32Array {
   const { axis } = options ?? {}
 
-  // Temporarily disable transform for vector tracks.
-  const isVector = track instanceof VectorKeyframeTrack
-  if (isVector) {
-    return track.values
-  }
+  if (!(track instanceof QuaternionKeyframeTrack)) return track.values
 
   const series: Record<string, number[]> = {}
 

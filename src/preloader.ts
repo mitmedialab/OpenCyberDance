@@ -25,15 +25,19 @@ export class ModelPreloader {
   }
 
   private async load(source: string) {
-    const now = performance.now()
+    try {
+      const now = performance.now()
 
-    const loader = new GLTFLoader()
-    const model = await loader.loadAsync(`/models/${source}`)
+      const loader = new GLTFLoader()
+      const model = await loader.loadAsync(`/models/${source}`)
 
-    this.models.set(source, model)
+      this.models.set(source, model)
 
-    const time = (performance.now() - now).toFixed(2)
-    console.log(`-- pre-loaded ${source} in ${time} --`)
+      const time = (performance.now() - now).toFixed(2)
+      console.log(`-- pre-loaded ${source} in ${time} --`)
+    } catch (error) {
+      console.error(`-- failed to load ${source} --`, error)
+    }
   }
 
   public get(source: string): GLTF | undefined {

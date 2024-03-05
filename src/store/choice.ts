@@ -33,24 +33,6 @@ export const $currentStep = computed(
 
     console.log(`current step is ${currentStepId}:`, steps[currentStepId])
 
-    // !!! HACK: exclude "number 60" from list if not yet in ending scene !!!
-    if (selectedChoice.title === 'dancers' && currentStepId === 0) {
-      const step = steps[currentStepId]
-
-      if (step.type !== 'choice') {
-        throw new Error('invariant - dancers must be a choice')
-      }
-
-      const choices = world.flags.waitingEndingStart
-        ? step.choices.filter((x) => x.key === 'number60')
-        : step.choices.filter((x) => x.key !== 'number60')
-
-      return {
-        ...step,
-        choices,
-      }
-    }
-
     return steps[currentStepId]
   },
 )
@@ -163,12 +145,18 @@ const selectChoice = (choice: ChoiceKey) => {
 export function handleVoiceSelection(input: string | number): boolean {
   extendPromptTimeout()
 
+  console.log(`-- voice selection: ${input}`)
+
   const selectedChoiceKey = $selectedChoiceKey.get()
   const currentStep = $currentStep.get() as Step
 
   if (!selectedChoiceKey || !currentStep) {
     if (choicesKey.includes(input as string)) {
       return selectChoice(input as ChoiceKey)
+    }
+
+    if (/(energy|allergy)/i.test(input as string)) {
+      return selectChoice('energy')
     }
 
     if (

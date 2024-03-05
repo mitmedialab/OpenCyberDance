@@ -132,7 +132,7 @@ export class World {
   }
 
   syncBackground() {
-    this.setBackground(this.isEnding ? 'white' : 'black')
+    this.setBackground('black')
   }
 
   async setup() {
@@ -145,7 +145,7 @@ export class World {
 
     // Setup the scenes
     this.setupCamera()
-    await this.setCamera(isEnding ? 'endingStart' : 'front')
+    await this.setCamera(isEnding ? 'endingFront' : 'front')
 
     this.setupLights()
     this.setupPlane()
@@ -162,7 +162,9 @@ export class World {
     this.updateParams()
 
     // ? do we slow down the playback speed?
-    // if (isEnding) this.adjustPlaybackSpeed(1)
+    if (isEnding) {
+      this.adjustPlaybackSpeed(0.2)
+    }
 
     window.world = this
     this.ready = true
@@ -388,6 +390,8 @@ export class World {
       // @ts-expect-error - character is a custom property
       ?.find((k) => k.character === name) as GUI
 
+    if (!dropdown) return
+
     // Update the dropdown animation's active state
     const controller = dropdown.controllers
       .find((c) => c.property === 'action')
@@ -470,26 +474,38 @@ export class World {
 
     // Add two characters
     if (scene === 'ENDING') {
+      // padung ---------- terry | changhung | tas
       await Promise.all([
         this.addCharacter({
           name: 'first',
           position: [0, 0, 0],
-          freezeParams: true,
-          model: 'pichetMaster',
+          model: 'padungLast',
         }),
 
         this.addCharacter({
           name: 'second',
           position: [0, 0, 0],
-          model: 'pichetGenBlack',
+          model: 'terryLast',
+        }),
+
+        this.addCharacter({
+          name: 'third',
+          position: [0, 0, 0],
+          model: 'changhungLast',
+        }),
+
+        this.addCharacter({
+          name: 'fourth',
+          position: [0, 0, 0],
+          model: 'tasLast',
         }),
       ])
 
       this.characters.map((character) => {
         if (!character.mixer) return
 
-        character.mixer.timeScale = 1
-        character.mixer.setTime(0)
+        character.mixer.timeScale = 0.2
+        character.mixer.setTime(2)
       })
 
       return

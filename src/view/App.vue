@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, ReactiveFlags } from 'vue'
 import { useStore } from '@nanostores/vue'
 
 import {
@@ -86,12 +86,17 @@ onMounted(async () => {
       navigator.clipboard.writeText(output)
     }
 
-    if (event.key === 'v') world.setTime(EndingKeyframes.SHADOW_APPEAR - 1)
-    if (event.key === 'b') world.setTime(182)
-    if (event.key === 'n') world.setTime(EndingKeyframes.SHADOW_EXITING - 1)
-    if (event.key === 'm') world.setTime(world.first?.mixer?.time! + 0.01)
+    if (event.key === 'v') world.setTime(0)
+    if (event.key === 'b') world.setTime(2)
 
     if (event.key === 'e') {
+      if (world.flags.waitingEndingStart) {
+        world.fadeInSceneContent()
+
+        world.flags.waitingEndingStart = false
+        return
+      }
+
       if (world.isEnding) return $currentScene.set('BLACK')
 
       $currentScene.set('ENDING')

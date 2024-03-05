@@ -92,7 +92,7 @@ export const steps = {
       { title: '3. changhung', key: 'changhung' },
       { title: '4. padung yokrob', key: 'yokrob' },
       { title: '5. padung yokrob monkey', key: 'yokroblingImprovise' },
-      { title: 'number 60', key: 'number60' },
+      // { title: 'number 60', key: 'number60' },
       // { title: '7. robot 33', key: 'robot33' },
       // { title: '8. robot 57', key: 'robot57' },
       // { title: '9. base 33', key: 'base33' },

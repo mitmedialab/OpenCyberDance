@@ -92,11 +92,7 @@ export const resetLimits: Partial<Record<ModelKey, number>> = {
 }
 
 // Ending scene's keyframes
-export const EndingKeyframes = {
-  SHADOW_APPEAR: 99,
-  SHADOW_STILL: 105,
-  SHADOW_EXITING: 400,
-}
+export const EndingKeyframes = {}
 
 export interface CharacterOptions {
   name: CharacterKey
@@ -121,12 +117,7 @@ type Handlers = {
 
 type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 
-type ShadowCharacterState = 'hidden' | 'appear' | 'still' | 'exiting'
-
-type AnimationFlags = {
-  /** State of the shadow character */
-  shadowState: ShadowCharacterState
-}
+type AnimationFlags = object
 
 const DEBUG_SKELETON = false
 
@@ -141,9 +132,7 @@ export class Character {
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
 
-  flags: AnimationFlags = {
-    shadowState: 'hidden',
-  }
+  flags: AnimationFlags = {}
 
   frameCounter = 0
 
@@ -172,13 +161,19 @@ export class Character {
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
 
     // Pichet dancers in ending scene.
-    pichetMaster: 'Master.glb',
-    pichetGenBlack: 'Gen.glb',
+    // pichetMaster: 'Master.glb',
+    // pichetGenBlack: 'Gen.glb',
 
     // robot: 'Robot3357test.glb',
     // abstract: '3357modelidel.glb',
     // abstract57: '575859_tas.glb',
     // tranimid: 'tranimid.glb',
+
+    // black background
+    padungLast: 'Padunglast.glb',
+    terryLast: 'Terrylast.glb',
+    tasLast: 'Taslast.glb',
+    changhungLast: 'Changhonglast.glb',
   }
 
   static defaultActions: Record<ModelKey, string> = {
@@ -197,9 +192,13 @@ export class Character {
 
     waiting: 'sit002_Tas.001',
 
-    pichetMaster: 'Master',
+    // pichetMaster: 'Master',
+    // pichetGenBlack: 'Action|Action|Action_Action_Action',
 
-    pichetGenBlack: 'Action|Action|Action_Action_Action',
+    padungLast: 'padungdance_Tas_padungdance_Tas',
+    terryLast: 'Terrydance_Tas',
+    changhungLast: 'Changhongdance_Tas_Changhongdance_Tas',
+    tasLast: 'tasdance002_Tas',
   }
 
   constructor(options?: Partial<CharacterOptions>) {
@@ -338,15 +337,6 @@ export class Character {
 
           // disables frustum culling as it clips the character
           o.frustumCulled = false
-
-          // if scene two, then make it invisible
-          const isEnding = $currentScene.get() === 'ENDING'
-
-          if (isEnding && this.isSecondary) {
-            o.visible = false
-
-            o.material = new MeshBasicMaterial({ color: 0x00000000 })
-          }
 
           if (o.material instanceof MeshStandardMaterial) {
             o.material.wireframe = false
@@ -914,7 +904,6 @@ export class Character {
 
       // Tick animation logic
       this.tickAxisPoint()
-      this.tickEndingSceneShadowCharacter()
 
       // Update the global animation time
       if (this.isPrimary) {
@@ -932,99 +921,6 @@ export class Character {
     // TODO: inverse kinematics tick
   }
 
-  /**
-   * Tick the ending scene's second "shadow" character.
-   *
-   * !! WARNING: this is super expensive as it is called every frame. !!
-   */
-  async tickEndingSceneShadowCharacter() {
-    if ($currentScene.get() !== 'ENDING') return
-    if (!this.mixer) return
-
-    const time = this.mixer.time
-    const state = this.flags.shadowState
-    const nowHidden = time < EndingKeyframes.SHADOW_APPEAR
-
-    // hide the second shadow character if it should not yet be visible
-    // ! this logic is only triggered when **seeking manually**
-    if (state !== 'hidden' && nowHidden) {
-      console.log('transition to: HIDDEN')
-      this.flags.shadowState = 'hidden'
-
-      this.handlers.setCameraAngle('endingStart')
-      this.setShadowCharacterVisible(false)
-      this.forceRestoreHipsPosition()
-
-      return
-    }
-
-    if (nowHidden) return
-
-    // STATE 2: the shadow appears on stage.
-    const nowAppear = time < EndingKeyframes.SHADOW_STILL
-
-    if (state !== 'appear' && nowAppear) {
-      console.log('transition to: MORPHING')
-      this.flags.shadowState = 'appear'
-
-      this.setShadowCharacterVisible(true)
-      return
-    }
-
-    if (nowAppear) return
-
-    // STATE 3: the shadow is ready to dance. camera is set to side-by-side
-    const nowDancing = time < EndingKeyframes.SHADOW_EXITING
-
-    if (state !== 'still' && nowDancing) {
-      console.log('transition to: STILL')
-      this.flags.shadowState = 'still'
-
-      if (!this.params) return
-
-      await this.startFade()
-
-      // ? update the "lock position" parameter
-      this.params.lockPosition = true
-
-      const x = this.isPrimary ? -1 : 1
-      const clip = this.currentClip!
-
-      // ? update the keyframes value to lock the position
-      this.syncPositionLock(clip, [0, 0, 0])
-
-      // ? update the model position
-      this.setPosition(x, 0, 0)
-
-      const prevAction = this.actions.get(clip.name)
-      if (!prevAction) return
-
-      // ? sync the camera angle
-      if (this.isPrimary) this.handlers.setCameraAngle('endingSideBySide')
-
-      await delay(30)
-
-      await this.endFade()
-    }
-
-    if (nowDancing) return
-
-    // STATE 4: both characters are exiting the stage.
-    if (state !== 'exiting') {
-      console.log('transition to: EXITING')
-      this.flags.shadowState = 'exiting'
-
-      await this.startFade()
-
-      this.setPosition(0, 0, 0)
-      this.handlers.setCameraAngle('endingExit')
-
-      this.forceRestoreHipsPosition()
-
-      await this.endFade()
-    }
-  }
-
   async startFade() {
     if (this.isPrimary) {
       await this.handlers.fade('out')
@@ -1036,17 +932,6 @@ export class Character {
 
   async endFade() {
     if (this.isPrimary) this.handlers.fade('in').then()
-  }
-
-  setShadowCharacterVisible(visible: boolean) {
-    // only applies to the secondary character (i.e. the shadow character)
-    if (!this.isSecondary) return
-    if (!this.model) return
-
-    // Make secondary model visible
-    this.model.traverse((o) => {
-      if (o instanceof SkinnedMesh) o.visible = visible
-    })
   }
 
   // !! HACK: immediately cut to this clip, without cross-fading.

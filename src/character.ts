@@ -678,7 +678,13 @@ export class Character {
       perf.ebs(() => {
         if (!this.params) return
 
-        clip.tracks = applyExternalBodySpace(clip.tracks, this.params.space)
+        const key = `${this.options.name}-${this.options.model}`
+
+        clip.tracks = applyExternalBodySpace(
+          clip.tracks,
+          this.params.space,
+          key,
+        )
       })
     }
 

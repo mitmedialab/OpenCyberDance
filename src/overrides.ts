@@ -202,9 +202,47 @@ export function overrideDelay(
   if (offset < 0) track.shift(offset)
 }
 
+class EBSCache {
+  private cache: Map<string, number[]> = new Map()
+
+  averages(tracks: KeyframeTrack[], key: string) {
+    if (this.cache.has(key)) {
+      return this.cache.get(key)!
+    }
+
+    const timing = tracks[0].times
+
+    const values = [...timing].map((_, frame) => {
+      const sums = tracks.map((track) => {
+        if (!(track instanceof THREE.QuaternionKeyframeTrack)) return 0
+
+        const size = track.getValueSize()
+
+        let sum = 0
+        for (let axis = 0; axis < size; axis++) {
+          const num = Math.abs(track.values[frame * size + axis])
+          sum += !isNaN(num) ? num : 0
+        }
+
+        // Average of quaternion x/y/z/w values
+        return sum / size
+      })
+
+      return sums.reduce((a, b) => a + b, 0) / sums.length
+    })
+
+    this.cache.set(key, values)
+
+    return values
+  }
+}
+
+export const ebsCache = new EBSCache()
+
 export function applyExternalBodySpace(
   tracks: KeyframeTrack[],
   options: typeof Params.prototype.space,
+  key: string,
 ): THREE.KeyframeTrack[] {
   const start = performance.now()
 
@@ -213,27 +251,8 @@ export function applyExternalBodySpace(
   // Do not compute anything if the delay is zero.
   if (delay === 0) return tracks
 
-  const timing = tracks[0].times
-
   // TODO: cache the average value for a HUGE speedup!
-  const averages = [...timing].map((_, frame) => {
-    const sums = tracks.map((track) => {
-      if (!(track instanceof THREE.QuaternionKeyframeTrack)) return 0
-
-      const size = track.getValueSize()
-
-      let sum = 0
-      for (let axis = 0; axis < size; axis++) {
-        const num = Math.abs(track.values[frame * size + axis])
-        sum += !isNaN(num) ? num : 0
-      }
-
-      // Average of quaternion x/y/z/w values
-      return sum / size
-    })
-
-    return sums.reduce((a, b) => a + b, 0) / sums.length
-  })
+  const averages = ebsCache.averages(tracks, key)
 
   function cappedNormalize(arr: number[], threshold: number) {
     const maxBelowThreshold = Math.max(

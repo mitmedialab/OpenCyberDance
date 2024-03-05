@@ -14,7 +14,9 @@ onNotify($currentScene, async () => {
   // Two characters transitioning from body to shadow
   if (mode === 'ENDING') {
     // Disable position lock as we need characters to walk
+    world.params.reset()
     world.params.lockPosition = false
+
     await world.fadeInBlankScene()
 
     world.flags.waitingEndingStart = true

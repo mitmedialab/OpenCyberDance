@@ -210,6 +210,7 @@ class EBSCache {
       return this.cache.get(key)!
     }
 
+    const start = performance.now()
     const timing = tracks[0].times
 
     const values = [...timing].map((_, frame) => {
@@ -232,6 +233,9 @@ class EBSCache {
     })
 
     this.cache.set(key, values)
+
+    const time = (performance.now() - start).toFixed(2)
+    console.log(`> timing average cache took ${time}ms`)
 
     return values
   }

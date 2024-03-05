@@ -72,6 +72,7 @@ export interface UpdateParamFlags {
   lockPosition?: boolean
   rotation?: boolean
   axisPoint?: boolean
+  space?: boolean
 }
 
 // Attach a profiler
@@ -689,7 +690,11 @@ export class Character {
       })
     }
 
-    this.fadeIntoModifiedAction(clip)
+    if (flags.space) {
+      this.fadeIntoModifiedAction(clip, 0.1, false)
+    } else {
+      this.fadeIntoModifiedAction(clip)
+    }
 
     const time = (performance.now() - start).toFixed(2)
     console.log(`> character param update took ${time}ms`)

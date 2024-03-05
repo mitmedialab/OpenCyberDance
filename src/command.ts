@@ -192,7 +192,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     world.params.space.threshold = FromPercent.shifting(percText) / 100
 
     setTimeout(() => {
-      world.updateParams()
+      world.updateParams({ space: true })
     }, 80)
 
     return

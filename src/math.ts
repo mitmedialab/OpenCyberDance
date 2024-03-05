@@ -34,7 +34,10 @@ export function percentToValue(
 }
 
 export function getMaxOccurence(arr: string[]) {
-  const n = arr.map((x) => Math.abs(parseInt(x)).toString())
+  const n = arr
+    .map((x) => x.replace('%', '').replace('$', ''))
+    .map((x) => Math.abs(parseInt(x)).toString())
+
   const o = n.reduce(
     (a: Record<string, number>, c: string): Record<string, number> => {
       !(c in a) ? (a[c] = 1) : (a[c] += 1)

@@ -302,7 +302,7 @@ export function applyExternalBodySpace(
     }
 
     // Add any remaining valleys at the end
-    while (currentIntervalStart + x < original[original.length - 1][1]) {
+    while (currentIntervalStart + x < original[original.length - 1]?.[1]) {
       result.push([currentIntervalStart, currentIntervalStart + x])
       currentIntervalStart += x
     }
@@ -365,7 +365,7 @@ export function applyExternalBodySpace(
   })
 
   const time = (performance.now() - start).toFixed(2)
-  console.log(`> external body space took ${time}ms`, tracks)
+  console.log(`> external body space took ${time}ms`)
 
   return tracks
 }

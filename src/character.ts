@@ -740,8 +740,14 @@ export class Character {
     console.log('>>> Resetting character!')
     const config = this.params.characters[this.options.name]
 
-    this.options.model = config.model
-    this.options.action = config.action ?? null
+    if (config) {
+      this.options.model = config.model
+      this.options.action = config.action ?? null
+    }
+
+    if (!config) {
+      console.warn(`this character does not have a parametric configuration!`)
+    }
 
     await this.setup()
   }

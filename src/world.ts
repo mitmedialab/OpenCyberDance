@@ -36,16 +36,12 @@ import { preloader } from './preloader.ts'
 import { updateDebugLogCamera } from './store/debug'
 import { $currentScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
-import {
-  formulaRanges,
-  Transform,
-  TransformKey,
-  TransformOptions,
-} from './transforms'
+import { formulaRanges } from './transforms'
 import { Matcher } from './types'
 import { debounce, delay } from './utils'
 import { VoiceController } from './voice'
 
+export const ENDING_SPEED = 0.2
 const CAMERA_NEAR = 0.1
 const CAMERA_FAR = 2000
 
@@ -159,7 +155,6 @@ export class World {
     if (isEnding) {
       await delay(1000)
 
-      const ENDING_SPEED = 0.2
       world.params.timescale = ENDING_SPEED
 
       this.characters.map((character) => {
@@ -503,6 +498,30 @@ export class World {
           model: 'tasLast',
         }),
       ])
+
+      this.params.characters.first = {
+        model: 'padungLast',
+        action: '',
+      }
+
+      this.params.characters.second = {
+        model: 'terryLast',
+        action: '',
+      }
+
+      if (!this.params.characters.third) {
+        this.params.characters.third = {
+          model: 'changhungLast',
+          action: '',
+        }
+      }
+
+      if (!this.params.characters.fourth) {
+        this.params.characters.fourth = {
+          model: 'tasLast',
+          action: '',
+        }
+      }
 
       return
     }

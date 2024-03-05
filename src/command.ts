@@ -12,7 +12,7 @@ import { ChoiceKey, choices, Step } from './step-input'
 import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
-import { world } from './world'
+import { ENDING_SPEED, world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>
   ((v - min) / (max - min)) * 100
@@ -290,12 +290,24 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       const { model, action } = current[name]
 
       char.options.model = model
-      world.params.characters[name].model = model
-
       char.options.action = action ?? null
-      world.params.characters[name].action = action ?? null
+
+      if (world.params.characters?.[name]) {
+        world.params.characters[name].model = model
+        world.params.characters[name].action = action ?? null
+      }
 
       await changeCharacter(name)
+    }
+
+    if (world.isEnding) {
+      world.params.timescale = ENDING_SPEED
+
+      for (const char of world.characters) {
+        if (!char.mixer) continue
+
+        char.mixer.timeScale = ENDING_SPEED
+      }
     }
 
     await world.fadeIn()

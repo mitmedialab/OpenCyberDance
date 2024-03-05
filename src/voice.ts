@@ -299,7 +299,7 @@ export class VoiceController {
 
     if (isEmpty && isPercent) {
       const cached = this.unfinalPercentCache.get(resultLen)
-      console.warn(`empty result for percent. id ${resultLen}`)
+      console.warn(`empty result for percent ~ id ${resultLen}`)
 
       if (typeof cached === 'number') {
         handleVoiceSelection(cached)
@@ -325,12 +325,14 @@ export class VoiceController {
 
       // do not use voice engine to detect percentage if not final
       if (isPercent && !isFinal) {
-        console.debug('[vh:skip] percent not final', alts)
+        const id = resultLen
+        console.info(`[vh:skip id=${id}] percent not final`, alts)
 
         const n = parseInt(alts[0])
 
         if (!isNaN(n)) {
-          this.unfinalPercentCache.set(resultLen, n)
+          console.log(`cached ${n} for id ${id}`)
+          this.unfinalPercentCache.set(id, n)
         }
 
         return false

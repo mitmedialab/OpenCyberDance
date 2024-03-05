@@ -30,12 +30,6 @@ onMounted(async () => {
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
-      // if (world.isEnding && world.flags.waitingEndingStart) {
-      //   world.fadeInSceneContent()
-      //   world.flags.waitingEndingStart = false
-      //   return
-      // }
-
       const willVisible = !showPrompt.value
 
       const completed = $valueCompleted.get()
@@ -49,15 +43,16 @@ onMounted(async () => {
       }
 
       resetPrompt()
-      $showPrompt.set(willVisible)
 
       if (willVisible) {
         ding()
         world.voice.enableVoice('prompt activate')
         extendPromptTimeout()
+        $showPrompt.set(true)
       } else {
         world.voice.stop()
         clearPromptTimeout()
+        $showPrompt.set(false)
       }
     }
 

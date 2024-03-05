@@ -39,6 +39,8 @@ export class VoiceController {
   /* Mapping between id (by recognition len) and success flag */
   successFlags: Map<number, boolean> = new Map()
 
+  unfinalPercentCache: Map<number, number> = new Map()
+
   get transcript() {
     return $transcript.get()
   }
@@ -293,6 +295,20 @@ export class VoiceController {
       `[heard] ${alts.join(', ')} (final=${isFinal}, id=${resultLen})`,
     )
 
+    const isEmpty = alts.map((a) => a.trim()).every((a) => a === '')
+
+    if (isEmpty && isPercent) {
+      const cached = this.unfinalPercentCache.get(resultLen)
+      console.warn(`empty result for percent. id ${resultLen}`)
+
+      if (typeof cached === 'number') {
+        handleVoiceSelection(cached)
+        this.unfinalPercentCache.clear()
+
+        return true
+      }
+    }
+
     $transcript.set(alts.join(', '))
 
     // PASS 1 - use speech recognition grammar
@@ -310,6 +326,13 @@ export class VoiceController {
       // do not use voice engine to detect percentage if not final
       if (isPercent && !isFinal) {
         console.debug('[vh:skip] percent not final', alts)
+
+        const n = parseInt(alts[0])
+
+        if (!isNaN(n)) {
+          this.unfinalPercentCache.set(resultLen, n)
+        }
+
         return false
       }
 

@@ -159,10 +159,13 @@ export class World {
     if (isEnding) {
       await delay(1000)
 
+      const ENDING_SPEED = 0.2
+      world.params.timescale = ENDING_SPEED
+
       this.characters.map((character) => {
         if (!character.mixer) return
 
-        character.mixer.timeScale = 0.2
+        character.mixer.timeScale = ENDING_SPEED
       })
     }
 
@@ -178,16 +181,6 @@ export class World {
         character.prepareExternalBodySpaceCache()
       }
     })
-  }
-
-  adjustPlaybackSpeed(speed: number) {
-    this.params.timescale = speed
-
-    for (const character of this.characters) {
-      if (!character.mixer) continue
-
-      character.mixer.timeScale = speed
-    }
   }
 
   setupComposer() {

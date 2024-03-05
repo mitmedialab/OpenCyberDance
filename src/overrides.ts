@@ -336,8 +336,6 @@ export function applyExternalBodySpace(
     Math.floor(100 * (1 - threshold)),
   )
 
-  const start = performance.now()
-
   // Every track must apply the same rotation freeze.
   tracks.forEach((track) => {
     // apply it to rotations and hips position
@@ -347,8 +345,14 @@ export function applyExternalBodySpace(
 
     if (!isTargetTrack) return
 
-    const startFrames = valleys.map(([start]) => start)
-    const endFrames = valleys.map(([, end]) => end)
+    // Pre-compute Sets for fast existence checks
+    const startFramesSet = new Set(valleys.map(([start]) => start))
+    const endFramesSet = new Set(valleys.map(([, end]) => end))
+
+    // Create a Map for direct frame-to-valley mapping
+    const frameToValleyMap = new Map(
+      valleys.map(([start, end]) => [start, [start, end]]),
+    )
 
     // Current region's delay offset.
     let delayPerFrame = 0
@@ -360,16 +364,19 @@ export function applyExternalBodySpace(
     let shouldAdjust = true
 
     track.times.forEach((_, frame) => {
-      if (endFrames.includes(frame)) {
+      if (endFramesSet.has(frame)) {
         shouldAdjust = false
         globalDelay += delay
         delayPerFrame = 0
       }
 
       // Increase the offset if the frame is a start frame.
-      if (startFrames.includes(frame)) {
-        const [, end] = valleys[startFrames.findIndex((s) => s === frame)]
-        const numFrames = Math.abs(end - frame)
+      if (startFramesSet.has(frame)) {
+        const valley = frameToValleyMap.get(frame)
+        if (!valley) return
+
+        const [start, end] = valley
+        const numFrames = Math.abs(end - start)
 
         delayPerFrame = delay / numFrames
         shouldAdjust = true
@@ -382,9 +389,6 @@ export function applyExternalBodySpace(
       track.times[frame] += offset
     })
   })
-
-  const time = (performance.now() - start).toFixed(2)
-  console.log(`> external body space took ${time}ms`)
 
   return tracks
 }

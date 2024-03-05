@@ -741,35 +741,6 @@ export class Character {
     await this.setup()
   }
 
-  overrideTrack(
-    key: Matcher,
-    values: Float32Array | number[],
-    times?: Float32Array | number[],
-  ) {
-    const id = this.trackIdByKey(key) ?? 0
-
-    const clip = this.currentClip
-    if (!clip) return
-
-    const track = clip.tracks[id]
-    if (!track) return
-
-    const size = track.values.length
-
-    if (values.length !== size) {
-      console.warn(`track length mismatch. ${size} != ${values.length}`)
-    }
-
-    if (times) {
-      clip.tracks[id].times = new Float32Array(times)
-    }
-
-    clip.tracks[id].values = new Float32Array(values)
-    clip.tracks[id].validate()
-
-    this.fadeIntoModifiedAction(clip)
-  }
-
   /** Get the original keyframe track. */
   originalClip(ids: number[]) {
     const clip = this.currentClip

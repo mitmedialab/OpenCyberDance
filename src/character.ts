@@ -690,8 +690,8 @@ export class Character {
       })
     }
 
-    if (flags.space) {
-      this.fadeIntoModifiedAction(clip, 0.1, false)
+    if (flags.timing) {
+      this.fadeIntoModifiedAction(clip, 0.6, false)
     } else {
       this.fadeIntoModifiedAction(clip)
     }

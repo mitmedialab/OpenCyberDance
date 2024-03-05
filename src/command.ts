@@ -26,7 +26,7 @@ const rangeConfig: Record<
   energy: [0, 1, 300],
   curve: [-2, 3],
   shifting: [0, 100],
-  space: [0, 2],
+  space: [0, 1.5],
   rotations: [1, 3.5],
   speed: [0, 1, 300],
 

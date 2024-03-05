@@ -271,6 +271,7 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     if (isNaN(percent)) {
+      if (fixNum('0', /^(zero|ciro)$/i)) return true
       if (fixNum('100', /^(one hundred)$/i)) return true
       if (fixNum('200', /^(two hundred)$/i)) return true
       if (fixNum('300', /^(three hundred)$/i)) return true

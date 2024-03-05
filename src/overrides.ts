@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
-import { ModelKey } from './character'
+import { Character, ModelKey } from './character'
 import {
   AxisPointControlParts,
   CurvePartKey,
@@ -239,6 +239,10 @@ class EBSCache {
 
     return values
   }
+
+  key(c: Character) {
+    return `${c.options.name}-${c.options.model}`
+  }
 }
 
 export const ebsCache = new EBSCache()
@@ -318,8 +322,6 @@ export function applyExternalBodySpace(
   options: typeof Params.prototype.space,
   key: string,
 ): THREE.KeyframeTrack[] {
-  const start = performance.now()
-
   const { delay, threshold, minWindow } = options ?? {}
 
   // Do not compute anything if the delay is zero.
@@ -333,6 +335,8 @@ export function applyExternalBodySpace(
     detectValleys(cappedNormalize(averages, 0.05), threshold, minWindow),
     Math.floor(100 * (1 - threshold)),
   )
+
+  const start = performance.now()
 
   // Every track must apply the same rotation freeze.
   tracks.forEach((track) => {

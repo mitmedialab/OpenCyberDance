@@ -153,6 +153,9 @@ export class World {
     // Sync every character's parameters.
     this.updateParams()
 
+    // Prepare lookup tables to speed up processing time.
+    this.warmupCharacterCache()
+
     if (isEnding) {
       await delay(1000)
 
@@ -165,6 +168,16 @@ export class World {
 
     window.world = this
     this.ready = true
+  }
+
+  warmupCharacterCache() {
+    const p = profile('warmup character cache', 1)
+
+    p(() => {
+      for (const character of this.characters) {
+        character.prepareExternalBodySpaceCache()
+      }
+    })
   }
 
   adjustPlaybackSpeed(speed: number) {

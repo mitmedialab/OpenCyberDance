@@ -25,6 +25,7 @@ import {
 import { trackToEuler } from './math'
 import {
   applyExternalBodySpace,
+  ebsCache,
   overrideDelay,
   overrideEnergy,
   overrideRotation,
@@ -678,7 +679,7 @@ export class Character {
       perf.ebs(() => {
         if (!this.params) return
 
-        const key = `${this.options.name}-${this.options.model}`
+        const key = ebsCache.key(this)
 
         clip.tracks = applyExternalBodySpace(
           clip.tracks,
@@ -915,5 +916,16 @@ export class Character {
 
       this.mixer.uncacheAction(prevAction.getClip())
     }, 4000)
+  }
+
+  /**
+   * Warmup caches for External Body Space
+   */
+  prepareExternalBodySpaceCache() {
+    const tracks = this.currentClip!.tracks
+    const key = ebsCache.key(this)
+
+    // Averages took around 50ms to compute
+    ebsCache.averages(tracks, key)
   }
 }

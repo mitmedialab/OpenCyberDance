@@ -5,7 +5,6 @@ import {
   Bone,
   LineBasicMaterial,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
@@ -652,9 +651,12 @@ export class Character {
       }
 
       // Override curve only
-      if (flags.curve && _curve.tracks.includes(index) && _curve.equation) {
-        // debugger
+      const isCurve =
+        flags.curve &&
+        _curve.tracks.includes(index) &&
+        track.name.includes('quaternion')
 
+      if (isCurve && _curve.equation) {
         track.values = applyTrackTransform(track, _curve.equation, {
           axis: _curve.axis,
           tracks: _curve.tracks,
@@ -771,55 +773,6 @@ export class Character {
     })
 
     return clip
-  }
-
-  transform(
-    transform: TransformKey | Transform | 'none',
-    options: Omit<TransformOptions, 'tracks'> & { tracks: Matcher | Matcher[] },
-  ) {
-    let tracks: number[]
-    if (this.options.freezeParams) return
-
-    if (options.tracks) {
-      const _tracks = Array.isArray(options.tracks)
-        ? options.tracks
-        : [options.tracks]
-
-      // Query the track ids.
-      tracks = this.query(..._tracks)
-    }
-
-    const isKey = typeof transform === 'string'
-    const name = isKey ? transform : transform.name
-
-    const transformer = isKey
-      ? transformers[transform as TransformKey]
-      : transform
-
-    if (!transformer) return
-
-    console.log(`> applying ${name} transform`, options)
-
-    const clip = this.currentClip
-    if (!clip) return
-
-    clip.tracks.forEach((track, id) => {
-      if (!transformer) return
-
-      // Exclude the tracks that does not match.
-      if (options.tracks && !tracks?.includes(id)) return
-
-      // Apply the transform to each track.
-      const values = applyTrackTransform(track, transformer, {
-        ...options,
-        tracks,
-      })
-
-      track.values = values
-      track.validate()
-    })
-
-    this.fadeIntoModifiedAction(clip)
   }
 
   trackIdByKey(key: Matcher) {

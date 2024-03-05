@@ -22,7 +22,7 @@ import { $currentScene } from '../store/scene'
 const showPrompt = useStore($showPrompt)
 
 const rendererElement = ref<HTMLDivElement>()
-const plotterContainer = ref<HTMLDivElement>()
+// const plotterContainer = ref<HTMLDivElement>()
 
 onMounted(async () => {
   await world.preload()
@@ -113,9 +113,9 @@ onMounted(async () => {
 
   rendererElement.value?.appendChild(world.renderer.domElement)
 
-  if (world.plotter.domElement) {
-    plotterContainer.value?.appendChild(world.plotter.domElement)
-  }
+  // if (world.plotter.domElement) {
+  //   plotterContainer.value?.appendChild(world.plotter.domElement)
+  // }
 
   world.render()
 })
@@ -124,7 +124,8 @@ onMounted(async () => {
 <template>
   <div class="app-container">
     <div ref="rendererElement" />
-    <div ref="plotterContainer" pointer-events-none />
+
+    <!-- <div ref="plotterContainer" pointer-events-none /> -->
 
     <StepPrompt v-if="showPrompt" />
     <StageControl />

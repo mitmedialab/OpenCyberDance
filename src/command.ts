@@ -126,30 +126,13 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     // Normal = 100%
     const isNormal = _percent === 100
 
-    // Always Low Pass
     world.params.curve.threshold = FromPercent.curve(percText)
-
-    // const equation = equationText as TransformKey
     world.params.curve.equation = isNormal ? 'none' : 'capMin'
 
     for (const part in curveParts) {
       world.params.curve.parts[part as CurvePartKey] =
         partText === 'all' ? true : partText === part
     }
-
-    // switch (equation) {
-    //   case 'derivative':
-    //     // always use first-order derivative
-    //     world.params.curve.threshold = 1
-    //     break
-    //   case 'lowpass':
-    //     break
-    //   case 'gaussian':
-    //   case 'capMin':
-    //   case 'capMax':
-    //     world.params.curve.threshold = toValue(percText, -2, 3)
-    //     break
-    // }
 
     setTimeout(() => {
       world.updateParams({ curve: true })

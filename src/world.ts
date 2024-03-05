@@ -76,7 +76,7 @@ export class World {
   })
 
   stats = new Stats()
-  plotter = new Plotter(this)
+  // plotter = new Plotter(this)
   params = new Params()
   panel = new Panel(this.params)
   voice = new VoiceController(this)
@@ -98,14 +98,6 @@ export class World {
 
   get trackNames() {
     return this.first?.currentClip?.tracks.map((t) => t.name)
-  }
-
-  transform(
-    transform: TransformKey | Transform | 'none',
-    options: TransformOptions & { tracks: Matcher | Matcher[] },
-  ) {
-    this.first?.transform(transform, options)
-    this.updatePlotterOnPause()
   }
 
   setBackground(mode: 'white' | 'black') {
@@ -428,8 +420,8 @@ export class World {
   handleCurveFormulaChange() {
     const { axis = [], tracks = [] } = this.first?.curveConfig ?? {}
 
-    this.plotter.axes = axis
-    this.plotter.select(...tracks)
+    // this.plotter.axes = axis
+    // this.plotter.select(...tracks)
 
     const dropdown = this.panel.curveFolder?.children.find(
       (c) => 'property' in c && c.property === 'threshold',
@@ -555,12 +547,12 @@ export class World {
     }
 
     this.panel.handlers.showGraph = (visible) => {
-      this.plotter.updateVisibility(visible)
+      // this.plotter.updateVisibility(visible)
     }
 
     this.panel.handlers.seek = (time) => {
       this.characters.forEach((c) => c.mixer?.setTime(time))
-      this.updatePlotterOnPause()
+      // this.updatePlotterOnPause()
     }
 
     this.panel.handlers.pause = (paused) => {
@@ -573,11 +565,11 @@ export class World {
   }
 
   // If we are paused and seeking, update the plotter.
-  updatePlotterOnPause = debounce(() => {
-    if (!this.params.paused) return
+  // updatePlotterOnPause = debounce(() => {
+  //   if (!this.params.paused) return
 
-    this.characters.forEach((c) => this.plotter?.update(c, { seeking: true }))
-  }, 200)
+  //   this.characters.forEach((c) => this.plotter?.update(c, { seeking: true }))
+  // }, 200)
 
   /** Queries the track id by name or regex. */
   query(...query: Matcher[]): number[] {

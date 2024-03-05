@@ -314,11 +314,10 @@ export function applyExternalBodySpace(
     Math.floor(100 * (1 - threshold)),
   )
 
-  // console.log(averages)
   // Every track must apply the same rotation freeze.
   tracks.forEach((track, ti) => {
     // Only apply external body space for rotations
-    if (!(track instanceof THREE.QuaternionKeyframeTrack)) return
+    if (!(track instanceof QuaternionKeyframeTrack)) return
 
     const startFrames = valleys.map(([start]) => start)
     const endFrames = valleys.map(([, end]) => end)

@@ -36,8 +36,9 @@ onMounted(async () => {
 
       if (completed) {
         ding()
-        world.voice.enableVoice('prompt activate')
+        world.voice.enableVoice('prompt completed')
         resetPrompt()
+        $showPrompt.set(true)
 
         return
       }
@@ -46,13 +47,16 @@ onMounted(async () => {
 
       if (willVisible) {
         ding()
-        world.voice.enableVoice('prompt activate')
-        extendPromptTimeout()
+        world.voice.enableVoice('prompt activated')
         $showPrompt.set(true)
+
+        // start the prompt timeout countdown
+        extendPromptTimeout('prompt activated', true)
       } else {
         world.voice.stop()
-        clearPromptTimeout()
         $showPrompt.set(false)
+
+        clearPromptTimeout('prompt deactivated')
       }
     }
 

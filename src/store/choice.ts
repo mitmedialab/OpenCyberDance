@@ -5,7 +5,7 @@ import { runCommand } from '../command'
 import { Choice, ChoiceKey, choices, Step } from '../step-input'
 import { world } from '../world'
 
-const PROMPT_TIMEOUT = 1000 * 20
+const PROMPT_TIMEOUT = 1000 * 30
 
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
@@ -62,7 +62,7 @@ export function nextStep() {
 
   $currentStepId.set(next)
 
-  extendPromptTimeout()
+  extendPromptTimeout('prompt next')
 }
 
 export function prevStep() {
@@ -79,7 +79,7 @@ export function prevStep() {
 
   $currentStepId.set(Math.max(step - 1, 0))
 
-  extendPromptTimeout()
+  extendPromptTimeout('prompt prev')
 }
 
 export function setChoice(choice: ChoiceKey) {
@@ -94,7 +94,7 @@ export function setChoice(choice: ChoiceKey) {
     $showPrompt.set(false)
   }
 
-  extendPromptTimeout()
+  extendPromptTimeout(`set choice ${choice}`)
 }
 
 export function clearStepChoice() {
@@ -143,9 +143,7 @@ const selectChoice = (choice: ChoiceKey) => {
 }
 
 export function handleVoiceSelection(input: string | number): boolean {
-  extendPromptTimeout()
-
-  console.log(`-- voice selection: ${input}`)
+  extendPromptTimeout(`handle voice ${input}`)
 
   const selectedChoiceKey = $selectedChoiceKey.get()
   const currentStep = $currentStep.get() as Step
@@ -339,7 +337,6 @@ export function createGrammarFromState(): string | null {
     };`
 
     grammar += choiceGrammar
-    // console.log('choice grammar:', choiceGrammar)
 
     return grammar
   }
@@ -347,24 +344,34 @@ export function createGrammarFromState(): string | null {
   return null
 }
 
-export function extendPromptTimeout() {
-  // clear existing timer
-  clearPromptTimeout()
-
-  const nextTimer = setTimeout(() => {
-    $showPrompt.set(false)
-    world.voice.stop()
-    clearPromptTimeout()
-  }, PROMPT_TIMEOUT)
-
-  $promptTimer.set(nextTimer)
-}
-
-export function clearPromptTimeout() {
+export function clearPromptTimeout(reason?: string) {
   const timer = $promptTimer.get()
-  if (timer) clearTimeout(timer)
+  if (timer !== null) clearTimeout(timer)
+
+  console.debug(`clearing prompt (t = ${timer}, r = "${reason}")`)
 
   $promptTimer.set(null)
 
   return timer
+}
+
+export function extendPromptTimeout(reason?: string, always = false) {
+  const timer = $promptTimer.get()
+  if (timer === null && !always) return
+
+  console.debug(`extending prompt (t = ${timer}, r = "${reason}")`)
+
+  // clear existing timer
+  clearPromptTimeout('to extend')
+
+  const nextTimer = setTimeout(() => {
+    console.log(`prompt timed out:`, $promptTimer.get())
+
+    $showPrompt.set(false)
+    world.voice.stop()
+
+    clearPromptTimeout('timed out')
+  }, PROMPT_TIMEOUT)
+
+  $promptTimer.set(nextTimer)
 }

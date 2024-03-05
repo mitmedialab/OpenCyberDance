@@ -8,6 +8,7 @@ import {
   $showPrompt,
   $valueCompleted,
   createGrammarFromState,
+  extendPromptTimeout,
   getVoicePromptParams,
   handleVoiceSelection,
   prevStep,
@@ -165,8 +166,14 @@ export class VoiceController {
       this.updateStatus('listening', 'audio start')
     })
 
+    this.recognition.addEventListener('speechstart', () => {
+      extendPromptTimeout('speech start')
+    })
+
     this.recognition.addEventListener('result', async (e) => {
       const id = e.results.length
+
+      extendPromptTimeout('speech result')
 
       if (this.successFlags.get(id)) {
         console.debug(`[!] ${id} already success. (v=1)`)

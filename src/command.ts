@@ -9,6 +9,7 @@ import {
   energyParts,
 } from './parts.ts'
 import { ChoiceKey, choices, Step } from './step-input'
+import { clearPromptTimeout, extendPromptTimeout } from './store/choice.ts'
 import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
@@ -79,6 +80,7 @@ export const CurrentPercent = {
 }
 
 export async function runCommand(primary: ChoiceKey, args: string[]) {
+  clearPromptTimeout()
   console.log(`executing command: ${primary} [${args.join(' ')}]`)
 
   const choice = choices[primary]

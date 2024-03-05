@@ -235,7 +235,7 @@ export function handleVoiceSelection(input: string | number): boolean {
 
     // auto-corrections
     if (fix('left', /^(left|left limb)/i)) return true
-    if (fix('right', /^(right|right limb|rylim|ride lim)/i)) return true
+    if (fix('right', /^(right|right limb|rylim|ride lim|light)/i)) return true
     if (fix('upper', /^(up|upper|up per|up her|at her)/i)) return true
     if (fix('lower', /^(low|lower)/i)) return true
     if (fix('leftArm', /(left on)/i)) return true

@@ -243,6 +243,76 @@ class EBSCache {
 
 export const ebsCache = new EBSCache()
 
+function cappedNormalize(arr: number[], threshold: number) {
+  const maxBelowThreshold = Math.max(
+    ...arr.filter((value) => value <= threshold),
+  )
+
+  const arrCapped = arr.map((value) =>
+    value > threshold ? maxBelowThreshold : value,
+  )
+
+  const minVal = Math.min(...arrCapped)
+  const maxVal = Math.max(...arrCapped)
+
+  const normalizedArr = arrCapped.map(
+    (value) => (value - minVal) / (maxVal - minVal),
+  )
+
+  return normalizedArr
+}
+
+function padValley(original: [start: number, end: number][], x: number) {
+  const result: [start: number, end: number][] = []
+  let currentIntervalStart = 0
+
+  for (const [start, end] of original) {
+    // Add valleys at intervals x
+    while (currentIntervalStart + x < start) {
+      result.push([currentIntervalStart + x, currentIntervalStart + x + 3])
+      currentIntervalStart += x + 3
+    }
+
+    // Add the original valley
+    result.push([start, end])
+    currentIntervalStart = end
+  }
+
+  // Add any remaining valleys at the end
+  while (currentIntervalStart + x < original[original.length - 1]?.[1]) {
+    result.push([currentIntervalStart, currentIntervalStart + x])
+    currentIntervalStart += x
+  }
+
+  return result
+}
+
+function detectValleys(array: number[], threshold: number, minWindow: number) {
+  const t = threshold / 100
+
+  const valleys: [start: number, end: number][] = []
+  let startIdx = 0
+
+  for (let i = 1; i < array.length; i++) {
+    const diff = array[i] - array[i - 1]
+
+    if (Math.abs(diff) - t <= 0) {
+      continue
+    } else {
+      if (i - startIdx > minWindow) {
+        valleys.push([startIdx, i - 1])
+      }
+      startIdx = i
+    }
+  }
+
+  if (array.length - startIdx > minWindow) {
+    valleys.push([startIdx, array.length - 1])
+  }
+
+  return valleys
+}
+
 export function applyExternalBodySpace(
   tracks: KeyframeTrack[],
   options: typeof Params.prototype.space,
@@ -258,81 +328,6 @@ export function applyExternalBodySpace(
   // TODO: cache the average value for a HUGE speedup!
   const averages = ebsCache.averages(tracks, key)
 
-  function cappedNormalize(arr: number[], threshold: number) {
-    const maxBelowThreshold = Math.max(
-      ...arr.filter((value) => value <= threshold),
-    )
-
-    const arrCapped = arr.map((value) =>
-      value > threshold ? maxBelowThreshold : value,
-    )
-
-    const minVal = Math.min(...arrCapped)
-    const maxVal = Math.max(...arrCapped)
-
-    const normalizedArr = arrCapped.map(
-      (value) => (value - minVal) / (maxVal - minVal),
-    )
-
-    return normalizedArr
-  }
-
-  function detectValleys(
-    array: number[],
-    threshold: number,
-    minWindow: number,
-  ) {
-    const t = threshold / 100
-
-    const valleys: [start: number, end: number][] = []
-    let startIdx = 0
-
-    console.log('threshold: ', t)
-    for (let i = 1; i < array.length; i++) {
-      const diff = array[i] - array[i - 1]
-
-      if (Math.abs(diff) - t <= 0) {
-        continue
-      } else {
-        if (i - startIdx > minWindow) {
-          valleys.push([startIdx, i - 1])
-        }
-        startIdx = i
-      }
-    }
-
-    if (array.length - startIdx > minWindow) {
-      valleys.push([startIdx, array.length - 1])
-    }
-
-    return valleys
-  }
-
-  function padValley(original: [start: number, end: number][], x: number) {
-    const result: [start: number, end: number][] = []
-    let currentIntervalStart = 0
-
-    for (const [start, end] of original) {
-      // Add valleys at intervals x
-      while (currentIntervalStart + x < start) {
-        result.push([currentIntervalStart + x, currentIntervalStart + x + 3])
-        currentIntervalStart += x + 3
-      }
-
-      // Add the original valley
-      result.push([start, end])
-      currentIntervalStart = end
-    }
-
-    // Add any remaining valleys at the end
-    while (currentIntervalStart + x < original[original.length - 1]?.[1]) {
-      result.push([currentIntervalStart, currentIntervalStart + x])
-      currentIntervalStart += x
-    }
-
-    return result
-  }
-
   // Valleys in a graph with low change.
   const valleys: [start: number, end: number][] = padValley(
     detectValleys(cappedNormalize(averages, 0.05), threshold, minWindow),
@@ -340,16 +335,13 @@ export function applyExternalBodySpace(
   )
 
   // Every track must apply the same rotation freeze.
-  tracks.forEach((track, ti) => {
+  tracks.forEach((track) => {
     // apply it to rotations and hips position
     // ! character will float in the air if hips position is not adjusted
-    if (
-      !(
-        track instanceof QuaternionKeyframeTrack ||
-        track.name === 'Hips.position'
-      )
-    )
-      return
+    const isTargetTrack =
+      track instanceof QuaternionKeyframeTrack || track.name === 'Hips.position'
+
+    if (!isTargetTrack) return
 
     const startFrames = valleys.map(([start]) => start)
     const endFrames = valleys.map(([, end]) => end)

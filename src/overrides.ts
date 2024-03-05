@@ -206,6 +206,8 @@ export function applyExternalBodySpace(
   tracks: KeyframeTrack[],
   options: typeof Params.prototype.space,
 ): THREE.KeyframeTrack[] {
+  const start = performance.now()
+
   const { delay, threshold, minWindow } = options ?? {}
 
   // Do not compute anything if the delay is zero.
@@ -329,11 +331,11 @@ export function applyExternalBodySpace(
     let globalDelay = 0
 
     // Are we currently adjusting the delay?
-    let isAdjusting = true
+    let shouldAdjust = true
 
     track.times.forEach((_, frame) => {
       if (endFrames.includes(frame)) {
-        isAdjusting = false
+        shouldAdjust = false
         globalDelay += delay
         delayPerFrame = 0
       }
@@ -344,23 +346,19 @@ export function applyExternalBodySpace(
         const numFrames = Math.abs(end - frame)
 
         delayPerFrame = delay / numFrames
-        isAdjusting = true
+        shouldAdjust = true
       }
 
-      // Apply the accumulated delay.
-      track.times[frame] += globalDelay
+      let offset = globalDelay
+      if (shouldAdjust) offset += delayPerFrame
 
-      // Apply the local delay for each frame.
-      if (isAdjusting) {
-        track.times[frame] += delayPerFrame
-      }
+      // Apply the timing offset for each frame.
+      track.times[frame] += offset
     })
-
-    tracks[ti] = track
   })
 
-  // console.log(valleys)
-  console.log(`Found ${valleys.length} valleys with low change.`)
+  const time = (performance.now() - start).toFixed(2)
+  console.log(`> external body space took ${time}ms`, tracks)
 
   return tracks
 }

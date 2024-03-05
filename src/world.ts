@@ -153,9 +153,14 @@ export class World {
     // Sync every character's parameters.
     this.updateParams()
 
-    // ? do we slow down the playback speed?
     if (isEnding) {
-      this.adjustPlaybackSpeed(0.2)
+      await delay(1000)
+
+      this.characters.map((character) => {
+        if (!character.mixer) return
+
+        character.mixer.timeScale = 0.2
+      })
     }
 
     window.world = this
@@ -348,7 +353,7 @@ export class World {
   }
 
   updateParams(flags?: UpdateParamFlags) {
-    const p = profile('updateParams', 10)
+    const p = profile('update char params', 10)
 
     p(() => {
       if (flags?.curve) this.handleCurveFormulaChange()
@@ -492,13 +497,6 @@ export class World {
           model: 'tasLast',
         }),
       ])
-
-      this.characters.map((character) => {
-        if (!character.mixer) return
-
-        character.mixer.timeScale = 0.2
-        character.mixer.setTime(2)
-      })
 
       return
     }

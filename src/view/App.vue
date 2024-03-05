@@ -86,8 +86,8 @@ onMounted(async () => {
       navigator.clipboard.writeText(output)
     }
 
-    if (event.key === 'v') world.setTime(0)
-    if (event.key === 'b') world.setTime(2)
+    if (event.key === 'v') world.setTime(2)
+    if (event.key === 'b') world.setTime(10)
 
     if (event.key === 'e') {
       if (world.flags.waitingEndingStart) {

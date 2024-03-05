@@ -74,7 +74,7 @@ export interface UpdateParamFlags {
 }
 
 // Attach a profiler
-const p = {
+const perf = {
   ebs: profile('external body space', 20),
 }
 
@@ -554,6 +554,8 @@ export class Character {
    * Update animation parameters.
    */
   updateParams(flags: UpdateParamFlags = { timing: true }) {
+    const start = performance.now()
+
     const clip = this.currentClip
     if (!clip || !this.params) return
 
@@ -673,7 +675,7 @@ export class Character {
 
     // External body space is always applied for timing changes.
     if (flags.timing) {
-      p.ebs(() => {
+      perf.ebs(() => {
         if (!this.params) return
 
         clip.tracks = applyExternalBodySpace(clip.tracks, this.params.space)
@@ -681,6 +683,9 @@ export class Character {
     }
 
     this.fadeIntoModifiedAction(clip)
+
+    const time = (performance.now() - start).toFixed(2)
+    console.log(`> character param update took ${time}ms`)
   }
 
   get curveConfig(): { tracks: Matcher[]; axis: Axis[] } {
@@ -698,7 +703,7 @@ export class Character {
     return { tracks, axis }
   }
 
-  fadeIntoModifiedAction(clip: THREE.AnimationClip, duration = 3, warp = true) {
+  fadeIntoModifiedAction(clip: THREE.AnimationClip, duration = 1, warp = true) {
     if (!this.mixer) return
 
     const prevAction = this.actions.get(clip.name)

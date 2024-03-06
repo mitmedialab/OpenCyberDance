@@ -163,8 +163,10 @@ export class World {
   async transitionInEndingScene() {
     if (!this.isEnding) return
 
-    await delay(1000)
+    this.setTime(2.5)
     this.setSpeed(ENDING_SPEED)
+
+    await delay(1000)
   }
 
   setSpeed(speed: number) {

@@ -340,6 +340,8 @@ export class Character {
           // disables frustum culling as it clips the character
           o.frustumCulled = false
 
+          console.log(o.scale)
+
           // if (o.material instanceof MeshStandardMaterial) {
           //   o.material.wireframe = false
           //   o.material.roughness = 0.2
@@ -366,6 +368,7 @@ export class Character {
       }
 
       this.model = gltfModel.scene
+
       this.scene.add(this.model)
 
       // Adjust character scale

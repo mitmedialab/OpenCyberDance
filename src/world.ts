@@ -152,20 +152,28 @@ export class World {
     // Prepare lookup tables to speed up processing time.
     this.warmupCharacterCache()
 
-    if (isEnding) {
-      await delay(1000)
-
-      world.params.timescale = ENDING_SPEED
-
-      this.characters.map((character) => {
-        if (!character.mixer) return
-
-        character.mixer.timeScale = ENDING_SPEED
-      })
-    }
+    // Transition in ending scene
+    this.transitionInEndingScene()
 
     window.world = this
     this.ready = true
+  }
+
+  async transitionInEndingScene() {
+    if (!this.isEnding) return
+
+    await delay(1000)
+    this.setSpeed(ENDING_SPEED)
+  }
+
+  setSpeed(speed: number) {
+    world.params.timescale = speed
+
+    this.characters.map((character) => {
+      if (!character.mixer) return
+
+      character.mixer.timeScale = speed
+    })
   }
 
   warmupCharacterCache() {

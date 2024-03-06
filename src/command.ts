@@ -13,6 +13,7 @@ import { clearPromptTimeout, extendPromptTimeout } from './store/choice.ts'
 import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
+import { delay } from './utils.ts'
 import { ENDING_SPEED, world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>
@@ -303,13 +304,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     }
 
     if (world.isEnding) {
-      world.params.timescale = ENDING_SPEED
-
-      for (const char of world.characters) {
-        if (!char.mixer) continue
-
-        char.mixer.timeScale = ENDING_SPEED
-      }
+      world.transitionInEndingScene()
     }
 
     await world.fadeIn()

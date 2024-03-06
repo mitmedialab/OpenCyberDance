@@ -18,6 +18,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import Stats from 'three/examples/jsm/libs/stats.module'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib'
 
 import { CAMERA_PRESETS, CameraPresetKey } from './camera'
 import {
@@ -120,7 +121,7 @@ export class World {
   }
 
   syncBackground() {
-    this.setBackground('black')
+    this.setBackground(world.isEnding ? 'white' : 'black')
   }
 
   async setup() {
@@ -252,29 +253,46 @@ export class World {
   }
 
   setupLights() {
-    const backLight = new DirectionalLight(0xffffff, 14)
+    // RectAreaLightUniformsLib.init()
+    //
+    // const areaLight = new THREE.RectAreaLight(0xffffff, 0.1, 1000, 1000)
+    // areaLight.position.set(0, -0.21285007787665805, 1.9899367846311686)
+    // areaLight.lookAt(0, 0, 0)
+    // this.addDebugTransformControl(areaLight)
+    // this.scene.add(areaLight)
+    //
+    // const rectLightHelper = new RectAreaLightHelper(rectLight)
+    // areaLight.add(rectLightHelper)
+
+    const backLight = new DirectionalLight(0xffffff, 10)
     backLight.name = 'BackLight'
     backLight.position.set(0, 0.2656135779782386, -0.6114542855111087)
-    // this.addDebugTransformControl(backLight)
     this.scene.add(backLight)
 
-    const frontLight = new DirectionalLight(0xffffff, 10)
+    const frontLight = new DirectionalLight(0xffffff, 0.5)
+    frontLight.position.set(0, -0.21285007787665805, 1.9899367846311686)
     frontLight.name = 'FrontLight'
-    // frontLight.position.set(0, 1.642723902041498, 2.6697376383189537)
     // this.addDebugTransformControl(frontLight)
     this.scene.add(frontLight)
 
-    const spotlight = new SpotLight(0xffffff)
-    spotlight.name = 'FeetSpotLight'
-    // spotlight.position.set(0, -0.3010949937431652, 1.094794209438712)
-    // spotlight.position.set(0, -0.646030735901475, 1.0085196631323525)
-    spotlight.position.set(0, -0.21285007787665805, 1.9899367846311686)
-    spotlight.angle = 0.7853981633974483
-    spotlight.penumbra = 0.1
-    spotlight.decay = 0
-    spotlight.distance = 100
-    // this.addDebugTransformControl(spotlight)
-    this.scene.add(spotlight)
+    // const spotlight = new SpotLight(0xffffff)
+    // spotlight.name = 'FeetSpotLight'
+    // spotlight.position.set(0, -0.21285007787665805, 1.9899367846311686)
+    // spotlight.angle = 0.7853981633974483
+    // spotlight.penumbra = 0.1
+    // spotlight.decay = 0.8
+    // spotlight.distance = 1000
+    // spotlight.intensity = 0.01
+    // spotlight.castShadow = true
+
+    // spotlight.shadow.mapSize.width = 1024
+    // spotlight.shadow.mapSize.height = 1024
+
+    // spotlight.shadow.camera.near = 500
+    // spotlight.shadow.camera.far = 4000
+    // spotlight.shadow.camera.fov = 30
+
+    // this.scene.add(spotlight)
   }
 
   setupPlane() {

@@ -5,6 +5,7 @@ import {
   Bone,
   LineBasicMaterial,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
@@ -339,8 +340,14 @@ export class Character {
           // disables frustum culling as it clips the character
           o.frustumCulled = false
 
-          if (o.material instanceof MeshStandardMaterial) {
-            o.material.wireframe = false
+          // if (o.material instanceof MeshStandardMaterial) {
+          //   o.material.wireframe = false
+          //   o.material.roughness = 0.2
+          //   o.material.metalness = 0.9
+          // }
+
+          if ($currentScene.get() === 'ENDING') {
+            o.material = new MeshBasicMaterial({ color: 0x000000 })
           }
 
           skinnedMesh = o

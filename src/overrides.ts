@@ -157,12 +157,17 @@ export class Params {
 
 /** Scale up or down keyframe tracks. */
 export function overrideEnergy(track: KeyframeTrack, factor = 1) {
+  let f = factor
+  if (f < 0.4) f = 0.4
+
   track.times = track.times.map((t) => {
-    if (factor === 1) return t
+    if (f === 1) return t
+
+    // factor -> 1%   -> 0.01
+    //           99%  -> 0.99
+    //           100% -> 1.00
 
     // prevent division by zero
-    let f = factor
-    if (f === 0) f = 0.01
 
     const value = t / f
     if (isNaN(value)) return t

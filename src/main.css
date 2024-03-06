@@ -62,7 +62,9 @@ html.dark body {
 }
 
 html:not(.dark) body {
-  background-color: var(--white);
+  background-image: url(/backdrop.png);
+  background-position: center;
+  background-size: cover;
 }
 
 @keyframes rotate {

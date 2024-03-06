@@ -160,7 +160,11 @@ export function overrideEnergy(track: KeyframeTrack, factor = 1) {
   track.times = track.times.map((t) => {
     if (factor === 1) return t
 
-    const value = t / factor
+    // prevent division by zero
+    let f = factor
+    if (f === 0) f = 0.01
+
+    const value = t / f
     if (isNaN(value)) return t
 
     return value

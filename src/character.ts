@@ -705,8 +705,6 @@ export class Character {
     // Use different duration and warp parameters for different parameter changes.
     if (flags.timing && !flags.withEnergy) {
       this.fadeIntoModifiedAction(clip, 0.6, false)
-    } else if (flags.withEnergy) {
-      this.fadeIntoModifiedAction(clip, 2, true)
     } else {
       this.fadeIntoModifiedAction(clip, 1, true)
     }

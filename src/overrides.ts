@@ -170,8 +170,10 @@ export function overrideEnergy(
     track instanceof THREE.VectorKeyframeTrack &&
     track.name.includes('position')
   ) {
-    // if energy is 0.0, freeze the track
-    if (factor < 0.05 && part === 'lower') {
+    // if energy is 0.0, freeze the position track
+    if (factor < 0.02 && part === 'lower') {
+      console.log(`-- freeze lower part: ${factor}`)
+
       const size = track.getValueSize()
 
       const len = track.times.length - 1
@@ -192,7 +194,7 @@ export function overrideEnergy(
 
   track.times = track.times.map((t) => {
     let f = factor
-    if (f < 0.05) f = 0.05
+    if (f < 0.02) f = 0.02
 
     const value = t / f
     if (isNaN(value)) return t

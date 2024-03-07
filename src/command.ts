@@ -153,7 +153,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'energy') {
     const [partText, percText] = args
 
-    // const wasFreezingLeg = world.params.energy.lower < 0.1
+    const wasFreezingLeg = world.params.energy.lower < 0.1
 
     const value = FromPercent.energy(percText)
 
@@ -167,6 +167,14 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
       }
     } else {
       world.params.energy[partText as EnergyPartKey] = value
+    }
+
+    if (wasFreezingLeg && world.params.energy.lower > 0.02) {
+      console.log(`-- unfreezing lower part: ${world.params.energy.lower}`)
+
+      for (const ch of world.characters) {
+        ch.forceRestoreHipsPosition()
+      }
     }
 
     setTimeout(() => {

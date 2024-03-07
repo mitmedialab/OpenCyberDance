@@ -702,6 +702,8 @@ export class World {
   }
 
   async startShadowCharacter() {
+    await this.fadeOut()
+    await this.fadeIn()
     this.setBackground('white')
 
     // TODO: fade white backdrop

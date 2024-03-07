@@ -62,6 +62,14 @@ html.dark body {
 }
 
 html:not(.dark) body {
+  background-color: white;
+}
+
+#app {
+  transition: background 1.5s ease-in-out;
+}
+
+html:not(.dark) #app {
   background-image: url(/backdrop.png);
   background-position: center;
   background-size: cover;

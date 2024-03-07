@@ -26,10 +26,13 @@ import {
   $duration,
 } from '../store/status.ts'
 import { world } from '../world'
+import { $currentScene } from '../store/scene'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
+
+const currentScene = useStore($currentScene)
 
 const selectedStepChoices = useStore($selectedValues)
 const completed = useStore($valueCompleted)
@@ -83,6 +86,8 @@ const showPerc = (value: number): string | null => {
 }
 
 const currentPerc = computed(() => showPerc(currentStep.value?.current()))
+
+const isEnding = computed(() => currentScene.value === 'ENDING')
 </script>
 
 <template>
@@ -135,7 +140,9 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
             v-for="(choice, key) in choices"
             :key="key"
             v-show="
-              (!selectedChoiceKey || selectedChoiceKey == key) && !choice.hidden
+              (!selectedChoiceKey || selectedChoiceKey == key) &&
+              !choice.hidden &&
+              !(isEnding && key === 'dances')
             "
             @click="selectedChoiceKey ? clearMainChoice() : setChoice(key)"
           >

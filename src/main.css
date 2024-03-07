@@ -4,6 +4,7 @@
   --default-bg: #000000;
   --scene-fade-time: 0.5s;
   --bg-color-fade-time: 0.8s;
+  --backdrop-fade-time: 1.2s;
 }
 
 @font-face {
@@ -53,6 +54,14 @@ body {
   animation: fade-out var(--scene-fade-time) ease-out forwards;
 }
 
+.backdrop-fade-in {
+  animation: fade-in var(--backdrop-fade-time) ease-in forwards;
+}
+
+.backdrop-fade-out {
+  animation: fade-out var(--backdrop-fade-time) ease-out forwards;
+}
+
 html {
   background-color: var(--default-bg);
 }
@@ -62,7 +71,8 @@ html.dark body {
 }
 
 html:not(.dark) body {
-  background-color: white;
+  /** according to backdrop image */
+  background-color: #575757;
 }
 
 #app {

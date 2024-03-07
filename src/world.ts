@@ -652,7 +652,7 @@ export class World {
     app.classList.remove('fade-in')
     app.classList.add('fade-out')
 
-    // wait until scene is almost faded out, similar to --screen-fade-time
+    // wait until scene is almost faded out, similar to --scene-fade-time
     await delay(500)
   }
 
@@ -702,9 +702,20 @@ export class World {
   }
 
   async startShadowCharacter() {
-    // TODO: slow fade white backdrop image
+    const app = document.querySelector('#app')
+    if (!app) return
+
+    // fade out scene
+    app.classList.remove('backdrop-fade-in')
+    app.classList.add('backdrop-fade-out')
+
+    // wait until scene is almost faded out, similar to --backdrop-fade-time
+    await delay(1200)
 
     this.setBackground('white')
+
+    app.classList.remove('backdrop-fade-out')
+    app.classList.add('backdrop-fade-in')
 
     await Promise.all([this.fadeFrontLights(), this.fadeBackLights()])
   }

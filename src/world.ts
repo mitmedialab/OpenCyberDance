@@ -722,30 +722,36 @@ export class World {
   async fadeFrontLights() {
     if (!this.frontLight) return
 
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 800; i++) {
       await delay(50)
 
       if (this.frontLight.intensity > 0.01) {
-        this.frontLight.intensity -= 0.05
-      } else break
+        this.frontLight.intensity -= 0.01
+      } else {
+        this.frontLight.intensity = 0
+        break
+      }
     }
   }
 
   async fadeBackLights() {
     if (!this.backLight) return
 
-    for (let i = 0; i < 800; i++) {
+    for (let i = 0; i < 2000; i++) {
       await delay(30)
 
-      if (this.backLight.intensity > 0) {
-        this.backLight.intensity -= 1
-      } else break
+      if (this.backLight.intensity > 0.01) {
+        this.backLight.intensity -= 0.9
+      } else {
+        this.backLight.intensity = 0
+        break
+      }
     }
   }
 
   async startBlurShadow() {
-    for (let i = 0; i < 2000; i++) {
-      await delay(50)
+    for (let i = 3; i < 145; i++) {
+      await delay(1200)
 
       this.renderer.domElement.style.filter = `blur(${i}px)`
     }

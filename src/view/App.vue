@@ -30,6 +30,10 @@ onMounted(async () => {
 
   window.addEventListener('keydown', async (event) => {
     if (event.key === ' ' || event.key === 'PageDown') {
+      if (world.isEnding && world.flags.waitingEndingStart) {
+        return
+      }
+
       const willVisible = !showPrompt.value
 
       const completed = $valueCompleted.get()
@@ -68,9 +72,9 @@ onMounted(async () => {
       }
     }
 
-    if (event.key === 'c') {
-      world.setupControls()
-    }
+    // if (event.key === 'c') {
+    //   world.setupControls()
+    // }
 
     if (event.key === 'k') {
       const cam = world.camera

@@ -751,9 +751,9 @@ export class World {
   }
 
   async startDissolveCharacter() {
-    const K = 108
+    const K = 308
 
-    for (let i = 1; i < K; i++) {
+    for (let i = 3; i < K; i++) {
       await delay(2500)
 
       this.renderer.domElement.style.filter = `blur(${i}px)`

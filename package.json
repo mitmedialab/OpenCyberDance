@@ -45,6 +45,7 @@
     "howler": "^2.2.4",
     "immer": "^10.0.3",
     "lil-gui": "^0.19.1",
+    "nanoid": "^5.0.6",
     "nanostores": "^0.9.5",
     "postprocessing": "^6.33.4",
     "three": "^0.159.0",

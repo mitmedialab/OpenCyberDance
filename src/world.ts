@@ -208,9 +208,7 @@ export class World {
     }, 1000)
   }
 
-  render() {
-    requestAnimationFrame(this.render.bind(this))
-
+  render(ft: number) {
     // Update animation mixers for each character
     if (!this.params.paused) {
       const delta = this.clock.getDelta()
@@ -228,6 +226,8 @@ export class World {
     if (this.camera) {
       this.renderer.render(this.scene, this.camera)
     }
+
+    requestAnimationFrame(this.render.bind(this))
   }
 
   addDebugTransformControl(object: Object3D) {

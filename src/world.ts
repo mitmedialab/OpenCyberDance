@@ -709,8 +709,8 @@ export class World {
     app.classList.remove('backdrop-fade-in')
     app.classList.add('backdrop-fade-out')
 
-    // wait until scene is almost faded out, similar to --backdrop-fade-time
-    await delay(4000)
+    // wait until scene is almost faded out, similar to --backdrop-fade-out-time
+    await delay(6000)
 
     this.setBackground('white')
 

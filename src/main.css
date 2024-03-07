@@ -4,8 +4,8 @@
   --default-bg: #000000;
   --scene-fade-time: 0.5s;
   --bg-color-fade-time: 0.8s;
-  --backdrop-fade-out-time: 4s;
-  --backdrop-fade-in-time: 8s;
+  --backdrop-fade-out-time: 6s;
+  --backdrop-fade-in-time: 10s;
 }
 
 @font-face {

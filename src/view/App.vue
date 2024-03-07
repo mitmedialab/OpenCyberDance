@@ -89,7 +89,7 @@ onMounted(async () => {
     //   navigator.clipboard.writeText(output)
     // }
 
-    if (event.key === 'e' && event.ctrlKey) {
+    if ((event.key === 'e' || event.key === 'ำ') && event.ctrlKey) {
       if (world.flags.waitingEndingStart) {
         world.fadeInSceneContent()
 
@@ -102,11 +102,11 @@ onMounted(async () => {
       $currentScene.set('ENDING')
     }
 
-    if (event.key === 'u' && event.ctrlKey) {
+    if ((event.key === 'u' || event.key === 'ี') && event.ctrlKey) {
       world.startShadowCharacter()
     }
 
-    if (event.key === 'i' && event.ctrlKey) {
+    if ((event.key === 'i' || event.key === 'ร') && event.ctrlKey) {
       world.startDissolveCharacter()
     }
 

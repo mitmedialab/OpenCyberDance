@@ -14,7 +14,7 @@ import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
 import { delay } from './utils.ts'
-import { ENDING_SPEED, world } from './world'
+import { ENDING_SPEED, World, world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>
   ((v - min) / (max - min)) * 100
@@ -39,6 +39,13 @@ const rangeConfig: Record<
 
 const p2v = (key: string, input: string): number => {
   const [min, max, maxPerc] = rangeConfig[key as ChoiceKey]
+
+  // ? special case for ending speed
+  // if (world.isEnding && key === 'speed') {
+  //   min = 0
+  //   max = ENDING_SPEED
+  //   maxPerc = 300
+  // }
 
   return percentToValue(parseInt(input), min, max, maxPerc)
 }
@@ -162,7 +169,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     }
 
     setTimeout(() => {
-      world.updateParams()
+      world.updateParams({ timing: true, withEnergy: true })
     }, 80)
 
     return

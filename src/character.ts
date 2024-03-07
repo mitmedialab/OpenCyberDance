@@ -74,6 +74,8 @@ export interface UpdateParamFlags {
   rotation?: boolean
   axisPoint?: boolean
   space?: boolean
+
+  withEnergy?: boolean
 }
 
 // Attach a profiler
@@ -651,11 +653,13 @@ export class Character {
         const part = trackNameToPart(track.name, 'core')
         if (!part || !this.mixer) return
 
+        const time = this.mixer.time
+
         // Override delays
-        overrideDelay(track, this.params.delays, this.mixer.time)
+        overrideDelay(track, this.params.delays, time)
 
         const energy = this.params.energy[part as EnergyPartKey]
-        overrideEnergy(track, energy)
+        overrideEnergy(track, energy, time)
       }
 
       // Override rotation only
@@ -700,10 +704,13 @@ export class Character {
       })
     }
 
-    if (flags.timing) {
+    // Use different duration and warp parameters for different parameter changes.
+    if (flags.timing && !flags.withEnergy) {
       this.fadeIntoModifiedAction(clip, 0.6, false)
+    } else if (flags.withEnergy) {
+      this.fadeIntoModifiedAction(clip, 2, true)
     } else {
-      this.fadeIntoModifiedAction(clip)
+      this.fadeIntoModifiedAction(clip, 1, true)
     }
 
     const time = (performance.now() - start).toFixed(2)

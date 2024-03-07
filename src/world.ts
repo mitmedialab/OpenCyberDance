@@ -558,7 +558,12 @@ export class World {
   setupPanel() {
     // Delay, energy and external body space all affects the timing.
     this.panel.handlers.delay = debounce(() => this.updateParams(), 100)
-    this.panel.handlers.energy = debounce(() => this.updateParams(), 100)
+
+    this.panel.handlers.energy = debounce(
+      () => this.updateParams({ timing: true, withEnergy: true }),
+      100,
+    )
+
     this.panel.handlers.space = debounce(() => this.updateParams(), 500)
 
     this.panel.handlers.lockPosition = () => this.updateParams()

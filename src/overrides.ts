@@ -157,23 +157,30 @@ export class Params {
 }
 
 /** Scale up or down keyframe tracks. */
-export function overrideEnergy(track: KeyframeTrack, factor = 1, time: number) {
+export function overrideEnergy(
+  track: KeyframeTrack,
+  factor = 1,
+  time: number,
+  part: EnergyPartKey,
+) {
   // if energy is 1.0, we don't need to do anything
   if (factor === 1.0) return track
-
-  // if energy is 0.0, freeze the track
-  // if (factor < 0.1) return freezeTrack(track, time)
 
   if (
     track instanceof THREE.VectorKeyframeTrack &&
     track.name.includes('position')
   ) {
+    // if energy is 0.0, freeze the track
+    // if (factor < 0.05 && part === 'lower') {
+    //   return freezeTrack(track, time)
+    // }
+
     return track
   }
 
   track.times = track.times.map((t) => {
     let f = factor
-    if (f < 0.2) f = 0.2
+    if (f < 0.05) f = 0.05
 
     const value = t / f
     if (isNaN(value)) return t

@@ -659,7 +659,7 @@ export class Character {
         overrideDelay(track, this.params.delays, time)
 
         const energy = this.params.energy[part as EnergyPartKey]
-        overrideEnergy(track, energy, time)
+        overrideEnergy(track, energy, time, part as EnergyPartKey)
       }
 
       // Override rotation only

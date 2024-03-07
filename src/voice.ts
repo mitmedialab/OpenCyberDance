@@ -386,27 +386,4 @@ export class VoiceController {
 
     return false
   }
-
-  sync(key: string | string[]) {
-    // Sync rotation fields
-    if (key.includes('rotation')) {
-      this.world.updateParams({ rotation: true })
-      return
-    }
-
-    this.world.updateParams({ timing: true })
-  }
-
-  setSynchronic(v: number) {
-    const p = this.world.params
-    console.debug('synchronic:', v)
-
-    for (const key in p.delays) {
-      // variance must be between 0 and 10
-      let variance = Math.abs(v)
-      variance = Math.min(variance, 10) // max variance is 10.
-      variance = Math.max(variance, 0) // min variance is 0.
-      p.delays[key as DelayPartKey] = randVariance(variance)
-    }
-  }
 }

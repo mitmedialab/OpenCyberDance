@@ -9,12 +9,11 @@ import {
   energyParts,
 } from './parts.ts'
 import { ChoiceKey, choices, Step } from './step-input'
-import { clearPromptTimeout, extendPromptTimeout } from './store/choice.ts'
+import { clearPromptTimeout } from './store/choice.ts'
 import { appendLog } from './store/status.ts'
 import { changeCharacter, switchDancers } from './switch-dance.ts'
 import { Axis } from './transforms.ts'
-import { delay } from './utils.ts'
-import { ENDING_SPEED, World, world } from './world'
+import { world } from './world'
 
 const toPercent = (v: number, min: number, max: number) =>
   ((v - min) / (max - min)) * 100

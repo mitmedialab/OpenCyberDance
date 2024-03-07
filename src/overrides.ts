@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
 import { Character, ModelKey } from './character'
+import { freezeTrack } from './freeze'
 import {
   AxisPointControlParts,
   CurvePartKey,
@@ -157,16 +158,22 @@ export class Params {
 
 /** Scale up or down keyframe tracks. */
 export function overrideEnergy(track: KeyframeTrack, factor = 1, time: number) {
-  if (factor === 1) return track
+  // if energy is 1.0, we don't need to do anything
+  if (factor === 1.0) return track
 
-  // freeze track mode
-  if (factor === 0) {
-    return
+  // if energy is 0.0, freeze the track
+  // if (factor < 0.1) return freezeTrack(track, time)
+
+  if (
+    track instanceof THREE.VectorKeyframeTrack &&
+    track.name.includes('position')
+  ) {
+    return track
   }
 
   track.times = track.times.map((t) => {
     let f = factor
-    if (f < 0.3) f = 0.3
+    if (f < 0.2) f = 0.2
 
     const value = t / f
     if (isNaN(value)) return t

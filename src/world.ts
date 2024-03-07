@@ -11,6 +11,7 @@ import {
   Object3D,
   OrthographicCamera,
   Scene,
+  SkinnedMesh,
   SpotLight,
   WebGLRenderer,
 } from 'three'
@@ -80,13 +81,16 @@ export class World {
   characters: Character[] = []
   camera: OrthographicCamera | null = null
   controls: OrbitControls | null = null
-
   composer: EffectComposer | null = null
+
+  frontLight: DirectionalLight | null = null
+  backLight: DirectionalLight | null = null
 
   timers = { seekBar: 0 }
 
   flags = {
     waitingEndingStart: false,
+    shadowCharacters: false,
   }
 
   get first() {
@@ -121,7 +125,7 @@ export class World {
   }
 
   syncBackground() {
-    this.setBackground(world.isEnding ? 'white' : 'black')
+    this.setBackground('black')
   }
 
   async setup() {
@@ -255,17 +259,6 @@ export class World {
   }
 
   setupLights() {
-    // RectAreaLightUniformsLib.init()
-    //
-    // const areaLight = new THREE.RectAreaLight(0xffffff, 0.1, 1000, 1000)
-    // areaLight.position.set(0, -0.21285007787665805, 1.9899367846311686)
-    // areaLight.lookAt(0, 0, 0)
-    // this.addDebugTransformControl(areaLight)
-    // this.scene.add(areaLight)
-    //
-    // const rectLightHelper = new RectAreaLightHelper(rectLight)
-    // areaLight.add(rectLightHelper)
-
     const backLight = new DirectionalLight(0xffffff, 10)
     backLight.name = 'BackLight'
     backLight.position.set(0, 0.2656135779782386, -0.6114542855111087)
@@ -274,27 +267,10 @@ export class World {
     const frontLight = new DirectionalLight(0xffffff, 0.5)
     frontLight.position.set(0, -0.21285007787665805, 1.9899367846311686)
     frontLight.name = 'FrontLight'
-    // this.addDebugTransformControl(frontLight)
     this.scene.add(frontLight)
 
-    // const spotlight = new SpotLight(0xffffff)
-    // spotlight.name = 'FeetSpotLight'
-    // spotlight.position.set(0, -0.21285007787665805, 1.9899367846311686)
-    // spotlight.angle = 0.7853981633974483
-    // spotlight.penumbra = 0.1
-    // spotlight.decay = 0.8
-    // spotlight.distance = 1000
-    // spotlight.intensity = 0.01
-    // spotlight.castShadow = true
-
-    // spotlight.shadow.mapSize.width = 1024
-    // spotlight.shadow.mapSize.height = 1024
-
-    // spotlight.shadow.camera.near = 500
-    // spotlight.shadow.camera.far = 4000
-    // spotlight.shadow.camera.fov = 30
-
-    // this.scene.add(spotlight)
+    this.frontLight = frontLight
+    this.backLight = backLight
   }
 
   setupPlane() {
@@ -723,6 +699,61 @@ export class World {
 
   async preload() {
     await preloader.setup()
+  }
+
+  async startShadowCharacter() {
+    this.setBackground('white')
+
+    // TODO: fade white backdrop
+
+    await Promise.all([this.fadeFrontLights(), this.fadeBackLights()])
+
+    for (const character of this.characters) {
+      character.model?.traverse((o) => {
+        if (o instanceof SkinnedMesh) {
+          if (o.material instanceof THREE.MeshStandardMaterial) {
+            // o.material.metalness =
+          }
+        }
+      })
+    }
+  }
+
+  async fadeFrontLights() {
+    if (!this.frontLight) return
+
+    for (let i = 0; i < 200; i++) {
+      await delay(50)
+
+      if (this.frontLight.intensity > 0.01) {
+        this.frontLight.intensity -= 0.05
+      } else break
+    }
+  }
+
+  async fadeBackLights() {
+    if (!this.backLight) return
+
+    for (let i = 0; i < 800; i++) {
+      await delay(30)
+
+      if (this.backLight.intensity > 0) {
+        this.backLight.intensity -= 1
+      } else break
+    }
+  }
+
+  async startBlurShadow() {
+    for (let i = 0; i < 2000; i++) {
+      await delay(50)
+
+      this.renderer.domElement.style.filter = `blur(${i}px)`
+    }
+  }
+
+  async intoEndingDarkness() {
+    this.setBackground('black')
+    this.fadeOut()
   }
 }
 

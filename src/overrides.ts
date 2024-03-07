@@ -171,9 +171,21 @@ export function overrideEnergy(
     track.name.includes('position')
   ) {
     // if energy is 0.0, freeze the track
-    // if (factor < 0.05 && part === 'lower') {
-    //   return freezeTrack(track, time)
-    // }
+    if (factor < 0.05 && part === 'lower') {
+      const size = track.getValueSize()
+
+      const len = track.times.length - 1
+      const frame = Math.round((time / track.times[len]) * len)
+      const data = track.values.slice(frame * size, frame * size + size)
+
+      const [x, y, z] = data
+
+      for (let i = 0; i < track.values.length; i += size) {
+        track.values[i] = x
+        track.values[i + 1] = y
+        track.values[i + 2] = z
+      }
+    }
 
     return track
   }

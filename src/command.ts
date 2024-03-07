@@ -153,6 +153,8 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   if (primary === 'energy') {
     const [partText, percText] = args
 
+    // const wasFreezingLeg = world.params.energy.lower < 0.1
+
     const value = FromPercent.energy(percText)
 
     if (partText === 'all') {

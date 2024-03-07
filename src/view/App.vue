@@ -97,10 +97,6 @@ onMounted(async () => {
       world.startDissolveCharacter()
     }
 
-    if (event.key === 'n') {
-      world.intoEndingDarkness()
-    }
-
     if (event.key === 'e') {
       if (world.flags.waitingEndingStart) {
         world.fadeInSceneContent()

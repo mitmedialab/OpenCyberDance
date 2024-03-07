@@ -759,11 +759,6 @@ export class World {
       this.renderer.domElement.style.filter = `blur(${i}px)`
     }
   }
-
-  async intoEndingDarkness() {
-    this.setBackground('black')
-    this.fadeOut()
-  }
 }
 
 export const world = new World()

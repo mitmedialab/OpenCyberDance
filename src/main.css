@@ -4,7 +4,8 @@
   --default-bg: #000000;
   --scene-fade-time: 0.5s;
   --bg-color-fade-time: 0.8s;
-  --backdrop-fade-time: 1.2s;
+  --backdrop-fade-out-time: 4s;
+  --backdrop-fade-in-time: 4s;
 }
 
 @font-face {
@@ -55,11 +56,11 @@ body {
 }
 
 .backdrop-fade-in {
-  animation: fade-in var(--backdrop-fade-time) ease-in forwards;
+  animation: fade-in var(--backdrop-fade-in-time) linear forwards;
 }
 
 .backdrop-fade-out {
-  animation: fade-out var(--backdrop-fade-time) ease-out forwards;
+  animation: fade-out var(--backdrop-fade-out-time) linear forwards;
 }
 
 html {

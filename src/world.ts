@@ -710,7 +710,7 @@ export class World {
     app.classList.add('backdrop-fade-out')
 
     // wait until scene is almost faded out, similar to --backdrop-fade-time
-    await delay(1200)
+    await delay(4000)
 
     this.setBackground('white')
 
@@ -723,30 +723,30 @@ export class World {
   async fadeFrontLights() {
     if (!this.frontLight) return
 
-    for (let i = 0; i < 800; i++) {
-      if (this.frontLight.intensity > 0.01) {
+    for (let i = 0; i < 8000; i++) {
+      if (this.frontLight.intensity > 0.0001) {
         this.frontLight.intensity -= 0.01
       } else {
         this.frontLight.intensity = 0
         break
       }
 
-      await delay(50)
+      await delay(180)
     }
   }
 
   async fadeBackLights() {
     if (!this.backLight) return
 
-    for (let i = 0; i < 2000; i++) {
-      if (this.backLight.intensity > 0.01) {
-        this.backLight.intensity -= 0.9
+    for (let i = 0; i < 20000; i++) {
+      if (this.backLight.intensity > 0.0001) {
+        this.backLight.intensity -= 0.5
       } else {
         this.backLight.intensity = 0
         break
       }
 
-      await delay(30)
+      await delay(120)
     }
   }
 

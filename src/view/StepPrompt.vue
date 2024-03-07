@@ -214,7 +214,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
     fixed
     bottom-4
     left-4
-    class="text-[12px] font-zed space-y-1 text-gray-500"
+    class="text-[12px] font-zed space-y-1 text-gray-950 dark:text-gray-200"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}
@@ -222,11 +222,7 @@ const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 
     <div v-if="transcript">h: {{ transcript }}</div>
 
-    <div
-      v-if="time"
-      class="text-gray-600"
-      :class="[{ 'text-gray-300': isAnimationFinished }]"
-    >
+    <div v-if="time">
       t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }}
     </div>
 

@@ -5,7 +5,7 @@
   --scene-fade-time: 0.5s;
   --bg-color-fade-time: 0.8s;
   --backdrop-fade-out-time: 4s;
-  --backdrop-fade-in-time: 4s;
+  --backdrop-fade-in-time: 8s;
 }
 
 @font-face {
@@ -72,8 +72,23 @@ html.dark body {
 }
 
 html:not(.dark) body {
-  /** according to backdrop image */
-  background-color: #575757;
+  background-color: var(--black);
+}
+
+html:not(.dark) .backdrop {
+  background-image: url(/backdrop.png);
+  background-size: cover;
+  background-position: cover;
+
+  position: fixed;
+  z-index: -10;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 100%;
 }
 
 #app {

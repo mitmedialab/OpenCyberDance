@@ -64,40 +64,32 @@ onMounted(async () => {
       }
     }
 
-    if (event.key === 'i') {
-      if (world.panel.panel._hidden) {
-        world.panel.panel.show(true)
-      } else {
-        world.panel.panel.hide()
-      }
-    }
+    // if (event.key === 'i') {
+    //   if (world.panel.panel._hidden) {
+    //     world.panel.panel.show(true)
+    //   } else {
+    //     world.panel.panel.hide()
+    //   }
+    // }
 
     // if (event.key === 'c') {
     //   world.setupControls()
     // }
 
-    if (event.key === 'k') {
-      const cam = world.camera
-      if (!cam) return
+    // if (event.key === 'k') {
+    //   const cam = world.camera
+    //   if (!cam) return
 
-      const output = JSON.stringify({
-        position: cam.position.toArray(),
-        rotation: cam.rotation.toArray(),
-        zoom: cam.zoom,
-      })
+    //   const output = JSON.stringify({
+    //     position: cam.position.toArray(),
+    //     rotation: cam.rotation.toArray(),
+    //     zoom: cam.zoom,
+    //   })
 
-      navigator.clipboard.writeText(output)
-    }
+    //   navigator.clipboard.writeText(output)
+    // }
 
-    if (event.key === 'v') {
-      world.startShadowCharacter()
-    }
-
-    if (event.key === 'b') {
-      world.startDissolveCharacter()
-    }
-
-    if (event.key === 'e') {
+    if (event.key === 'e' && event.ctrlKey) {
       if (world.flags.waitingEndingStart) {
         world.fadeInSceneContent()
 
@@ -110,7 +102,15 @@ onMounted(async () => {
       $currentScene.set('ENDING')
     }
 
-    if (event.key === 'f') {
+    if (event.key === 'u' && event.ctrlKey) {
+      world.startShadowCharacter()
+    }
+
+    if (event.key === 'i' && event.ctrlKey) {
+      world.startDissolveCharacter()
+    }
+
+    if (event.key === 'f' && event.ctrlKey) {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen()
       } else if (document.exitFullscreen) {

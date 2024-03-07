@@ -724,14 +724,14 @@ export class World {
     if (!this.frontLight) return
 
     for (let i = 0; i < 800; i++) {
-      await delay(50)
-
       if (this.frontLight.intensity > 0.01) {
         this.frontLight.intensity -= 0.01
       } else {
         this.frontLight.intensity = 0
         break
       }
+
+      await delay(50)
     }
   }
 
@@ -739,24 +739,24 @@ export class World {
     if (!this.backLight) return
 
     for (let i = 0; i < 2000; i++) {
-      await delay(30)
-
       if (this.backLight.intensity > 0.01) {
         this.backLight.intensity -= 0.9
       } else {
         this.backLight.intensity = 0
         break
       }
+
+      await delay(30)
     }
   }
 
   async startDissolveCharacter() {
     const K = 308
 
-    for (let i = 3; i < K; i++) {
-      await delay(2500)
-
+    for (let i = 2; i < K; i++) {
       this.renderer.domElement.style.filter = `blur(${i}px)`
+
+      await delay(2500)
     }
   }
 }

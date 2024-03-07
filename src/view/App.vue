@@ -94,7 +94,7 @@ onMounted(async () => {
     }
 
     if (event.key === 'b') {
-      world.startBlurShadow()
+      world.startDissolveCharacter()
     }
 
     if (event.key === 'n') {

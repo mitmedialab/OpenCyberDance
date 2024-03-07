@@ -702,23 +702,11 @@ export class World {
   }
 
   async startShadowCharacter() {
-    await this.fadeOut()
-    await this.fadeIn()
+    // TODO: slow fade white backdrop image
+
     this.setBackground('white')
 
-    // TODO: fade white backdrop
-
     await Promise.all([this.fadeFrontLights(), this.fadeBackLights()])
-
-    for (const character of this.characters) {
-      character.model?.traverse((o) => {
-        if (o instanceof SkinnedMesh) {
-          if (o.material instanceof THREE.MeshStandardMaterial) {
-            // o.material.metalness =
-          }
-        }
-      })
-    }
   }
 
   async fadeFrontLights() {
@@ -751,9 +739,11 @@ export class World {
     }
   }
 
-  async startBlurShadow() {
-    for (let i = 3; i < 145; i++) {
-      await delay(1200)
+  async startDissolveCharacter() {
+    const K = 108
+
+    for (let i = 1; i < K; i++) {
+      await delay(2500)
 
       this.renderer.domElement.style.filter = `blur(${i}px)`
     }

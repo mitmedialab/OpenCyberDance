@@ -4,8 +4,7 @@
   --default-bg: #000000;
   --scene-fade-time: 0.5s;
   --bg-color-fade-time: 0.8s;
-  --backdrop-fade-out-time: 6s;
-  --backdrop-fade-in-time: 10s;
+  --backdrop-fade-in-time: 20s;
 }
 
 @font-face {
@@ -55,14 +54,6 @@ body {
   animation: fade-out var(--scene-fade-time) ease-out forwards;
 }
 
-.backdrop-fade-in {
-  animation: fade-in var(--backdrop-fade-in-time) linear forwards;
-}
-
-.backdrop-fade-out {
-  animation: fade-out var(--backdrop-fade-out-time) linear forwards;
-}
-
 html {
   background-color: var(--default-bg);
 }
@@ -75,30 +66,55 @@ html:not(.dark) body {
   background-color: var(--black);
 }
 
-html:not(.dark) .backdrop {
-  background-image: url(/backdrop.png);
-  background-size: cover;
-  background-position: cover;
-
+.app-container {
   position: fixed;
-  z-index: -10;
+  z-index: 0;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
 
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+}
+
+.renderer-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  z-index: 2;
+
+  width: 100vw;
+  height: 100vh;
+}
+
+.backdrop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  opacity: 0;
+  z-index: 1;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-image: url(/backdrop.png);
+  background-size: cover;
+  background-position: center;
+}
+
+.backdrop-fade-in {
+  animation: fade-in var(--backdrop-fade-in-time) linear forwards;
 }
 
 #app {
   transition: background 1.5s ease-in-out;
-}
-
-html:not(.dark) #app {
-  background-image: url(/backdrop.png);
-  background-position: center;
-  background-size: cover;
 }
 
 @keyframes rotate {

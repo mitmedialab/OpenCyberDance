@@ -208,9 +208,7 @@ export class World {
     }, 1000)
   }
 
-  render() {
-    requestAnimationFrame(this.render.bind(this))
-
+  render(ft: number) {
     // Update animation mixers for each character
     if (!this.params.paused) {
       const delta = this.clock.getDelta()
@@ -228,6 +226,8 @@ export class World {
     if (this.camera) {
       this.renderer.render(this.scene, this.camera)
     }
+
+    requestAnimationFrame(this.render.bind(this))
   }
 
   addDebugTransformControl(object: Object3D) {
@@ -702,51 +702,47 @@ export class World {
   }
 
   async startShadowCharacter() {
-    const app = document.querySelector('#app')
-    if (!app) return
+    const backdrop = document.querySelector('.backdrop')
+    if (!backdrop) return
 
-    // fade out scene
-    app.classList.remove('backdrop-fade-in')
-    app.classList.add('backdrop-fade-out')
+    backdrop.classList.remove('backdrop-fade-in')
 
-    // wait until scene is almost faded out, similar to --backdrop-fade-out-time
-    await delay(6000)
+    Promise.all([this.fadeFrontLights(), this.fadeBackLights()]).then()
+
+    backdrop.classList.add('backdrop-fade-in')
+
+    await delay(8000)
 
     this.setBackground('white')
-
-    app.classList.remove('backdrop-fade-out')
-    app.classList.add('backdrop-fade-in')
-
-    await Promise.all([this.fadeFrontLights(), this.fadeBackLights()])
   }
 
   async fadeFrontLights() {
     if (!this.frontLight) return
 
-    for (let i = 0; i < 8000; i++) {
-      if (this.frontLight.intensity > 0.0001) {
-        this.frontLight.intensity -= 0.01
+    for (let i = 0; i < 80000; i++) {
+      if (this.frontLight.intensity > 0.001) {
+        this.frontLight.intensity -= 0.005
       } else {
         this.frontLight.intensity = 0
         break
       }
 
-      await delay(180)
+      await delay(120)
     }
   }
 
   async fadeBackLights() {
     if (!this.backLight) return
 
-    for (let i = 0; i < 20000; i++) {
+    for (let i = 0; i < 80000; i++) {
       if (this.backLight.intensity > 0.0001) {
-        this.backLight.intensity -= 0.5
+        this.backLight.intensity -= 0.1
       } else {
         this.backLight.intensity = 0
         break
       }
 
-      await delay(120)
+      await delay(80)
     }
   }
 

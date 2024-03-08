@@ -92,128 +92,132 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
 <template>
   <div
-    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-gray-900 dark:text-white prompt-root"
+    class="fixed top-10 left-10 prompt-root-container animate__animated animate__fadeInUp rounded-10"
   >
-    <div
-      class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
-      :class="{ 'text-black dark:text-white rounded': completed }"
-    >
-      <div
-        class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
-        :class="[
-          {
-            'animate__rotateIn animate__infinite': isThinking,
-            'bg-gray-800 dark:bg-white': !isListening && !voiceError,
-            'bg-red-5 animate__flash animate__infinite': isListening,
-            'bg-red-4 animate__heartBeat animate__infinite': !!voiceError,
-            'animate__headShake animate__infinite': isConfused,
-          },
-        ]"
-        v-if="!completed"
-      />
+    <div class="fixed w-full h-full rounded-10 prompt-backdrop"></div>
 
+    <div class="space-y-4 text-gray-900 dark:text-white prompt-root rounded-10">
       <div
-        flex
-        v-if="completed"
-        class="cursor-pointer py-1 px-2 animate__animated fadeIn"
-        :class="[
-          {
-            'bg-red-5 text-white px-4 rounded-l pl-4 pr-4': completed,
-          },
-        ]"
+        class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
+        :class="{ 'text-black dark:text-white rounded': completed }"
       >
-        > executed
-      </div>
+        <div
+          class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
+          :class="[
+            {
+              'animate__rotateIn animate__infinite': isThinking,
+              'bg-gray-800 dark:bg-white': !isListening && !voiceError,
+              'bg-red-5 animate__flash animate__infinite': isListening,
+              'bg-red-4 animate__heartBeat animate__infinite': !!voiceError,
+              'animate__headShake animate__infinite': isConfused,
+            },
+          ]"
+          v-if="!completed"
+        />
 
-      <div flex flex-col relative>
-        <TransitionGroup name="choice-list">
+        <div
+          flex
+          v-if="completed"
+          class="cursor-pointer py-1 px-2 animate__animated fadeIn"
+          :class="[
+            {
+              'bg-red-5 text-white px-4 rounded-l pl-4 pr-4': completed,
+            },
+          ]"
+        >
+          > executed
+        </div>
+
+        <div flex flex-col relative>
+          <TransitionGroup name="choice-list">
+            <div
+              :class="[
+                {
+                  'highlight-a-bit-inverted dark:highlight-a-bit':
+                    selectedChoiceKey == key,
+                  'go-away': selectedChoiceKey && selectedChoiceKey != key,
+                  animate__fadeInUp: !selectedChoiceKey,
+                },
+              ]"
+              class="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
+              v-for="(choice, key) in choices"
+              :key="key"
+              v-show="
+                (!selectedChoiceKey || selectedChoiceKey == key) &&
+                !choice.hidden &&
+                !(isEnding && key === 'dances')
+              "
+              @click="selectedChoiceKey ? clearMainChoice() : setChoice(key)"
+            >
+              > {{ choice.title }}
+            </div>
+          </TransitionGroup>
+        </div>
+
+        <div
+          v-for="choice in selectedStepChoiceTitles"
+          class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
+          :key="choice"
+          v-show="choice"
+          :class="[{ 'highlight-a-bit': !completed }]"
+        >
+          <span v-if="numeric(choice, currentStep?.max)">> {{ choice }}%</span>
+          <span v-else>> {{ choice }}</span>
+        </div>
+
+        <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
           <div
-            :class="[
-              {
-                'highlight-a-bit-inverted dark:highlight-a-bit':
-                  selectedChoiceKey == key,
-                'go-away': selectedChoiceKey && selectedChoiceKey != key,
-                animate__fadeInUp: !selectedChoiceKey,
-              },
-            ]"
-            class="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
-            v-for="(choice, key) in choices"
-            :key="key"
-            v-show="
-              (!selectedChoiceKey || selectedChoiceKey == key) &&
-              !choice.hidden &&
-              !(isEnding && key === 'dances')
-            "
-            @click="selectedChoiceKey ? clearMainChoice() : setChoice(key)"
+            class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+            v-for="choice in currentStep.choices"
+            @click="addValue(choice.key)"
+            :key="choice.key"
           >
             > {{ choice.title }}
           </div>
+
+          <div
+            class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+            @click="prevStep()"
+          >
+            &lt; go back
+          </div>
+        </div>
+
+        <div flex flex-col v-if="currentStep?.type === 'percent' && !completed">
+          <div
+            py-1
+            px-2
+            @click="addValue('50')"
+            class="animate__animated animate__fadeInUp"
+          >
+            <span
+              >>
+              <span v-if="currentPerc != null">{{ currentPerc }}% -> ?</span>
+              (0% - {{ currentStep.max ?? 100 }}%)</span
+            >
+          </div>
+
+          <div
+            class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp transition-faster"
+            @click="prevStep()"
+          >
+            &lt; go back
+          </div>
+        </div>
+      </div>
+
+      <div v-if="completed" class="flex flex-col font-zed gap-y-1">
+        <TransitionGroup name="choice-list">
+          <div
+            v-for="(log, id) in logs.slice(0, 5)"
+            :key="log"
+            class="text-[14px] text-gray-4 animate__animated animate__fadeInUp transition-faster"
+            v-show="id !== logs.length - 1"
+          >
+            $ {{ log }}
+          </div>
         </TransitionGroup>
       </div>
-
-      <div
-        v-for="choice in selectedStepChoiceTitles"
-        class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
-        :key="choice"
-        v-show="choice"
-        :class="[{ 'highlight-a-bit': !completed }]"
-      >
-        <span v-if="numeric(choice, currentStep?.max)">> {{ choice }}%</span>
-        <span v-else>> {{ choice }}</span>
-      </div>
-
-      <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
-        <div
-          class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
-          v-for="choice in currentStep.choices"
-          @click="addValue(choice.key)"
-          :key="choice.key"
-        >
-          > {{ choice.title }}
-        </div>
-
-        <div
-          class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
-          @click="prevStep()"
-        >
-          &lt; go back
-        </div>
-      </div>
-
-      <div flex flex-col v-if="currentStep?.type === 'percent' && !completed">
-        <div
-          py-1
-          px-2
-          @click="addValue('50')"
-          class="animate__animated animate__fadeInUp"
-        >
-          <span
-            >>
-            <span v-if="currentPerc != null">{{ currentPerc }}% -> ?</span> (0%
-            - {{ currentStep.max ?? 100 }}%)</span
-          >
-        </div>
-
-        <div
-          class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 rounded animate__animated animate__fadeInUp transition-faster"
-          @click="prevStep()"
-        >
-          &lt; go back
-        </div>
-      </div>
-    </div>
-
-    <div v-if="completed" class="flex flex-col font-zed gap-y-1">
-      <TransitionGroup name="choice-list">
-        <div
-          v-for="(log, id) in logs.slice(0, 5)"
-          :key="log"
-          class="text-[14px] text-gray-4 animate__animated animate__fadeInUp transition-faster"
-          v-show="id !== logs.length - 1"
-        >
-          $ {{ log }}
-        </div>
-      </TransitionGroup>
     </div>
   </div>
 

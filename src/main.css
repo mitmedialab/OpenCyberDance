@@ -99,7 +99,7 @@ html:not(.dark) body {
   bottom: 0;
 
   opacity: 0;
-  z-index: 1;
+  z-index: 0;
 
   width: 100vw;
   height: 100vh;
@@ -201,9 +201,16 @@ html:not(.dark) body {
 }
 
 html:not(.dark) .prompt-root {
-  background: rgba(255, 255, 255, 0.6);
   padding: 1.4em 2em;
-  border-radius: 8px;
   transition: all 1s ease-in-out;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(30px);
+}
+
+.prompt-root-container {
+  z-index: 4;
+}
+
+html:not(.dark) .prompt-backdrop {
+  filter: blur(15px);
+  background: rgba(255, 255, 255, 0.4);
 }

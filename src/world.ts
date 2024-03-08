@@ -709,11 +709,11 @@ export class World {
 
     Promise.all([this.fadeFrontLights(), this.fadeBackLights()]).then()
 
+    setTimeout(() => {
+      this.setBackground('white')
+    }, 1000)
+
     backdrop.classList.add('backdrop-fade-in')
-
-    await delay(8000)
-
-    this.setBackground('white')
   }
 
   async fadeFrontLights() {
@@ -753,9 +753,18 @@ export class World {
 
   async startDissolveCharacter() {
     const K = 308
+    const S = 2
+    const SS = 5
+    const F = 100
 
-    for (let i = 2; i < K; i++) {
+    for (let i = S; i < K; i++) {
       this.renderer.domElement.style.filter = `blur(${i}px)`
+
+      if (i > SS) {
+        this.renderer.domElement.style.opacity = `${(((F - i) / F) * F).toFixed(
+          2,
+        )}%`
+      }
 
       await delay(2500)
     }

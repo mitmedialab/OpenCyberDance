@@ -24,6 +24,7 @@
 body {
   margin: 0;
   transition: background-color var(--bg-color-fade-time) ease-in-out;
+  font-family: 'Helvetica Neue', sans-serif;
 }
 
 @keyframes fade-out {
@@ -202,4 +203,5 @@ html:not(.dark) body {
 
 .prompt-root-container {
   z-index: 4;
+  font-weight: 400;
 }

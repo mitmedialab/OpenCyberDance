@@ -92,13 +92,13 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
 <template>
   <div
-    class="fixed top-10 left-10 prompt-root-container animate__animated animate__fadeInUp rounded-10"
+    class="fixed top-10 left-10 prompt-root-container animate__animated animate__fadeInUp rounded-10 capitalize"
   >
     <div class="fixed w-full h-full rounded-10 prompt-backdrop"></div>
 
     <div class="space-y-4 text-white prompt-root rounded-10">
       <div
-        class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
+        class="flex items-start justify-start gap-x-6 text-8 animate__animated"
         :class="{ 'text-white rounded': completed }"
       >
         <div
@@ -139,7 +139,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
                   animate__fadeInUp: !selectedChoiceKey,
                 },
               ]"
-              class="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated transition-faster"
+              class="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:rounded cursor-pointer py-1 pb-2 px-2 animate__animated transition-faster"
               v-for="(choice, key) in choices"
               :key="key"
               v-show="
@@ -156,7 +156,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
         <div
           v-for="choice in selectedStepChoiceTitles"
-          class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 last:pr-4 animate__animated animate__fadeInUp"
+          class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 pb-2 px-2 last:pr-4 animate__animated animate__fadeInUp"
           :key="choice"
           v-show="choice"
           :class="[{ 'highlight-a-bit': !completed }]"
@@ -167,7 +167,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
         <div flex flex-col v-if="currentStep?.type === 'choice' && !completed">
           <div
-            class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+            class="hover:bg-white hover:text-black hover:rounded cursor-pointer py-1 pb-2 px-2 animate__animated animate__fadeInUp transition-faster"
             v-for="choice in currentStep.choices"
             @click="addValue(choice.key)"
             :key="choice.key"
@@ -176,7 +176,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
           </div>
 
           <div
-            class="hover:bg-white hover:text-black cursor-pointer py-1 px-2 animate__animated animate__fadeInUp transition-faster"
+            class="hover:bg-white hover:text-black cursor-pointer py-1 pb-2 px-2 animate__animated animate__fadeInUp transition-faster"
             @click="prevStep()"
           >
             &lt; go back
@@ -206,7 +206,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
         </div>
       </div>
 
-      <div v-if="completed" class="flex flex-col font-zed gap-y-1">
+      <div v-if="completed" class="flex flex-col gap-y-1">
         <TransitionGroup name="choice-list">
           <div
             v-for="(log, id) in logs.slice(0, 5)"
@@ -225,7 +225,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
     fixed
     bottom-4
     left-4
-    class="text-[12px] font-zed space-y-1 dark:text-gray-200 text-white"
+    class="text-[12px] space-y-1 dark:text-gray-200 text-white"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}

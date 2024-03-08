@@ -1,5 +1,5 @@
 <template>
-  <div flex fixed bottom-4 right-4 gap-x-2 font-zed text-3 class="group">
+  <div flex fixed bottom-4 right-4 gap-x-2 text-3 class="group">
     <!-- <div
       px-1
       py-1
@@ -33,10 +33,10 @@
       </div>
     </div>
 
-    <div flex font-zed text-gray-700>
+    <div flex text-gray-700>
       <input
         v-model="volume"
-        class="w-[25px] bg-transparent outline-none font-zed appearance-none border-none text-gray-700 focus:text-gray-300 hover:text-gray-400"
+        class="w-[25px] bg-transparent outline-none appearance-none border-none text-gray-700 focus:text-gray-300 hover:text-gray-400"
         :class="[{ 'text-red-300': invalid }]"
       />
     </div> -->

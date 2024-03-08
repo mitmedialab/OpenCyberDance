@@ -724,7 +724,7 @@ export class World {
         this.frontLight.intensity -= 0.005
       } else break
 
-      await delay(180)
+      await delay(120)
     }
 
     for (let i = 0; i < 80000; i++) {

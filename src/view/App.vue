@@ -132,7 +132,7 @@ onMounted(async () => {
 <template>
   <div class="app-container">
     <div class="backdrop" />
-    <div ref="rendererElement" />
+    <div class="renderer-container" ref="rendererElement" />
 
     <!-- <div ref="plotterContainer" pointer-events-none /> -->
 

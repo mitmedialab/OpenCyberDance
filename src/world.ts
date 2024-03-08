@@ -91,6 +91,7 @@ export class World {
   flags = {
     waitingEndingStart: false,
     shadowCharacters: false,
+    dissolveCharacters: false,
   }
 
   get first() {
@@ -702,6 +703,10 @@ export class World {
   }
 
   async startShadowCharacter() {
+    if (this.flags.shadowCharacters) return
+
+    this.flags.shadowCharacters = true
+
     const backdrop = document.querySelector('.backdrop')
     if (!backdrop) return
 
@@ -752,6 +757,10 @@ export class World {
   }
 
   async startDissolveCharacter() {
+    if (this.flags.dissolveCharacters) return
+
+    this.flags.dissolveCharacters = true
+
     const K = 308
     const S = 2
 

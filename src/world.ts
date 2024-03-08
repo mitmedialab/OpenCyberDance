@@ -774,17 +774,6 @@ export class World {
 
           await delay(600)
         }
-
-        for (let i = S; i < K; i++) {
-          if (i > 80) break
-
-          this.renderer.domElement.style.opacity = `${(
-            ((100 - (i + 10)) / 100) *
-            100
-          ).toFixed(2)}%`
-
-          await delay(1000)
-        }
       })(),
     ])
   }

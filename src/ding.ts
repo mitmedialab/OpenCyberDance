@@ -14,7 +14,7 @@ class SoundManager {
     if ($soundReady.get() === true) return
 
     this.ding = new Howl({
-      src: ['/sounds/khogwong_1.wav'],
+      src: ['/sounds/khongwong_1.wav'],
       preload: true,
       volume: 1,
       onload: () => {

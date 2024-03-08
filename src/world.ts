@@ -760,17 +760,30 @@ export class World {
         for (let i = S; i < K; i++) {
           this.renderer.domElement.style.filter = `blur(${i}px)`
 
-          await delay(2500)
+          await delay(4000)
         }
       })(),
       (async () => {
         for (let i = S; i < K; i++) {
+          if (i > 80) break
+
           this.renderer.domElement.style.opacity = `${(
             ((100 - (i + 10)) / 100) *
             100
           ).toFixed(2)}%`
 
           await delay(600)
+        }
+
+        for (let i = S; i < K; i++) {
+          if (i > 80) break
+
+          this.renderer.domElement.style.opacity = `${(
+            ((100 - (i + 10)) / 100) *
+            100
+          ).toFixed(2)}%`
+
+          await delay(1000)
         }
       })(),
     ])

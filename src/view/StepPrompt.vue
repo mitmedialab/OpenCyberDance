@@ -96,10 +96,10 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
   >
     <div class="fixed w-full h-full rounded-10 prompt-backdrop"></div>
 
-    <div class="space-y-4 text-gray-900 dark:text-white prompt-root rounded-10">
+    <div class="space-y-4 text-white prompt-root rounded-10">
       <div
         class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"
-        :class="{ 'text-black dark:text-white rounded': completed }"
+        :class="{ 'text-white rounded': completed }"
       >
         <div
           class="min-w-14 min-h-14 shadow shadow-2xl relative z-2 flex items-center justify-center animate__animated"
@@ -211,7 +211,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
           <div
             v-for="(log, id) in logs.slice(0, 5)"
             :key="log"
-            class="text-[14px] dark:text-gray-4 text-black animate__animated animate__fadeInUp transition-faster"
+            class="text-[14px] text-white animate__animated animate__fadeInUp transition-faster"
             v-show="id !== logs.length - 1"
           >
             $ {{ log }}

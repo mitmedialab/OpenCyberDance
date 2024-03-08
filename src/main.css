@@ -118,7 +118,7 @@ html:not(.dark) body {
   background: radial-gradient(
     circle at 50% 90%,
     rgba(240, 240, 240, 1) 0%,
-    rgba(157, 157, 157, 1) 100%
+    rgba(78, 76, 92, 1) 100%
   );
 
   /* background-image: radial-gradient(circle closest-side, white, grey); */

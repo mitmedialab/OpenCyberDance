@@ -29,6 +29,7 @@ import {
   gltfLoader,
   UpdateParamFlags,
 } from './character'
+import { soundManager } from './ding.ts'
 import { dispose } from './dispose.ts'
 import { Params } from './overrides'
 import { Panel } from './panel'
@@ -133,6 +134,8 @@ export class World {
     if (this.ready) return
 
     const isEnding = this.isEnding
+
+    soundManager.setup()
 
     // Ensure background color is in sync
     this.syncBackground()

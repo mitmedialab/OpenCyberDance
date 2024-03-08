@@ -7,20 +7,6 @@
   --backdrop-fade-in-time: 20s;
 }
 
-@font-face {
-  font-family: 'Zed Mono Extended';
-  src: url('/fonts/zed-mono-extended.ttf');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Zed Mono Extended';
-  src: url('/fonts/zed-mono-bold.ttf');
-  font-weight: bold;
-  font-style: normal;
-}
-
 body {
   margin: 0;
   transition: background-color var(--bg-color-fade-time) ease-in-out;

@@ -27,6 +27,7 @@ import {
 } from '../store/status.ts'
 import { world } from '../world'
 import { $currentScene } from '../store/scene'
+import { $soundError, $soundReady, soundManager } from '../ding'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
 const selectedChoice = useStore($selectedChoice)
@@ -88,6 +89,16 @@ const showPerc = (value: number): string | null => {
 const currentPerc = computed(() => showPerc(currentStep.value?.current()))
 
 const isEnding = computed(() => currentScene.value === 'ENDING')
+
+const isSoundReady = useStore($soundReady)
+const isSoundError = useStore($soundError)
+
+const soundState = computed(() => {
+  if (isSoundReady.value) return 'ok'
+  if (isSoundError.value) return 'fail'
+
+  return 'loading'
+})
 </script>
 
 <template>
@@ -225,7 +236,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
     fixed
     bottom-4
     left-4
-    class="text-[12px] space-y-1 dark:text-gray-200 text-white"
+    class="text-[12px] space-y-1 dark:text-gray-400 text-white font-mono"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}
@@ -234,7 +245,8 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
     <div v-if="transcript">h: {{ transcript }}</div>
 
     <div v-if="time">
-      t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }}
+      t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }} | ds:
+      {{ soundState }}
     </div>
 
     <div v-if="voiceError" class="text-red-5">

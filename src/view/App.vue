@@ -13,7 +13,7 @@ import {
 import { world } from '../world'
 
 import StepPrompt from './StepPrompt.vue'
-import { ding } from '../ding.ts'
+import { ding, soundManager } from '../ding.ts'
 import StageControl from './StageControl.vue'
 
 import { EndingKeyframes } from '../character'
@@ -39,7 +39,7 @@ onMounted(async () => {
       const completed = $valueCompleted.get()
 
       if (completed) {
-        ding()
+        soundManager.play()
         world.voice.enableVoice('prompt completed')
         resetPrompt()
         $showPrompt.set(true)
@@ -50,7 +50,7 @@ onMounted(async () => {
       resetPrompt()
 
       if (willVisible) {
-        ding()
+        soundManager.play()
         world.voice.enableVoice('prompt activated')
         $showPrompt.set(true)
 

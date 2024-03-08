@@ -18,9 +18,7 @@ export default defineConfig({
     presetTypography(),
     presetWebFonts({
       provider: 'none',
-      fonts: {
-        zed: ['Zed Mono Extended'],
-      },
+      fonts: {},
     }),
     presetWind(),
   ],

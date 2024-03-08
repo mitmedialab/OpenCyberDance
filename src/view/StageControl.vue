@@ -45,25 +45,9 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import { useStore } from '@nanostores/vue'
-
-import { $musicPlaying, toggleMusic, setVolume } from '../music'
-
-import SceneChanger from './SceneChanger.vue'
 
 const volume = ref('1.0')
 const invalid = ref(false)
-
-// const playing = useStore($musicPlaying)
-// const tracks = [1, 2, 3]
-
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen()
-  } else if (document.exitFullscreen) {
-    document.exitFullscreen()
-  }
-}
 
 watch(volume, () => {
   const v = parseFloat(volume.value)
@@ -73,6 +57,5 @@ watch(volume, () => {
   }
 
   invalid.value = false
-  setVolume(v)
 })
 </script>

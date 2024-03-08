@@ -225,7 +225,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
     fixed
     bottom-4
     left-4
-    class="text-[12px] font-zed space-y-1 text-gray-950 dark:text-gray-200"
+    class="text-[12px] font-zed space-y-1 dark:text-gray-200 text-white"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}

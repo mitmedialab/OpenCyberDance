@@ -105,7 +105,14 @@ html:not(.dark) body {
   width: 100vw;
   height: 100vh;
 
-  background-image: url(/backdrop.png);
+  background: radial-gradient(
+    circle at 50% 90%,
+    rgba(240, 240, 240, 1) 0%,
+    rgba(157, 157, 157, 1) 100%
+  );
+
+  /* background-image: radial-gradient(circle closest-side, white, grey); */
+
   background-size: cover;
   background-position: center;
 }

@@ -137,6 +137,8 @@ export class World {
 
     soundManager.setup()
 
+    if (this.panel) this.panel.panel.hide()
+
     // Ensure background color is in sync
     this.syncBackground()
 

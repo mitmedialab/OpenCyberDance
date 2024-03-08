@@ -9,7 +9,7 @@
 }
 
 @font-face {
-  font-family : 'Zed Mono Extended';
+  font-family: 'Zed Mono Extended';
   src: url('/fonts/zed-mono-extended.ttf');
   font-weight: normal;
   font-style: normal;
@@ -182,4 +182,12 @@ html:not(.dark) #app {
 
 .choice-list-leave-active {
   position: absolute;
+}
+
+html:not(.dark) .prompt-root {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 1.4em 2em;
+  border-radius: 8px;
+  transition: all 1s ease-in-out;
+  backdrop-filter: blur(10px);
 }

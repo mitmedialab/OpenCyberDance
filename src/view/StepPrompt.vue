@@ -92,7 +92,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
 <template>
   <div
-    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-gray-900 dark:text-white"
+    class="fixed top-10 left-10 animate__animated animate__fadeInUp space-y-4 text-gray-900 dark:text-white prompt-root"
   >
     <div
       class="flex items-start justify-start gap-x-6 text-8 font-zed animate__animated"

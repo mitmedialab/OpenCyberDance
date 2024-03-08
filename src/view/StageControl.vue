@@ -1,6 +1,6 @@
 <template>
   <div flex fixed bottom-4 right-4 gap-x-2 font-zed text-3 class="group">
-    <div
+    <!-- <div
       px-1
       py-1
       text-gray-200
@@ -9,9 +9,9 @@
       @click="toggleFullscreen"
     >
       FS
-    </div>
+    </div> -->
 
-    <SceneChanger />
+    <!-- <SceneChanger /> -->
 
     <!-- <div v-for="track in tracks">
       <div

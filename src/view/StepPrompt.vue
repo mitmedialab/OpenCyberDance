@@ -211,7 +211,7 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
           <div
             v-for="(log, id) in logs.slice(0, 5)"
             :key="log"
-            class="text-[14px] text-gray-4 animate__animated animate__fadeInUp transition-faster"
+            class="text-[14px] dark:text-gray-4 text-black animate__animated animate__fadeInUp transition-faster"
             v-show="id !== logs.length - 1"
           >
             $ {{ log }}

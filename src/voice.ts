@@ -33,6 +33,13 @@ export type ListeningStatus =
   | 'confused'
   | 'failed'
 
+interface UnfinalPercent {
+  n: number
+  alt: string
+  timer: number
+  id: number
+}
+
 export class VoiceController {
   recognition: SpeechRecognition | null = null
   world: World
@@ -40,7 +47,7 @@ export class VoiceController {
   /* Mapping between id (by recognition len) and success flag */
   successFlags: Map<number, boolean> = new Map()
 
-  unfinalPercentCache: Map<number, number> = new Map()
+  unfinalPercentCache: Map<number, UnfinalPercent> = new Map()
 
   get transcript() {
     return $transcript.get()
@@ -302,20 +309,6 @@ export class VoiceController {
       `[heard] ${alts.join(', ')} (final=${isFinal}, id=${resultLen})`,
     )
 
-    const isEmpty = alts.map((a) => a.trim()).every((a) => a === '')
-
-    if (isEmpty && isPercent) {
-      const cached = this.unfinalPercentCache.get(resultLen)
-      console.warn(`empty result for percent ~ id ${resultLen}`)
-
-      if (typeof cached === 'number') {
-        handleVoiceSelection(cached)
-        this.unfinalPercentCache.clear()
-
-        return true
-      }
-    }
-
     $transcript.set(alts.join(', '))
 
     // PASS 1 - use speech recognition grammar
@@ -330,19 +323,41 @@ export class VoiceController {
         return true
       }
 
+      const id = resultLen
+
       // do not use voice engine to detect percentage if not final
       if (isPercent && !isFinal) {
-        const id = resultLen
         console.info(`[vh:skip id=${id}] percent not final`, alts)
 
-        const n = parseInt(alts[0])
+        for (const alt of alts) {
+          const v = parseInt(alt)
 
-        if (!isNaN(n)) {
-          console.log(`cached ${n} for id ${id}`)
-          this.unfinalPercentCache.set(id, n)
+          if (!isNaN(v)) {
+            console.log(`cached ${v} for id ${id}`)
+
+            const timer = setTimeout(() => {
+              console.log(`---> UNFINAL PERCENT TIMEOUT: ${v} (${id})`)
+            }, 5000)
+
+            this.unfinalPercentCache.set(id, { n: v, alt, timer, id })
+
+            break
+          }
         }
 
         return false
+      }
+
+      if (isPercent && isFinal) {
+        if (this.unfinalPercentCache.has(id)) {
+          const unfinal = this.unfinalPercentCache.get(id)
+
+          if (unfinal !== undefined) {
+            clearTimeout(unfinal.timer)
+          }
+
+          this.unfinalPercentCache.delete(id)
+        }
       }
 
       const primaryOk = handleVoiceSelection(alt)
@@ -354,35 +369,6 @@ export class VoiceController {
     }
 
     console.warn(`cannot parse input: (${alts.join(', ')})`)
-
-    // // only use GPT for final results
-    // if (!voiceResult.isFinal) {
-    //   console.debug(`[vc:skip:gpt] input not final`, alts)
-    //   return false
-    // }
-
-    // // PASS 2 - use GPT
-    // const alt = alts?.[0]?.trim()
-    // const msg = JSON.stringify({ input: alt, ...params })
-    // const aiOutput = await gpt(CORRECTION_PROMPT, msg)
-    // console.debug(`[ai]`, aiOutput)
-
-    // let obj = { choice: null } as {
-    //   choice: string | null
-    //   percent: string | null
-    // }
-
-    // try {
-    //   obj = JSON.parse(aiOutput)
-    // } catch (err) {}
-
-    // if (obj.percent) {
-    //   return handleVoiceSelection(obj.percent)
-    // }
-
-    // if (obj.choice) {
-    //   return handleVoiceSelection(obj.choice)
-    // }
 
     return false
   }

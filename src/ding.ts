@@ -26,6 +26,15 @@ class SoundManager {
         $soundError.set(true)
         $soundReady.set(false)
 
+        try {
+          if (this.ding) {
+            this.ding.stop()
+            this.ding.unload()
+          }
+        } catch (err) {
+          // ???
+        }
+
         this.setup()
       },
       onend: () => {

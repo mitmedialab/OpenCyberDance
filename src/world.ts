@@ -720,14 +720,19 @@ export class World {
     if (!this.frontLight) return
 
     for (let i = 0; i < 80000; i++) {
-      if (this.frontLight.intensity > 0.001) {
+      if (this.frontLight.intensity > 0.01) {
         this.frontLight.intensity -= 0.005
-      } else {
-        this.frontLight.intensity = 0
-        break
-      }
+      } else break
 
-      await delay(120)
+      await delay(180)
+    }
+
+    for (let i = 0; i < 80000; i++) {
+      if (this.frontLight.intensity > 0.00001) {
+        this.frontLight.intensity -= 0.001
+      } else break
+
+      await delay(80)
     }
   }
 

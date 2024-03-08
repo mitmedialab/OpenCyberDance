@@ -211,6 +211,7 @@ html:not(.dark) .prompt-root {
 }
 
 html:not(.dark) .prompt-backdrop {
-  filter: blur(15px);
-  background: rgba(255, 255, 255, 0.4);
+  filter: blur(20px);
+  backdrop-filter: blur(30px);
+  background: rgba(255, 255, 255, 0.3);
 }

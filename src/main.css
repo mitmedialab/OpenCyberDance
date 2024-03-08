@@ -112,7 +112,7 @@ html:not(.dark) body {
   background-size: cover;
   background-position: center;
 
-  will-change: opacity filter;
+  will-change: opacity, filter;
 }
 
 .backdrop-fade-in {

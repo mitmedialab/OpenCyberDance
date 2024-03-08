@@ -720,29 +720,29 @@ export class World {
     if (!this.frontLight) return
 
     for (let i = 0; i < 80000; i++) {
-      if (this.frontLight.intensity > 0.00001) {
+      if (this.frontLight.intensity > 0.001) {
         this.frontLight.intensity -= 0.005
       } else {
         this.frontLight.intensity = 0
         break
       }
 
-      await delay(200)
+      await delay(120)
     }
   }
 
   async fadeBackLights() {
     if (!this.backLight) return
 
-    for (let i = 0; i < 20000; i++) {
+    for (let i = 0; i < 80000; i++) {
       if (this.backLight.intensity > 0.0001) {
-        this.backLight.intensity -= 0.25
+        this.backLight.intensity -= 0.1
       } else {
         this.backLight.intensity = 0
         break
       }
 
-      await delay(140)
+      await delay(80)
     }
   }
 

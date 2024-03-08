@@ -242,7 +242,7 @@ const soundState = computed(() => {
       s: {{ status }}
     </div>
 
-    <div v-if="transcript">h: {{ transcript }}</div>
+    <div v-if="transcript">h: {{ transcript?.slice(0, 60) }}</div>
 
     <div v-if="time">
       t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }} | ds:

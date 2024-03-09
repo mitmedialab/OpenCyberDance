@@ -365,7 +365,7 @@ export class VoiceController {
       }
     }
 
-    console.warn(`cannot parse input: (${alts.join(', ')})`)
+    console.warn(`cannot parse input: (${alts.join(', ')})`, step)
 
     // // only use GPT for final results
     // if (!voiceResult.isFinal) {

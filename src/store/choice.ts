@@ -219,12 +219,36 @@ export function handleVoiceSelection(input: string | number): boolean {
 
     if (isOrdered) {
       const order = parseInt(title)
+      console.log(`IS ORDERED:`, title)
 
       if (!isNaN(order)) {
         const key = currentStep.choices[order - 1].key
         addValue(key)
 
         return true
+      }
+
+      if (isNaN(order)) {
+        const fixNum = (num: number, match: RegExp): boolean => {
+          if (match.test(title)) {
+            const key = currentStep.choices[num - 1].key
+            addValue(key)
+
+            return true
+          }
+
+          return false
+        }
+
+        if (isNaN(order)) {
+          if (fixNum(1, /^(one|wan)$/i)) return true
+          if (fixNum(2, /^(to|too|two)$/i)) return true
+          if (fixNum(3, /^(tree|three|free)$/i)) return true
+          if (fixNum(4, /^(four|for)$/i)) return true
+          if (fixNum(5, /^(five)$/i)) return true
+
+          return false
+        }
       }
     }
 

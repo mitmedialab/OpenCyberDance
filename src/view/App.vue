@@ -117,6 +117,15 @@ onMounted(async () => {
         document.exitFullscreen()
       }
     }
+
+    if (event.key === 'j' && event.ctrlKey) {
+      console.log(`FORCE RESTART RECOGNIZER`)
+      world.voice.stop()
+
+      setTimeout(() => {
+        world.voice.startRecognition('FORCE RESTART')
+      }, 50)
+    }
   })
 
   rendererElement.value?.appendChild(world.renderer.domElement)

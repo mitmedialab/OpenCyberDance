@@ -64,13 +64,13 @@ onMounted(async () => {
       }
     }
 
-    if (event.key === 'i') {
-      if (world.panel.panel._hidden) {
-        world.panel.panel.show(true)
-      } else {
-        world.panel.panel.hide()
-      }
-    }
+    // if (event.key === 'i') {
+    //   if (world.panel.panel._hidden) {
+    //     world.panel.panel.show(true)
+    //   } else {
+    //     world.panel.panel.hide()
+    //   }
+    // }
 
     // if (event.key === 'c') {
     //   world.setupControls()
@@ -106,9 +106,9 @@ onMounted(async () => {
       world.startShadowCharacter()
     }
 
-    // if ((event.key === 'i' || event.key === 'ร') && event.ctrlKey) {
-    //   world.startDissolveCharacter()
-    // }
+    if ((event.key === 'i' || event.key === 'ร') && event.ctrlKey) {
+      world.startDissolveCharacter()
+    }
 
     if (event.key === 'f' && event.ctrlKey) {
       if (!document.fullscreenElement) {

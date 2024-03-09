@@ -171,27 +171,28 @@ export function overrideEnergy(
     track.name.includes('position')
   ) {
     // if energy is 0.0, freeze the track
-    // if (factor < 0.05 && part === 'lower') {
-    //   const size = track.getValueSize()
+    if (factor < 0.05 && part === 'lower') {
+      const size = track.getValueSize()
 
-    //   const len = track.times.length - 1
-    //   const frame = Math.round((time / track.times[len]) * len)
-    //   const data = track.values.slice(frame * size, frame * size + size)
+      const len = track.times.length - 1
+      const frame = Math.round((time / track.times[len]) * len)
+      const data = track.values.slice(frame * size, frame * size + size)
 
-    //   const [x, y, z] = data
+      const [x, y, z] = data
 
-    //   for (let i = 0; i < track.values.length; i += size) {
-    //     track.values[i] = x
-    //     track.values[i + 1] = y
-    //     track.values[i + 2] = z
-    //   }
-    // }
+      for (let i = 0; i < track.values.length; i += size) {
+        track.values[i] = x
+        track.values[i + 1] = y
+        track.values[i + 2] = z
+      }
+    }
 
     return track
   }
 
   track.times = track.times.map((t) => {
-    const f = factor
+    let f = factor
+    if (f < 0.05) f = 0.05
 
     const value = t / f
     if (isNaN(value)) return t

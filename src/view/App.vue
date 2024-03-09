@@ -117,6 +117,12 @@ onMounted(async () => {
         document.exitFullscreen()
       }
     }
+
+    if (event.key === 'j' && event.ctrlKey) {
+      const k = [...world.voice.unfinalPercentCache.keys()]
+
+      console.log('OPERATION J', k)
+    }
   })
 
   rendererElement.value?.appendChild(world.renderer.domElement)

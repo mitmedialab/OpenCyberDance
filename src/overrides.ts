@@ -191,8 +191,8 @@ export function overrideEnergy(
   }
 
   track.times = track.times.map((t) => {
-    let f = factor
-    if (f < 0.05) f = 0.05
+    const f = factor
+    // if (f < 0.05) f = 0.05
 
     const value = t / f
     if (isNaN(value)) return t

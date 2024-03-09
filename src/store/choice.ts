@@ -179,7 +179,7 @@ export function handleVoiceSelection(input: string | number): boolean {
       return selectChoice('speed')
     }
 
-    if (/(recent|reset|resin)/i.test(input as string)) {
+    if (/(recent|resin)/i.test(input as string)) {
       return selectChoice('reset')
     }
 

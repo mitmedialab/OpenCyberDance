@@ -5,6 +5,7 @@ import { CORRECTION_PROMPT } from './prompts.ts'
 import { Step } from './step-input.ts'
 import {
   $currentStep,
+  $nonFinalNum,
   $showPrompt,
   $valueCompleted,
   createGrammarFromState,
@@ -335,11 +336,22 @@ export class VoiceController {
         const id = resultLen
         console.info(`[vh:skip id=${id}] percent not final`, alts)
 
-        const n = parseInt(alts[0])
+        for (const alt of alts) {
+          const n = parseInt(alt)
 
-        if (!isNaN(n)) {
-          console.log(`cached ${n} for id ${id}`)
-          this.unfinalPercentCache.set(id, n)
+          if (!isNaN(n)) {
+            console.log(`cached ${n} for id ${id}`)
+            $nonFinalNum.set(n)
+            this.unfinalPercentCache.set(id, n)
+            break
+          }
+
+          if (isNaN(n)) {
+            if (/zero/.test(alt)) {
+              $nonFinalNum.set(0)
+              break
+            }
+          }
         }
 
         return false

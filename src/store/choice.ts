@@ -11,6 +11,8 @@ export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
 export const $selectedValues = atom<string[]>([])
 
+export const $nonFinalNum = atom<number | null>(null)
+
 export const $showPrompt = atom(false)
 export const $promptTimer = atom<number | null>(null)
 

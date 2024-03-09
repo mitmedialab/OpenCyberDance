@@ -8,6 +8,8 @@ import {
   extendPromptTimeout,
   clearPromptTimeout,
   resetPrompt,
+  $nonFinalNum,
+  handleVoiceSelection,
 } from '../store/choice'
 
 import { world } from '../world'
@@ -125,6 +127,20 @@ onMounted(async () => {
       setTimeout(() => {
         world.voice.startRecognition('FORCE RESTART')
       }, 50)
+    }
+
+    if (event.key === 'k' && event.ctrlKey) {
+      console.log(`FORCE STOP RECOGNIZER`)
+      world.voice.stop()
+    }
+
+    if (event.key === 'l' && event.ctrlKey) {
+      const nfn = $nonFinalNum.get()
+      console.log(`INSERT NONFINAL NUM: ${nfn}`)
+
+      if (nfn !== null) {
+        handleVoiceSelection(nfn)
+      }
     }
   })
 

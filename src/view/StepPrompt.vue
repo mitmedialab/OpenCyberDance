@@ -14,6 +14,7 @@ import {
   addValue,
   $selectedValues,
   $valueCompleted,
+  $nonFinalNum,
 } from '../store/choice.ts'
 
 import {
@@ -92,6 +93,8 @@ const isEnding = computed(() => currentScene.value === 'ENDING')
 
 const isSoundReady = useStore($soundReady)
 const isSoundError = useStore($soundError)
+
+const nonFinalNum = useStore($nonFinalNum)
 
 const soundState = computed(() => {
   if (isSoundReady.value) return 'ok'
@@ -247,6 +250,7 @@ const soundState = computed(() => {
     <div v-if="time">
       t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }} | ds:
       {{ soundState }}
+      <span v-if="nonFinalNum !== null">| nfn: {{ nonFinalNum }}</span>
     </div>
 
     <div v-if="voiceError" class="text-red-5">

@@ -256,7 +256,11 @@ export class VoiceController {
       console.debug(`> [speaking] ${text}`)
 
       // don't speak too much.
-      const spokenText = text.slice(0, 150)
+      let spokenText = text.slice(0, 150)
+
+      if (spokenText.includes('rotations x')) {
+        spokenText = spokenText.replace('rotations x', 'rotations ex')
+      }
 
       responsiveVoice.speak(spokenText, 'UK English Male', {
         rate: 1,

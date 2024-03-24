@@ -41,3 +41,8 @@ export const $understand = computed($gptResult, (result) => {
     return false
   }
 })
+
+if (typeof window !== 'undefined') {
+  // @ts-expect-error: logs
+  window.$logs = $logs
+}

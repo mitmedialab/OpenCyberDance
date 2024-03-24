@@ -11,22 +11,18 @@ import {
   Object3D,
   OrthographicCamera,
   Scene,
-  SkinnedMesh,
-  SpotLight,
   WebGLRenderer,
 } from 'three'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import Stats from 'three/examples/jsm/libs/stats.module'
-import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib'
 
 import { CAMERA_PRESETS, CameraPresetKey } from './camera'
 import {
   Character,
   CharacterKey,
   CharacterOptions,
-  gltfLoader,
   UpdateParamFlags,
 } from './character'
 import { soundManager } from './ding.ts'
@@ -34,7 +30,6 @@ import { dispose } from './dispose.ts'
 import { Params } from './overrides'
 import { Panel } from './panel'
 import { profile } from './perf'
-import { Plotter } from './plotter'
 import { preloader } from './preloader.ts'
 import { updateDebugLogCamera } from './store/debug'
 import { $currentScene } from './store/scene.ts'
@@ -214,7 +209,7 @@ export class World {
     }, 1000)
   }
 
-  render(ft: number) {
+  render() {
     // Update animation mixers for each character
     if (!this.params.paused) {
       const delta = this.clock.getDelta()
@@ -434,7 +429,7 @@ export class World {
   }
 
   handleCurveFormulaChange() {
-    const { axis = [], tracks = [] } = this.first?.curveConfig ?? {}
+    // const { axis = [], tracks = [] } = this.first?.curveConfig ?? {}
 
     // this.plotter.axes = axis
     // this.plotter.select(...tracks)
@@ -584,7 +579,7 @@ export class World {
       this.voice.toggle()
     }
 
-    this.panel.handlers.showGraph = (visible) => {
+    this.panel.handlers.showGraph = () => {
       // this.plotter.updateVisibility(visible)
     }
 

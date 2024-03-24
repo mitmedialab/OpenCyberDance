@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import { Euler, KeyframeTrack, QuaternionKeyframeTrack } from 'three'
 
 import { Character, ModelKey } from './character'
-import { freezeTrack } from './freeze'
 import {
   AxisPointControlParts,
   CurvePartKey,

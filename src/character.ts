@@ -5,7 +5,6 @@ import {
   Bone,
   LineBasicMaterial,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   QuaternionKeyframeTrack,
   Scene,
@@ -48,8 +47,6 @@ import {
   Axis,
   Transform,
   transformers,
-  TransformKey,
-  TransformOptions,
 } from './transforms'
 import { Matcher } from './types'
 import { delay } from './utils'

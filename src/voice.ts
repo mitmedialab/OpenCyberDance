@@ -1,7 +1,4 @@
-import { getMaxOccurence, randVariance } from './math'
-import { DelayPartKey } from './parts'
-import { gpt } from './prompt'
-import { CORRECTION_PROMPT } from './prompts.ts'
+import { getMaxOccurence } from './math'
 import { Step } from './step-input.ts'
 import {
   $currentStep,
@@ -10,7 +7,6 @@ import {
   $valueCompleted,
   createGrammarFromState,
   extendPromptTimeout,
-  getVoicePromptParams,
   handleVoiceSelection,
   prevStep,
 } from './store/choice.ts'
@@ -281,7 +277,7 @@ export class VoiceController {
     const voiceResult = resultList[resultLen - 1]
     const isFinal = voiceResult.isFinal
 
-    const params = getVoicePromptParams()
+    // const params = getVoicePromptParams()
 
     const alts = [...voiceResult]
       .filter((b) => b.confidence > 0.000001)

@@ -66,13 +66,13 @@ onMounted(async () => {
       }
     }
 
-    // if (event.key === 'i') {
-    //   if (world.panel.panel._hidden) {
-    //     world.panel.panel.show(true)
-    //   } else {
-    //     world.panel.panel.hide()
-    //   }
-    // }
+    if (event.key === 'i') {
+      if (world.panel.panel._hidden) {
+        world.panel.panel.show(true)
+      } else {
+        world.panel.panel.hide()
+      }
+    }
 
     // if (event.key === 'c') {
     //   world.setupControls()

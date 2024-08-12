@@ -157,6 +157,8 @@ export class VoiceController {
     this.recognition.addEventListener('start', () => {
       this.successFlags.clear()
       this.updateStatus('listening', 'recognizer start')
+
+      $voiceError.set(null)
     })
 
     this.recognition.addEventListener('audiostart', () => {

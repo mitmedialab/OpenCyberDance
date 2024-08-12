@@ -31,7 +31,11 @@ onMounted(async () => {
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {
-    if (event.key === ' ' || event.key === 'PageDown') {
+    if (
+      event.key === ' ' ||
+      event.key === 'PageDown' ||
+      event.key === 'ArrowRight'
+    ) {
       if (world.isEnding && world.flags.waitingEndingStart) {
         return
       }

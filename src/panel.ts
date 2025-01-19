@@ -26,11 +26,18 @@ interface Handlers {
   axisPoint(): void
 }
 
+const createGUI = () => {
+  const gui = new GUI({ width: 310 })
+  gui.hide()
+
+  return gui
+}
+
 export class Panel {
   initialized = false
 
   params: Params
-  panel = new GUI({ width: 310 })
+  panel = createGUI()
 
   energyFolder: GUI | null = null
   spaceFolder: GUI | null = null

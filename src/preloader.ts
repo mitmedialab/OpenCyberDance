@@ -2,6 +2,9 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { Character } from './character'
 
+/** reminder: flip to "false" to load assets locally! you will have to put it in /public/models/ */
+const USE_PRODUCTION_ASSETS = true
+
 export class ModelPreloader {
   ready = false
   models: Map<string, GLTF> = new Map()
@@ -29,7 +32,12 @@ export class ModelPreloader {
       const now = performance.now()
 
       const loader = new GLTFLoader()
-      const model = await loader.loadAsync(`/models/${source}`)
+
+      const modelUrl = USE_PRODUCTION_ASSETS
+        ? `https://files.poom.dev/cybersubin-production/${source}`
+        : `/models/${source}`
+
+      const model = await loader.loadAsync(modelUrl)
 
       this.models.set(source, model)
 

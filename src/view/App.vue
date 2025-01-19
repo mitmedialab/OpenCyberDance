@@ -27,7 +27,9 @@ const rendererElement = ref<HTMLDivElement>()
 // const plotterContainer = ref<HTMLDivElement>()
 
 onMounted(async () => {
-  await world.preload()
+  // Do not block on preload.
+  world.preload()
+
   await world.setup()
 
   window.addEventListener('keydown', async (event) => {

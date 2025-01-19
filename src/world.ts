@@ -23,6 +23,7 @@ import {
   Character,
   CharacterKey,
   CharacterOptions,
+  INITIAL_MODEL,
   UpdateParamFlags,
 } from './character'
 import { soundManager } from './ding.ts'
@@ -699,7 +700,13 @@ export class World {
   }
 
   async preload() {
-    await preloader.setup()
+    const initialModel = Character.sources[INITIAL_MODEL]
+
+    // Block on initial model
+    await preloader.load(initialModel)
+
+    // Preload the rest asynchronously
+    preloader.setup().then()
   }
 
   async startShadowCharacter() {

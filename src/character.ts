@@ -121,6 +121,7 @@ type DebugSpheres = { forehead?: Mesh; neck?: Mesh; body?: Mesh }
 type AnimationFlags = object
 
 const DEBUG_SKELETON = false
+export const INITIAL_MODEL: ModelKey = 'waiting'
 
 export class Character {
   scene: THREE.Scene | null = null
@@ -142,7 +143,7 @@ export class Character {
   options: CharacterOptions = {
     name: 'first',
     action: '',
-    model: 'waiting',
+    model: INITIAL_MODEL,
     scale: 0.008,
     position: [0, 0, 0],
     lengthen: 0,
@@ -175,7 +176,7 @@ export class Character {
     terryLast: 'Terrylast.glb',
     tasLast: 'Taslast.glb',
     changhungLast: 'Changhonglast.glb',
-  }
+  } satisfies Record<string, string>
 
   static defaultActions: Record<ModelKey, string> = {
     none: '',

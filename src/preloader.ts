@@ -9,7 +9,7 @@ export class ModelPreloader {
   ready = false
   models: Map<string, GLTF> = new Map()
 
-  public async setup() {
+  async setup() {
     if (this.ready) return
 
     const start = performance.now()
@@ -27,7 +27,7 @@ export class ModelPreloader {
     this.ready = true
   }
 
-  private async load(source: string) {
+  async load(source: string) {
     try {
       const now = performance.now()
 

@@ -157,10 +157,10 @@ export class Character {
 
     waiting: 'subinwaiting.glb',
     kukpat: 'Kukpat.glb',
-    // terry: 'terry.glb',
-    // changhung: 'changhung.glb',
-    // yokrob: 'YOKROB.glb',
-    // yokroblingImprovise: 'YOKROBlingimprovise.glb',
+    terry: 'terry.glb',
+    changhung: 'changhung.glb',
+    yokrob: 'YOKROB.glb',
+    yokroblingImprovise: 'YOKROBlingimprovise.glb',
 
     // Pichet dancers in ending scene.
     // pichetMaster: 'Master.glb',

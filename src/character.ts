@@ -157,10 +157,10 @@ export class Character {
 
     waiting: 'subinwaiting.glb',
     kukpat: 'Kukpat.glb',
-    terry: 'terry.glb',
-    changhung: 'changhung.glb',
-    yokrob: 'YOKROB.glb',
-    yokroblingImprovise: 'YOKROBlingimprovise.glb',
+    // terry: 'terry.glb',
+    // changhung: 'changhung.glb',
+    // yokrob: 'YOKROB.glb',
+    // yokroblingImprovise: 'YOKROBlingimprovise.glb',
 
     // Pichet dancers in ending scene.
     // pichetMaster: 'Master.glb',
@@ -172,10 +172,10 @@ export class Character {
     // tranimid: 'tranimid.glb',
 
     // black background
-    padungLast: 'Padunglast.glb',
-    terryLast: 'Terrylast.glb',
-    tasLast: 'Taslast.glb',
-    changhungLast: 'Changhonglast.glb',
+    // padungLast: 'Padunglast.glb',
+    // terryLast: 'Terrylast.glb',
+    // tasLast: 'Taslast.glb',
+    // changhungLast: 'Changhonglast.glb',
   } satisfies Record<string, string>
 
   static defaultActions: Record<ModelKey, string> = {

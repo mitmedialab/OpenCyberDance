@@ -1,9 +1,11 @@
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { Character } from './character'
 
 /** reminder: flip to "false" to load assets locally! you will have to put it in /public/models/ */
-const USE_PRODUCTION_ASSETS = true
+const USE_PRODUCTION_ASSETS = false
 
 export class ModelPreloader {
   ready = false
@@ -32,6 +34,13 @@ export class ModelPreloader {
       const now = performance.now()
 
       const loader = new GLTFLoader()
+
+      const draco = new DRACOLoader()
+      draco.setDecoderPath(`https://www.gstatic.com/draco/v1/decoders/`)
+      draco.preload()
+
+      loader.setDRACOLoader(draco)
+      loader.setMeshoptDecoder(MeshoptDecoder)
 
       const modelUrl = USE_PRODUCTION_ASSETS
         ? `https://files.poom.dev/cybersubin-production/${source}`

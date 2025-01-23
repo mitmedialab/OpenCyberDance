@@ -5,7 +5,7 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Character } from './character'
 
 /** reminder: flip to "false" to load assets locally! you will have to put it in /public/models/ */
-const USE_PRODUCTION_ASSETS = true
+const USE_PRODUCTION_ASSETS = false
 
 export class ModelPreloader {
   ready = false

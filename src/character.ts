@@ -172,10 +172,10 @@ export class Character {
     // tranimid: 'tranimid.glb',
 
     // black background
-    // padungLast: 'Padunglast.glb',
-    // terryLast: 'Terrylast.glb',
-    // tasLast: 'Taslast.glb',
-    // changhungLast: 'Changhonglast.glb',
+    padungLast: 'Padunglast.glb',
+    terryLast: 'Terrylast.glb',
+    tasLast: 'Taslast.glb',
+    changhungLast: 'Changhonglast.glb',
   } satisfies Record<string, string>
 
   static defaultActions: Record<ModelKey, string> = {
@@ -917,6 +917,8 @@ export class Character {
    * Warmup caches for External Body Space
    */
   prepareExternalBodySpaceCache() {
+    console.log('>>> prepareExternalBodySpaceCache', { options: this.options })
+
     const tracks = this.currentClip!.tracks
     const key = ebsCache.key(this)
 

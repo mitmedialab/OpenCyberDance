@@ -32,28 +32,3 @@ export function percentToValue(
   // Map the percentage to the range [min, max]
   return min + (perc / 100) * (max - min)
 }
-
-export function getMaxOccurence(arr: string[]) {
-  const n = arr
-    .map((x) => x.replace('%', '').replace('$', ''))
-    .map((x) => Math.abs(parseInt(x)).toString())
-
-  const o = n.reduce(
-    (a: Record<string, number>, c: string): Record<string, number> => {
-      !(c in a) ? (a[c] = 1) : (a[c] += 1)
-      return a
-    },
-    {},
-  )
-
-  const s: [el: string, ord: number][] = Object.entries(o).sort(
-    ([, a], [, b]) => b - a,
-  )
-
-  const ord = s
-    .filter(([, occ]) => occ === s[0][1])
-    .map((x) => [x[0], arr.indexOf(x[0])])
-    .sort(([, a], [, b]) => (a as number) - (b as number))
-
-  return ord.length > 0 ? ord[0][0] : ''
-}

@@ -1,4 +1,3 @@
-import { getMaxOccurence } from './math'
 import { findMostFrequentNumber } from './number-parser.ts'
 import { Step } from './step-input.ts'
 import {

@@ -363,35 +363,6 @@ export class VoiceController {
 
     console.warn(`cannot parse input: (${alts.join(', ')})`, step)
 
-    // // only use GPT for final results
-    // if (!voiceResult.isFinal) {
-    //   console.debug(`[vc:skip:gpt] input not final`, alts)
-    //   return false
-    // }
-
-    // // PASS 2 - use GPT
-    // const alt = alts?.[0]?.trim()
-    // const msg = JSON.stringify({ input: alt, ...params })
-    // const aiOutput = await gpt(CORRECTION_PROMPT, msg)
-    // console.debug(`[ai]`, aiOutput)
-
-    // let obj = { choice: null } as {
-    //   choice: string | null
-    //   percent: string | null
-    // }
-
-    // try {
-    //   obj = JSON.parse(aiOutput)
-    // } catch (err) {}
-
-    // if (obj.percent) {
-    //   return handleVoiceSelection(obj.percent)
-    // }
-
-    // if (obj.choice) {
-    //   return handleVoiceSelection(obj.choice)
-    // }
-
     return false
   }
 }

@@ -1,4 +1,5 @@
 import { getMaxOccurence } from './math'
+import { findMostFrequentNumber } from './number-parser.ts'
 import { Step } from './step-input.ts'
 import {
   $currentStep,
@@ -287,16 +288,9 @@ export class VoiceController {
       .map((alt) => alt.transcript)
 
     if (isPercent) {
-      const definitelyNumbers = alts
-        .map((s) => s.replace(/\D/g, ''))
-        .filter((alt) => Number(alt))
-        .filter(
-          (alt) => step?.type === 'percent' && Number(alt) <= (step.max ?? 100),
-        )
+      const finalNumber = findMostFrequentNumber(alts)
 
-      const max = getMaxOccurence(definitelyNumbers)
-
-      alts.unshift(max?.toString())
+      alts.unshift(finalNumber?.toString())
     }
 
     if (alts.length === 0) return false

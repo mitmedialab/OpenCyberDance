@@ -20,6 +20,7 @@ import StageControl from './StageControl.vue'
 
 import { EndingKeyframes } from '../character'
 import { $currentScene } from '../store/scene'
+import { prevStep } from '../store/choice'
 
 const showPrompt = useStore($showPrompt)
 
@@ -124,6 +125,10 @@ onMounted(async () => {
       } else if (document.exitFullscreen) {
         document.exitFullscreen()
       }
+    }
+
+    if (event.key === 'b' && event.ctrlKey) {
+      prevStep()
     }
 
     if (event.key === 'j' && event.ctrlKey) {

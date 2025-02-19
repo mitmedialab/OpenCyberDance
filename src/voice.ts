@@ -209,6 +209,12 @@ export class VoiceController {
 
       if (show && !completed) {
         this.continueListening('after recognition disconnected')
+      } else if (completed) {
+        this.stop()
+        console.log('--- VoiceController :: STOPPED LISTENING! ---', {
+          show,
+          completed,
+        })
       }
     })
   }
@@ -269,17 +275,13 @@ export class VoiceController {
     })
   }
 
-  async onVoiceResult(
-    resultList: SpeechRecognitionResultList,
-  ): Promise<boolean> {
+  onVoiceResult(resultList: SpeechRecognitionResultList): boolean {
     const step = $currentStep.get() as Step
     const isPercent = step && step.type === 'percent'
 
     const resultLen = resultList.length
     const voiceResult = resultList[resultLen - 1]
     const isFinal = voiceResult.isFinal
-
-    // const params = getVoicePromptParams()
 
     const alts = [...voiceResult]
       .filter((b) => b.confidence > 0.000001)
@@ -356,6 +358,11 @@ export class VoiceController {
 
       if (primaryOk) {
         console.debug(`${alt} is detected by voice engine; final=${isFinal}.`)
+
+        if ($valueCompleted.get()) {
+          this.stop()
+        }
+
         return true
       }
     }

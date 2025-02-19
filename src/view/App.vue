@@ -63,6 +63,8 @@ onMounted(async () => {
         // start the prompt timeout countdown
         extendPromptTimeout('prompt activated', true)
       } else {
+        console.log('--- STOP LISTENING! ---')
+
         world.voice.stop()
         $showPrompt.set(false)
 

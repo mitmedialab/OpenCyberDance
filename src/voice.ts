@@ -210,7 +210,7 @@ export class VoiceController {
       if (show && !completed) {
         this.continueListening('after recognition disconnected')
       } else if (completed) {
-        this.stop()
+        this.stop('recognition ended with status=completed')
         console.log('--- VoiceController :: STOPPED LISTENING! ---', {
           show,
           completed,
@@ -287,6 +287,14 @@ export class VoiceController {
       .filter((b) => b.confidence > 0.000001)
       .sort((a, b) => b.confidence - a.confidence)
       .map((alt) => alt.transcript)
+
+    // prioritize the term "go back" otherwise integer "0" takes precedence
+    for (const alt of alts) {
+      if (/back|go back|previous/.test(alt)) {
+        prevStep()
+        return true
+      }
+    }
 
     if (isPercent) {
       const finalNumber = findMostFrequentNumber(alts)

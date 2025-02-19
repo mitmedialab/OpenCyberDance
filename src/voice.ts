@@ -240,6 +240,11 @@ export class VoiceController {
     // do not continue if already completed.
     if (completed) return
 
+    // if the status is already disabled, do not continue listening.
+    if (this.status === 'disabled') {
+      return
+    }
+
     // if it's still not completed, then we need to continue!
     setTimeout(() => {
       if (!this.recognition) {

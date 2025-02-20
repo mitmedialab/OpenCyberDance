@@ -380,7 +380,7 @@ export class VoiceController {
       }
     }
 
-    console.warn(`cannot parse input: (${alts.join(', ')})`, step)
+    console.log(`[cannot parse input] (${alts.join(', ')})`, step)
 
     return false
   }

@@ -125,7 +125,10 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   appendLog(spokenSentence)
 
   world.voice.stop('run command done')
-  await world.voice.speak(spokenSentence)
+
+  if (primary !== 'reset') {
+    await world.voice.speak(spokenSentence)
+  }
 
   if (primary === 'curve') {
     const [partText, percText] = args
@@ -285,6 +288,8 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
 }
 
 export async function resetAction() {
+  await world.voice.speak('reset')
+
   await world.fadeOut()
 
   // store the currently active animation

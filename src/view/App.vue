@@ -21,6 +21,7 @@ import StageControl from './StageControl.vue'
 import { EndingKeyframes } from '../character'
 import { $currentScene } from '../store/scene'
 import { prevStep } from '../store/choice'
+import { resetAction } from '../command'
 
 const showPrompt = useStore($showPrompt)
 
@@ -71,6 +72,10 @@ onMounted(async () => {
 
         clearPromptTimeout('prompt deactivated')
       }
+    }
+
+    if (event.key === 'r' && event.ctrlKey) {
+      await resetAction()
     }
 
     // if (event.key === 'i') {

@@ -2,7 +2,7 @@ import { produce } from 'immer'
 import { atom, computed } from 'nanostores'
 
 import { runCommand } from '../command'
-import { Choice, ChoiceKey, choices, Step } from '../step-input'
+import { Choice, ChoiceKey, choices, Step, StepKey } from '../step-input'
 import { world } from '../world'
 
 const PROMPT_TIMEOUT = 1000 * 30
@@ -10,6 +10,7 @@ const PROMPT_TIMEOUT = 1000 * 30
 export const $selectedChoiceKey = atom<ChoiceKey | null>(null)
 export const $currentStepId = atom<number | null>(0)
 export const $selectedValues = atom<string[]>([])
+export const $lastStepKey = atom<StepKey | null>(null)
 
 export const $nonFinalNum = atom<number | null>(null)
 

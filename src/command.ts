@@ -280,43 +280,47 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 
   if (primary === 'reset') {
-    await world.fadeOut()
-
-    // store the currently active animation
-    const current: Record<string, { model: ModelKey; action: string }> = {}
-
-    for (const char of world.characters) {
-      current[char.options.name] = {
-        model: char.options.model,
-        action: char.options.action!,
-      }
-    }
-
-    // reset all parameters
-    world.params.reset()
-
-    // apply current animations to the new characters
-    for (const char of world.characters) {
-      const name = char.options.name
-      const { model, action } = current[name]
-
-      char.options.model = model
-      char.options.action = action ?? null
-
-      if (world.params.characters?.[name]) {
-        world.params.characters[name].model = model
-        world.params.characters[name].action = action ?? null
-      }
-
-      await changeCharacter(name)
-    }
-
-    if (world.isEnding) {
-      world.transitionInEndingScene()
-    }
-
-    await world.fadeIn()
-
-    return
+    // NO-OP. we do manual reset.
   }
+}
+
+export async function resetAction() {
+  await world.fadeOut()
+
+  // store the currently active animation
+  const current: Record<string, { model: ModelKey; action: string }> = {}
+
+  for (const char of world.characters) {
+    current[char.options.name] = {
+      model: char.options.model,
+      action: char.options.action!,
+    }
+  }
+
+  // reset all parameters
+  world.params.reset()
+
+  // apply current animations to the new characters
+  for (const char of world.characters) {
+    const name = char.options.name
+    const { model, action } = current[name]
+
+    char.options.model = model
+    char.options.action = action ?? null
+
+    if (world.params.characters?.[name]) {
+      world.params.characters[name].model = model
+      world.params.characters[name].action = action ?? null
+    }
+
+    await changeCharacter(name)
+  }
+
+  if (world.isEnding) {
+    world.transitionInEndingScene()
+  }
+
+  await world.fadeIn()
+
+  return
 }

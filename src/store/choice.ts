@@ -160,7 +160,9 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     if (
-      /(location|rotate|rotation|rotations|quotation)/i.test(input as string)
+      /(location|rotate|rotation|rotations|quotation|patient)/i.test(
+        input as string,
+      )
     ) {
       return selectChoice('rotations')
     }
@@ -273,10 +275,10 @@ export function handleVoiceSelection(input: string | number): boolean {
     if (fix('rightArm', /(light arm|right now|light now)/i)) return true
     if (fix('rightLeg', /(light lake|right lake|bright lake)/i)) return true
     if (fix('gaussian', /(gauss|klaus)/i)) return true
-    if (fix('all', /(all|oh)/i)) return true
+    if (fix('all', /(all|oh|or|our)/i)) return true
     if (fix('x', /^(ex)$/i)) return true
     if (fix('y', /^(why|wine|whine)$/i)) return true
-    if (fix('z', /^(see|sea)$/i)) return true
+    if (fix('z', /^(see|sea|sad)$/i)) return true
     if (fix('kukpat', /^(tus|tusk|task|tas)/i)) return true
     if (fix('yokroblingImprovise', /^(monkey|rob monkey)$/i)) return true
     if (fix('number60', /^(number|six|sixty|number sixty)/i)) return true

@@ -120,7 +120,7 @@ export class VoiceController {
 
   createRecognition() {
     this.recognition = new SpeechRecognition()
-    this.recognition.lang = 'en-TH'
+    this.recognition.lang = 'en-SG'
     this.recognition.interimResults = true
     this.recognition.maxAlternatives = 8
     this.recognition.continuous = true

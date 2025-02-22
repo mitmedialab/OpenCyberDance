@@ -146,6 +146,11 @@ const selectChoice = (choice: ChoiceKey) => {
 }
 
 export function handleVoiceSelection(input: string | number): boolean {
+  // trim the input first before matching
+  if (typeof input === 'string') {
+    input = input.trim()
+  }
+
   extendPromptTimeout(`handle voice ${input}`)
 
   const selectedChoiceKey = $selectedChoiceKey.get()
@@ -180,7 +185,11 @@ export function handleVoiceSelection(input: string | number): boolean {
       return selectChoice('shifting')
     }
 
-    if (/(speed|animation|dance speed|dancer speed)/i.test(input as string)) {
+    if (
+      /(speed|animation|dance speed|dancer speed|dance beat)/i.test(
+        input as string,
+      )
+    ) {
       return selectChoice('speed')
     }
 
@@ -268,7 +277,7 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     // auto-corrections
-    if (fix('left', /^(left|left limb)/i)) return true
+    if (fix('left', /^(left|left limb|lap)/i)) return true
     if (fix('right', /^(right|right limb|rylim|ride lim|light)/i)) return true
     if (fix('upper', /^(up|upper|up per|up her|at her)/i)) return true
     if (fix('lower', /^(low|lower)/i)) return true

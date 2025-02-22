@@ -173,7 +173,7 @@ export function handleVoiceSelection(input: string | number): boolean {
       return selectChoice('rotations')
     }
 
-    if (/(space|external|body|extern)/i.test(input as string)) {
+    if (/(space|external|body|extern|EXT)/i.test(input as string)) {
       return selectChoice('space')
     }
 

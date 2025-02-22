@@ -140,6 +140,11 @@ export const clearMainChoice = () => {
 const choicesKey = Object.keys(choices)
 
 const selectChoice = (choice: ChoiceKey) => {
+  // you cannot choose the dancers if the ending sequence is already started
+  if (world.isEnding && choice === 'dances') {
+    return false
+  }
+
   setChoice(choice)
   // ding(2)
   return true

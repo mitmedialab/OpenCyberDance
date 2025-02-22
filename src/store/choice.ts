@@ -181,7 +181,7 @@ export function handleVoiceSelection(input: string | number): boolean {
       return selectChoice('curve')
     }
 
-    if (/(relation|shifting|shooting)/i.test(input as string)) {
+    if (/(relation|shifting|shooting|shift)/i.test(input as string)) {
       return selectChoice('shifting')
     }
 

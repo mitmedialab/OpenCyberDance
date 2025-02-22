@@ -199,7 +199,7 @@ export function handleVoiceSelection(input: string | number): boolean {
 
     if (
       !world.isEnding &&
-      /(dancer|dancers|character|model)/i.test(input as string)
+      /(dancer|dancers|answer|character|model)/i.test(input as string)
     ) {
       return selectChoice('dances')
     }

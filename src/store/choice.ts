@@ -191,7 +191,7 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     if (
-      /(speed|animation|dance speed|dancer speed|dance beat)/i.test(
+      /(speed|animation|dance speed|dancer speed|dance beat|beat)/i.test(
         input as string,
       )
     ) {

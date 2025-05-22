@@ -88,7 +88,7 @@ export const steps = {
     type: 'choice',
     choices: [
       { title: '1. tas kukpat', key: 'kukpat' },
-      { title: '2. terry', key: 'terry' },
+      { title: '2. poon', key: 'poon' },
       { title: '3. changhung', key: 'changhung' },
       { title: '4. padung yokrob', key: 'yokrob' },
       { title: '5. padung yokrob monkey', key: 'yokroblingImprovise' },

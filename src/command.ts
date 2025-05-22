@@ -283,7 +283,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 
   if (primary === 'reset') {
-    // NO-OP. we do manual reset.
+    world.params.reset()
   }
 }
 

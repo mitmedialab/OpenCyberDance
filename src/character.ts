@@ -86,7 +86,7 @@ export type CharacterKey = keyof typeof Params.prototype.characters
 const NTH_FRAME_TICK = 58
 
 export const resetLimits: Partial<Record<ModelKey, number>> = {
-  terry: 160,
+  poon: 160,
   changhung: 300,
   yokrob: 202,
   yokroblingImprovise: 220,
@@ -157,7 +157,7 @@ export class Character {
 
     waiting: 'subinwaiting.glb',
     kukpat: 'Kukpat.glb',
-    terry: 'terry.glb',
+    poon: 'terry.glb',
     changhung: 'changhung.glb',
     yokrob: 'YOKROB.glb',
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
@@ -187,7 +187,7 @@ export class Character {
     // tranimid: 'tranimid_Tas',
 
     // animation track names for solo dances
-    terry: 'terry_chr02',
+    poon: 'terry_chr02',
     changhung: 'Changhung002_chr02',
     yokrob: 'yokrobling_Tas',
     yokroblingImprovise: 'yokroblingimprovised_chr02.001',

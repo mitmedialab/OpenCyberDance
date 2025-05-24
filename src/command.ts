@@ -283,7 +283,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 
   if (primary === 'reset') {
-    world.params.reset()
+    world.fadeOut()
   }
 }
 

@@ -59,15 +59,19 @@ export const PREDEFINED_POSTURES: Posture[] = [
   //   },
   // },
   {
-    name: 'T-Pose Test',
-    description: 'T-Posed',
+    name: 'left arm left',
+    description: 'left arm to the left',
     leftArm: {
-      upperarm: { x: 0, y: 0, z: 6 },
+      upperarm: { x: 6, y: 1.7, z: 0 },
       forearm: { x: 0, y: 0, z: 0 },
-      hand: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: -1, z: 0 },
     },
+  },
+  {
+    name: 'right arm right',
+    description: 'right arm to the right',
     rightArm: {
-      upperarm: { x: 0, y: 0, z: -6 },
+      upperarm: { x: -6, y: 1.7, z: 0 },
       forearm: { x: 0, y: 0, z: 0 },
       hand: { x: 0, y: 0, z: 0 },
     },

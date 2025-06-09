@@ -592,7 +592,7 @@ export class BoneRotationManager {
   triggerDebugUpdate() {
     if (!this.character.params?.postureDebug.enabled) return
 
-    console.log('Applying debug posture targets')
+    // console.log('Applying debug posture targets')
 
     this.armBones.forEach((bone, index) => {
       const name = bone.name.toLowerCase()
@@ -615,12 +615,33 @@ export class BoneRotationManager {
         targetRotation = { ...debugArm.hand }
       }
 
-      // Apply constraints and clipping prevention
-      const constrainedRotation = this.applyEnhancedGeneralConstraints(
-        targetRotation,
-        isLeftArm,
-        bone,
-      )
+      // Apply bone-specific constraints like the posture system does
+      let constrainedRotation: BoneRotationOffset | null = null
+      if (boneType === 'upperarm') {
+        constrainedRotation = this.applyEnhancedUpperArmConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+      } else if (boneType === 'forearm') {
+        constrainedRotation = this.applyEnhancedForearmConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+      } else if (boneType === 'hand') {
+        constrainedRotation = this.applyEnhancedHandConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+      } else {
+        constrainedRotation = this.applyEnhancedGeneralConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+      }
 
       if (constrainedRotation) {
         this.currentTargets[index] = constrainedRotation

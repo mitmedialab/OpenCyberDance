@@ -53,6 +53,7 @@ export interface PostureDebugConfig {
   enabled: boolean
   leftArm: ArmDebugConfig
   rightArm: ArmDebugConfig
+  head: { x: number; y: number; z: number }
 }
 
 export class Params {
@@ -144,6 +145,7 @@ export class Params {
       forearm: { x: 0, y: 0, z: 0 },
       hand: { x: 0, y: 0, z: 0 },
     },
+    head: { x: 0, y: 0, z: 0 },
   }
 
   // ! HACK: temporary reactivity hack. TO REMOVE!

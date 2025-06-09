@@ -12,6 +12,7 @@ export interface Posture {
   description: string
   leftArm?: ArmPosture
   rightArm?: ArmPosture
+  head?: { x: number; y: number; z: number }
 }
 
 // Port exact posture definitions from HTML prototype
@@ -93,5 +94,35 @@ export const PREDEFINED_POSTURES: Posture[] = [
       forearm: { x: 6, y: 3.73, z: 0.85 },
       hand: { x: -1.17, y: 0, z: 0 },
     },
+  },
+  {
+    name: 'head nod',
+    description: 'gentle forward nod',
+    head: { x: 0.5, y: 0, z: 0 },
+  },
+  {
+    name: 'head up',
+    description: 'gentle forward nod',
+    head: { x: -0.3, y: 0, z: 0 },
+  },
+  {
+    name: 'head look left',
+    description: 'turn head to the left',
+    head: { x: 0, y: 0.7, z: 0 },
+  },
+  {
+    name: 'head look right',
+    description: 'turn head to the right',
+    head: { x: 0, y: -0.7, z: 0 },
+  },
+  {
+    name: 'head tilt left',
+    description: 'tilt head to the left shoulder',
+    head: { x: 0, y: 0, z: 0.25 },
+  },
+  {
+    name: 'head tilt right',
+    description: 'tilt head to the right shoulder',
+    head: { x: 0, y: 0, z: -0.25 },
   },
 ]

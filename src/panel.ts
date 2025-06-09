@@ -579,6 +579,42 @@ export class Panel {
       .listen()
       .onChange(this.handlers.postureDebug)
 
+    // Head Controls
+    const headFolder = this.postureDebugFolder.addFolder('🗣️ Head')
+    headFolder
+      .add(
+        this.params.postureDebug.head,
+        'x',
+        -Math.PI / 4,
+        Math.PI / 4,
+        0.01,
+      )
+      .name('X Rotation (nod up/down)')
+      .listen()
+      .onChange(this.handlers.postureDebug)
+    headFolder
+      .add(
+        this.params.postureDebug.head,
+        'y',
+        -Math.PI / 4,
+        Math.PI / 4,
+        0.01,
+      )
+      .name('Y Rotation (turn left/right)')
+      .listen()
+      .onChange(this.handlers.postureDebug)
+    headFolder
+      .add(
+        this.params.postureDebug.head,
+        'z',
+        -Math.PI / 4,
+        Math.PI / 4,
+        0.01,
+      )
+      .name('Z Rotation (tilt left/right)')
+      .listen()
+      .onChange(this.handlers.postureDebug)
+
     // Helper buttons
     this.postureDebugFolder
       .add({ reset: () => this.resetPostureDebug() }, 'reset')
@@ -595,6 +631,7 @@ export class Panel {
     this.params.postureDebug.rightArm.upperarm = { x: 0, y: 0, z: 0 }
     this.params.postureDebug.rightArm.forearm = { x: 0, y: 0, z: 0 }
     this.params.postureDebug.rightArm.hand = { x: 0, y: 0, z: 0 }
+    this.params.postureDebug.head = { x: 0, y: 0, z: 0 }
 
     this.handlers.postureDebug()
     console.log('Reset all posture debug rotations')

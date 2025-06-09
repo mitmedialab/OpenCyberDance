@@ -33,8 +33,11 @@ declare module 'three' {
 export class BoneRotationManager {
   private character: Character
   private armBones: Bone[] = []
+  private headBones: Bone[] = []
   private currentTargets: BoneRotationOffset[] = []
   private currentRotations: BoneRotationOffset[] = []
+  private headTargets: BoneRotationOffset[] = []
+  private headRotations: BoneRotationOffset[] = []
   private currentPostureIndex = 0
   private nextChangeTime = 0
   private isActive = false
@@ -52,6 +55,7 @@ export class BoneRotationManager {
 
     this.isActive = true
     this.findArmBones()
+    this.findHeadBones()
     this.initializeRotations()
     this.generatePostureTargets()
     this.nextChangeTime = Date.now() + delay
@@ -65,8 +69,11 @@ export class BoneRotationManager {
     this.isActive = false
     this.clearRotationOffsets()
     this.armBones = []
+    this.headBones = []
     this.currentTargets = []
     this.currentRotations = []
+    this.headTargets = []
+    this.headRotations = []
 
     console.log('Stopped posture sequence')
   }
@@ -141,9 +148,48 @@ export class BoneRotationManager {
     )
   }
 
+  // Find head bones using dynamic traversal
+  private findHeadBones() {
+    if (!this.character.model) return
+
+    this.headBones = []
+
+    this.character.model.traverse((child) => {
+      if ((child as Bone).isBone || child.type === 'Bone') {
+        const name = child.name.toLowerCase()
+        const bone = child as Bone
+
+        // Include head and neck bones for head movement
+        if (
+          (name.includes('head') ||
+            name.includes('neck') ||
+            name.includes('skull')) &&
+          // Exclude hair/face features that shouldn't move
+          !name.includes('hair') &&
+          !name.includes('eye') &&
+          !name.includes('mouth') &&
+          !name.includes('jaw') &&
+          !name.includes('tooth') &&
+          !name.includes('tongue')
+        ) {
+          bone.boneType = 'head' as any
+          bone.transitionSpeed = 2.0 // Slower transition speed for smoother head movement
+          this.headBones.push(bone)
+        }
+      }
+    })
+
+    console.log(
+      'Found head bones:',
+      this.headBones.map((b) => b.name),
+    )
+  }
+
   private initializeRotations() {
     this.currentTargets = []
     this.currentRotations = []
+    this.headTargets = []
+    this.headRotations = []
     this.armSpinStates = []
 
     this.armBones.forEach((bone, index) => {
@@ -170,6 +216,21 @@ export class BoneRotationManager {
         delete bone.rotationOffset
       }
     })
+
+    // Initialize head bone rotations
+    this.headBones.forEach((bone, index) => {
+      this.headTargets.push({ x: 0, y: 0, z: 0 })
+      this.headRotations.push({
+        x: bone.randomRotationOffset ? bone.randomRotationOffset.x : 0,
+        y: bone.randomRotationOffset ? bone.randomRotationOffset.y : 0,
+        z: bone.randomRotationOffset ? bone.randomRotationOffset.z : 0,
+      })
+
+      // Clear any existing rotation offsets
+      if (bone.rotationOffset) {
+        delete bone.rotationOffset
+      }
+    })
   }
 
   private generatePostureTargets() {
@@ -184,8 +245,11 @@ export class BoneRotationManager {
     )
 
     // Move to next posture for next time
-    this.currentPostureIndex =
-      (this.currentPostureIndex + 1) % PREDEFINED_POSTURES.length
+    const randomPostureIndex = Math.floor(
+      Math.random() * PREDEFINED_POSTURES.length,
+    )
+
+    this.currentPostureIndex = randomPostureIndex
 
     this.armBones.forEach((bone, index) => {
       const name = bone.name.toLowerCase()
@@ -299,6 +363,33 @@ export class BoneRotationManager {
         }
       }
     })
+
+    // Apply head posture if defined
+    if (currentPosture.head) {
+      this.headBones.forEach((bone, index) => {
+        if (!this.headTargets[index]) return
+
+        // Apply the predefined head rotation with constraints
+        const targetRotation = { ...currentPosture.head! }
+        const constrainedRotation = this.applyHeadConstraints(targetRotation)
+
+        this.headTargets[index] = constrainedRotation
+
+        console.log(
+          `Set head bone ${bone.name} to x:${constrainedRotation.x.toFixed(
+            2,
+          )} y:${constrainedRotation.y.toFixed(
+            2,
+          )} z:${constrainedRotation.z.toFixed(2)}`,
+        )
+      })
+    } else {
+      // Reset head to neutral position if no head posture is defined
+      this.headBones.forEach((bone, index) => {
+        if (!this.headTargets[index]) return
+        this.headTargets[index] = { x: 0, y: 0, z: 0 }
+      })
+    }
 
     console.log(`Applied predefined posture: ${currentPosture.name}`)
   }
@@ -513,8 +604,34 @@ export class BoneRotationManager {
     return result || rotation
   }
 
+  private applyHeadConstraints(
+    rotation: BoneRotationOffset,
+  ): BoneRotationOffset {
+    // Conservative head movement ranges for safety
+    const maxHeadRotation = Math.PI / 4 // 45 degrees max in any direction
+
+    rotation.x = Math.max(
+      -maxHeadRotation,
+      Math.min(maxHeadRotation, rotation.x),
+    )
+    rotation.y = Math.max(
+      -maxHeadRotation,
+      Math.min(maxHeadRotation, rotation.y),
+    )
+    rotation.z = Math.max(
+      -maxHeadRotation,
+      Math.min(maxHeadRotation, rotation.z),
+    )
+
+    return rotation
+  }
+
   private clearRotationOffsets() {
     this.armBones.forEach((bone) => {
+      delete bone.rotationOffset
+      delete bone.randomRotationOffset
+    })
+    this.headBones.forEach((bone) => {
       delete bone.rotationOffset
       delete bone.randomRotationOffset
     })
@@ -550,6 +667,32 @@ export class BoneRotationManager {
       const speed = Math.min(boneSpeed * delta, 1.0) // Cap the interpolation speed
 
       // Smooth lerp toward target with different speeds for each component
+      current.x = current.x + (target.x - current.x) * speed
+      current.y = current.y + (target.y - current.y) * speed
+      current.z = current.z + (target.z - current.z) * speed
+
+      // Store as offset to be applied after animation
+      if (!bone.randomRotationOffset) {
+        bone.randomRotationOffset = { x: 0, y: 0, z: 0 }
+      }
+
+      bone.randomRotationOffset.x = current.x
+      bone.randomRotationOffset.y = current.y
+      bone.randomRotationOffset.z = current.z
+    })
+
+    // Update head bones (both for posture system and debug mode)
+    this.headBones.forEach((bone, index) => {
+      if (!this.headRotations[index] || !this.headTargets[index]) return
+
+      const current = this.headRotations[index]
+      const target = this.headTargets[index]
+
+      // Use slower transition speed for head movement
+      const boneSpeed = bone.transitionSpeed || 2.0
+      const speed = Math.min(boneSpeed * delta, 1.0)
+
+      // Smooth lerp toward target
       current.x = current.x + (target.x - current.x) * speed
       current.y = current.y + (target.y - current.y) * speed
       current.z = current.z + (target.z - current.z) * speed
@@ -652,6 +795,20 @@ export class BoneRotationManager {
         //   )} y:${targetRotation.y.toFixed(2)} z:${targetRotation.z.toFixed(2)}`,
         // )
       }
+    })
+
+    // Update head bones with debug targets
+    this.headBones.forEach((bone, index) => {
+      if (!this.headTargets[index]) return
+
+      // Get debug head configuration
+      const debugHead = this.character.params!.postureDebug.head
+
+      // Apply debug rotation with constraints
+      const targetRotation = { ...debugHead }
+      const constrainedRotation = this.applyHeadConstraints(targetRotation)
+
+      this.headTargets[index] = constrainedRotation
     })
   }
 }

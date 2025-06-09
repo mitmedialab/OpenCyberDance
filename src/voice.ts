@@ -31,6 +31,9 @@ export class VoiceController {
   recognition: SpeechRecognition | null = null
   world: World
 
+  /** GC workaround */
+  utterances: SpeechSynthesisUtterance[] = []
+
   /* Mapping between id (by recognition len) and success flag */
   successFlags: Map<number, boolean> = new Map()
 
@@ -263,13 +266,25 @@ export class VoiceController {
         spokenText = spokenText.replace('rotations x', 'rotations ex')
       }
 
+      if (spokenText.includes('kukpat')) {
+        spokenText = spokenText.replace('kukpat', 'kookpat')
+      }
+
+      if (spokenText.includes('changhung')) {
+        spokenText = spokenText.replace('changhung', 'changhong')
+      }
+
       speechSynthesis.cancel()
 
       const voice = speechSynthesis
         .getVoices()
-        .find((v) => v.name.includes('UK English Male'))
+        .find((v) => v.name.includes('Daniel'))
 
-      console.log('voices', voice)
+      // auto-resolve after 10 seconds
+      const timer = setTimeout(() => {
+        speechSynthesis.cancel()
+        resolve()
+      }, 15000)
 
       const u = new SpeechSynthesisUtterance(spokenText)
       u.lang = 'en-US'
@@ -277,13 +292,16 @@ export class VoiceController {
       u.rate = 1
       u.onend = () => {
         console.log(`[voice:onend] "${spokenText}"`)
+        clearTimeout(timer)
         resolve()
       }
       u.onerror = (e) => {
         console.error(`[voice:onerror] "${spokenText}"`, e)
+        clearTimeout(timer)
         resolve()
       }
 
+      this.utterances.push(u)
       speechSynthesis.speak(u)
     })
   }

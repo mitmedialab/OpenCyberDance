@@ -146,7 +146,8 @@ onMounted(async () => {
     }
 
     if (event.key === 'k' && event.ctrlKey) {
-      console.log(`FORCE STOP RECOGNIZER`)
+      speechSynthesis.cancel()
+      console.log(`FORCE STOP RECOGNIZER+SPEECH`)
       world.voice.stop()
     }
 

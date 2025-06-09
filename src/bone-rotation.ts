@@ -202,7 +202,7 @@ export class BoneRotationManager {
       }
 
       // 20% chance to add spinning before reaching target - like HTML prototype
-      const shouldSpin = Math.random() < 0.2
+      const shouldSpin = false
       let targetRotation = { x: 0, y: 0, z: 0 }
 
       if (shouldSpin && !this.armSpinStates[index].isSpinning) {

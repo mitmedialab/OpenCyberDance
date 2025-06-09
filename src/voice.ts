@@ -274,6 +274,10 @@ export class VoiceController {
         spokenText = spokenText.replace('changhung', 'changhong')
       }
 
+      if (spokenText.includes('padung')) {
+        spokenText = spokenText.replace('padung', 'padoong')
+      }
+
       speechSynthesis.cancel()
 
       const voice = speechSynthesis

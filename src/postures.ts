@@ -128,4 +128,88 @@ export const PREDEFINED_POSTURES: Posture[] = [
       hand: { x: 0, y: 0, z: 0 },
     },
   },
+  {
+    name: 'Left Shoulder Forward',
+    description: 'Left hand straight ahead at shoulder level, right arm down',
+    leftArm: {
+      upperarm: { x: 0, y: 0, z: -1.57 }, // -90 degrees (shoulder level)
+      forearm: { x: 1.57, y: 0, z: 0 }, // +90 degrees forward
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'Right Shoulder Forward',
+    description: 'Right hand straight ahead at shoulder level, left arm down',
+    leftArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0, z: 1.57 }, // +90 degrees (shoulder level)
+      forearm: { x: 1.57, y: 0, z: 0 }, // +90 degrees forward
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'Left Diagonal Front-Left',
+    description: 'Left hand diagonally to the front-left (-45 degrees)',
+    leftArm: {
+      upperarm: { x: 0, y: 0.785, z: -1.18 }, // -45 degrees diagonal
+      forearm: { x: 1.18, y: 0, z: 0 }, // Forward angle
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'Right Diagonal Front-Left',
+    description: 'Right hand diagonally to the front-left (-45 degrees)',
+    leftArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0.785, z: 1.18 }, // +45 degrees diagonal
+      forearm: { x: 1.18, y: 0, z: 0 }, // Forward angle
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'Left Diagonal Front-Right',
+    description: 'Left hand diagonally to the front-right (45 degrees)',
+    leftArm: {
+      upperarm: { x: 0, y: -0.785, z: -1.18 }, // -45 degrees diagonal (opposite direction)
+      forearm: { x: 1.18, y: 0, z: 0 }, // Forward angle
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'Right Diagonal Front-Right',
+    description: 'Right hand diagonally to the front-right (45 degrees)',
+    leftArm: {
+      upperarm: { x: 0, y: 0, z: 0 }, // Neutral position
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: -0.785, z: 1.18 }, // +45 degrees diagonal (opposite direction)
+      forearm: { x: 1.18, y: 0, z: 0 }, // Forward angle
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
 ]

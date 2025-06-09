@@ -84,7 +84,7 @@ export const CurrentPercent = {
   speed: () => v2p('speed', world.params.timescale),
   space: () => v2p('space', world.params.space.delay),
   rotations: (axis: Axis) => v2p('rotations', world.params.rotations[axis]),
-  axis: () => toPercent(world.params.axisPoint.threshold, 0, 10),
+  axis: () => v2p('axis', world.params.axisPoint.threshold), // toPercent(world.params.axisPoint.threshold, 0, 10),
 }
 
 export async function runCommand(primary: ChoiceKey, args: string[]) {

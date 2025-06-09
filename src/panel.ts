@@ -296,12 +296,12 @@ export class Panel {
       .listen()
       .onChange(this.handlers.axisPoint)
 
-    for (const part of Object.keys(axisPointControlParts)) {
-      this.axisPointFolder
-        ?.add(this.params.axisPoint.parts, part)
-        .listen()
-        .onChange(this.handlers.axisPoint)
-    }
+    // for (const part of Object.keys(axisPointControlParts)) {
+    //   this.axisPointFolder
+    //     ?.add(this.params.axisPoint.parts, part)
+    //     .listen()
+    //     .onChange(this.handlers.axisPoint)
+    // }
   }
 
   updateKey() {

@@ -9,7 +9,6 @@ const armatureParts = [
   { title: 'left leg', key: 'leftLeg' },
   { title: 'right leg', key: 'rightLeg' },
 ]
-
 export interface ChoiceOption {
   title: string
   key: string
@@ -166,7 +165,13 @@ export const choices = {
   axis: {
     title: 'axis point',
     triggers: ['axis'],
-    steps: [steps.axisParts, steps.percent],
+    // steps: [steps.axisParts, steps.percent],
+    steps: [
+      {
+        type: 'percent',
+        current: () => CurrentPercent.axis(),
+      },
+    ],
   },
   rotations: {
     title: 'rotations',

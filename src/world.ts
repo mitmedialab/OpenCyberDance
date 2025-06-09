@@ -558,6 +558,18 @@ export class World {
       this.updateParams({ axisPoint: true })
     }, 100)
 
+    this.panel.handlers.startPostures = () => {
+      for (const character of this.characters) {
+        character.startPostures()
+      }
+    }
+
+    this.panel.handlers.stopPostures = () => {
+      for (const character of this.characters) {
+        character.stopPostures()
+      }
+    }
+
     this.panel.handlers.timescale = (timescale) => {
       for (const character of this.characters) {
         if (!character.mixer) continue

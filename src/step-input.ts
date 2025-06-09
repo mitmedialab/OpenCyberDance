@@ -163,11 +163,11 @@ export const choices = {
       },
     ],
   },
-  // axis: {
-  //   title: 'axis point',
-  //   triggers: ['axis'],
-  //   steps: [steps.axisParts, steps.percent],
-  // },
+  axis: {
+    title: 'axis point',
+    triggers: ['axis'],
+    steps: [steps.axisParts, steps.percent],
+  },
   rotations: {
     title: 'rotations',
     triggers: ['turn', 'rotation'],

@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepe Belly 3D Animation</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐸</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
+      color: white;
+    }
+
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      min-width: 280px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #333;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb:hover {
+      background: #764ba2;
+      transform: scale(1.2);
+    }
+
+    button {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 5px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .value-display {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 200;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #667eea;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    #info {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #error {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 0, 0, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+      z-index: 300;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="loading">
+      <div class="spinner"></div>
+      <h2>Loading Pepe...</h2>
+      <p>Preparing 3D model and animations</p>
+    </div>
+
+    <div id="error">
+      <h3>❌ Loading Error</h3>
+      <p>Could not load the 3D model. Please check that the files are in the /3D folder:</p>
+      <ul>
+        <li>Pepe_Belly.gltf</li>
+        <li>Pepe_Belly.bin</li>
+        <li>Pepe.jpg</li>
+      </ul>
+    </div>
+
+    <div id="controls" style="display: none;">
+      <h3>🎮 Animation Controls</h3>
+
+      <div class="control-group">
+        <label for="animationSpeed">Animation Speed: <span class="value-display" id="speedValue">1.0x</span></label>
+        <input type="range" id="animationSpeed" min="0" max="3" step="0.1" value="1">
+      </div>
+
+      <div class="control-group">
+        <label for="animationTime">Animation Time: <span class="value-display" id="timeValue">0.0s</span></label>
+        <input type="range" id="animationTime" min="0" max="100" step="0.1" value="0">
+      </div>
+
+      <div class="control-group">
+        <button id="playPause">⏸️ Pause</button>
+        <button id="reset">🔄 Reset</button>
+        <button id="rotateArmsLive">🎯 Postures</button>
+      </div>
+
+      <div class="control-group">
+        <label for="rotationSpeed">Auto Rotation: <span class="value-display" id="rotationValue">0.0x</span></label>
+        <input type="range" id="rotationSpeed" min="0" max="2" step="0.1" value="0">
+      </div>
+
+      <div class="control-group">
+        <label for="cameraDistance">Camera Distance: <span class="value-display" id="distanceValue">3.0</span></label>
+        <input type="range" id="cameraDistance" min="1" max="10" step="0.1" value="3.0"></input>
+      </div>
+    </div>
+
+    <div id="info">
+      <strong>🎨 3D Viewer Info</strong><br>
+      Model: Pepe Belly<br>
+      Animation: <span id="animationName">Loading...</span><br>
+      FPS: <span id="fps">--</span>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+    // Scene setup
+    let scene, camera, renderer, mixer, model, animationAction;
+    let isPlaying = true;
+    let autoRotate = true;
+    let wireframeMode = false;
+    let clock = new THREE.Clock();
+    let fpsCounter = 0;
+    let lastTime = 0;
+
+    // Random arm pointing system
+    let randomArmPointing = false;
+    let armBones = [];
+    let armTargetRotations = [];
+    let armCurrentRotations = [];
+    let nextRandomChangeTime = 0;
+    let transitionSpeed = 6.0; // Speed of smooth transitions
+
+    // Check if GLTFLoader is available and initialize
+    function checkAndInit() {
+      console.log('THREE.js version:', THREE.REVISION);
+      console.log('Available loaders:', Object.keys(THREE).filter(key => key.includes('Loader')));
+
+      if (typeof THREE.GLTFLoader !== 'undefined') {
+        console.log('GLTFLoader is available');
+        init();
+      } else {
+        console.log('GLTFLoader not available, trying alternative loading...');
+        // Try alternative loading method
+        loadGLTFLoaderAlternative();
+      }
+    }
+
+    function loadGLTFLoaderAlternative() {
+      // Alternative 1: Try different CDN
+      const script1 = document.createElement('script');
+      script1.src = 'https://threejs.org/examples/js/loaders/GLTFLoader.js';
+      script1.onload = function () {
+        console.log('GLTFLoader loaded from threejs.org');
+        init();
+      };
+      script1.onerror = function () {
+        // Alternative 2: Try jsdelivr with different path
+        const script2 = document.createElement('script');
+        script2.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+        script2.onload = function () {
+          console.log('GLTFLoader loaded from jsdelivr');
+          init();
+        };
+        script2.onerror = function () {
+          // Show error message
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('error').innerHTML = `
+                        <h3>❌ GLTFLoader Error</h3>
+                        <p>Unable to load GLTFLoader from multiple sources.</p>
+                        <p>This might be due to network restrictions or CORS policy.</p>
+                        <p>Try:</p>
+                        <ul>
+                            <li>Refreshing the page</li>
+                            <li>Checking your internet connection</li>
+                            <li>Using a local server (python -m http.server)</li>
+                        </ul>
+                    `;
+          document.getElementById('error').style.display = 'block';
+        };
+        document.head.appendChild(script2);
+      };
+      document.head.appendChild(script1);
+    }
+
+    // Initialize the 3D scene
+    function init() {
+      // Create scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x222222);
+
+      // Create camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 1, 3);
+
+      // Create renderer
+      renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.getElementById('container').appendChild(renderer.domElement);
+
+      // Add lights
+      setupLights();
+
+      // Load the GLTF model
+      loadModel();
+
+      // Setup controls
+      setupControls();
+
+      // Start animation loop
+      animate();
+    }
+
+    function setupLights() {
+      // Ambient light - increased intensity
+      const ambientLight = new THREE.AmbientLight(0x404040, 1.0);
+      scene.add(ambientLight);
+
+      // Main directional light - increased intensity
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      directionalLight.position.set(5, 5, 5);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
+      scene.add(directionalLight);
+
+      // Fill light - increased intensity
+      const fillLight = new THREE.DirectionalLight(0x8888ff, 0.6);
+      fillLight.position.set(-3, 2, -3);
+      scene.add(fillLight);
+
+      // Rim light - increased intensity
+      const rimLight = new THREE.DirectionalLight(0xff8888, 0.4);
+      rimLight.position.set(0, 3, -5);
+      scene.add(rimLight);
+
+      // Additional point lights for better illumination
+      const pointLight1 = new THREE.PointLight(0xffffff, 0.8, 10);
+      pointLight1.position.set(2, 2, 2);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0xffffff, 0.6, 8);
+      pointLight2.position.set(-2, 1, -2);
+      scene.add(pointLight2);
+
+      // Hemisphere light for natural ambient lighting
+      const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x654321, 0.5);
+      scene.add(hemisphereLight);
+
+      // Additional spotlight for dramatic lighting
+      const spotLight = new THREE.SpotLight(0xffffff, 1.0, 10, Math.PI / 6, 0.1);
+      spotLight.position.set(0, 5, 0);
+      spotLight.target.position.set(0, 0, 0);
+      spotLight.castShadow = true;
+      scene.add(spotLight);
+      scene.add(spotLight.target);
+
+      // Extra fill lights from different angles
+      const sideLight1 = new THREE.DirectionalLight(0x4488ff, 0.3);
+      sideLight1.position.set(3, 0, 0);
+      scene.add(sideLight1);
+
+      const sideLight2 = new THREE.DirectionalLight(0xff4488, 0.3);
+      sideLight2.position.set(-3, 0, 0);
+      scene.add(sideLight2);
+
+      const backLight = new THREE.DirectionalLight(0x88ff44, 0.2);
+      backLight.position.set(0, 0, -3);
+      scene.add(backLight);
+    }
+
+    function loadModel() {
+      const loader = new THREE.GLTFLoader();
+
+      loader.load(
+        '/3D/Pepe_Belly.gltf',
+        function (gltf) {
+          model = gltf.scene;
+
+          // Scale and position the model at center
+          model.scale.setScalar(1);
+          model.position.set(0, 0, 0);
+
+          // Enable shadows
+          model.traverse(function (child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          scene.add(model);
+
+          // Setup animations
+          if (gltf.animations && gltf.animations.length > 0) {
+            mixer = new THREE.AnimationMixer(model);
+            animationAction = mixer.clipAction(gltf.animations[0]);
+            animationAction.play();
+
+            // Update animation info
+            document.getElementById('animationName').textContent = gltf.animations[0].name;
+
+            // Set up animation time slider
+            const duration = gltf.animations[0].duration;
+            document.getElementById('animationTime').max = duration;
+          }
+
+          // Hide loading, show controls
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('controls').style.display = 'block';
+        },
+        function (progress) {
+          console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+        },
+        function (error) {
+          console.error('Error loading model:', error);
+
+          // Create a fallback cube if model fails to load
+          const geometry = new THREE.BoxGeometry(1, 1, 1);
+          const material = new THREE.MeshPhongMaterial({
+            color: 0x00ff00,
+            wireframe: false
+          });
+          const cube = new THREE.Mesh(geometry, material);
+          cube.position.set(0, 0, 0);
+          scene.add(cube);
+
+          // Add a simple rotation animation for the cube
+          function animateCube() {
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+          }
+
+          // Override the animate function to include cube animation
+          const originalAnimate = animate;
+          animate = function () {
+            requestAnimationFrame(animate);
+            animateCube();
+            renderer.render(scene, camera);
+          };
+
+          // Hide loading, show controls with limited functionality
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('controls').style.display = 'block';
+          document.getElementById('animationName').textContent = 'Fallback Cube';
+
+          // Show warning instead of error
+          document.getElementById('error').innerHTML = `
+                        <h3>⚠️ Model Loading Failed</h3>
+                        <p>Could not load Pepe model, showing fallback cube.</p>
+                        <p>Check that files are in /3D/ folder:</p>
+                        <ul>
+                            <li>Pepe_Belly.gltf</li>
+                            <li>Pepe_Belly.bin</li>
+                            <li>Pepe.jpg</li>
+                        </ul>
+                        <p>The 3D engine is working correctly.</p>
+                    `;
+          document.getElementById('error').style.display = 'block';
+
+          // Start the fallback animation
+          animate();
+        }
+      );
+    }
+
+    function setupControls() {
+      // Animation speed control
+      document.getElementById('animationSpeed').addEventListener('input', function (e) {
+        const speed = parseFloat(e.target.value);
+        if (animationAction) {
+          animationAction.timeScale = speed;
+        }
+        document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
+      });
+
+      // Animation time control
+      document.getElementById('animationTime').addEventListener('input', function (e) {
+        const time = parseFloat(e.target.value);
+        if (animationAction) {
+          animationAction.time = time;
+        }
+        document.getElementById('timeValue').textContent = time.toFixed(1) + 's';
+      });
+
+      // Play/Pause button
+      document.getElementById('playPause').addEventListener('click', function () {
+        if (animationAction) {
+          if (isPlaying) {
+            animationAction.paused = true;
+            this.textContent = '▶️ Play';
+          } else {
+            animationAction.paused = false;
+            this.textContent = '⏸️ Pause';
+          }
+          isPlaying = !isPlaying;
+        }
+      });
+
+      // Reset button
+      document.getElementById('reset').addEventListener('click', function () {
+        if (animationAction) {
+          animationAction.reset();
+          animationAction.play();
+          if (!isPlaying) {
+            animationAction.paused = true;
+          }
+        }
+      });
+
+      
+
+      // Rotation speed control
+      document.getElementById('rotationSpeed').addEventListener('input', function (e) {
+        const speed = parseFloat(e.target.value);
+        document.getElementById('rotationValue').textContent = speed.toFixed(1) + 'x';
+      });
+
+      // Camera distance control
+      document.getElementById('cameraDistance').addEventListener('input', function (e) {
+        const distance = parseFloat(e.target.value);
+        const direction = camera.position.clone().normalize();
+        camera.position.copy(direction.multiplyScalar(distance));
+        camera.position.y = Math.max(camera.position.y, 0.5);
+        camera.lookAt(0, 0, 0);
+        document.getElementById('distanceValue').textContent = distance.toFixed(1);
+      });
+
+      // Axis Point button
+      document.getElementById('rotateArmsLive').addEventListener('click', function () {
+        startRandomArmPointing();
+      });
+
+      // Mouse controls
+      let isDragging = false;
+      let previousMousePosition = {x: 0, y: 0};
+
+      renderer.domElement.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        previousMousePosition = {x: e.clientX, y: e.clientY};
+      });
+
+      renderer.domElement.addEventListener('mousemove', function (e) {
+        if (isDragging && model) {
+          const deltaMove = {
+            x: e.clientX - previousMousePosition.x,
+            y: e.clientY - previousMousePosition.y
+          };
+
+          model.rotation.y += deltaMove.x * 0.01;
+          model.rotation.x += deltaMove.y * 0.01;
+
+          previousMousePosition = {x: e.clientX, y: e.clientY};
+        }
+      });
+
+      document.addEventListener('mouseup', function () {
+        isDragging = false;
+      });
+
+      // Scroll wheel zoom
+      renderer.domElement.addEventListener('wheel', function (e) {
+        const zoomSpeed = 0.1;
+        const distance = camera.position.length();
+        const newDistance = distance + (e.deltaY > 0 ? zoomSpeed : -zoomSpeed);
+
+        if (newDistance > 1 && newDistance < 10) {
+          const direction = camera.position.clone().normalize();
+          camera.position.copy(direction.multiplyScalar(newDistance));
+          document.getElementById('cameraDistance').value = newDistance;
+          document.getElementById('distanceValue').textContent = newDistance.toFixed(1);
+        }
+
+        e.preventDefault();
+      });
+    }
+
+    function rotateHandJoints() {
+      if (!model) {
+        console.log('No model loaded');
+        return;
+      }
+
+      // Temporarily pause animation to prevent it from overriding our rotations
+      const wasPlaying = isPlaying;
+      if (animationAction && isPlaying) {
+        animationAction.paused = true;
+        isPlaying = false;
+        document.getElementById('playPause').textContent = '▶️ Play';
+        console.log('Paused animation to apply hand rotations');
+      }
+
+      console.log('=== Starting hand rotation analysis ===');
+
+      // Function to find hand-related bones/joints
+      function findHandBones(object) {
+        const handBones = [];
+
+        object.traverse(function (child) {
+          if (child.isBone || child.type === 'Bone') {
+            const name = child.name.toLowerCase();
+            // Look for common hand bone naming patterns
+            if (name.includes('hand') || 
+                name.includes('wrist') || 
+                name.includes('finger') || 
+                name.includes('thumb') || 
+                name.includes('index') || 
+                name.includes('middle') || 
+                name.includes('ring') || 
+                name.includes('pinky') ||
+                name.includes('palm')) {
+              handBones.push(child);
+            }
+          }
+        });
+
+        return handBones;
+      }
+
+      // Find all hand bones
+      const handBones = findHandBones(model);
+
+      if (handBones.length === 0) {
+        console.log('No hand bones found. Trying to rotate mesh objects with hand-related names...');
+
+        // Fallback: look for mesh objects that might be hands
+        model.traverse(function (child) {
+          if (child.isMesh) {
+            const name = child.name.toLowerCase();
+            if (name.includes('hand') || name.includes('arm')) {
+              console.log('Rotating mesh:', child.name);
+              child.rotation.z += Math.PI / 2; // 90 degrees
+            }
+          }
+        });
+        return;
+      }
+
+      // Rotate each hand bone by 90 degrees
+      handBones.forEach(function (bone) {
+        console.log('Rotating hand bone:', bone.name);
+        // Rotate around Z-axis by 90 degrees (π/2 radians)
+        bone.rotation.z += Math.PI / 2;
+
+        // Alternative rotations you can try:
+        // bone.rotation.x += Math.PI / 2; // Rotate around X-axis
+        // bone.rotation.y += Math.PI / 2; // Rotate around Y-axis
+      });
+
+      console.log(`Rotated ${handBones.length} hand bones by 90 degrees`);
+    }
+
+    function rotateFullArms(keepAnimationPlaying = false) {
+      if (!model) {
+        console.log('No model loaded');
+        return;
+      }
+
+      // Optionally pause animation to prevent it from overriding our rotations
+      const wasPlaying = isPlaying;
+      if (animationAction && isPlaying && !keepAnimationPlaying) {
+        animationAction.paused = true;
+        isPlaying = false;
+        document.getElementById('playPause').textContent = '▶️ Play';
+        console.log('Paused animation to apply arm rotations');
+      }
+
+      console.log('=== Starting arm joint rotation analysis ===');
+
+      // Function to find arm joints (excluding shoulder/body connections)
+      function findArmBones(object) {
+        const armBones = [];
+
+        object.traverse(function (child) {
+          if (child.isBone || child.type === 'Bone') {
+            const name = child.name.toLowerCase();
+
+            // Include arm joints but exclude shoulder/spine connections
+            if ((name.includes('arm') || 
+                 name.includes('forearm') ||
+                 name.includes('upperarm') ||
+                 name.includes('elbow') ||
+                 name.includes('wrist') ||
+                 name.includes('hand') || 
+                 name.includes('finger') || 
+                 name.includes('thumb') || 
+                 name.includes('index') || 
+                 name.includes('middle') || 
+                 name.includes('ring') || 
+                 name.includes('pinky') ||
+                 name.includes('palm') ||
+                 // Mixamo naming conventions for arms (not shoulders)
+                 name.includes('leftarm') ||
+                 name.includes('rightarm') ||
+                 name.includes('leftforearm') ||
+                 name.includes('rightforearm') ||
+                 name.includes('leftupperarm') ||
+                 name.includes('rightupperarm')) &&
+                // Exclude shoulder/spine connections
+                !name.includes('shoulder') &&
+                !name.includes('clavicle') &&
+                !name.includes('spine') &&
+                !name.includes('neck') &&
+                !name.includes('torso') &&
+                !name.includes('chest')) {
+              armBones.push(child);
+            }
+          }
+        });
+
+        return armBones;
+      }
+
+      // Find all arm bones (excluding shoulders)
+      const armBones = findArmBones(model);
+
+      if (armBones.length === 0) {
+        console.log('No arm joints found. Trying to rotate mesh objects with arm-related names...');
+
+        // Fallback: look for mesh objects that might be arms
+        model.traverse(function (child) {
+          if (child.isMesh) {
+            const name = child.name.toLowerCase();
+            if ((name.includes('hand') || name.includes('arm')) && 
+                !name.includes('shoulder') && !name.includes('torso')) {
+              console.log('Rotating mesh:', child.name);
+              child.rotation.z += Math.PI / 2; // 90 degrees
+            }
+          }
+        });
+        return;
+      }
+
+      // For live mode, we need to modify the bones differently
+      if (keepAnimationPlaying) {
+        // Store original rotations and add rotation offset
+        armBones.forEach(function (bone) {
+          if (!bone.rotationOffset) {
+            bone.rotationOffset = {
+              x: 0,
+              y: 0,
+              z: Math.PI / 2  // 90 degrees rotation offset
+            };
+            console.log('Added rotation offset to:', bone.name);
+          } else {
+            // Add more rotation if already offset
+            bone.rotationOffset.z += Math.PI / 2;
+            console.log('Increased rotation offset for:', bone.name);
+          }
+        });
+
+        console.log(`Applied rotation offset to ${armBones.length} arm joints`);
+        console.log('Animation continues playing with arm rotation offsets applied');
+
+        // Ensure animation stays playing
+        if (animationAction && !isPlaying) {
+          animationAction.paused = false;
+          isPlaying = true;
+          document.getElementById('playPause').textContent = '⏸️ Pause';
+        }
+      } else {
+        // For non-live mode, directly rotate the bones
+        armBones.forEach(function (bone) {
+          console.log('Rotating arm joint:', bone.name);
+          // Rotate around Z-axis by 90 degrees (π/2 radians)
+          bone.rotation.z += Math.PI / 2;
+
+          // Alternative rotations you can try:
+          // bone.rotation.x += Math.PI / 4; // 45 degrees on X
+          // bone.rotation.y += Math.PI / 6; // 30 degrees on Y
+        });
+        console.log(`Rotated ${armBones.length} arm joints by 90 degrees`);
+      }
+    }
+
+    function startRandomArmPointing() {
+      if (!model) {
+        console.log('No model loaded');
+        return;
+      }
+
+      if (!randomArmPointing) {
+        // Start random arm pointing
+        randomArmPointing = true;
+
+        // Initialize arm bones and tracking arrays only once
+        armBones = findArmBonesForPointing(model);
+        armTargetRotations = [];
+        armCurrentRotations = [];
+
+        // Clear any existing regular rotation offsets from these bones
+        armBones.forEach(function(bone) {
+          if (bone.rotationOffset) {
+            delete bone.rotationOffset;
+          }
+        });
+
+        // Initialize current rotations from existing bone positions
+        armBones.forEach(function(bone, index) {
+          armCurrentRotations[index] = {
+            x: bone.randomRotationOffset ? bone.randomRotationOffset.x : 0,
+            y: bone.randomRotationOffset ? bone.randomRotationOffset.y : 0,
+            z: bone.randomRotationOffset ? bone.randomRotationOffset.z : 0
+          };
+          armTargetRotations[index] = { x: 0, y: 0, z: 0 };
+        });
+
+        // Generate first posture target
+        generateRandomArmTargets();
+        nextRandomChangeTime = Date.now() + (3000 + Math.random() * 2000); // 3-5 seconds for posture changes
+
+        console.log(`Started posture sequence with ${armBones.length} arm bones`);
+        document.getElementById('rotateArmsLive').textContent = '🛑 Stop Postures';
+
+        // Ensure animation keeps playing
+        if (animationAction && !isPlaying) {
+          animationAction.paused = false;
+          isPlaying = true;
+          document.getElementById('playPause').textContent = '⏸️ Pause';
+        }
+      } else if (randomArmPointing) {
+        // If already running, generate new targets immediately for smooth transition
+        generateRandomArmTargets();
+        nextRandomChangeTime = Date.now() + 2000; // Reset timer
+        console.log('Generated new random targets for smooth transition');
+      } else {
+        // Stop posture sequence
+        console.log('Stopped posture sequence');
+        randomArmPointing = false;
+        currentPostureIndex = 0; // Reset to first posture
+        document.getElementById('rotateArmsLive').textContent = '🎯 Postures';
+
+        // Reset random rotation offsets
+        armBones.forEach(function(bone) {
+          if (bone.randomRotationOffset) {
+            delete bone.randomRotationOffset;
+          }
+        });
+
+        // Clear the arrays
+        armBones = [];
+        armTargetRotations = [];
+        armCurrentRotations = [];
+      }
+    }
+
+    function findArmBonesForPointing(object) {
+      const bones = [];
+
+      object.traverse(function (child) {
+        if (child.isBone || child.type === 'Bone') {
+          const name = child.name.toLowerCase();
+
+          // Include arm components for realistic pointing but exclude fingers
+          if ((name.includes('arm') || 
+               name.includes('forearm') ||
+               name.includes('upperarm') ||
+               name.includes('hand')) &&
+              // Exclude shoulder/spine connections
+              !name.includes('shoulder') &&
+              !name.includes('clavicle') &&
+              !name.includes('spine') &&
+              !name.includes('neck') &&
+              !name.includes('torso') &&
+              !name.includes('chest') &&
+              // Exclude all finger bones
+              !name.includes('finger') &&
+              !name.includes('thumb') &&
+              !name.includes('index') &&
+              !name.includes('middle') &&
+              !name.includes('ring') &&
+              !name.includes('pinky') &&
+              !name.includes('pinkie')) {
+
+            // Categorize bones for different rotation speeds
+            let boneType = 'default';
+            if (name.includes('arm') && !name.includes('forearm')) {
+              boneType = 'upperarm';
+            } else if (name.includes('forearm')) {
+              boneType = 'forearm';
+            } else if (name.includes('hand')) {
+              boneType = 'hand';
+            }
+
+            child.boneType = boneType; // Store bone type for later use
+            bones.push(child);
+          }
+        }
+      });
+
+      return bones;
+    }
+
+    // Define predefined postures in JSON format
+    const predefinedPostures = [
+      {
+        name: "T-Pose",
+        description: "Classic T-pose with arms extended horizontally",
+        leftArm: {
+          upperarm: { x: 0, y: 0, z: -1.57 }, // -90 degrees (horizontal)
+          forearm: { x: 0, y: 0, z: 0 },
+          hand: { x: 0, y: 0, z: 0 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0, z: 1.57 }, // +90 degrees (horizontal)
+          forearm: { x: 0, y: 0, z: 0 },
+          hand: { x: 0, y: 0, z: 0 }
+        }
+      },
+      {
+        name: "Victory Pose",
+        description: "Both arms raised high in victory",
+        leftArm: {
+          upperarm: { x: 0, y: 1.2, z: -1.0 },
+          forearm: { x: 0, y: 0, z: -0.5 },
+          hand: { x: 0, y: 0, z: 0.3 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 1.2, z: 1.0 },
+          forearm: { x: 0, y: 0, z: 0.5 },
+          hand: { x: 0, y: 0, z: -0.3 }
+        }
+      },
+      {
+        name: "Flexing",
+        description: "Classic bodybuilder flex pose",
+        leftArm: {
+          upperarm: { x: 0, y: 0.8, z: -1.2 },
+          forearm: { x: 0, y: 0, z: -2.0 },
+          hand: { x: 0, y: 0, z: 0.5 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0.8, z: 1.2 },
+          forearm: { x: 0, y: 0, z: 2.0 },
+          hand: { x: 0, y: 0, z: -0.5 }
+        }
+      },
+      {
+        name: "Pointing Forward",
+        description: "Both arms pointing straight ahead",
+        leftArm: {
+          upperarm: { x: 0, y: 0, z: -0.5 },
+          forearm: { x: 0, y: 0, z: 0 },
+          hand: { x: 0, y: 0, z: 0 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0, z: 0.5 },
+          forearm: { x: 0, y: 0, z: 0 },
+          hand: { x: 0, y: 0, z: 0 }
+        }
+      },
+      {
+        name: "Crossed Arms",
+        description: "Arms crossed over chest",
+        leftArm: {
+          upperarm: { x: 0, y: 0, z: 0.8 },
+          forearm: { x: 0, y: 0, z: 1.2 },
+          hand: { x: 0, y: 0, z: 0 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0, z: -0.8 },
+          forearm: { x: 0, y: 0, z: -1.2 },
+          hand: { x: 0, y: 0, z: 0 }
+        }
+      },
+      {
+        name: "Thinking Pose",
+        description: "One hand on chin, one on hip",
+        leftArm: {
+          upperarm: { x: 0, y: 0.5, z: -0.3 },
+          forearm: { x: 0, y: 0, z: -1.5 },
+          hand: { x: 0.5, y: 0, z: 0 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0, z: 0.8 },
+          forearm: { x: 0, y: 0, z: 0.5 },
+          hand: { x: 0, y: 0, z: 0 }
+        }
+      },
+      {
+        name: "Surrender",
+        description: "Hands up in surrender position",
+        leftArm: {
+          upperarm: { x: 0, y: 1.5, z: -1.3 },
+          forearm: { x: 0, y: 0, z: -1.0 },
+          hand: { x: 0, y: 0, z: 0.2 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 1.5, z: 1.3 },
+          forearm: { x: 0, y: 0, z: 1.0 },
+          hand: { x: 0, y: 0, z: -0.2 }
+        }
+      },
+      {
+        name: "Dramatic Point",
+        description: "One arm pointing dramatically, other on hip",
+        leftArm: {
+          upperarm: { x: 0, y: 0, z: 0.5 },
+          forearm: { x: 0, y: 0, z: 0.3 },
+          hand: { x: 0, y: 0, z: 0 }
+        },
+        rightArm: {
+          upperarm: { x: 0, y: 0.8, z: 1.0 },
+          forearm: { x: 0, y: 0, z: 0 },
+          hand: { x: 0, y: 0, z: 0 }
+        }
+      }
+    ];
+
+    // Track current posture index and timing
+    let currentPostureIndex = 0;
+    let armSpinStates = []; // Track spinning states for each bone
+
+    function generateRandomArmTargets() {
+      // Reset collision states for all bones so they can move again
+      armBones.forEach(function(bone) {
+        bone.isCollided = false;
+      });
+
+      // Get current posture from predefined list
+      const currentPosture = predefinedPostures[currentPostureIndex];
+      console.log(`Switching to posture: ${currentPosture.name} - ${currentPosture.description}`);
+
+      // Move to next posture for next time
+      currentPostureIndex = (currentPostureIndex + 1) % predefinedPostures.length;
+
+      armBones.forEach(function(bone, index) {
+        const name = bone.name.toLowerCase();
+        const boneType = bone.boneType || 'default';
+        const isLeftArm = name.includes('left');
+
+        // Initialize spin state if not exists
+        if (!armSpinStates[index]) {
+          armSpinStates[index] = {
+            isSpinning: false,
+            spinCount: 0,
+            targetSpins: 0,
+            spinAxis: 'z',
+            originalTarget: null
+          };
+        }
+
+        // 20% chance to add spinning before reaching target (reduced from 30%)
+        const shouldSpin = Math.random() < 0.2;
+        let targetRotation = { x: 0, y: 0, z: 0 };
+
+        if (shouldSpin && !armSpinStates[index].isSpinning) {
+          // Start spinning 1-2 times
+          armSpinStates[index].isSpinning = true;
+          armSpinStates[index].targetSpins = Math.random() < 0.5 ? 1 : 2;
+          armSpinStates[index].spinCount = 0;
+          armSpinStates[index].spinAxis = ['x', 'y', 'z'][Math.floor(Math.random() * 3)];
+          
+          // Set dramatic spin rotation
+          if (armSpinStates[index].spinAxis === 'x') {
+            targetRotation.x = Math.PI * 2 * armSpinStates[index].targetSpins;
+          } else if (armSpinStates[index].spinAxis === 'y') {
+            targetRotation.y = Math.PI * 2 * armSpinStates[index].targetSpins;
+          } else {
+            targetRotation.z = Math.PI * 2 * armSpinStates[index].targetSpins;
+          }
+          
+          console.log(`Bone ${bone.name} will spin ${armSpinStates[index].targetSpins} times around ${armSpinStates[index].spinAxis}-axis`);
+        } else {
+          // Get rotation from predefined posture
+          const armConfig = isLeftArm ? currentPosture.leftArm : currentPosture.rightArm;
+          
+          // Apply the predefined rotation based on bone type
+          if (boneType === 'upperarm' && armConfig.upperarm) {
+            targetRotation = {
+              x: armConfig.upperarm.x,
+              y: armConfig.upperarm.y,
+              z: armConfig.upperarm.z
+            };
+
+            // Apply collision constraints
+            const constrainedRotation = applyEnhancedUpperArmConstraints(targetRotation, isLeftArm, bone);
+            
+            // If collision detected, skip this bone completely
+            if (constrainedRotation === null) {
+              return; // Skip this bone update
+            }
+            targetRotation = constrainedRotation;
+
+          } else if (boneType === 'forearm' && armConfig.forearm) {
+            targetRotation = {
+              x: armConfig.forearm.x,
+              y: armConfig.forearm.y,
+              z: armConfig.forearm.z
+            };
+
+            // Apply collision constraints
+            const constrainedRotation = applyEnhancedForearmConstraints(targetRotation, isLeftArm, bone);
+            
+            // If collision detected, skip this bone completely
+            if (constrainedRotation === null) {
+              return; // Skip this bone update
+            }
+            targetRotation = constrainedRotation;
+
+          } else if (boneType === 'hand' && armConfig.hand) {
+            targetRotation = {
+              x: armConfig.hand.x,
+              y: armConfig.hand.y,
+              z: armConfig.hand.z
+            };
+
+            // Apply collision constraints
+            const constrainedRotation = applyEnhancedHandConstraints(targetRotation, isLeftArm, bone);
+            
+            // If collision detected, skip this bone completely
+            if (constrainedRotation === null) {
+              return; // Skip this bone update
+            }
+            targetRotation = constrainedRotation;
+
+          } else {
+            // For bones not specifically defined in posture, use neutral position
+            targetRotation = { x: 0, y: 0, z: 0 };
+
+            // Apply general constraints
+            const constrainedRotation = applyEnhancedGeneralConstraints(targetRotation, isLeftArm, bone);
+            
+            // If collision detected, skip this bone completely
+            if (constrainedRotation === null) {
+              return; // Skip this bone update
+            }
+            targetRotation = constrainedRotation;
+          }
+        }
+
+        // Store the target rotation
+        armTargetRotations[index] = targetRotation;
+
+        // Store transition speed based on bone type (different speeds for different parts)
+        if (!armBones[index].transitionSpeed) {
+          switch (boneType) {
+            case 'upperarm':
+              armBones[index].transitionSpeed = 3.0; // Slightly slower for more controlled movement
+              break;
+            case 'forearm':
+              armBones[index].transitionSpeed = 4.0; // Controlled speed
+              break;
+            case 'hand':
+              armBones[index].transitionSpeed = 5.0; // Faster for hand gestures
+              break;
+            default:
+              armBones[index].transitionSpeed = 3.5;
+          }
+        }
+      });
+
+      console.log(`Applied predefined posture: ${currentPosture.name}`);
+    }
+
+    
+
+    // Collision detection for body parts
+    function checkArmBodyCollision(bone, rotation, isLeftArm) {
+      if (!bone.parent || !model) return false;
+
+      // Get bone world position to check collision
+      bone.updateMatrixWorld();
+      const boneWorldPos = new THREE.Vector3();
+      bone.getWorldPosition(boneWorldPos);
+
+      // Define body collision zones (torso, chest, belly area)
+      const bodyZones = [
+        { center: { x: 0, y: 1.2, z: 0 }, radius: 0.35 }, // Chest
+        { center: { x: 0, y: 0.8, z: 0 }, radius: 0.4 },  // Belly
+        { center: { x: 0, y: 1.0, z: 0 }, radius: 0.3 },  // Mid torso
+        { center: { x: 0, y: 0.6, z: 0 }, radius: 0.35 }   // Lower torso
+      ];
+
+      // Calculate future bone position with proposed rotation
+      const testRotation = {
+        x: bone.rotation.x + rotation.x,
+        y: bone.rotation.y + rotation.y,
+        z: bone.rotation.z + rotation.z
+      };
+
+      // Simulate bone position with new rotation
+      const armLength = 0.6; // Approximate arm segment length
+      const shoulderOffset = isLeftArm ? -0.4 : 0.4;
+      
+      // Calculate where the bone would be with the new rotation
+      const futurePos = {
+        x: shoulderOffset + Math.sin(testRotation.z) * armLength,
+        y: 1.5 + Math.sin(testRotation.y) * armLength,
+        z: Math.sin(testRotation.x) * armLength
+      };
+
+      // Check collision with each body zone
+      for (let zone of bodyZones) {
+        const distance = Math.sqrt(
+          Math.pow(futurePos.x - zone.center.x, 2) +
+          Math.pow(futurePos.y - zone.center.y, 2) +
+          Math.pow(futurePos.z - zone.center.z, 2)
+        );
+
+        if (distance < zone.radius) {
+          console.log(`Collision detected for ${bone.name} at zone ${zone.center.y}`);
+          return true; // Collision detected
+        }
+      }
+
+      return false; // No collision
+    }
+
+    // Enhanced constraint functions with collision detection
+    function applyEnhancedUpperArmConstraints(rotation, isLeftArm, bone = null) {
+      // Enhanced ranges for more dramatic movements
+      const maxInwardRotation = Math.PI / 8; // 22.5 degrees max inward (still conservative)
+      const maxOutwardRotation = Math.PI / 1.2; // 150 degrees max outward (more dramatic)
+      const maxForwardRotation = Math.PI / 2; // 90 degrees max forward (enhanced)
+      const maxBackwardRotation = Math.PI / 2.5; // 72 degrees max backward (enhanced)
+
+      // If bone is provided, check for collision first
+      if (bone && checkArmBodyCollision(bone, rotation, isLeftArm)) {
+        // Stop movement by marking bone as collided and keeping current position
+        console.log(`${bone.name} stopped due to collision`);
+        bone.isCollided = true;
+        return null; // Signal to stop updating this bone
+      }
+
+      // Constrain X rotation (forward/backward) with enhanced range
+      rotation.x = Math.max(-maxBackwardRotation, Math.min(maxForwardRotation, rotation.x));
+
+      // Constrain Y rotation (up/down) with enhanced range
+      rotation.y = Math.max(-Math.PI / 1.5, Math.min(Math.PI / 1.5, rotation.y)); // Enhanced to ±120 degrees
+
+      // Constrain Z rotation (inward/outward twist) - critical for body collision
+      if (isLeftArm) {
+        // Left arm: positive Z moves inward, negative Z moves outward
+        rotation.z = Math.max(-maxOutwardRotation, Math.min(maxInwardRotation, rotation.z));
+      } else {
+        // Right arm: negative Z moves inward, positive Z moves outward
+        rotation.z = Math.max(-maxInwardRotation, Math.min(maxOutwardRotation, rotation.z));
+      }
+
+      return rotation;
+    }
+
+    // Original constraint functions maintained for compatibility
+    function applyUpperArmConstraints(rotation, isLeftArm) {
+      return applyEnhancedUpperArmConstraints(rotation, isLeftArm);
+    }
+
+    function applyEnhancedForearmConstraints(rotation, isLeftArm, bone = null) {
+      // Enhanced forearm movements with wider range but still safe
+      const maxBendAngle = Math.PI / 1.5; // Enhanced to 120 degrees max bend
+
+      // If bone is provided, check for collision first
+      if (bone && checkArmBodyCollision(bone, rotation, isLeftArm)) {
+        console.log(`${bone.name} forearm stopped due to collision`);
+        bone.isCollided = true;
+        return null; // Signal to stop updating this bone
+      }
+
+      // Enhanced bending range
+      rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x)); // Enhanced to ±60 degrees
+      rotation.y = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, rotation.y)); // Enhanced to ±45 degrees
+      
+      // Enhanced Z rotation with more dramatic range but still safe
+      if (isLeftArm) {
+        rotation.z = Math.max(-Math.PI / 4, Math.min(maxBendAngle, rotation.z)); // Allow some inward but prefer outward
+      } else {
+        rotation.z = Math.max(-maxBendAngle, Math.min(Math.PI / 4, rotation.z)); // Allow some inward but prefer outward
+      }
+
+      return rotation;
+    }
+
+    function applyEnhancedHandConstraints(rotation, isLeftArm, bone = null) {
+      // Enhanced hands with more dramatic freedom
+      const maxRotation = Math.PI / 2; // Enhanced to 90 degrees max in any direction
+
+      // If bone is provided, check for collision first
+      if (bone && checkArmBodyCollision(bone, rotation, isLeftArm)) {
+        console.log(`${bone.name} hand stopped due to collision`);
+        bone.isCollided = true;
+        return null; // Signal to stop updating this bone
+      }
+
+      rotation.x = Math.max(-maxRotation, Math.min(maxRotation, rotation.x));
+      rotation.y = Math.max(-maxRotation, Math.min(maxRotation, rotation.y));
+      rotation.z = Math.max(-maxRotation, Math.min(maxRotation, rotation.z));
+
+      return rotation;
+    }
+
+    function applyEnhancedGeneralConstraints(rotation, isLeftArm, bone = null) {
+      // Enhanced general constraints for dramatic movements
+      const maxRotation = Math.PI / 2.5; // Enhanced to 72 degrees max
+
+      // If bone is provided, check for collision first
+      if (bone && checkArmBodyCollision(bone, rotation, isLeftArm)) {
+        console.log(`${bone.name} general bone stopped due to collision`);
+        bone.isCollided = true;
+        return null; // Signal to stop updating this bone
+      }
+
+      rotation.x = Math.max(-maxRotation, Math.min(maxRotation, rotation.x));
+      rotation.y = Math.max(-maxRotation, Math.min(maxRotation, rotation.y));
+      rotation.z = Math.max(-maxRotation, Math.min(maxRotation, rotation.z));
+
+      return rotation;
+    }
+
+    // Original constraint functions maintained for compatibility
+    function applyForearmConstraints(rotation, isLeftArm) {
+      return applyEnhancedForearmConstraints(rotation, isLeftArm);
+    }
+
+    function applyHandConstraints(rotation, isLeftArm) {
+      return applyEnhancedHandConstraints(rotation, isLeftArm);
+    }
+
+    function applyGeneralConstraints(rotation, isLeftArm) {
+      return applyEnhancedGeneralConstraints(rotation, isLeftArm);
+    }
+
+    function updateRandomArmPointing(delta) {
+      if (!randomArmPointing || armBones.length === 0) return;
+
+      // Check if it's time to generate new posture targets
+      if (Date.now() > nextRandomChangeTime) {
+        generateRandomArmTargets();
+        nextRandomChangeTime = Date.now() + (3000 + Math.random() * 2000); // 3-5 seconds for posture changes
+      }
+
+      // Smoothly interpolate current rotations toward targets with individual speeds
+      armBones.forEach(function(bone, index) {
+        if (!armCurrentRotations[index] || !armTargetRotations[index]) return;
+        
+        // Skip bones that have collided and should stay in place
+        if (bone.isCollided) return;
+
+        const current = armCurrentRotations[index];
+        const target = armTargetRotations[index];
+
+        // Use individual bone transition speed
+        const boneSpeed = bone.transitionSpeed || transitionSpeed;
+        const speed = Math.min(boneSpeed * delta, 1.0); // Cap the interpolation speed
+
+        // Smooth lerp toward target with different speeds for each component
+        current.x = current.x + (target.x - current.x) * speed;
+        current.y = current.y + (target.y - current.y) * speed;
+        current.z = current.z + (target.z - current.z) * speed;
+
+        // Store as offset to be applied after animation
+        if (!bone.randomRotationOffset) {
+          bone.randomRotationOffset = { x: 0, y: 0, z: 0 };
+        }
+
+        bone.randomRotationOffset.x = current.x;
+        bone.randomRotationOffset.y = current.y;
+        bone.randomRotationOffset.z = current.z;
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+
+      // Update animation mixer (only if model loaded successfully)
+      if (mixer && isPlaying && model) {
+        mixer.update(delta);
+
+        // Update random arm pointing
+        updateRandomArmPointing(delta);
+
+        // Apply rotation offsets after animation update
+        model.traverse(function (child) {
+          if (child.isBone || child.type === 'Bone') {
+            // Apply fixed rotation offsets
+            if (child.rotationOffset) {
+              child.rotation.x += child.rotationOffset.x;
+              child.rotation.y += child.rotationOffset.y;
+              child.rotation.z += child.rotationOffset.z;
+            }
+
+            // Apply random rotation offsets (for random arm pointing)
+            if (child.randomRotationOffset) {
+              child.rotation.x += child.randomRotationOffset.x;
+              child.rotation.y += child.randomRotationOffset.y;
+              child.rotation.z += child.randomRotationOffset.z;
+            }
+          }
+        });
+
+        // Update time slider
+        if (animationAction) {
+          document.getElementById('animationTime').value = animationAction.time;
+          document.getElementById('timeValue').textContent = animationAction.time.toFixed(1) + 's';
+        }
+      }
+
+      // Auto rotation (works for both model and fallback)
+      const rotationSpeed = parseFloat(document.getElementById('rotationSpeed')?.value || 0.5);
+      if (model && rotationSpeed > 0) {
+        model.rotation.y += delta * rotationSpeed;
+      }
+
+      // Update FPS counter
+      fpsCounter++;
+      const currentTime = Date.now();
+      if (currentTime - lastTime >= 1000) {
+        document.getElementById('fps').textContent = fpsCounter;
+        fpsCounter = 0;
+        lastTime = currentTime;
+      }
+
+      // Render the scene
+      renderer.render(scene, camera);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize when page loads
+    window.addEventListener('load', function () {
+      // Set a timeout to prevent infinite loading
+      setTimeout(function () {
+        if (document.getElementById('loading').style.display !== 'none') {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('error').innerHTML = `
+                        <h3>⏰ Loading Timeout</h3>
+                        <p>The application took too long to load.</p>
+                        <p>Please check:</p>
+                        <ul>
+                            <li>Your internet connection</li>
+                            <li>If the 3D files are in the correct location</li>
+                            <li>Try refreshing the page</li>
+                        </ul>
+                    `;
+          document.getElementById('error').style.display = 'block';
+        }
+      }, 10000); // 10 second timeout
+
+      checkAndInit();
+    });
+  </script>
+</body>
+
+</html>

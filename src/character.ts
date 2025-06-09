@@ -13,6 +13,7 @@ import {
 } from 'three'
 
 import { KeyframeAnalyzer } from './analyze'
+import { BoneRotationManager } from './bone-rotation'
 import { CameraPresetKey } from './camera'
 import { dispose } from './dispose'
 import { CCDIKHelper } from './ik/ccd-ik-helper'
@@ -133,6 +134,7 @@ export class Character {
   params: Params | null = null
   analyzer: KeyframeAnalyzer | null = null
   ik: IKManager | null = null
+  boneRotation: BoneRotationManager | null = null
 
   flags: AnimationFlags = {}
 
@@ -248,6 +250,7 @@ export class Character {
     this.mixer = null
     this.skeletonHelper = null
     this.model = null
+    this.boneRotation = null
 
     this.original.clear()
     this.actions.clear()
@@ -415,6 +418,9 @@ export class Character {
 
       // Play the first animation
       this.updateAction()
+
+      // Initialize bone rotation manager
+      this.boneRotation = new BoneRotationManager(this)
 
       console.log('>>> setup completed')
     } catch (error) {
@@ -853,6 +859,12 @@ export class Character {
     this.frameCounter++
     this.mixer.update(delta)
 
+    // Apply real-time bone rotations after animation update
+    if (this.boneRotation?.isPostureActive) {
+      this.boneRotation.updateRotations(delta)
+      this.applyBoneOffsets()
+    }
+
     // Tick business logic every nth frames
     if (this.frameCounter % NTH_FRAME_TICK === 0) {
       // Reset the model time if it exceeds the playback
@@ -873,12 +885,67 @@ export class Character {
   }
 
   /**
-   * Tick the axis point update using Inverse Kinematics.
-   *
-   * WARNING: this is super expensive as it is called every frame.
+   * Apply bone rotation offsets - ported from HTML prototype
+   * This applies the rotationOffset to each bone after the animation update
+   */
+  applyBoneOffsets() {
+    if (!this.model) return
+
+    this.model.traverse((child) => {
+      if ((child as Bone).isBone || child.type === 'Bone') {
+        const bone = child as Bone
+
+        // Apply fixed rotation offsets
+        if (bone.rotationOffset) {
+          bone.rotation.x += bone.rotationOffset.x
+          bone.rotation.y += bone.rotationOffset.y
+          bone.rotation.z += bone.rotationOffset.z
+        }
+
+        // Apply random rotation offsets (for random arm pointing) - matching HTML prototype
+        if (bone.randomRotationOffset) {
+          bone.rotation.x += bone.randomRotationOffset.x
+          bone.rotation.y += bone.randomRotationOffset.y
+          bone.rotation.z += bone.randomRotationOffset.z
+        }
+      }
+    })
+  }
+
+  /**
+   * Tick the axis point update - now handles real-time bone rotation
    */
   tickAxisPoint() {
-    // TODO: inverse kinematics tick
+    // The real-time bone rotation is now handled in tickRender()
+    // This method can be used for other axis point logic if needed
+  }
+
+  /**
+   * Start the real-time bone rotation posture system
+   */
+  startPostures() {
+    this.boneRotation?.start()
+  }
+
+  /**
+   * Stop the real-time bone rotation posture system
+   */
+  stopPostures() {
+    this.boneRotation?.stop()
+  }
+
+  /**
+   * Check if postures are currently active
+   */
+  get posturesActive(): boolean {
+    return this.boneRotation?.isPostureActive ?? false
+  }
+
+  /**
+   * Get the current posture name
+   */
+  get currentPostureName(): string {
+    return this.boneRotation?.currentPostureName ?? 'None'
   }
 
   async startFade() {

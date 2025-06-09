@@ -24,6 +24,8 @@ interface Handlers {
   showGraph(visible: boolean): void
   setCamera(): void
   axisPoint(): void
+  startPostures(): void
+  stopPostures(): void
 }
 
 const createGUI = () => {
@@ -69,6 +71,8 @@ export class Panel {
     showGraph: () => {},
     setCamera: () => {},
     axisPoint: () => {},
+    startPostures: () => {},
+    stopPostures: () => {},
   }
 
   constructor(params: Params) {
@@ -277,6 +281,16 @@ export class Panel {
   addAxisPointControl() {
     if (!this.axisPointFolder) return
 
+    // Add posture controls
+    this.axisPointFolder
+      .add({ startPostures: this.startPostures.bind(this) }, 'startPostures')
+      .name('🎯 Start Postures')
+
+    this.axisPointFolder
+      .add({ stopPostures: this.stopPostures.bind(this) }, 'stopPostures')
+      .name('🛑 Stop Postures')
+
+    // Original axis point controls
     this.axisPointFolder
       .add(this.params.axisPoint, 'threshold', 0, 10, 0.001)
       .listen()
@@ -323,6 +337,16 @@ export class Panel {
     if (!command) return
 
     this.handlers.prompt.bind(this)(command)
+  }
+
+  startPostures() {
+    this.handlers.startPostures()
+    console.log(`>>> panel::startPostures`)
+  }
+
+  stopPostures() {
+    this.handlers.stopPostures()
+    console.log(`>>> panel::stopPostures`)
   }
 
   reset() {

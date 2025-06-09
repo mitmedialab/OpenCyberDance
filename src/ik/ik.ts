@@ -264,7 +264,7 @@ export class IKManager {
       }
 
       // Update all IK bones
-      this.ik.update()
+      // this.ik.update()
     }
   }
 

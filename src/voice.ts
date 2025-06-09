@@ -271,12 +271,14 @@ export class VoiceController {
         spokenText = spokenText.replace('rotations x', 'rotations ex')
       }
 
-      responsiveVoice.speak(spokenText, 'UK English Male', {
-        rate: 1,
-        onend: () => {
-          resolve()
-        },
-      })
+      resolve()
+
+      // responsiveVoice.speak(spokenText, 'UK English Male', {
+      //   rate: 1,
+      //   onend: () => {
+      //     resolve()
+      //   },
+      // })
     })
   }
 

@@ -49,6 +49,7 @@ export class VoiceController {
 
   constructor(world: World) {
     this.world = world
+    speechSynthesis.cancel()
   }
 
   // Update the status display
@@ -271,14 +272,12 @@ export class VoiceController {
         spokenText = spokenText.replace('rotations x', 'rotations ex')
       }
 
-      resolve()
-
-      // responsiveVoice.speak(spokenText, 'UK English Male', {
-      //   rate: 1,
-      //   onend: () => {
-      //     resolve()
-      //   },
-      // })
+      responsiveVoice.speak(spokenText, 'UK English Male', {
+        rate: 1,
+        onend: () => {
+          resolve()
+        },
+      })
     })
   }
 

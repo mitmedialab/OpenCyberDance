@@ -726,8 +726,8 @@ export class BoneRotationManager {
 
   getPostureDelay() {
     const axisPointFrequency = this.character.params?.axisPoint.frequency ?? 0
-    const slowest = 10000
-    const fastest = 700
+    const slowest = 7000
+    const fastest = 600
 
     return slowest + (fastest - slowest) * axisPointFrequency
   }

@@ -19,9 +19,6 @@ const SpeechRecognition =
 const SpeechGrammarList =
   window.SpeechGrammarList || window.webkitSpeechGrammarList
 
-// @ts-expect-error - it's a UMD global
-const responsiveVoice = window.responsiveVoice
-
 export type ListeningStatus =
   | 'disabled'
   | 'listening'
@@ -256,12 +253,6 @@ export class VoiceController {
 
   speak(text: string): Promise<void> {
     return new Promise((resolve) => {
-      // if (!responsiveVoice) {
-      //   console.error('ResponsiveVoice not loaded!')
-      //   resolve()
-      //   return
-      // }
-
       this.updateStatus('speaking')
       console.debug(`> [speaking] ${text}`)
 
@@ -294,18 +285,6 @@ export class VoiceController {
       }
 
       speechSynthesis.speak(u)
-
-      // responsiveVoice.speak(spokenText, 'UK English Female', {
-      //   rate: 1,
-      //   onend() {
-      //     console.log(`[voice:onend] "${spokenText}"`)
-      //     resolve()
-      //   },
-      //   onerror(error) {
-      //     console.error(`[voice:onerror] "${spokenText}"`, error)
-      //     resolve()
-      //   },
-      // })
     })
   }
 

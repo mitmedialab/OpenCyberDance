@@ -645,11 +645,11 @@ export class BoneRotationManager {
 
       if (constrainedRotation) {
         this.currentTargets[index] = constrainedRotation
-        console.log(
-          `Debug: Set ${bone.name} to x:${targetRotation.x.toFixed(
-            2,
-          )} y:${targetRotation.y.toFixed(2)} z:${targetRotation.z.toFixed(2)}`,
-        )
+        // console.log(
+        //   `Debug: Set ${bone.name} to x:${targetRotation.x.toFixed(
+        //     2,
+        //   )} y:${targetRotation.y.toFixed(2)} z:${targetRotation.z.toFixed(2)}`,
+        // )
       }
     })
   }

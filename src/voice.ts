@@ -274,7 +274,12 @@ export class VoiceController {
 
       responsiveVoice.speak(spokenText, 'UK English Male', {
         rate: 1,
-        onend: () => {
+        onend() {
+          console.log(`[voice:onend] "${spokenText}"`)
+          resolve()
+        },
+        onerror(error) {
+          console.error(`[voice:onerror] "${spokenText}"`, error)
           resolve()
         },
       })

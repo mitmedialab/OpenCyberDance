@@ -48,4 +48,50 @@ export const PREDEFINED_POSTURES: Posture[] = [
       hand: { x: 0, y: 0, z: 0 },
     },
   },
+  {
+    name: 'both arms up',
+    description: 'both arms raised straight up',
+    leftArm: {
+      upperarm: { x: 5, y: 5, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: -5, y: 5, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'both arms side',
+    description: 'both arms extended to the sides',
+    leftArm: {
+      upperarm: { x: 6, y: 1.7, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: -6, y: 1.7, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'left hand to hip',
+    description: 'left hand to the hip',
+    leftArm: {
+      upperarm: { x: 2.2, y: 0.73, z: 3.49 },
+      forearm: { x: 6, y: -6, z: -3 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+  },
+  {
+    name: 'right hand to head',
+    description: 'right hand to the head',
+    rightArm: {
+      upperarm: { x: 2.2, y: 0.73, z: 3.49 },
+      forearm: { x: 6, y: 3.73, z: 0.85 },
+      hand: { x: -1.17, y: 0, z: 0 },
+    },
+  },
 ]

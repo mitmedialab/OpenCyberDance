@@ -607,6 +607,15 @@ export class World {
 
     this.panel.handlers.prompt = () => {}
 
+    this.panel.handlers.postureDebug = () => {
+      // Trigger posture update when debug parameters change
+      for (const character of this.characters) {
+        if (character.boneRotation) {
+          character.boneRotation.triggerDebugUpdate()
+        }
+      }
+    }
+
     this.panel.createPanel()
   }
 

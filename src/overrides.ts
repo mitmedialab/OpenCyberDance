@@ -43,6 +43,18 @@ export interface AxisPointConfig {
   parts: Record<AxisPointControlParts, boolean>
 }
 
+export interface ArmDebugConfig {
+  upperarm: { x: number; y: number; z: number }
+  forearm: { x: number; y: number; z: number }
+  hand: { x: number; y: number; z: number }
+}
+
+export interface PostureDebugConfig {
+  enabled: boolean
+  leftArm: ArmDebugConfig
+  rightArm: ArmDebugConfig
+}
+
 export class Params {
   time = 0
   timescale = 1
@@ -117,6 +129,20 @@ export class Params {
     second: {
       model: 'waiting',
       action: '',
+    },
+  }
+
+  postureDebug: PostureDebugConfig = {
+    enabled: false,
+    leftArm: {
+      upperarm: { x: 0, y: 0, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
+    },
+    rightArm: {
+      upperarm: { x: 0, y: 0, z: 0 },
+      forearm: { x: 0, y: 0, z: 0 },
+      hand: { x: 0, y: 0, z: 0 },
     },
   }
 

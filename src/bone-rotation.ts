@@ -201,100 +201,80 @@ export class BoneRotationManager {
         }
       }
 
-      // 20% chance to add spinning before reaching target - like HTML prototype
-      const shouldSpin = false
       let targetRotation = { x: 0, y: 0, z: 0 }
 
-      if (shouldSpin && !this.armSpinStates[index].isSpinning) {
-        // Start spinning 1-2 times
-        this.armSpinStates[index].isSpinning = true
-        this.armSpinStates[index].targetSpins = Math.random() < 0.5 ? 1 : 2
-        this.armSpinStates[index].spinCount = 0
-        this.armSpinStates[index].spinAxis = ['x', 'y', 'z'][
-          Math.floor(Math.random() * 3)
-        ] as 'x' | 'y' | 'z'
+      // Get rotation from predefined posture
+      const armConfig = isLeftArm
+        ? currentPosture.leftArm
+        : currentPosture.rightArm
 
-        // Set dramatic spin rotation
-        if (this.armSpinStates[index].spinAxis === 'x') {
-          targetRotation.x = Math.PI * 2 * this.armSpinStates[index].targetSpins
-        } else if (this.armSpinStates[index].spinAxis === 'y') {
-          targetRotation.y = Math.PI * 2 * this.armSpinStates[index].targetSpins
-        } else {
-          targetRotation.z = Math.PI * 2 * this.armSpinStates[index].targetSpins
-        }
+      // If no arm configuration is defined, skip this bone (leave in natural position)
+      if (!armConfig) {
+        return // Skip this bone update - arm will stay in natural position
+      }
 
-        console.log(
-          `Bone ${bone.name} will spin ${this.armSpinStates[index].targetSpins} times around ${this.armSpinStates[index].spinAxis}-axis`,
+      // Apply the predefined rotation based on bone type
+      if (boneType === 'upperarm' && armConfig.upperarm) {
+        targetRotation = { ...armConfig.upperarm }
+
+        // Apply collision constraints
+        const constrainedRotation = this.applyEnhancedUpperArmConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
         )
-      } else {
-        // Get rotation from predefined posture
-        const armConfig = isLeftArm
-          ? currentPosture.leftArm
-          : currentPosture.rightArm
 
-        // Apply the predefined rotation based on bone type
-        if (boneType === 'upperarm' && armConfig.upperarm) {
-          targetRotation = { ...armConfig.upperarm }
-
-          // Apply collision constraints
-          const constrainedRotation = this.applyEnhancedUpperArmConstraints(
-            targetRotation,
-            isLeftArm,
-            bone,
-          )
-
-          // If collision detected, skip this bone completely
-          if (constrainedRotation === null) {
-            return // Skip this bone update
-          }
-          targetRotation = constrainedRotation
-        } else if (boneType === 'forearm' && armConfig.forearm) {
-          targetRotation = { ...armConfig.forearm }
-
-          // Apply collision constraints
-          const constrainedRotation = this.applyEnhancedForearmConstraints(
-            targetRotation,
-            isLeftArm,
-            bone,
-          )
-
-          // If collision detected, skip this bone completely
-          if (constrainedRotation === null) {
-            return // Skip this bone update
-          }
-          targetRotation = constrainedRotation
-        } else if (boneType === 'hand' && armConfig.hand) {
-          targetRotation = { ...armConfig.hand }
-
-          // Apply collision constraints
-          const constrainedRotation = this.applyEnhancedHandConstraints(
-            targetRotation,
-            isLeftArm,
-            bone,
-          )
-
-          // If collision detected, skip this bone completely
-          if (constrainedRotation === null) {
-            return // Skip this bone update
-          }
-          targetRotation = constrainedRotation
-        } else {
-          // For bones not specifically defined in posture, use neutral position
-          targetRotation = { x: 0, y: 0, z: 0 }
-
-          // Apply general constraints
-          const constrainedRotation = this.applyEnhancedGeneralConstraints(
-            targetRotation,
-            isLeftArm,
-            bone,
-          )
-
-          // If collision detected, skip this bone completely
-          if (constrainedRotation === null) {
-            return // Skip this bone update
-          }
-          targetRotation = constrainedRotation
+        // If collision detected, skip this bone completely
+        if (constrainedRotation === null) {
+          return // Skip this bone update
         }
+        targetRotation = constrainedRotation
+      } else if (boneType === 'forearm' && armConfig.forearm) {
+        targetRotation = { ...armConfig.forearm }
+
+        // Apply collision constraints
+        const constrainedRotation = this.applyEnhancedForearmConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+
+        // If collision detected, skip this bone completely
+        if (constrainedRotation === null) {
+          return // Skip this bone update
+        }
+        targetRotation = constrainedRotation
+      } else if (boneType === 'hand' && armConfig.hand) {
+        targetRotation = { ...armConfig.hand }
+
+        // Apply collision constraints
+        const constrainedRotation = this.applyEnhancedHandConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+
+        // If collision detected, skip this bone completely
+        if (constrainedRotation === null) {
+          return // Skip this bone update
+        }
+        targetRotation = constrainedRotation
+      } else {
+        // For bones not specifically defined in posture, use neutral position
+        targetRotation = { x: 0, y: 0, z: 0 }
+
+        // Apply general constraints
+        const constrainedRotation = this.applyEnhancedGeneralConstraints(
+          targetRotation,
+          isLeftArm,
+          bone,
+        )
+
+        // If collision detected, skip this bone completely
+        if (constrainedRotation === null) {
+          return // Skip this bone update
+        }
+        targetRotation = constrainedRotation
       }
 
       // Store the target rotation
@@ -542,10 +522,15 @@ export class BoneRotationManager {
   updateRotations(delta: number) {
     if (!this.isActive || this.armBones.length === 0) return
 
-    // Check if it's time to generate new posture targets
-    if (Date.now() > this.nextChangeTime) {
-      this.generatePostureTargets()
-      this.nextChangeTime = Date.now() + (3000 + Math.random() * 2000) // 3-5 seconds
+    // If debug mode is enabled, skip automatic posture generation
+    if (this.character.params?.postureDebug.enabled) {
+      // Debug mode is active - use debug targets instead of automatic postures
+    } else {
+      // Check if it's time to generate new posture targets
+      if (Date.now() > this.nextChangeTime) {
+        this.generatePostureTargets()
+        this.nextChangeTime = Date.now() + (3000 + Math.random() * 2000) // 3-5 seconds
+      }
     }
 
     // Smoothly interpolate current rotations toward targets with individual speeds
@@ -601,5 +586,50 @@ export class BoneRotationManager {
       this.nextChangeTime = Date.now() + 2000 // Reset timer
       console.log('Generated new random targets for smooth transition')
     }
+  }
+
+  // Method to update targets from debug panel
+  triggerDebugUpdate() {
+    if (!this.character.params?.postureDebug.enabled) return
+
+    console.log('Applying debug posture targets')
+
+    this.armBones.forEach((bone, index) => {
+      const name = bone.name.toLowerCase()
+      const boneType = bone.boneType || 'upperarm'
+      const isLeftArm = name.includes('left')
+
+      // Get debug configuration for this arm
+      const debugArm = isLeftArm
+        ? this.character.params!.postureDebug.leftArm
+        : this.character.params!.postureDebug.rightArm
+
+      let targetRotation = { x: 0, y: 0, z: 0 }
+
+      // Apply debug rotation based on bone type
+      if (boneType === 'upperarm' && debugArm.upperarm) {
+        targetRotation = { ...debugArm.upperarm }
+      } else if (boneType === 'forearm' && debugArm.forearm) {
+        targetRotation = { ...debugArm.forearm }
+      } else if (boneType === 'hand' && debugArm.hand) {
+        targetRotation = { ...debugArm.hand }
+      }
+
+      // Apply constraints and clipping prevention
+      const constrainedRotation = this.applyEnhancedGeneralConstraints(
+        targetRotation,
+        isLeftArm,
+        bone,
+      )
+
+      if (constrainedRotation) {
+        this.currentTargets[index] = constrainedRotation
+        console.log(
+          `Debug: Set ${bone.name} to x:${targetRotation.x.toFixed(
+            2,
+          )} y:${targetRotation.y.toFixed(2)} z:${targetRotation.z.toFixed(2)}`,
+        )
+      }
+    })
   }
 }

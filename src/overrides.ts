@@ -39,7 +39,7 @@ export interface SpaceConfig {
 }
 
 export interface AxisPointConfig {
-  threshold: number
+  frequency: number
   parts: Record<AxisPointControlParts, boolean>
 }
 
@@ -111,7 +111,7 @@ export class Params {
   }
 
   axisPoint: AxisPointConfig = {
-    threshold: 0,
+    frequency: 0,
 
     parts: {
       leftArm: true,
@@ -177,7 +177,7 @@ export class Params {
     this.axisPoint.parts.rightArm = defaults.axisPoint.parts.rightArm
     this.axisPoint.parts.leftLeg = defaults.axisPoint.parts.leftLeg
     this.axisPoint.parts.rightLeg = defaults.axisPoint.parts.rightLeg
-    this.axisPoint.threshold = defaults.axisPoint.threshold
+    this.axisPoint.frequency = defaults.axisPoint.frequency
   }
 }
 

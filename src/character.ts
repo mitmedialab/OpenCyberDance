@@ -575,6 +575,18 @@ export class Character {
     const clip = this.currentClip
     if (!clip || !this.params) return
 
+    if (flags.axisPoint) {
+      const frequency = this.params.axisPoint.frequency
+
+      if (frequency <= 0) {
+        this.boneRotation?.stop()
+      } else {
+        this.boneRotation?.start()
+      }
+
+      return
+    }
+
     const { freezeParams } = this.options
 
     if (freezeParams) {

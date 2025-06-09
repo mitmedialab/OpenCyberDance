@@ -256,11 +256,11 @@ export class VoiceController {
 
   speak(text: string): Promise<void> {
     return new Promise((resolve) => {
-      if (!responsiveVoice) {
-        console.error('ResponsiveVoice not loaded!')
-        resolve()
-        return
-      }
+      // if (!responsiveVoice) {
+      //   console.error('ResponsiveVoice not loaded!')
+      //   resolve()
+      //   return
+      // }
 
       this.updateStatus('speaking')
       console.debug(`> [speaking] ${text}`)
@@ -272,17 +272,40 @@ export class VoiceController {
         spokenText = spokenText.replace('rotations x', 'rotations ex')
       }
 
-      responsiveVoice.speak(spokenText, 'UK English Male', {
-        rate: 1,
-        onend() {
-          console.log(`[voice:onend] "${spokenText}"`)
-          resolve()
-        },
-        onerror(error) {
-          console.error(`[voice:onerror] "${spokenText}"`, error)
-          resolve()
-        },
-      })
+      speechSynthesis.cancel()
+
+      const voice = speechSynthesis
+        .getVoices()
+        .find((v) => v.name.includes('UK English Male'))
+
+      console.log('voices', voice)
+
+      const u = new SpeechSynthesisUtterance(spokenText)
+      u.lang = 'en-US'
+      u.voice = voice!
+      u.rate = 1
+      u.onend = () => {
+        console.log(`[voice:onend] "${spokenText}"`)
+        resolve()
+      }
+      u.onerror = (e) => {
+        console.error(`[voice:onerror] "${spokenText}"`, e)
+        resolve()
+      }
+
+      speechSynthesis.speak(u)
+
+      // responsiveVoice.speak(spokenText, 'UK English Female', {
+      //   rate: 1,
+      //   onend() {
+      //     console.log(`[voice:onend] "${spokenText}"`)
+      //     resolve()
+      //   },
+      //   onerror(error) {
+      //     console.error(`[voice:onerror] "${spokenText}"`, error)
+      //     resolve()
+      //   },
+      // })
     })
   }
 

@@ -48,14 +48,16 @@ export class BoneRotationManager {
   start() {
     if (!this.character.model) return
 
+    const delay = this.getPostureDelay()
+
     this.isActive = true
     this.findArmBones()
     this.initializeRotations()
     this.generatePostureTargets()
-    this.nextChangeTime = Date.now() + (3000 + Math.random() * 2000) // 3-5 seconds
+    this.nextChangeTime = Date.now() + delay
 
     console.log(
-      `Started posture sequence with ${this.armBones.length} arm bones`,
+      `Started posture sequence with ${this.armBones.length} arm bones. Posture delay: ${delay}ms`,
     )
   }
 
@@ -529,7 +531,7 @@ export class BoneRotationManager {
       // Check if it's time to generate new posture targets
       if (Date.now() > this.nextChangeTime) {
         this.generatePostureTargets()
-        this.nextChangeTime = Date.now() + (3000 + Math.random() * 2000) // 3-5 seconds
+        this.nextChangeTime = Date.now() + this.getPostureDelay()
       }
     }
 
@@ -579,13 +581,19 @@ export class BoneRotationManager {
     return PREDEFINED_POSTURES
   }
 
-  // Method to manually trigger new posture
-  triggerNewPosture() {
-    if (this.isActive) {
-      this.generatePostureTargets()
-      this.nextChangeTime = Date.now() + 2000 // Reset timer
-      console.log('Generated new random targets for smooth transition')
+  getPostureDelay() {
+    const axisPointFrequency = this.character.params?.axisPoint.frequency
+    console.log('axisPointFrequency', axisPointFrequency)
+
+    if (axisPointFrequency === undefined || axisPointFrequency === 0) {
+      return 2000
     }
+
+    // Linear interpolation: 1% -> 10000ms, 100% -> 500ms
+    const minDelay = 500 // 0.5 seconds at 100%
+    const maxDelay = 10000 // 10 seconds at 1%
+
+    return maxDelay - (axisPointFrequency / 100) * (maxDelay - minDelay)
   }
 
   // Method to update targets from debug panel

@@ -30,7 +30,7 @@ const rangeConfig: Record<
   space: [0, 1.5],
   rotations: [1, 3.5],
   speed: [0, 1, 300],
-  axis: [0, 10, 100],
+  axis: [0, 1, 100],
 
   // no op
   reset: [0, 0],
@@ -84,7 +84,7 @@ export const CurrentPercent = {
   speed: () => v2p('speed', world.params.timescale),
   space: () => v2p('space', world.params.space.delay),
   rotations: (axis: Axis) => v2p('rotations', world.params.rotations[axis]),
-  axis: () => v2p('axis', world.params.axisPoint.threshold), // toPercent(world.params.axisPoint.threshold, 0, 10),
+  axis: () => v2p('axis', world.params.axisPoint.frequency),
 }
 
 export async function runCommand(primary: ChoiceKey, args: string[]) {
@@ -215,14 +215,9 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
 
   // Axis Point
   if (primary === 'axis') {
-    const [partText, percText] = args
+    const [percText] = args
 
-    for (const part in axisPointControlParts) {
-      world.params.axisPoint.parts[part as AxisPointControlParts] =
-        partText === 'all' ? true : partText === part
-    }
-
-    world.params.axisPoint.threshold = FromPercent.axis(percText)
+    world.params.axisPoint.frequency = FromPercent.axis(percText)
 
     setTimeout(() => {
       world.updateParams({ axisPoint: true })

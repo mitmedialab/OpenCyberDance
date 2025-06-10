@@ -33,7 +33,6 @@ import {
   Params,
 } from './overrides'
 import {
-  AxisPointControlParts,
   CurvePartKey,
   curveParts,
   EnergyPartKey,
@@ -578,6 +577,26 @@ export class Character {
     if (flags.axisPoint) {
       const frequency = this.params.axisPoint.frequency
 
+      const isCircleAndCurveActive = Object.values(
+        this.params.curve.parts,
+      ).some((x) => !!x)
+
+      const isAxisPointActive =
+        this.params.axisPoint.frequency &&
+        this.params.axisPoint.frequency > 0.05
+
+      // If BOTH axis point and circle and curve is active,
+      // we want to clear the altered track.
+      if (isAxisPointActive && isCircleAndCurveActive) {
+        clip.tracks.forEach((track, index) => {
+          const original = this.originalOf(index)
+          if (!original) return
+
+          // clear the altered track, please.
+          track.values = original.values.slice(0)
+        })
+      }
+
       if (frequency <= 0) {
         this.boneRotation?.stop()
       } else {
@@ -633,32 +652,6 @@ export class Character {
         }
       }
 
-      if (flags.axisPoint) {
-        const { parts } = this.params.axisPoint
-        const part = trackNameToPart(track.name, 'axis')
-
-        if (part) {
-          const enabled = parts[part as AxisPointControlParts]
-
-          if (enabled) {
-            const time = this.mixer?.time ?? 1
-            const len = track.times.length - 1
-            const frame = Math.round((time / track.times[len]) * len)
-            const data = track.values.slice(frame * 4, frame * 4 + 4)
-
-            // Modify the entire keyframe values to this moment in time.
-            for (let i = 0; i < track.values.length; i += 4) {
-              let j = 0
-
-              track.values[i] = data[j++]
-              track.values[i + 1] = data[j++]
-              track.values[i + 2] = data[j++]
-              track.values[i + 3] = data[j++]
-            }
-          }
-        }
-      }
-
       if (flags.timing) {
         // Reset the keyframe times.
         track.times = original.timings.slice(0)
@@ -702,10 +695,6 @@ export class Character {
 
       clip.tracks[index] = track
     })
-
-    if (flags.axisPoint && this.ik) {
-      this.ik.setPartMorph(this.params.axisPoint)
-    }
 
     // External body space is always applied for timing changes.
     if (flags.timing) {
@@ -890,9 +879,6 @@ export class Character {
         this.mixer.setTime(0)
       }
 
-      // Tick animation logic
-      this.tickAxisPoint()
-
       // Update the global animation time
       if (this.isPrimary) {
         $time.set(this.mixer.time ?? 0)
@@ -926,14 +912,6 @@ export class Character {
         }
       }
     })
-  }
-
-  /**
-   * Tick the axis point update - now handles real-time bone rotation
-   */
-  tickAxisPoint() {
-    // The real-time bone rotation is now handled in tickRender()
-    // This method can be used for other axis point logic if needed
   }
 
   /**

@@ -109,6 +109,11 @@ export const steps = {
 export type StepKey = keyof typeof steps
 
 export const choices = {
+  dances: {
+    title: 'dancers',
+    triggers: ['dances'],
+    steps: [steps.dances],
+  },
   energy: {
     title: 'energy',
     triggers: ['energy'],
@@ -136,19 +141,14 @@ export const choices = {
       },
     ],
   },
-
-  shifting: {
-    title: 'shifting relations',
-    triggers: ['shifting', 'synchronic', 'sync', 'relations'],
+  axis: {
+    title: 'axis point',
+    triggers: ['axis'],
     steps: [
-      steps.shiftingParts,
       {
         type: 'percent',
-        current() {
-          const values = $selectedValues.get()
-
-          return CurrentPercent.shifting(values[0] as DelayPartKey)
-        },
+        current: () => CurrentPercent.axis(),
+        max: 120,
       },
     ],
   },
@@ -162,14 +162,18 @@ export const choices = {
       },
     ],
   },
-  axis: {
-    title: 'axis point',
-    triggers: ['axis'],
+  shifting: {
+    title: 'shifting relations',
+    triggers: ['shifting', 'synchronic', 'sync', 'relations'],
     steps: [
+      steps.shiftingParts,
       {
         type: 'percent',
-        current: () => CurrentPercent.axis(),
-        max: 120,
+        current() {
+          const values = $selectedValues.get()
+
+          return CurrentPercent.shifting(values[0] as DelayPartKey)
+        },
       },
     ],
   },
@@ -190,11 +194,6 @@ export const choices = {
       },
     ],
   },
-  reset: {
-    title: 'reset',
-    triggers: ['reset'],
-    steps: [],
-  },
   speed: {
     title: 'dance speed',
     triggers: ['speed'],
@@ -206,10 +205,10 @@ export const choices = {
       },
     ],
   },
-  dances: {
-    title: 'dancers',
-    triggers: ['dances'],
-    steps: [steps.dances],
+  reset: {
+    title: 'reset',
+    triggers: ['reset'],
+    steps: [],
   },
 } satisfies Record<string, Choice>
 

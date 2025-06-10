@@ -577,9 +577,9 @@ export class Character {
     if (flags.axisPoint) {
       const frequency = this.params.axisPoint.frequency
 
-      const isCircleAndCurveActive = Object.values(
-        this.params.curve.parts,
-      ).some((x) => !!x)
+      const isCircleAndCurveActive =
+        Object.values(this.params.curve.parts).some((x) => !!x) &&
+        this.params.curve.equation !== 'none'
 
       const isAxisPointVisiblyActive = frequency && frequency >= 0.05
 

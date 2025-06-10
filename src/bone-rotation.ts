@@ -465,12 +465,12 @@ export class BoneRotationManager {
     const maxBackwardRotation = Math.PI / 2.5 // 72 degrees max backward (enhanced)
 
     // If bone is provided, check for collision first
-    // if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
-    //   // Stop movement by marking bone as collided and keeping current position
-    //   console.log(`${bone.name} stopped due to collision`)
-    //   bone.isCollided = true
-    //   return null // Signal to stop updating this bone
-    // }
+    if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
+      // Stop movement by marking bone as collided and keeping current position
+      console.log(`${bone.name} stopped due to collision`)
+      bone.isCollided = true
+      return null // Signal to stop updating this bone
+    }
 
     // Constrain X rotation (forward/backward) with enhanced range
     rotation.x = Math.max(
@@ -517,11 +517,11 @@ export class BoneRotationManager {
     const maxBendAngle = Math.PI / 1.5 // Enhanced to 120 degrees max bend
 
     // If bone is provided, check for collision first
-    // if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
-    //   console.log(`${bone.name} forearm stopped due to collision`)
-    //   bone.isCollided = true
-    //   return null // Signal to stop updating this bone
-    // }
+    if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
+      console.log(`${bone.name} forearm stopped due to collision`)
+      bone.isCollided = true
+      return null // Signal to stop updating this bone
+    }
 
     // Enhanced bending range
     rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotation.x)) // Enhanced to ±60 degrees
@@ -554,11 +554,11 @@ export class BoneRotationManager {
     const maxRotation = Math.PI / 2 // Enhanced to 90 degrees max in any direction
 
     // If bone is provided, check for collision first
-    // if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
-    //   console.log(`${bone.name} hand stopped due to collision`)
-    //   bone.isCollided = true
-    //   return null // Signal to stop updating this bone
-    // }
+    if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
+      console.log(`${bone.name} hand stopped due to collision`)
+      bone.isCollided = true
+      return null // Signal to stop updating this bone
+    }
 
     rotation.x = Math.max(-maxRotation, Math.min(maxRotation, rotation.x))
     rotation.y = Math.max(-maxRotation, Math.min(maxRotation, rotation.y))
@@ -584,11 +584,11 @@ export class BoneRotationManager {
     const maxRotation = Math.PI / 2.5 // Enhanced to 72 degrees max
 
     // If bone is provided, check for collision first
-    // if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
-    //   console.log(`${bone.name} general bone stopped due to collision`)
-    //   bone.isCollided = true
-    //   return null // Signal to stop updating this bone
-    // }
+    if (bone && this.checkArmBodyCollision(bone, rotation, isLeftArm)) {
+      console.log(`${bone.name} general bone stopped due to collision`)
+      bone.isCollided = true
+      return null // Signal to stop updating this bone
+    }
 
     rotation.x = Math.max(-maxRotation, Math.min(maxRotation, rotation.x))
     rotation.y = Math.max(-maxRotation, Math.min(maxRotation, rotation.y))

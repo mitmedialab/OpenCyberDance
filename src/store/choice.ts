@@ -191,7 +191,7 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     if (
-      /(speed|animation|dance speed|dancer speed|dance beat|beat)/i.test(
+      /(speed|animation|dance speed|dancer speed|dance beat|beat|dance paid)/i.test(
         input as string,
       )
     ) {
@@ -204,7 +204,7 @@ export function handleVoiceSelection(input: string | number): boolean {
 
     if (
       !world.isEnding &&
-      /(dancer|dancers|answer|character|model)/i.test(input as string)
+      /(dancer|dancers|answer|character|model|tensor)/i.test(input as string)
     ) {
       return selectChoice('dances')
     }
@@ -292,7 +292,10 @@ export function handleVoiceSelection(input: string | number): boolean {
     // auto-corrections
     if (fix('left', /^(left|left limb|lap)/i)) return true
     if (
-      fix('right', /^(right|right limb|rylim|ride lim|light|life limbs|life)/i)
+      fix(
+        'right',
+        /^(right|right limb|rylim|ride lim|light|life limbs|life|dry lim)/i,
+      )
     )
       return true
     if (fix('upper', /^(up|upper|up per|up her|at her)/i)) return true

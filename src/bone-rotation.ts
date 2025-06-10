@@ -729,7 +729,7 @@ export class BoneRotationManager {
     const slowest = 7000
     const fastest = 600
 
-    return slowest + (fastest - slowest) * axisPointFrequency
+    return Math.abs(slowest + (fastest - slowest) * axisPointFrequency)
   }
 
   // Method to update targets from debug panel

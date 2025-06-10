@@ -30,7 +30,7 @@ const rangeConfig: Record<
   space: [0, 1.5],
   rotations: [1, 3.5],
   speed: [0, 1, 300],
-  axis: [0, 1, 100],
+  axis: [0, 1, 120],
 
   // no op
   reset: [0, 0],

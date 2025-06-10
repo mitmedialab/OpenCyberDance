@@ -165,11 +165,11 @@ export const choices = {
   axis: {
     title: 'axis point',
     triggers: ['axis'],
-    // steps: [steps.axisParts, steps.percent],
     steps: [
       {
         type: 'percent',
         current: () => CurrentPercent.axis(),
+        max: 120,
       },
     ],
   },

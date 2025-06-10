@@ -345,7 +345,7 @@ export function handleVoiceSelection(input: string | number): boolean {
       if (fixNum('5', /^(five)$/i)) return true
       if (fixNum('6', /^(six)$/i)) return true
       if (fixNum('7', /^(seven)$/i)) return true
-      if (fixNum('8', /^(eight)$/i)) return true
+      if (fixNum('8', /^(eight|ate|aid)$/i)) return true
       if (fixNum('80', /^(8T)$/i)) return true
       if (fixNum('9', /^(nine)$/i)) return true
       if (fixNum('0', /^(zero)$/i)) return true

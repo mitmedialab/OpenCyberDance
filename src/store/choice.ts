@@ -210,7 +210,7 @@ export function handleVoiceSelection(input: string | number): boolean {
     }
 
     if (
-      /(axis|point|access|SS|axes|access point|axis point|axis point frequency)/i.test(
+      /(axis|point|access|SS|axes|pipe|access point|axis point|axis point frequency|exist|exit)/i.test(
         input as string,
       )
     ) {

@@ -150,7 +150,10 @@ const selectChoice = (choice: ChoiceKey) => {
   return true
 }
 
-export function handleVoiceSelection(input: string | number): boolean {
+export function handleVoiceSelection(
+  input: string | number,
+  forced: boolean,
+): boolean {
   // trim the input first before matching
   if (typeof input === 'string') {
     input = input.trim()
@@ -316,6 +319,11 @@ export function handleVoiceSelection(input: string | number): boolean {
 
   if (currentStep.type === 'percent') {
     console.log('[percent parse]', input)
+
+    // 0 is manual
+    if (!forced && (input === 0 || input === '0' || input === 'zero')) {
+      return false
+    }
 
     if (typeof input === 'number') {
       addValue(`${input}`)

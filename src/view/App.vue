@@ -169,7 +169,7 @@ onMounted(async () => {
       console.log(`INSERT NONFINAL NUM: ${nfn}`)
 
       if (nfn !== null) {
-        handleVoiceSelection(nfn)
+        handleVoiceSelection(nfn, true)
       }
     }
 
@@ -179,7 +179,7 @@ onMounted(async () => {
       const nfn = parseInt(event.key)
       console.log(`nfn: ${nfn}`)
       $nonFinalNum.set(nfn)
-      handleVoiceSelection(nfn)
+      handleVoiceSelection(nfn, true)
     }
   })
 

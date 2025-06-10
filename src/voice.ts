@@ -350,7 +350,8 @@ export class VoiceController {
       console.warn(`empty result for percent ~ id ${resultLen}`)
 
       if (typeof cached === 'number') {
-        handleVoiceSelection(cached)
+        console.log(`handleVoiceSelection(cached):`, cached)
+        handleVoiceSelection(cached, false)
         this.unfinalPercentCache.clear()
 
         return true
@@ -367,7 +368,8 @@ export class VoiceController {
       }
 
       if (/^(ex|why|wine|see|sea)$/i.test(alt.toLowerCase())) {
-        handleVoiceSelection(alt.toLowerCase())
+        console.log(`handleVoiceSelection(why):`, alt)
+        handleVoiceSelection(alt.toLowerCase(), false)
         return true
       }
 
@@ -397,10 +399,20 @@ export class VoiceController {
         return false
       }
 
-      const primaryOk = handleVoiceSelection(alt)
+      const primaryOk = handleVoiceSelection(alt, false)
 
       if (primaryOk) {
-        console.debug(`${alt} is detected by voice engine; final=${isFinal}.`)
+        console.log(
+          `handleVoiceSelection(primaryOk=True, isFinal=${isFinal}):`,
+          alt,
+        )
+
+        if (isFinal && alt.trim() === '0') {
+          console.log('found 0, ignoring...')
+          return false
+        }
+
+        console.log(`${alt} is detected by voice engine; final=${isFinal}.`)
 
         if ($valueCompleted.get()) {
           this.stop()

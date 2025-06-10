@@ -581,13 +581,11 @@ export class Character {
         this.params.curve.parts,
       ).some((x) => !!x)
 
-      const isAxisPointActive =
-        this.params.axisPoint.frequency &&
-        this.params.axisPoint.frequency >= 0.05
+      const isAxisPointVisiblyActive = frequency && frequency >= 0.05
 
       // If BOTH axis point and circle and curve is active,
       // we want to clear the altered track.
-      if (isAxisPointActive && isCircleAndCurveActive) {
+      if (isAxisPointVisiblyActive && isCircleAndCurveActive) {
         clip.tracks.forEach((track, index) => {
           const original = this.originalOf(index)
           if (!original) return

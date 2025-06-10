@@ -142,10 +142,10 @@ export class BoneRotationManager {
       }
     })
 
-    console.log(
-      'Found arm bones:',
-      this.armBones.map((b) => b.name),
-    )
+    // console.log(
+    //   'Found arm bones:',
+    //   this.armBones.map((b) => b.name),
+    // )
   }
 
   // Find head bones using dynamic traversal
@@ -179,10 +179,10 @@ export class BoneRotationManager {
       }
     })
 
-    console.log(
-      'Found head bones:',
-      this.headBones.map((b) => b.name),
-    )
+    // console.log(
+    //   'Found head bones:',
+    //   this.headBones.map((b) => b.name),
+    // )
   }
 
   private initializeRotations() {
@@ -375,13 +375,13 @@ export class BoneRotationManager {
 
         this.headTargets[index] = constrainedRotation
 
-        console.log(
-          `Set head bone ${bone.name} to x:${constrainedRotation.x.toFixed(
-            2,
-          )} y:${constrainedRotation.y.toFixed(
-            2,
-          )} z:${constrainedRotation.z.toFixed(2)}`,
-        )
+        // console.log(
+        //   `Set head bone ${bone.name} to x:${constrainedRotation.x.toFixed(
+        //     2,
+        //   )} y:${constrainedRotation.y.toFixed(
+        //     2,
+        //   )} z:${constrainedRotation.z.toFixed(2)}`,
+        // )
       })
     } else {
       // Reset head to neutral position if no head posture is defined

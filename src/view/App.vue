@@ -78,6 +78,19 @@ onMounted(async () => {
       await resetAction()
     }
 
+    if (event.key === 'g' && event.ctrlKey) {
+      world.characters.forEach((character) => {
+        if (character.boneRotation?.isPostureActive) {
+          character.boneRotation.stop()
+        } else if (
+          character.params?.axisPoint?.frequency &&
+          character.params.axisPoint.frequency > 0
+        ) {
+          character.boneRotation?.start()
+        }
+      })
+    }
+
     // if (event.key === 'g') {
     //   if (world.panel.panel._hidden) {
     //     world.panel.panel.show(true)

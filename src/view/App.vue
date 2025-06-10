@@ -78,17 +78,17 @@ onMounted(async () => {
       await resetAction()
     }
 
-    if (event.key === 'g') {
-      if (world.panel.panel._hidden) {
-        world.panel.panel.show(true)
-      } else {
-        world.panel.panel.hide()
-      }
-    }
+    // if (event.key === 'g') {
+    //   if (world.panel.panel._hidden) {
+    //     world.panel.panel.show(true)
+    //   } else {
+    //     world.panel.panel.hide()
+    //   }
+    // }
 
-    if (event.key === 'c') {
-      world.setupControls()
-    }
+    // if (event.key === 'c') {
+    //   world.setupControls()
+    // }
 
     // if (event.key === 'k') {
     //   const cam = world.camera

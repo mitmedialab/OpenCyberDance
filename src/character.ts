@@ -583,7 +583,7 @@ export class Character {
 
       const isAxisPointActive =
         this.params.axisPoint.frequency &&
-        this.params.axisPoint.frequency > 0.05
+        this.params.axisPoint.frequency >= 0.05
 
       // If BOTH axis point and circle and curve is active,
       // we want to clear the altered track.

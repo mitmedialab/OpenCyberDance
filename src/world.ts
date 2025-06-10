@@ -33,7 +33,7 @@ import { Panel } from './panel'
 import { profile } from './perf'
 import { preloader } from './preloader.ts'
 import { updateDebugLogCamera } from './store/debug'
-import { $currentScene } from './store/scene.ts'
+import { $currentScene, $isWhiteScene } from './store/scene.ts'
 import { changeAction, changeCharacter } from './switch-dance.ts'
 import { formulaRanges } from './transforms'
 import { Matcher } from './types'
@@ -745,6 +745,10 @@ export class World {
     setTimeout(() => {
       this.setBackground('white')
     }, 1000)
+
+    setTimeout(() => {
+      $isWhiteScene.set(true)
+    }, 6000)
 
     backdrop.classList.add('backdrop-fade-in')
   }

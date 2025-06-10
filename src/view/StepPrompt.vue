@@ -27,7 +27,7 @@ import {
   $duration,
 } from '../store/status.ts'
 import { world } from '../world'
-import { $currentScene } from '../store/scene'
+import { $currentScene, $isWhiteScene } from '../store/scene'
 import { $soundError, $soundReady, soundManager } from '../ding'
 
 const selectedChoiceKey = useStore($selectedChoiceKey)
@@ -35,6 +35,7 @@ const selectedChoice = useStore($selectedChoice)
 const currentStep = useStore($currentStep)
 
 const currentScene = useStore($currentScene)
+const isWhiteScene = useStore($isWhiteScene)
 
 const selectedStepChoices = useStore($selectedValues)
 const completed = useStore($valueCompleted)
@@ -239,7 +240,11 @@ const soundState = computed(() => {
     fixed
     bottom-4
     left-4
-    class="text-[12px] space-y-1 dark:text-gray-400 text-white font-mono"
+    :class="[
+      'text-[12px] space-y-1 font-mono transition-all transition-ease-out transition-duration-700',
+      isWhiteScene && 'text-black',
+      !isWhiteScene && 'dark:text-gray-400 text-gray-400',
+    ]"
   >
     <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
       s: {{ status }}

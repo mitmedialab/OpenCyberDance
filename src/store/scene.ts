@@ -5,6 +5,7 @@ import { world } from '../world'
 export type SceneMode = 'BLACK' | 'ENDING'
 
 export const $currentScene = atom<SceneMode>('BLACK')
+export const $isWhiteScene = atom(false)
 
 onNotify($currentScene, async () => {
   const mode = $currentScene.get()

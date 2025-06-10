@@ -688,7 +688,11 @@ export class Character {
         _curve.tracks.includes(index) &&
         track.name.includes('quaternion')
 
-      if (isCurve && _curve.equation) {
+      const isAxisPointNotEnabled =
+        !this.params.axisPoint.frequency ||
+        this.params.axisPoint.frequency < 0.05
+
+      if (isCurve && _curve.equation && isAxisPointNotEnabled) {
         track.values = applyTrackTransform(track, _curve.equation, {
           axis: _curve.axis,
           tracks: _curve.tracks,

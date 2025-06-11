@@ -213,7 +213,7 @@ export function handleVoiceSelection(
     }
 
     if (
-      /(axis|point|access|SS|axes|pipe|access point|axis point|axis point frequency|exist|exit)/i.test(
+      /(axis|point|access|SS|axes|pipe|access point|axis point|axis point frequency|exist|exit|ex)/i.test(
         input as string,
       )
     ) {

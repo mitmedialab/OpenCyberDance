@@ -207,7 +207,9 @@ export function handleVoiceSelection(
 
     if (
       !world.isEnding &&
-      /(dancer|dancers|answer|character|model|tensor)/i.test(input as string)
+      /(dancer|dancers|answer|character|model|tensor|cancer)/i.test(
+        input as string,
+      )
     ) {
       return selectChoice('dances')
     }

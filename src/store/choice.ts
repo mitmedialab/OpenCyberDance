@@ -307,7 +307,8 @@ export function handleVoiceSelection(
     if (fix('lower', /^(low|lower)/i)) return true
     if (fix('leftArm', /(left on)/i)) return true
     if (fix('rightArm', /(light arm|right now|light now)/i)) return true
-    if (fix('rightLeg', /(light lake|right lake|bright lake)/i)) return true
+    if (fix('rightLeg', /(light lake|right lake|bright lake|riley)/i))
+      return true
     if (fix('gaussian', /(gauss|klaus)/i)) return true
     if (fix('all', /(all|oh|or|our)/i)) return true
     if (fix('x', /^(ex)$/i)) return true

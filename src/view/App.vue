@@ -91,14 +91,6 @@ onMounted(async () => {
       })
     }
 
-    // if (event.key === 'g') {
-    //   if (world.panel.panel._hidden) {
-    //     world.panel.panel.show(true)
-    //   } else {
-    //     world.panel.panel.hide()
-    //   }
-    // }
-
     // reset character mixer time - rewind the tape
     if (event.key === 'c' && event.ctrlKey) {
       world.characters.forEach((character) => {
@@ -125,7 +117,7 @@ onMounted(async () => {
     //   navigator.clipboard.writeText(output)
     // }
 
-    if ((event.key === 'e' || event.key === 'ำ') && event.ctrlKey) {
+    if (event.key === 'g' || event.key === 'ำ') {
       if (world.flags.waitingEndingStart) {
         world.fadeInSceneContent()
 
@@ -138,11 +130,11 @@ onMounted(async () => {
       $currentScene.set('ENDING')
     }
 
-    if ((event.key === 'u' || event.key === 'ี') && event.ctrlKey) {
+    if (event.key === 'h' || event.key === 'ี') {
       world.startShadowCharacter()
     }
 
-    if ((event.key === 'i' || event.key === 'ร') && event.ctrlKey) {
+    if (event.key === 'i' || event.key === 'ร') {
       world.startDissolveCharacter()
     }
 

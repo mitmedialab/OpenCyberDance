@@ -270,12 +270,12 @@ export class VoiceController {
         spokenText = spokenText.replace('kukpat', 'kookpat')
       }
 
-      if (spokenText.includes('changhung')) {
-        spokenText = spokenText.replace('changhung', 'changhong')
+      if (spokenText.includes('o')) {
+        spokenText = spokenText.replace('o', 'oh')
       }
 
-      if (spokenText.includes('padung')) {
-        spokenText = spokenText.replace('padung', 'padoong')
+      if (spokenText.includes('sunon')) {
+        spokenText = spokenText.replace('sunon', 'soo-non')
       }
 
       speechSynthesis.cancel()

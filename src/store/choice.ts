@@ -207,7 +207,7 @@ export function handleVoiceSelection(
 
     if (
       !world.isEnding &&
-      /(dancer|dancers|answer|character|model|tensor|cancer)/i.test(
+      /(dancer|dancers|answer|character|model|tensor|cancer|Then first)/i.test(
         input as string,
       )
     ) {
@@ -260,7 +260,7 @@ export function handleVoiceSelection(
 
       if (isNaN(order)) {
         const fixNum = (num: number, match: RegExp): boolean => {
-          if (match.test(title)) {
+          if (match.test(title.trim())) {
             const key = currentStep.choices[num - 1].key
             addValue(key)
 

@@ -314,7 +314,7 @@ export function handleVoiceSelection(
     if (fix('x', /^(ex)$/i)) return true
     if (fix('y', /^(why|wine|whine)$/i)) return true
     if (fix('z', /^(see|sea|sad)$/i)) return true
-    if (fix('kade', /^(kade|cade|kaid)/i)) return true
+    if (fix('gade', /^(kade|gade|cade|gaid|ged)/i)) return true
     if (fix('kukpat', /^(tus|tusk|task|tas)/i)) return true
     if (fix('yokroblingImprovise', /^(monkey|rob monkey)$/i)) return true
     if (fix('number60', /^(number|six|sixty|number sixty)/i)) return true
@@ -403,7 +403,7 @@ export function createGrammarFromState(): string | null {
 
   let grammar = `
     #JSGF V1.0;
-    
+
     grammar choices;
   `
 

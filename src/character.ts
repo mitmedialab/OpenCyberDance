@@ -86,7 +86,7 @@ export type CharacterKey = keyof typeof Params.prototype.characters
 const NTH_FRAME_TICK = 58
 
 export const resetLimits: Partial<Record<ModelKey, number>> = {
-  kade: 160,
+  gade: 160,
   o: 300,
   yokrob: 202,
   yokroblingImprovise: 220,
@@ -158,7 +158,7 @@ export class Character {
 
     waiting: 'subinwaiting.glb',
     kukpat: 'Kukpat.glb',
-    kade: 'terry.glb',
+    gade: 'terry.glb',
     o: 'changhung.glb',
     yokrob: 'YOKROB.glb',
     yokroblingImprovise: 'YOKROBlingimprovise.glb',
@@ -174,7 +174,7 @@ export class Character {
 
     // black background
     sunonLast: 'Padunglast.glb',
-    kadeLast: 'Terrylast.glb',
+    gadeLast: 'Terrylast.glb',
     tasLast: 'Taslast.glb',
     oLast: 'Changhonglast.glb',
   } satisfies Record<string, string>
@@ -188,7 +188,7 @@ export class Character {
     // tranimid: 'tranimid_Tas',
 
     // animation track names for solo dances
-    kade: 'terry_chr02',
+    gade: 'terry_chr02',
     o: 'Changhung002_chr02',
     yokrob: 'yokrobling_Tas',
     yokroblingImprovise: 'yokroblingimprovised_chr02.001',
@@ -199,7 +199,7 @@ export class Character {
     // pichetGenBlack: 'Action|Action|Action_Action_Action',
 
     sunonLast: 'padungdance_Tas_padungdance_Tas',
-    kadeLast: 'Terrydance_Tas',
+    gadeLast: 'Terrydance_Tas',
     oLast: 'Changhongdance_Tas_Changhongdance_Tas',
     tasLast: 'tasdance002_Tas',
   }

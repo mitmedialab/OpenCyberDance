@@ -478,7 +478,7 @@ export class World {
 
     // Add two characters
     if (scene === 'ENDING') {
-      // sunon ---------- kade | o | tas
+      // sunon ---------- gade | o | tas
       await Promise.all([
         this.addCharacter({
           name: 'first',
@@ -489,7 +489,7 @@ export class World {
         this.addCharacter({
           name: 'second',
           position: [0, 0, 0],
-          model: 'kadeLast',
+          model: 'gadeLast',
         }),
 
         this.addCharacter({
@@ -511,7 +511,7 @@ export class World {
       }
 
       this.params.characters.second = {
-        model: 'kadeLast',
+        model: 'gadeLast',
         action: '',
       }
 

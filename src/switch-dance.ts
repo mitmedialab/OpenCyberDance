@@ -5,7 +5,7 @@ export type DanceConfig = { model: ModelKey; action?: string }
 
 const danceKeyMap: Record<string, DanceConfig> = {
   kukpat: { model: 'kukpat' },
-  kade: { model: 'kade' },
+  gade: { model: 'gade' },
   o: { model: 'o' },
   yokrob: { model: 'yokrob' },
   yokroblingImprovise: {

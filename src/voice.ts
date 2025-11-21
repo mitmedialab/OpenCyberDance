@@ -16,9 +16,6 @@ import { World } from './world'
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
 
-const SpeechGrammarList =
-  window.SpeechGrammarList || window.webkitSpeechGrammarList
-
 export type ListeningStatus =
   | 'disabled'
   | 'listening'
@@ -126,12 +123,14 @@ export class VoiceController {
     this.recognition.maxAlternatives = 8
     this.recognition.continuous = true
 
-    const targetGrammar = createGrammarFromState()
+    const targetPhrases = createGrammarFromState()
 
-    if (targetGrammar) {
-      const grammars = new SpeechGrammarList()
-      grammars.addFromString(targetGrammar, 1)
-      this.recognition.grammars = grammars
+    if (targetPhrases && targetPhrases.length > 0) {
+      // @ts-expect-error -- out of date typedoc
+      this.recognition.phrases = targetPhrases.map(
+        // @ts-expect-error -- out of date typedoc
+        (phrase) => new SpeechRecognitionPhrase(phrase),
+      )
     }
 
     this.recognition.addEventListener('error', (e) => {
@@ -360,7 +359,7 @@ export class VoiceController {
 
     $transcript.set(alts.join(', '))
 
-    // PASS 1 - use speech recognition grammar
+    // PASS 1 - use speech recognition phrases
     for (const alt of alts) {
       if (/back|go back|previous/.test(alt)) {
         prevStep()

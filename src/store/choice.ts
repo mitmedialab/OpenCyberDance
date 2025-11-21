@@ -396,25 +396,15 @@ export function getVoicePromptParams():
   return { percent: true }
 }
 
-export function createGrammarFromState(): string | null {
+export function createGrammarFromState(): string[] | null {
   const params = getVoicePromptParams()
 
   const hasChoice = 'choices' in params
 
-  let grammar = `
-    #JSGF V1.0;
-
-    grammar choices;
-  `
+  console.log('grammar choices:', { params })
 
   if (hasChoice) {
-    const choiceGrammar = `public <choice> = ${
-      params.choices?.join(' | ') || ''
-    };`
-
-    grammar += choiceGrammar
-
-    return grammar
+    return params.choices || []
   }
 
   return null

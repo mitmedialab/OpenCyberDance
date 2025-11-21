@@ -16,8 +16,7 @@ import { World } from './world'
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
 
-const SpeechGrammarList =
-  window.SpeechGrammarList || window.webkitSpeechGrammarList
+const LANG = 'en-US'
 
 export type ListeningStatus =
   | 'disabled'
@@ -72,7 +71,10 @@ export class VoiceController {
     this.startRecognition('start method')
   }
 
-  startRecognition(key?: string) {
+  async startRecognition(key?: string) {
+    const ok = await this.setupLocalSpeech()
+    if (!ok) return
+
     try {
       this.recognition?.abort()
     } catch (error) {
@@ -119,20 +121,43 @@ export class VoiceController {
     this.stop()
   }
 
+  updatePhrases() {
+    const targetPhrases = createGrammarFromState()
+
+    console.log('[phrases]', { targetPhrases })
+
+    if (targetPhrases && this.recognition) {
+      const phrases = [
+        ...targetPhrases.map(
+          // @ts-expect-error -- outdated
+          (word) => new SpeechRecognitionPhrase(word, 1.0),
+        ),
+      ]
+
+      console.log('[phrases] applied', { phrases })
+
+      // @ts-expect-error -- outdated
+      this.recognition.phrases = phrases
+    }
+  }
+
   createRecognition() {
     this.recognition = new SpeechRecognition()
-    this.recognition.lang = 'en-SG'
+    this.recognition.lang = 'en-US'
     this.recognition.interimResults = true
     this.recognition.maxAlternatives = 8
     this.recognition.continuous = true
 
-    const targetGrammar = createGrammarFromState()
+    // @ts-expect-error -- outdated type doc
+    this.recognition.processLocally = true
 
-    if (targetGrammar) {
-      const grammars = new SpeechGrammarList()
-      grammars.addFromString(targetGrammar, 1)
-      this.recognition.grammars = grammars
-    }
+    this.updatePhrases()
+
+    // if (targetGrammar) {
+    //   // const grammars = new SpeechGrammarList()
+    //   // grammars.addFromString(targetGrammar, 1)
+    //   // this.recognition.grammars = grammars
+    // }
 
     this.recognition.addEventListener('error', (e) => {
       // do not update error status if manually aborted by us.
@@ -173,12 +198,14 @@ export class VoiceController {
     this.recognition.addEventListener('result', async (e) => {
       const id = e.results.length
 
+      console.log('--- result', e.results)
+
       extendPromptTimeout('speech result')
 
-      if (this.successFlags.get(id)) {
-        console.debug(`[!] ${id} already success. (v=1)`)
-        return
-      }
+      // if (this.successFlags.get(id)) {
+      //   console.debug(`[!] ${id} already success. (v=1)`)
+      //   return
+      // }
 
       this.updateStatus('thinking')
       this.restoreStatusTimer('thinking')
@@ -187,10 +214,10 @@ export class VoiceController {
 
       const status = await this.onVoiceResult(e.results)
 
-      if (this.successFlags.get(id)) {
-        console.debug(`[!] ${id} already success. (v=2)`)
-        return
-      }
+      // if (this.successFlags.get(id)) {
+      //   console.debug(`[!] ${id} already success. (v=2)`)
+      //   return
+      // }
 
       if (status) {
         console.debug(`> interpretation success (id: ${id})`)
@@ -291,7 +318,7 @@ export class VoiceController {
       }, 15000)
 
       const u = new SpeechSynthesisUtterance(spokenText)
-      u.lang = 'en-US'
+      u.lang = LANG
       u.voice = voice!
       u.rate = 1
       u.onend = () => {
@@ -308,6 +335,38 @@ export class VoiceController {
       this.utterances.push(u)
       speechSynthesis.speak(u)
     })
+  }
+
+  async setupLocalSpeech() {
+    try {
+      // @ts-expect-error -- foo
+      const checkStatus = await SpeechRecognition.available({
+        langs: [LANG],
+        processLocally: true,
+      })
+
+      if (checkStatus === 'available') {
+        return true
+      }
+
+      console.log(`SpeechRecognition.available status: "${checkStatus}"`)
+
+      if (checkStatus === 'unavailable') {
+        return false
+      }
+
+      // @ts-expect-error -- bar
+      const installStatus = await SpeechRecognition.install({
+        langs: [LANG],
+        processLocally: true,
+      })
+
+      console.log(`SpeechRecognition.install status: "${installStatus}"`)
+
+      return installStatus
+    } catch (error) {
+      return false
+    }
   }
 
   onVoiceResult(resultList: SpeechRecognitionResultList): boolean {

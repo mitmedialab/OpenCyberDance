@@ -66,6 +66,8 @@ export function nextStep() {
   $currentStepId.set(next)
 
   extendPromptTimeout('prompt next')
+
+  world.voice.updatePhrases()
 }
 
 export function prevStep() {
@@ -96,6 +98,8 @@ export function setChoice(choice: ChoiceKey) {
     $selectedChoiceKey.set(null)
     $showPrompt.set(false)
   }
+
+  world.voice.updatePhrases()
 
   extendPromptTimeout(`set choice ${choice}`)
 }
@@ -154,6 +158,8 @@ export function handleVoiceSelection(
   input: string | number,
   forced: boolean,
 ): boolean {
+  console.log('handleVoiceSelection Input =', input, { forced })
+
   // trim the input first before matching
   if (typeof input === 'string') {
     input = input.trim()
@@ -207,7 +213,7 @@ export function handleVoiceSelection(
 
     if (
       !world.isEnding &&
-      /(dancer|dancers|answer|character|model|tensor|cancer)/i.test(
+      /(dancer|dancers|answer|character|model|tensor|cancer|sensor)/i.test(
         input as string,
       )
     ) {
@@ -376,7 +382,7 @@ export function handleVoiceSelection(
 
 export function getVoicePromptParams():
   | { percent: true }
-  | { choices: string[] } {
+  | { choices: string[]; ordered?: boolean } {
   const selectedChoiceKey = $selectedChoiceKey.get()
   const choiceKeys = Object.keys(choices)
 
@@ -386,7 +392,12 @@ export function getVoicePromptParams():
   if (!currentStep) return { choices: choiceKeys }
 
   if (currentStep.type === 'choice') {
-    return { choices: currentStep.choices.map((x) => x.title) }
+    return {
+      choices: currentStep.choices.map((x) => x.title),
+
+      // @ts-expect-error -- will fix
+      ordered: currentStep.meta === 'ordered',
+    }
   }
 
   if (currentStep.type === 'percent') {
@@ -396,25 +407,17 @@ export function getVoicePromptParams():
   return { percent: true }
 }
 
-export function createGrammarFromState(): string | null {
+export function createGrammarFromState(): string[] | null {
   const params = getVoicePromptParams()
 
   const hasChoice = 'choices' in params
 
-  let grammar = `
-    #JSGF V1.0;
-
-    grammar choices;
-  `
-
   if (hasChoice) {
-    const choiceGrammar = `public <choice> = ${
-      params.choices?.join(' | ') || ''
-    };`
+    if (params.ordered && params.choices.length === 5) {
+      return ['One', 'Two', 'Three', 'Four', 'Five']
+    }
 
-    grammar += choiceGrammar
-
-    return grammar
+    return params.choices
   }
 
   return null

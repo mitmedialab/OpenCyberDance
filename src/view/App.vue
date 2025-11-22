@@ -78,7 +78,7 @@ onMounted(async () => {
       await resetAction()
     }
 
-    if (event.key === 'g' && event.ctrlKey) {
+    if (event.key === "'" && event.ctrlKey) {
       world.characters.forEach((character) => {
         if (character.boneRotation?.isPostureActive) {
           character.boneRotation.stop()

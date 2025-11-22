@@ -134,7 +134,7 @@ onMounted(async () => {
       world.startShadowCharacter()
     }
 
-    if (event.key === 'i') {
+    if (event.key === 'j') {
       world.startDissolveCharacter()
     }
 
@@ -150,19 +150,13 @@ onMounted(async () => {
       prevStep()
     }
 
-    if (event.key === 'j' && event.ctrlKey) {
+    if (event.key === 'k' && event.ctrlKey) {
       console.log(`FORCE RESTART RECOGNIZER`)
       world.voice.stop()
 
       setTimeout(() => {
         world.voice.startRecognition('FORCE RESTART')
       }, 50)
-    }
-
-    if (event.key === 'k' && event.ctrlKey) {
-      speechSynthesis.cancel()
-      console.log(`FORCE STOP RECOGNIZER+SPEECH`)
-      world.voice.stop()
     }
 
     if (event.key === 'l' && event.ctrlKey) {
@@ -172,6 +166,12 @@ onMounted(async () => {
       if (nfn !== null) {
         handleVoiceSelection(nfn, true)
       }
+    }
+
+    if (event.key === ';' && event.ctrlKey) {
+      speechSynthesis.cancel()
+      console.log(`FORCE STOP RECOGNIZER+SPEECH`)
+      world.voice.stop()
     }
 
     const numbersOnKeypad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']

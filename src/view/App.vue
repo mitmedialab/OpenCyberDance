@@ -134,7 +134,7 @@ onMounted(async () => {
       world.startShadowCharacter()
     }
 
-    if (event.key === 'j') {
+    if (event.key === 'j' && !event.ctrlKey) {
       world.startDissolveCharacter()
     }
 

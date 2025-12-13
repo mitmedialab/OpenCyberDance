@@ -242,7 +242,7 @@ const soundState = computed(() => {
     left-4
     :class="[
       'text-[12px] space-y-1 font-mono transition-all transition-ease-out transition-duration-700',
-      isWhiteScene && 'hidden',
+      isWhiteScene && 'text-gray-400',
       !isWhiteScene && 'dark:text-gray-400 text-gray-400',
     ]"
   >

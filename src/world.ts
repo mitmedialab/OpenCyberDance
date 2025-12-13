@@ -40,7 +40,6 @@ import { Matcher } from './types'
 import { debounce, delay } from './utils'
 import { VoiceController } from './voice'
 
-export const ENDING_SPEED = 0.2
 const CAMERA_NEAR = 0.1
 const CAMERA_FAR = 2000
 
@@ -170,7 +169,7 @@ export class World {
     if (!this.isEnding) return
 
     this.setTime(2.5)
-    this.setSpeed(ENDING_SPEED)
+    this.setSpeed(this.params.timescale) // Apply ending speed divisor
 
     await delay(1000)
   }
@@ -178,10 +177,12 @@ export class World {
   setSpeed(speed: number) {
     world.params.timescale = speed
 
+    const actualSpeed = this.isEnding ? speed / 5 : speed
+
     this.characters.map((character) => {
       if (!character.mixer) return
 
-      character.mixer.timeScale = speed
+      character.mixer.timeScale = actualSpeed
     })
   }
 
@@ -571,11 +572,7 @@ export class World {
     }
 
     this.panel.handlers.timescale = (timescale) => {
-      for (const character of this.characters) {
-        if (!character.mixer) continue
-
-        character.mixer.timeScale = timescale
-      }
+      this.setSpeed(timescale)
     }
 
     this.panel.handlers.setCamera = this.setCamera.bind(this)

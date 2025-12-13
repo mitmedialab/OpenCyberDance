@@ -257,13 +257,7 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
     const [percText] = args
 
     const speed = FromPercent.speed(percText)
-    world.params.timescale = speed
-
-    for (const character of world.characters) {
-      if (!character.mixer) continue
-
-      character.mixer.timeScale = speed
-    }
+    world.setSpeed(speed)
   }
 
   if (primary === 'dances') {

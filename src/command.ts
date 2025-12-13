@@ -277,10 +277,11 @@ export async function runCommand(primary: ChoiceKey, args: string[]) {
   }
 }
 
-export async function resetAction() {
-  await world.voice.speak('reset')
-
-  await world.fadeOut()
+export async function resetAction(soft = true) {
+  if (soft) {
+    await world.voice.speak('reset')
+    await world.fadeOut()
+  }
 
   // store the currently active animation
   const current: Record<string, { model: ModelKey; action: string }> = {}

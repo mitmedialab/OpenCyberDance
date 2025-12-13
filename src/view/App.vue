@@ -101,6 +101,15 @@ onMounted(async () => {
       })
     }
 
+    // forward the tape in time
+    if (event.key === ',' && event.ctrlKey) {
+      world.characters.forEach((character) => {
+        if (!character.mixer) return
+
+        character.mixer.setTime(character.mixer.time + 5)
+      })
+    }
+
     // if (event.key === 'c') {
     //   world.setupControls()
     // }

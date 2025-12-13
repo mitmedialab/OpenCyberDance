@@ -859,6 +859,12 @@ export class Character {
     if (!this.mixer) return
 
     this.frameCounter++
+
+    // Remove previous bone offsets before mixer update to prevent accumulation
+    if (this.boneRotation?.isPostureActive) {
+      this.removeBoneOffsets()
+    }
+
     this.mixer.update(delta)
 
     // Apply real-time bone rotations after animation update
@@ -881,6 +887,34 @@ export class Character {
         $time.set(this.mixer.time ?? 0)
       }
     }
+  }
+
+  /**
+   * Remove bone rotation offsets before mixer update to prevent accumulation
+   * This is necessary because energy modifications can cause mixer to skip bone updates
+   */
+  removeBoneOffsets() {
+    if (!this.model) return
+
+    this.model.traverse((child) => {
+      if ((child as Bone).isBone || child.type === 'Bone') {
+        const bone = child as Bone
+
+        // Remove fixed rotation offsets
+        if (bone.rotationOffset) {
+          bone.rotation.x -= bone.rotationOffset.x
+          bone.rotation.y -= bone.rotationOffset.y
+          bone.rotation.z -= bone.rotationOffset.z
+        }
+
+        // Remove random rotation offsets
+        if (bone.randomRotationOffset) {
+          bone.rotation.x -= bone.randomRotationOffset.x
+          bone.rotation.y -= bone.randomRotationOffset.y
+          bone.rotation.z -= bone.randomRotationOffset.z
+        }
+      }
+    })
   }
 
   /**

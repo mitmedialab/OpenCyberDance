@@ -94,22 +94,18 @@ onMounted(async () => {
 
     // reset character mixer time - rewind the tape
     if (event.key === '.' && event.ctrlKey) {
-      if (world.isEnding) {
-        return
-      }
+      const startAt = world.isEnding ? 15 : 5
 
       world.characters.forEach((character) => {
         if (!character.mixer) return
 
-        character.mixer.setTime(5)
+        character.mixer.setTime(startAt)
       })
     }
 
     // forward the tape in time
     if (event.key === ',' && event.ctrlKey) {
-      if (world.isEnding) {
-        return
-      }
+      if (world.isEnding) return
 
       world.characters.forEach((character) => {
         if (!character.mixer) return

@@ -107,7 +107,7 @@ const soundState = computed(() => {
 
 <template>
   <div
-    class="fixed top-[180px] left-10 prompt-root-container animate__animated animate__fadeInUp rounded-10 capitalize"
+    class="fixed top-[20px] left-10 prompt-root-container animate__animated animate__fadeInUp rounded-10 capitalize"
   >
     <div class="fixed w-full h-full rounded-10 prompt-backdrop"></div>
 

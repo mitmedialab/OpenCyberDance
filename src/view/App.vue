@@ -108,6 +108,13 @@ onMounted(async () => {
       world.setTime(nextTime)
     }
 
+    if (event.key === 'm' && event.ctrlKey) {
+      let endAt = 112
+
+      world.params.time = endAt
+      world.setTime(endAt)
+    }
+
     // if (event.key === 'c') {
     //   world.setupControls()
     // }

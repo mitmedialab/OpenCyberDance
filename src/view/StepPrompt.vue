@@ -246,16 +246,8 @@ const soundState = computed(() => {
       !isWhiteScene && 'dark:text-gray-400 text-gray-400',
     ]"
   >
-    <div v-if="status" :class="[{ 'text-red-5': status === 'failed' }]">
-      s: {{ status }}
-    </div>
-
-    <div v-if="transcript">h: {{ transcript?.slice(0, 60) }}</div>
-
     <div v-if="time">
-      t: {{ time?.toFixed(2) }} / {{ duration?.toFixed(2) }} | ds:
-      {{ soundState }}
-      <span v-if="nonFinalNum !== null">| nfn: {{ nonFinalNum }}</span>
+      <span v-if="nonFinalNum !== null">nfn: {{ nonFinalNum }}</span>
     </div>
 
     <div v-if="voiceError" class="text-red-5">

@@ -93,11 +93,11 @@ onMounted(async () => {
     }
 
     // reset character mixer time - rewind the tape
-    if (event.key === 'c' && event.ctrlKey) {
+    if (event.key === '.' && event.ctrlKey) {
       world.characters.forEach((character) => {
         if (!character.mixer) return
 
-        character.mixer.setTime(0)
+        character.mixer.setTime(5)
       })
     }
 

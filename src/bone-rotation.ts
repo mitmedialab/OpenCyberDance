@@ -127,13 +127,13 @@ export class BoneRotationManager {
           // Set transition speed based on bone type - matching HTML prototype
           switch (boneType) {
             case 'upperarm':
-              bone.transitionSpeed = 3.0
+              bone.transitionSpeed = 2.0
               break
             case 'forearm':
-              bone.transitionSpeed = 4.0
+              bone.transitionSpeed = 3.0
               break
             case 'hand':
-              bone.transitionSpeed = 5.0
+              bone.transitionSpeed = 4.0
               break
           }
 
@@ -350,16 +350,16 @@ export class BoneRotationManager {
       if (!this.armBones[index].transitionSpeed) {
         switch (boneType) {
           case 'upperarm':
-            this.armBones[index].transitionSpeed = 3.0 // Slightly slower for more controlled movement
+            this.armBones[index].transitionSpeed = 2.0 // Slightly slower for more controlled movement
             break
           case 'forearm':
-            this.armBones[index].transitionSpeed = 4.0 // Controlled speed
+            this.armBones[index].transitionSpeed = 3.0 // Controlled speed
             break
           case 'hand':
-            this.armBones[index].transitionSpeed = 5.0 // Faster for hand gestures
+            this.armBones[index].transitionSpeed = 4.0 // Faster for hand gestures
             break
           default:
-            this.armBones[index].transitionSpeed = 3.5
+            this.armBones[index].transitionSpeed = 2.5
         }
       }
     })

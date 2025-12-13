@@ -22,6 +22,7 @@ import { EndingKeyframes } from '../character'
 import { $currentScene } from '../store/scene'
 import { prevStep } from '../store/choice'
 import { resetAction } from '../command'
+import { $voiceError } from '../store/status'
 
 const showPrompt = useStore($showPrompt)
 
@@ -153,6 +154,8 @@ onMounted(async () => {
     if (event.key === 'k' && event.ctrlKey) {
       console.log(`FORCE RESTART RECOGNIZER`)
       world.voice.stop()
+
+      $voiceError.set(null)
 
       setTimeout(() => {
         world.voice.startRecognition('FORCE RESTART')

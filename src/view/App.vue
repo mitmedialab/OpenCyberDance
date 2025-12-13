@@ -96,22 +96,16 @@ onMounted(async () => {
     if (event.key === '.' && event.ctrlKey) {
       const startAt = world.isEnding ? 15 : 5
 
-      world.characters.forEach((character) => {
-        if (!character.mixer) return
-
-        character.mixer.setTime(startAt)
-      })
+      world.params.time = startAt
+      world.setTime(startAt)
     }
 
     // forward the tape in time
     if (event.key === ',' && event.ctrlKey) {
-      if (world.isEnding) return
+      let nextTime = world.params.time + 2
 
-      world.characters.forEach((character) => {
-        if (!character.mixer) return
-
-        character.mixer.setTime(character.mixer.time + 5)
-      })
+      world.params.time = nextTime
+      world.setTime(nextTime)
     }
 
     // if (event.key === 'c') {

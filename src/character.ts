@@ -737,6 +737,25 @@ export class Character {
     return { tracks, axis }
   }
 
+  /**
+   * Safely uncache an action after ensuring it's stopped.
+   * @param action The action to uncache
+   * @param delayMs Delay in milliseconds before uncaching
+   */
+  private scheduleUncacheAction(action: AnimationAction, delayMs: number) {
+    setTimeout(() => {
+      if (!this.mixer) return
+
+      console.log('scheduleUncacheAction :: uncaching action now!')
+
+      // Ensure the action is stopped before uncaching
+      action.stop()
+
+      // Uncache the specific action with its root to avoid affecting other actions
+      this.mixer.uncacheAction(action.getClip(), action.getRoot())
+    }, delayMs)
+  }
+
   fadeIntoModifiedAction(clip: THREE.AnimationClip, duration = 1, warp = true) {
     if (!this.mixer) return
 
@@ -750,10 +769,12 @@ export class Character {
     prevAction.crossFadeTo(action, duration, warp)
     action.play()
 
-    // Uncache the action after the cross-fade is complete.
-    setTimeout(() => {
-      this.mixer?.uncacheAction(prevAction.getClip())
-    }, 4000)
+    // Uncache the previous action after the cross-fade is complete
+    // Wait for cross-fade duration + 1s buffer, minimum 4s
+    this.scheduleUncacheAction(
+      prevAction,
+      Math.max(duration * 1000 + 1000, 4000),
+    )
   }
 
   async reset() {
@@ -965,11 +986,8 @@ export class Character {
     prevAction.stop()
     action.play()
 
-    setTimeout(() => {
-      if (!this.mixer) return
-
-      this.mixer.uncacheAction(prevAction.getClip())
-    }, 4000)
+    // Uncache the previous action after a delay
+    this.scheduleUncacheAction(prevAction, 4000)
   }
 
   /**

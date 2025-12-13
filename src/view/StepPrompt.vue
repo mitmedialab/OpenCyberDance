@@ -247,7 +247,7 @@ const soundState = computed(() => {
     ]"
   >
     <div v-if="time">
-      <span v-if="nonFinalNum !== null">nfn: {{ nonFinalNum }}</span>
+      <span v-if="nonFinalNum !== null">{{ nonFinalNum }}</span>
     </div>
 
     <div v-if="voiceError" class="text-red-5">
